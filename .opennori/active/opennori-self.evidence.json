@@ -358,7 +358,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-11T11:47:14.003Z",
+    "updated_at": "2026-06-11T11:54:32.744Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -2637,6 +2637,49 @@
             "limitations": "The smoke test used the local 0.1.4 bin before npm publish; npm latest must be checked after publishing.",
             "gate": "accepted",
             "created_at": "2026-06-11T11:47:14.002Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "protocol-check",
+            "summary": "OpenNori 0.1.5 fixes the short agent entry too: opennori --json now routes to bootstrap preview, so agents and CI do not need to remember bootstrap --json.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "command",
+                "label": "npm pack --dry-run --json",
+                "command": "npm pack --dry-run --json"
+              },
+              {
+                "type": "command",
+                "label": "node /Users/jarl/code/jarlone/opennori/bin/opennori.js --json in a fresh temporary project",
+                "command": "node /Users/jarl/code/jarlone/opennori/bin/opennori.js --json in a fresh temporary project"
+              },
+              {
+                "type": "artifact",
+                "label": "bin/opennori.js",
+                "path": "bin/opennori.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "package.json",
+                "path": "package.json"
+              }
+            ],
+            "reviewability": "Run opennori --json from a fresh project and confirm it returns needs_confirm with will_write 0; run npm run check for the regression test.",
+            "limitations": "This evidence covers the local 0.1.5 package before npm publish; verify npm latest after publishing.",
+            "gate": "accepted",
+            "created_at": "2026-06-11T11:54:32.743Z"
           }
         ]
       },

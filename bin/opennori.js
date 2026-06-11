@@ -2,7 +2,9 @@
 import { main } from "../src/cli.js";
 
 const args = process.argv.slice(2);
-const commandArgs = args.length > 0 ? args : ["bootstrap"];
+const commandArgs = args.length === 0 || (args[0].startsWith("-") && !["--help", "-h"].includes(args[0]))
+  ? ["bootstrap", ...args]
+  : args;
 
 main(commandArgs).catch((error) => {
   console.error(JSON.stringify({

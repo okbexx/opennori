@@ -77,6 +77,17 @@ test("opennori quickstart previews bootstrap without requiring install flags", (
   assert.equal(ready.data.doctor.status, "ready");
 });
 
+test("opennori quickstart accepts top-level json for agents", () => {
+  const root = tempRoot();
+  const preview = run(["--json"], { cwd: root });
+
+  assert.equal(preview.ok, true);
+  assert.equal(preview.data.status, "needs_confirm");
+  assert.equal(preview.data.install_plan.schema_version, "opennori/install-plan-v1");
+  assert.equal(preview.data.install_plan.summary.will_write, 0);
+  assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
+});
+
 test("opennori quickstart is interactive for human terminals", () => {
   const declinedRoot = tempRoot();
   const declined = runInteractiveBootstrap(declinedRoot, "n");
