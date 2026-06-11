@@ -39,6 +39,7 @@ const NORI_CAPABILITIES = [
   "skill-pack",
   "brainstorm",
   "acceptance-discovery",
+  "acceptance-quality-audit",
   "capability-profile",
   "profile-check",
   "archive",
@@ -428,30 +429,40 @@ function sentenceHasSpecifics(text, terms) {
   return terms.some((term) => value.includes(term.toLowerCase()));
 }
 
-function discoverAcceptance(goal, explicitId = undefined) {
-  const text = String(goal || "").trim();
+function discoverAcceptanceGaps(text, { fallback = false, allowedIds = null } = {}) {
   const lowered = text.toLowerCase();
   const gaps = DISCOVERY_GAPS
+    .filter((gap) => !allowedIds || allowedIds.has(gap.id))
     .filter((gap) => gap.patterns.some((pattern) => lowered.includes(pattern.toLowerCase())))
     .filter((gap) => {
-      if (gap.id === "missing-field-scope") return !sentenceHasSpecifics(text, ["昵称", "头像", "简介", "邮箱", "手机号", "name", "avatar", "bio", "email", "phone"]);
-      if (gap.id === "missing-validation-rule") return !sentenceHasSpecifics(text, ["长度", "必填", "格式", "大小", "类型", "字符", "required", "format", "length", "size", "type"]);
+      if (gap.id === "missing-field-scope") return !sentenceHasSpecifics(text, ["昵称", "头像", "简介", "邮箱", "手机号", "字段范围", "field scope", "name", "avatar", "bio", "email", "phone"]);
+      if (gap.id === "missing-validation-rule") return !sentenceHasSpecifics(text, ["长度", "必填", "格式", "大小", "类型", "字符", "校验规则", "validation", "required", "format", "length", "size", "type"]);
       if (gap.id === "missing-success-signal") return !sentenceHasSpecifics(text, ["成功", "保存成功", "成功反馈", "result", "success"]);
       if (gap.id === "missing-persistence-scope") return !sentenceHasSpecifics(text, ["刷新", "重新打开", "重新登录", "跨设备", "refresh", "reload", "reopen", "login"]);
-      if (gap.id === "missing-failure-case") return !sentenceHasSpecifics(text, ["网络", "权限", "无效", "错误码", "保留原", "network", "permission", "invalid"]);
-      if (gap.id === "missing-out-of-scope-boundary") return !sentenceHasSpecifics(text, ["不在范围", "不包含", "本轮不", "out of scope", "exclude"]);
+      if (gap.id === "missing-failure-case") return !sentenceHasSpecifics(text, ["网络", "权限", "无效", "错误码", "保留原", "失败场景", "network", "permission", "invalid"]);
+      if (gap.id === "missing-out-of-scope-boundary") return !sentenceHasSpecifics(text, ["不在范围", "不包含", "本轮不", "范围边界", "out of scope", "exclude"]);
       if (gap.id === "missing-user-entry") return !sentenceHasSpecifics(text, ["设置页", "登录页", "report", "dashboard", "页面", "page"]);
       if (gap.id === "missing-review-method") return !sentenceHasSpecifics(text, ["截图", "浏览器", "报告", "测试", "review", "screenshot", "browser", "report"]);
       return true;
     });
 
-  const selectedGaps = gaps.length > 0 ? gaps : [
+  if (gaps.length > 0 || !fallback) return gaps;
+  return [
     {
       id: "missing-review-method",
       question: "用户或评审者应该用什么可复查方式判断这个目标完成？",
       why: "OpenNori 需要先知道完成判断方式，才能形成真正可验收的 AC。"
     }
   ];
+}
+
+function discoveryGap(gapId) {
+  return DISCOVERY_GAPS.find((gap) => gap.id === gapId);
+}
+
+function discoverAcceptance(goal, explicitId = undefined) {
+  const text = String(goal || "").trim();
+  const selectedGaps = discoverAcceptanceGaps(text, { fallback: true });
 
   return {
     protocol_version: "opennori/discovery-v1",
@@ -466,6 +477,84 @@ function discoverAcceptance(goal, explicitId = undefined) {
       priority: index < 3 ? "must-answer" : "can-default"
     })),
     next: "Ask the must-answer questions before drafting a Nori Contract. Use assumptions only when the user accepts them."
+  };
+}
+
+function auditAcceptanceQuality(contract) {
+  const findings = [];
+  for (const [index, criterion] of (contract.criteria || []).entries()) {
+    const triggerText = [
+      criterion.user_story,
+      criterion.threshold
+    ].filter(Boolean).join("\n");
+    const fullText = [
+      criterion.user_story,
+      criterion.measurement,
+      criterion.threshold
+    ].filter(Boolean).join("\n");
+    const addFinding = (gapId) => {
+      const gap = discoveryGap(gapId);
+      if (!gap) return;
+      findings.push({
+        criterion_id: criterion.id,
+        path: `criteria[${index}]`,
+        gap_id: gap.id,
+        question: gap.question,
+        why: gap.why,
+        severity: "needs-user-review"
+      });
+    };
+
+    const vagueEditableProfile = sentenceHasSpecifics(triggerText, [
+      "修改个人资料",
+      "修改资料",
+      "修改字段",
+      "编辑个人资料",
+      "编辑资料",
+      "edit profile",
+      "update profile",
+      "modify fields",
+      "edit fields"
+    ]);
+    if (vagueEditableProfile && !sentenceHasSpecifics(fullText, ["昵称", "头像", "简介", "邮箱", "手机号", "字段范围", "field scope", "name", "avatar", "bio", "email", "phone"])) {
+      addFinding("missing-field-scope");
+    }
+    if (vagueEditableProfile && !sentenceHasSpecifics(fullText, ["长度", "必填", "格式", "大小", "类型", "字符", "校验规则", "validation", "required", "format", "length", "size", "type"])) {
+      addFinding("missing-validation-rule");
+    }
+
+    const mentionsSave = sentenceHasSpecifics(triggerText, ["保存", "提交", "save", "submit"]);
+    if (mentionsSave && !sentenceHasSpecifics(fullText, ["保存成功", "成功反馈", "成功提示", "显示成功", "报告显示", "result", "success"])) {
+      addFinding("missing-success-signal");
+    }
+    if (mentionsSave && !sentenceHasSpecifics(fullText, ["刷新", "重新打开", "重新登录", "跨设备", "refresh", "reload", "reopen", "login"])) {
+      addFinding("missing-persistence-scope");
+    }
+
+    const vagueFailure = sentenceHasSpecifics(triggerText, [
+      "失败时有提示",
+      "失败提示",
+      "有提示",
+      "错误提示",
+      "show an error",
+      "error message"
+    ]);
+    if (vagueFailure && !sentenceHasSpecifics(fullText, ["网络", "权限", "无效", "错误码", "保留原", "失败场景", "network", "permission", "invalid"])) {
+      addFinding("missing-failure-case");
+    }
+
+    const broadSettingsScope = sentenceHasSpecifics(triggerText, ["设置页", "个人资料", "settings page"]);
+    if (broadSettingsScope && !sentenceHasSpecifics(fullText, ["不在范围", "不包含", "本轮不", "范围边界", "out of scope", "exclude"])) {
+      addFinding("missing-out-of-scope-boundary");
+    }
+  }
+
+  return {
+    status: findings.length > 0 ? "needs-user-review" : "clear",
+    summary: findings.length > 0
+      ? `${findings.length} acceptance quality gap(s) may need user review.`
+      : "No underspecified acceptance gaps found.",
+    findings
   };
 }
 
@@ -763,16 +852,20 @@ const SKILL_PACK = [
       "- Confirm first-time setup after user approval: `opennori bootstrap --root <repo> --confirm --json`.",
       "- Preview install: `opennori install --root <repo> --dry-run --json`.",
       "- Install Skill Pack: `opennori install --root <repo> --skill --json`.",
+      "- Preview upgrade: `opennori upgrade --root <repo> --skill --dry-run --json`.",
+      "- Confirm upgrade after user approval: `opennori upgrade --root <repo> --skill --confirm --json`.",
       "- Preview destructive install: `opennori install --root <repo> --skill --force --dry-run --json`.",
       "- Confirm destructive install: `opennori install --root <repo> --skill --force --confirm --json`.",
       "- Doctor: `opennori doctor --root <repo> --json`.",
+      "- Existing contract check after upgrade: `opennori check --root <repo> --json`.",
       "- Preview uninstall: `opennori uninstall --root <repo> --dry-run --json`.",
       "- Remove entry assets while preserving state: `opennori uninstall --root <repo> --confirm --json`.",
       "- Remove all OpenNori state only after explicit user acceptance: `opennori uninstall --root <repo> --include-state --confirm --json`.",
       "",
       "## Rules",
       "Always show dry-run plans before destructive writes.",
-      "Default uninstall preserves active goals, evidence, reports, archives, and brainstorms."
+      "Default uninstall preserves active goals, evidence, reports, archives, and brainstorms.",
+      "Upgrade must preserve existing active contracts and evidence. After upgrade, run `opennori check` and route any `acceptance_quality` warnings to `nori-acceptance` for user-approved revision."
     ]
   },
   {
@@ -1867,6 +1960,10 @@ export async function main(args) {
       writeManifest(root);
     }
 
+    const nextActions = dryRun
+      ? ["Review the upgrade plan, then rerun with --confirm if the planned updates are acceptable."]
+      : ["Run opennori check --root <project> --json to audit existing active Nori Contracts for underspecified ACs before continuing work."];
+
     printJson(ok({
       root,
       dry_run: dryRun,
@@ -1874,7 +1971,7 @@ export async function main(args) {
       upgrade_plan: upgradePlan,
       actions: upgradePlan.actions,
       manifest: dryRun ? buildManifest(root) : safeReadManifest(root)
-    }));
+    }, [], [], nextActions));
     return;
   }
 
@@ -2029,12 +2126,23 @@ export async function main(args) {
       process.exitCode = 1;
       return;
     }
+    const acceptanceQuality = auditAcceptanceQuality(contract);
+    const warnings = acceptanceQuality.findings.map((finding) => ({
+      type: "acceptance_quality",
+      criterion_id: finding.criterion_id,
+      gap_id: finding.gap_id,
+      message: finding.question
+    }));
+    const nextActions = acceptanceQuality.status === "needs-user-review"
+      ? ["Ask the user the acceptance_quality questions, then revise the affected criteria before relying on this contract as complete."]
+      : [];
     printJson(ok({
       goal_id: contract.goal_id,
       workflow_status: ledger.status,
       current_gap: currentGap(contract, ledger),
-      statuses: Object.fromEntries(Object.entries(ledger.criteria).map(([id, state]) => [id, state.status]))
-    }));
+      statuses: Object.fromEntries(Object.entries(ledger.criteria).map(([id, state]) => [id, state.status])),
+      acceptance_quality: acceptanceQuality
+    }, [], warnings, nextActions));
     return;
   }
 

@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User clarified that OpenNori must discover underspecified acceptance criteria, not only validate AC wording.",
-      "approved_at": "2026-06-11T12:28:03.631Z"
+      "summary": "User agreed existing OpenNori projects need an upgrade-safe AC quality audit.",
+      "approved_at": "2026-06-11T12:47:02.499Z"
     },
     "criteria": [
       {
@@ -112,9 +112,9 @@
       {
         "id": "AC-P-12",
         "layer": "protocol",
-        "user_story": "作为用户，我运行 opennori discover 或 opennori check 后，能发现 AC 是否缺少真实用户操作、可观察结果或关键验收信息，而不是只检查是否以“作为用户”开头。",
-        "measurement": "对包含“测试通过”“字段存在”等内部完成条件的验收草案运行 opennori check；对包含“修改字段”“失败时有提示”等空泛完成条件的目标运行 opennori discover。",
-        "threshold": "内部完成条件会被 check 拒绝；空泛目标会被 discover 标出字段范围、校验规则、成功反馈、失败场景、范围边界等验收缺口；包含用户运行、打开、查看、确认等操作，并说明用户能看到或判断什么结果的 AC 可以通过。",
+        "user_story": "作为用户，我运行 opennori check 或让 agent 升级已使用 OpenNori 的项目后，能发现现有 active contract 里过于含糊的 AC，而不是让旧的弱验收标准静默通过。",
+        "measurement": "对已有 active goal 中包含“修改字段”“失败时有提示”等空泛完成条件的 Nori Contract 运行 opennori check；再对结构正确且包含具体用户操作、字段范围、反馈和判断方式的 contract 运行 check。",
+        "threshold": "check 在不改写历史 contract/evidence 的前提下输出 acceptance_quality 审计结果、warnings 和下一步建议；弱 AC 会标出缺少的字段范围、校验规则、成功反馈、失败场景或范围边界；具体 AC 不产生质量告警。",
         "required": true,
         "risk": "high"
       },
@@ -358,7 +358,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-11T12:29:36.240Z",
+    "updated_at": "2026-06-11T12:57:11.709Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -1040,7 +1040,7 @@
           {
             "kind": "review-result",
             "basis": "protocol-check",
-            "summary": "OpenNori now has an acceptance discovery gate: opennori discover identifies underspecified AC gaps before drafting, including missing field scope, validation rules, success signal, failure cases, and out-of-scope boundaries for a vague settings-page goal.",
+            "summary": "OpenNori now audits existing active contracts after upgrade: opennori check returns acceptance_quality warnings for weak ACs without rewriting contract or evidence, upgrade points agents to run check, and docs/Skill Pack describe the upgrade-safe path.",
             "result": "passing",
             "confidence": "verified",
             "sources": [
@@ -1051,13 +1051,8 @@
               },
               {
                 "type": "command",
-                "label": "npm pack --dry-run --json",
-                "command": "npm pack --dry-run --json"
-              },
-              {
-                "type": "command",
-                "label": "node ./bin/opennori.js discover --goal \"做一个设置页，用户可以修改个人资料，保存后刷新仍然生效，失败时有提示。\" --root /tmp/opennori-discovery-smoke-2 --json",
-                "command": "node ./bin/opennori.js discover --goal \"做一个设置页，用户可以修改个人资料，保存后刷新仍然生效，失败时有提示。\" --root /tmp/opennori-discovery-smoke-2 --json"
+                "label": "node ./bin/opennori.js check --root . --json",
+                "command": "node ./bin/opennori.js check --root . --json"
               },
               {
                 "type": "artifact",
@@ -1078,12 +1073,17 @@
                 "type": "artifact",
                 "label": ".opennori/protocol.md",
                 "path": ".opennori/protocol.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".agents/skills/nori-project-health/SKILL.md",
+                "path": ".agents/skills/nori-project-health/SKILL.md"
               }
             ],
-            "reviewability": "Run npm run check and inspect the discover test; run the discovery smoke command and confirm it returns gap questions rather than a Nori Contract.",
-            "limitations": "The first implementation uses an explicit gap taxonomy and heuristic matching; agent judgment still matters for domain-specific follow-up questions.",
+            "reviewability": "Run npm run check, inspect the check audits existing active contracts test, run opennori check on this repo and verify acceptance_quality is clear, and inspect upgrade next_actions.",
+            "limitations": "The first audit is intentionally heuristic and conservative: it catches common weak AC wording without rewriting existing project history; domain-specific follow-up remains agent and user responsibility.",
             "gate": "accepted",
-            "created_at": "2026-06-11T12:29:36.239Z"
+            "created_at": "2026-06-11T12:57:11.709Z"
           }
         ]
       },

@@ -1,9 +1,9 @@
 {
   "schema_version": "opennori/manifest-v1",
   "protocol_version": "opennori/v1",
-  "opennori_version": "0.1.6",
+  "opennori_version": "0.1.7",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-11T12:30:42.416Z",
+  "updated_at": "2026-06-11T12:58:29.573Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -11,6 +11,7 @@
     "skill-pack",
     "brainstorm",
     "acceptance-discovery",
+    "acceptance-quality-audit",
     "capability-profile",
     "profile-check",
     "archive",
@@ -160,8 +161,8 @@
         "path": ".agents/skills/nori-project-health/SKILL.md",
         "installed": true,
         "in_sync": true,
-        "expected_sha256": "433ecf04e37c30e857398d86e3b6961b725ce32f86e38ee4ff6199486ddedc77",
-        "actual_sha256": "433ecf04e37c30e857398d86e3b6961b725ce32f86e38ee4ff6199486ddedc77"
+        "expected_sha256": "c02b4f28da8a31b7d3cd2a503bf259c1575ce0dfd0384d140b446b1a6219ad96",
+        "actual_sha256": "c02b4f28da8a31b7d3cd2a503bf259c1575ce0dfd0384d140b446b1a6219ad96"
       },
       {
         "name": "nori-reporting",

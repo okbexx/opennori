@@ -94,6 +94,8 @@ language requests to the deterministic CLI state layer.
   returns structured JSON for agents and automation.
 - `discover` finds underspecified acceptance gaps before draft, so vague ACs such as "modify fields"
   or "show an error" become user questions instead of weak contracts.
+- Existing projects keep their Nori Contracts and evidence during upgrade. After upgrading, `check`
+  audits active contracts for vague ACs and asks the user before any revision.
 - `doctor` reports whether project state is `ready`, `needs-action`, or `broken`, with recovery
   actions.
 - Nori Profile records required Skills, preferred stacks, avoided tools, and install policy without

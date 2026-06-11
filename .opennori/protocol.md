@@ -154,6 +154,11 @@ the root `nori` Skill routes natural-language requests to focused Skills:
 `opennori install --skill` installs the pack under `.agents/skills/`. The manifest records `skill_pack`
 state, and `opennori doctor` checks whether the pack is installed and in sync.
 
+When upgrading an existing OpenNori project, upgrade entry assets first, then run `opennori check`.
+`check` validates active Nori Contracts and reports `acceptance_quality` warnings for vague ACs
+such as "modify profile fields" or "show an error". It does not rewrite existing contracts, evidence,
+reports, archives, or brainstorms. The user decides whether to revise affected criteria.
+
 ## Nori Profile
 
 Acceptance criteria remain human-facing outcomes. A Nori Profile is separate execution
@@ -249,11 +254,12 @@ On every turn:
 8. After approval, run `opennori approve --root <repo> --summary "<approval>" --json`.
 9. If the user states required Skills, preferred stacks, avoided tools, install policy, or execution constraints, run `opennori profile add --root <repo> ... --json` and keep those items out of the user acceptance criteria.
 10. If the user revises a criterion later, run `opennori criterion update --root <repo> --criterion <id> ... --json`; old evidence for the changed criterion is cleared.
-11. Run `opennori resume --root <repo>` or `opennori next --root <repo>` to recover the active goal and current acceptance gap from repository files.
-12. Work only to produce evidence for that gap.
-13. Add acceptance evidence with `opennori evidence add`; choose any suitable verification method, but record basis, sources, reviewability, confidence, and limitations. Add profile compliance evidence with `opennori profile evidence` when profile items exist.
-14. Run `opennori evaluate`.
-15. Report acceptance state, profile compliance, and evidence, not implementation steps.
+11. If the user asks to upgrade an existing OpenNori project, run `opennori doctor`, preview and confirm `opennori upgrade`, then run `opennori check`; ask the user before revising any existing AC flagged by `acceptance_quality`.
+12. Run `opennori resume --root <repo>` or `opennori next --root <repo>` to recover the active goal and current acceptance gap from repository files.
+13. Work only to produce evidence for that gap.
+14. Add acceptance evidence with `opennori evidence add`; choose any suitable verification method, but record basis, sources, reviewability, confidence, and limitations. Add profile compliance evidence with `opennori profile evidence` when profile items exist.
+15. Run `opennori evaluate`.
+16. Report acceptance state, profile compliance, and evidence, not implementation steps.
 
 Useful commands:
 
@@ -269,7 +275,9 @@ Useful commands:
 - `opennori profile show --root <repo>`: show profile compliance and blocking items.
 - `opennori list --root <repo>`: list active OpenNori goals.
 - `opennori install --root <repo>`: create or refresh project-local OpenNori assets and manifest.
+- `opennori upgrade --root <repo>`: preview and refresh project-local OpenNori assets without rewriting active contracts or evidence.
 - `opennori doctor --root <repo>`: inspect project OpenNori health and recovery actions.
+- `opennori check --root <repo>`: validate active contract structure and audit active ACs for underspecified acceptance quality.
 - `opennori resume --root <repo>`: recover the active goal, current gap, completion answer, and intervention state.
 - `opennori status --root <repo>`: answer whether the goal is complete and whether the user needs to act.
 - `opennori report --root <repo>`: generate the human acceptance report.

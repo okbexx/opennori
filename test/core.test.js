@@ -771,6 +771,7 @@ test("upgrade previews and confirms manifest protocol and Skill Pack refresh", (
   assert.equal(refreshedManifest.opennori_version, PACKAGE_VERSION);
   assert.equal(refreshedManifest.capabilities.includes("upgrade"), true);
   assert.equal(refreshedManifest.capabilities.includes("context-export"), true);
+  assert.equal(upgraded.next_actions.some((action) => /opennori check/.test(action)), true);
 });
 
 test("profile check automatically checks local Skills and package stacks without forcing adapters", () => {
@@ -1081,4 +1082,57 @@ test("check requires measurable user operations and observable outcomes", () => 
   const goodPayload = run(["init", goodBrief, "--root", goodRoot, "--json"]);
   assert.equal(goodPayload.ok, true);
   assert.equal(goodPayload.data.current_gap.id, "ACCEPTANCE-BASIS");
+});
+
+test("check audits existing active contracts for underspecified acceptance quality without rewriting history", () => {
+  const weakRoot = tempRoot();
+  const weakBrief = path.join(weakRoot, "weak-contract.json");
+  fs.writeFileSync(weakBrief, JSON.stringify({
+    goal_id: "weak-contract",
+    goal: "Settings page",
+    acceptance_basis: { status: "approved", summary: "Existing project contract." },
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "作为用户，我打开设置页后，能修改个人资料并保存，失败时看到提示。",
+        measurement: "打开设置页，修改个人资料，点击保存。",
+        threshold: "刷新后仍然生效；失败时有提示。"
+      }
+    ]
+  }));
+
+  const init = run(["init", weakBrief, "--root", weakRoot, "--json"]);
+  const before = fs.readFileSync(init.data.evidence_path, "utf8");
+  const check = run(["check", "--root", weakRoot, "--json"]);
+  const after = fs.readFileSync(init.data.evidence_path, "utf8");
+
+  assert.equal(check.ok, true);
+  assert.equal(check.data.acceptance_quality.status, "needs-user-review");
+  assert.equal(check.warnings.some((warning) => warning.gap_id === "missing-field-scope"), true);
+  assert.equal(check.warnings.some((warning) => warning.gap_id === "missing-validation-rule"), true);
+  assert.equal(check.warnings.some((warning) => warning.gap_id === "missing-success-signal"), true);
+  assert.equal(check.warnings.some((warning) => warning.gap_id === "missing-failure-case"), true);
+  assert.equal(check.next_actions.some((action) => /revise/.test(action)), true);
+  assert.equal(after, before);
+
+  const goodRoot = tempRoot();
+  const goodBrief = path.join(goodRoot, "specific-contract.json");
+  fs.writeFileSync(goodBrief, JSON.stringify({
+    goal_id: "specific-contract",
+    goal: "Settings page",
+    acceptance_basis: { status: "approved", summary: "Specific project contract." },
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "作为用户，我打开设置页后，能修改昵称、头像和简介，保存成功后看到成功反馈。",
+        measurement: "打开设置页，修改昵称、头像和简介，检查昵称必填、简介长度、头像文件类型和大小，点击保存，并查看报告或截图。",
+        threshold: "报告显示保存成功，刷新后昵称、头像和简介仍然存在；网络失败时保留原值并显示网络错误；邮箱和手机号本轮不在范围。"
+      }
+    ]
+  }));
+
+  run(["init", goodBrief, "--root", goodRoot, "--json"]);
+  const goodCheck = run(["check", "--root", goodRoot, "--json"]);
+  assert.equal(goodCheck.data.acceptance_quality.status, "clear");
+  assert.equal(goodCheck.warnings.length, 0);
 });
