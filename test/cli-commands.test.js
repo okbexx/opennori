@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { test } from "vitest";
-import { runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../src/cli/commands/acceptance.js";
+import { runApproveCommand, runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../src/cli/commands/acceptance.js";
 import { runArchitectureProfilesCommand } from "../src/cli/commands/architecture.js";
 import { runContextExportCommand } from "../src/cli/commands/context.js";
 import { runChangesCommand, runDoctorCommand, runListCommand } from "../src/cli/commands/health.js";
@@ -241,4 +241,37 @@ test("changes command module groups acceptance and implementation files", async 
   assert.equal(changes.data.active_goals.length, 1);
   assert.equal(changes.data.changed_files.acceptance.some((item) => item.path === ".opennori/active/module-goal.acceptance.md"), true);
   assert.equal(changes.data.changed_files.implementation.some((item) => item.path === "src/index.js"), true);
+});
+
+test("approve command module marks acceptance basis approved and recomputes status", async () => {
+  const root = tempRoot();
+  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const contract = {
+    schema_version: "opennori/contract-v1",
+    goal_id: "module-goal",
+    goal: "Approve module acceptance",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "As a user, I can approve acceptance criteria."
+      }
+    ],
+    acceptance_basis: { status: "draft" }
+  };
+  const ledger = buildEvidenceLedger(contract);
+  addEvidence(contract, ledger, "AC-1", { kind: "test-summary", summary: "AC-1 passes.", result: "passing" });
+  fs.mkdirSync(path.dirname(acceptancePath), { recursive: true });
+  fs.writeFileSync(acceptancePath, "# Module goal\n");
+  writeJson(evidencePath, { contract, ledger });
+
+  const approved = await runApproveCommand(["--summary", "User approved module criteria.", "--json"], {
+    loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root })
+  });
+  assert.equal(approved.ok, true);
+  assert.equal(approved.data.acceptance_basis.status, "approved");
+  assert.equal(approved.data.acceptance_basis.summary, "User approved module criteria.");
+  assert.equal(approved.data.workflow_status, "complete");
+  assert.equal(approved.data.current_gap, null);
+  assert.match(fs.readFileSync(acceptancePath, "utf8"), /Status: approved/);
 });

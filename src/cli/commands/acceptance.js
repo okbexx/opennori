@@ -176,3 +176,53 @@ export const evaluateCommand = defineCommand({
 export async function runEvaluateCommand(rawArgs, { loadPair }) {
   return runJsonCommand(evaluateCommand, rawArgs, { loadPair });
 }
+
+export const approveCommand = defineCommand({
+  meta: {
+    name: "approve",
+    description: "Mark the current OpenNori acceptance criteria as user-approved."
+  },
+  args: {
+    root: {
+      type: "string",
+      description: "Project root.",
+      default: process.cwd()
+    },
+    goal: {
+      type: "string",
+      description: "Active goal id to approve."
+    },
+    summary: {
+      type: "string",
+      description: "Human approval summary.",
+      default: "User approved acceptance criteria."
+    },
+    json: {
+      type: "boolean",
+      description: "Keep deterministic JSON output for agents.",
+      default: false
+    }
+  },
+  run({ args, data }) {
+    const { contract, ledger, acceptancePath, evidencePath, root } = data.loadPair();
+    contract.acceptance_basis = {
+      status: "approved",
+      summary: args.summary || "User approved acceptance criteria.",
+      approved_at: new Date().toISOString()
+    };
+    recomputeWorkflowStatus(contract, ledger);
+    writeJson(evidencePath, { contract, ledger });
+    syncAcceptanceMarkdown(acceptancePath, contract, ledger);
+    refreshManifest(root);
+    return ok({
+      goal_id: contract.goal_id,
+      acceptance_basis: contract.acceptance_basis,
+      workflow_status: ledger.status,
+      current_gap: currentGap(contract, ledger)
+    });
+  }
+});
+
+export async function runApproveCommand(rawArgs, { loadPair }) {
+  return runJsonCommand(approveCommand, rawArgs, { loadPair });
+}

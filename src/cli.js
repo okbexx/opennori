@@ -47,7 +47,7 @@ import {
   writeArchitectureProfile
 } from "./architecture.js";
 import { packagePath } from "./package-root.js";
-import { runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "./cli/commands/acceptance.js";
+import { runApproveCommand, runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "./cli/commands/acceptance.js";
 import { runArchitectureProfilesCommand, runArchitectureShowCommand } from "./cli/commands/architecture.js";
 import { runContextExportCommand } from "./cli/commands/context.js";
 import { runChangesCommand, runDoctorCommand, runListCommand } from "./cli/commands/health.js";
@@ -928,21 +928,7 @@ export async function main(args) {
   }
 
   if (command === "approve") {
-    const { contract, ledger, acceptancePath, evidencePath, root } = loadPair(args);
-    contract.acceptance_basis = {
-      status: "approved",
-      summary: argValue(args, "--summary", "User approved acceptance criteria."),
-      approved_at: new Date().toISOString()
-    };
-    recomputeWorkflowStatus(contract, ledger);
-    savePair(acceptancePath, evidencePath, contract, ledger);
-    refreshManifest(root);
-    printJson(ok({
-      goal_id: contract.goal_id,
-      acceptance_basis: contract.acceptance_basis,
-      workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger)
-    }));
+    printJson(await runApproveCommand(args.slice(1), { loadPair: () => loadPair(args) }));
     return;
   }
 
