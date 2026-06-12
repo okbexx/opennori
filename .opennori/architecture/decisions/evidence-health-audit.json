@@ -1,0 +1,14 @@
+{
+  "schema_version": "opennori/build-vs-buy-v1",
+  "id": "evidence-health-audit",
+  "created_at": "2026-06-12T02:57:59.246Z",
+  "area": "evidence-health",
+  "need": "Warn when a complete-looking OpenNori goal relies on stale, summary-only, or bulk-template evidence",
+  "recommendation": "self-build",
+  "summary": "Reuse OpenNori's existing evidence ledger fields to audit evidence health without forcing adapters: created_at, sources, reviewability, limitations, basis, confidence, and summary patterns are enough for first-pass warnings.",
+  "current_project": "src/core.js already normalizes evidence and renderReport/check already expose evidence metadata.",
+  "standard_library": "Node built-ins are sufficient; no parser or database is needed.",
+  "official_sdk": "No official SDK applies to OpenNori's evidence semantics.",
+  "open_source": "Generic validation libraries would not understand OpenNori's human acceptance evidence semantics; schema libraries can be revisited if evidence schemas grow.",
+  "self_build_reason": "Evidence health is OpenNori product-domain semantics. The audit should stay flexible and warn on review risk without turning evidence into a fixed adapter taxonomy."
+}

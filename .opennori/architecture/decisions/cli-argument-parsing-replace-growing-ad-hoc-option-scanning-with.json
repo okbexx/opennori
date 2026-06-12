@@ -1,0 +1,14 @@
+{
+  "schema_version": "opennori/build-vs-buy-v1",
+  "id": "cli-argument-parsing-replace-growing-ad-hoc-option-scanning-with",
+  "created_at": "2026-06-12T03:32:00.971Z",
+  "area": "cli-argument-parsing",
+  "need": "Replace growing ad hoc option scanning with a standard-library-backed argument parser while preserving the existing opennori command surface.",
+  "recommendation": "reuse",
+  "summary": "Reuse Node.js standard library parseArgs tokens for option lookup and repeated flags instead of adding commander/cac or expanding custom array scanning. This keeps the CLI dependency-free while aligning with agent-native-cli build-vs-buy policy.",
+  "current_project": "OpenNori currently has small argValue/hasFlag/argValues helpers and no runtime dependencies.",
+  "standard_library": "node:util parseArgs supports unknown options, positionals, inline values, repeated option tokens, and no extra dependency.",
+  "official_sdk": "No official OpenNori SDK is relevant for CLI parsing.",
+  "open_source": "commander, cac, and citty are mature, but adding a dependency for the current thin parser would increase package surface without enough payoff.",
+  "self_build_reason": "Only a tiny compatibility wrapper remains around parseArgs to preserve existing --flag value and repeated source flag behavior."
+}

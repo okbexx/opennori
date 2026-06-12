@@ -2,5 +2,6 @@ node_modules/
 .DS_Store
 coverage/
 npm-debug.log*
+.codegraph/
 .adaw/active/*.local.*
 .adaw/evidence/**/local-*

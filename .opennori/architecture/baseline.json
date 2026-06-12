@@ -1,0 +1,127 @@
+{
+  "schema_version": "opennori/architecture-baseline-v1",
+  "status": "active",
+  "profile": "agent-native-cli",
+  "profile_title": "Agent-native CLI",
+  "profile_origin": "builtin",
+  "goal_id": "opennori-self",
+  "goal": "让 OpenNori 以 agent-native-cli Architecture Baseline 完成 Architecture Baseline Loop 产品化能力和后续架构修复",
+  "summary": "Use a thin deterministic CLI, domain-first modules, schema-backed project state, manifest-managed lifecycle actions, agent-readable Skills, and build-vs-buy checks before custom infrastructure.",
+  "created_at": "2026-06-12T00:15:07.495Z",
+  "updated_at": "2026-06-12T00:15:07.495Z",
+  "accepted_at": "2026-06-12T00:15:07.495Z",
+  "sticky": true,
+  "requires_challenge_to_change": true,
+  "applies_to": [
+    "project-local state tools",
+    "agent-facing CLI products",
+    "Skill Pack and manifest managed tools"
+  ],
+  "sources": [
+    {
+      "label": "CodeGraph / GitNexus",
+      "lesson": "Expose deterministic agent-readable context, status, doctor, and staleness signals without making OpenNori a code graph platform."
+    },
+    {
+      "label": "Compound Engineering Plugin",
+      "lesson": "Keep command, parser, converter/target, and Skill surfaces separate without adopting process-centered multi-agent review."
+    },
+    {
+      "label": "ECC",
+      "lesson": "Use manifest/profile/component/install-state style productization without becoming a workflow OS."
+    },
+    {
+      "label": "CLI-Anything",
+      "lesson": "Treat CLI, Skill, tests, and registry-like discoverability as product assets without becoming a generic harness market."
+    },
+    {
+      "label": "vibecode-pro-max-kit",
+      "lesson": "Borrow managed-file install and Skill distribution boundaries, but reject RIPER phase folders and process/ as the mainline."
+    }
+  ],
+  "principles": [
+    "thin-cli-entry",
+    "domain-first-modules",
+    "schema-backed-opennori-state",
+    "manifest-managed-install-upgrade-uninstall",
+    "skill-driven-natural-language-usage",
+    "agent-readable-baseline-surface",
+    "build-vs-buy-before-custom-infrastructure"
+  ],
+  "checks": [
+    {
+      "id": "ARCH-1",
+      "audience": "maintainer",
+      "statement": "Opening the CLI entry should make it clear that command parsing, dispatch, and output are separate from domain decisions.",
+      "review": "Inspect CLI entry, command handlers, and domain modules before claiming architecture complete."
+    },
+    {
+      "id": "ARCH-2",
+      "audience": "maintainer",
+      "statement": "Changing Product AC discovery should not require editing installer, Skill Pack, manifest, or report rendering logic.",
+      "review": "Inspect acceptance-discovery modules and tests."
+    },
+    {
+      "id": "ARCH-3",
+      "audience": "maintainer",
+      "statement": "Install, upgrade, uninstall, managed files, and doctor recovery are lifecycle concerns with dry-run preview and explicit confirmation boundaries.",
+      "review": "Inspect lifecycle commands, manifest state, and doctor output."
+    },
+    {
+      "id": "ARCH-4",
+      "audience": "agent",
+      "statement": "Before custom infrastructure work, check current project dependencies, standard libraries, official SDKs, mature open-source libraries, and documented reference projects.",
+      "review": "Record a build-vs-buy decision or challenge before self-building infrastructure."
+    },
+    {
+      "id": "ARCH-5",
+      "audience": "agent",
+      "statement": "Do not replace this baseline silently. Raise an Architecture Challenge when project evidence conflicts with it.",
+      "review": "Check .opennori/architecture/challenges for unresolved challenges."
+    }
+  ],
+  "preferred_libraries": [
+    {
+      "area": "cli",
+      "policy": "Prefer a mature CLI parser or current project convention over growing custom argument parsing."
+    },
+    {
+      "area": "schema",
+      "policy": "Prefer schema validation libraries or JSON Schema over long-term handwritten schema validation."
+    },
+    {
+      "area": "markdown",
+      "policy": "Prefer established markdown/frontmatter libraries when parsing becomes non-trivial; keep OpenNori-specific rendering local when it is product domain logic."
+    }
+  ],
+  "avoid": [
+    "process/ as OpenNori's workflow mainline",
+    "phase/task-list state as product completion state",
+    "agent self-summary as the only high-risk completion evidence",
+    "silent architecture replacement",
+    "custom infrastructure without build-vs-buy evidence"
+  ],
+  "build_vs_buy_policy": {
+    "order": [
+      "current-project-dependency",
+      "standard-library",
+      "official-sdk",
+      "mature-open-source-library",
+      "small-local-implementation"
+    ],
+    "require_reason_when_self_building": true
+  },
+  "challenge_policy": {
+    "agent_may_challenge": true,
+    "agent_must_not_silently_replace": true,
+    "requires_user_confirmation": true
+  },
+  "agent_surfaces": [
+    ".opennori/architecture/baseline.json",
+    ".opennori/architecture/baseline.md",
+    ".opennori/agent-guide.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".agents/skills/nori-architecture-apply/SKILL.md"
+  ]
+}

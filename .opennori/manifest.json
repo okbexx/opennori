@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.7",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-11T12:58:29.573Z",
+  "updated_at": "2026-06-12T03:34:28.637Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -19,7 +19,12 @@
     "report",
     "doctor",
     "upgrade",
-    "context-export"
+    "context-export",
+    "architecture-baseline",
+    "architecture-challenge",
+    "architecture-agent-surface",
+    "architecture-profile",
+    "build-vs-buy"
   ],
   "managed_files": [
     {
@@ -32,6 +37,24 @@
       "path": ".opennori/protocol.md",
       "kind": "protocol",
       "required": true,
+      "exists": true
+    },
+    {
+      "path": ".opennori/agent-guide.md",
+      "kind": "agent-guide",
+      "required": true,
+      "exists": true
+    },
+    {
+      "path": "AGENTS.md",
+      "kind": "agent-route",
+      "required": false,
+      "exists": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "kind": "agent-route",
+      "required": false,
       "exists": true
     },
     {
@@ -65,6 +88,48 @@
       "exists": true
     },
     {
+      "path": ".opennori/architecture",
+      "kind": "directory",
+      "required": true,
+      "exists": true
+    },
+    {
+      "path": ".opennori/architecture/profiles",
+      "kind": "directory",
+      "required": true,
+      "exists": true
+    },
+    {
+      "path": ".opennori/architecture/challenges",
+      "kind": "directory",
+      "required": true,
+      "exists": true
+    },
+    {
+      "path": ".opennori/architecture/decisions",
+      "kind": "directory",
+      "required": true,
+      "exists": true
+    },
+    {
+      "path": ".opennori/architecture/evidence",
+      "kind": "directory",
+      "required": true,
+      "exists": true
+    },
+    {
+      "path": ".opennori/architecture/baseline.json",
+      "kind": "architecture-baseline",
+      "required": false,
+      "exists": true
+    },
+    {
+      "path": ".opennori/architecture/baseline.md",
+      "kind": "architecture-baseline",
+      "required": false,
+      "exists": true
+    },
+    {
       "path": ".agents/skills/nori/SKILL.md",
       "kind": "skill",
       "required": false,
@@ -84,6 +149,30 @@
     },
     {
       "path": ".agents/skills/nori-capability-profile/SKILL.md",
+      "kind": "skill",
+      "required": false,
+      "exists": true
+    },
+    {
+      "path": ".agents/skills/nori-architecture-brainstorm/SKILL.md",
+      "kind": "skill",
+      "required": false,
+      "exists": true
+    },
+    {
+      "path": ".agents/skills/nori-architecture-apply/SKILL.md",
+      "kind": "skill",
+      "required": false,
+      "exists": true
+    },
+    {
+      "path": ".agents/skills/nori-architecture-challenge/SKILL.md",
+      "kind": "skill",
+      "required": false,
+      "exists": true
+    },
+    {
+      "path": ".agents/skills/nori-build-vs-buy/SKILL.md",
       "kind": "skill",
       "required": false,
       "exists": true
@@ -115,22 +204,22 @@
     "installed": true,
     "path": ".agents/skills/nori/SKILL.md",
     "in_sync": true,
-    "expected_sha256": "baf44e15e483ae6c943f68af9f85dfd9d9b72eaa7abdd486ee8ffff67e63c4d4",
-    "actual_sha256": "baf44e15e483ae6c943f68af9f85dfd9d9b72eaa7abdd486ee8ffff67e63c4d4"
+    "expected_sha256": "acae8347f7acc4a21e1ee6efef40c8088284fbcbb7f8f7c73589b6f9a1ea83f7",
+    "actual_sha256": "acae8347f7acc4a21e1ee6efef40c8088284fbcbb7f8f7c73589b6f9a1ea83f7"
   },
   "skill_pack": {
     "schema_version": "opennori/skill-pack-v1",
     "installed": true,
     "in_sync": true,
-    "count": 6,
+    "count": 10,
     "skills": [
       {
         "name": "nori",
         "path": ".agents/skills/nori/SKILL.md",
         "installed": true,
         "in_sync": true,
-        "expected_sha256": "baf44e15e483ae6c943f68af9f85dfd9d9b72eaa7abdd486ee8ffff67e63c4d4",
-        "actual_sha256": "baf44e15e483ae6c943f68af9f85dfd9d9b72eaa7abdd486ee8ffff67e63c4d4"
+        "expected_sha256": "acae8347f7acc4a21e1ee6efef40c8088284fbcbb7f8f7c73589b6f9a1ea83f7",
+        "actual_sha256": "acae8347f7acc4a21e1ee6efef40c8088284fbcbb7f8f7c73589b6f9a1ea83f7"
       },
       {
         "name": "nori-acceptance",
@@ -157,21 +246,149 @@
         "actual_sha256": "c6b3fb8110b258c8990bc9f83829ca7c11de5facc6257931db31cb222a5102b2"
       },
       {
+        "name": "nori-architecture-brainstorm",
+        "path": ".agents/skills/nori-architecture-brainstorm/SKILL.md",
+        "installed": true,
+        "in_sync": true,
+        "expected_sha256": "02d8c32eb9267854d4bf51b728257a36acdbde5581199f98248032e47304f034",
+        "actual_sha256": "02d8c32eb9267854d4bf51b728257a36acdbde5581199f98248032e47304f034"
+      },
+      {
+        "name": "nori-architecture-apply",
+        "path": ".agents/skills/nori-architecture-apply/SKILL.md",
+        "installed": true,
+        "in_sync": true,
+        "expected_sha256": "e62798a816aeacdb56d965be9dbbbe3ae70fc48c30879f6dc592024a304fd56c",
+        "actual_sha256": "e62798a816aeacdb56d965be9dbbbe3ae70fc48c30879f6dc592024a304fd56c"
+      },
+      {
+        "name": "nori-architecture-challenge",
+        "path": ".agents/skills/nori-architecture-challenge/SKILL.md",
+        "installed": true,
+        "in_sync": true,
+        "expected_sha256": "9ada9f02a0146f19e88ec93932e0c139dae99106c01ad423ec38d6f739dac613",
+        "actual_sha256": "9ada9f02a0146f19e88ec93932e0c139dae99106c01ad423ec38d6f739dac613"
+      },
+      {
+        "name": "nori-build-vs-buy",
+        "path": ".agents/skills/nori-build-vs-buy/SKILL.md",
+        "installed": true,
+        "in_sync": true,
+        "expected_sha256": "c7f0cb7e894cead50cb4d48d1cedb27269980ef4fbcbd3ed941766f34fd437a9",
+        "actual_sha256": "c7f0cb7e894cead50cb4d48d1cedb27269980ef4fbcbd3ed941766f34fd437a9"
+      },
+      {
         "name": "nori-project-health",
         "path": ".agents/skills/nori-project-health/SKILL.md",
         "installed": true,
         "in_sync": true,
-        "expected_sha256": "c02b4f28da8a31b7d3cd2a503bf259c1575ce0dfd0384d140b446b1a6219ad96",
-        "actual_sha256": "c02b4f28da8a31b7d3cd2a503bf259c1575ce0dfd0384d140b446b1a6219ad96"
+        "expected_sha256": "63f658bb0cf4e33b4952d5511fcc2aa202dca8123c7db2aa6339519076800f20",
+        "actual_sha256": "63f658bb0cf4e33b4952d5511fcc2aa202dca8123c7db2aa6339519076800f20"
       },
       {
         "name": "nori-reporting",
         "path": ".agents/skills/nori-reporting/SKILL.md",
         "installed": true,
         "in_sync": true,
-        "expected_sha256": "951287bcf3673f45262895d957ae06ce4b7b2059e88370e03421347f851a8d14",
-        "actual_sha256": "951287bcf3673f45262895d957ae06ce4b7b2059e88370e03421347f851a8d14"
+        "expected_sha256": "94f95f67d84864bb87b2a66fa705e517e18a142aea7af8ea9cf860a64282a8c2",
+        "actual_sha256": "94f95f67d84864bb87b2a66fa705e517e18a142aea7af8ea9cf860a64282a8c2"
       }
     ]
+  },
+  "architecture": {
+    "schema_version": "opennori/architecture-state-v1",
+    "decision": "valid",
+    "required_for_goal": true,
+    "baseline": {
+      "status": "active",
+      "profile": "agent-native-cli",
+      "profile_title": "Agent-native CLI",
+      "goal_id": "opennori-self",
+      "sticky": true,
+      "requires_challenge_to_change": true,
+      "accepted_at": "2026-06-12T00:15:07.495Z"
+    },
+    "issues": [],
+    "open_challenges": [],
+    "build_vs_buy_decisions": [
+      {
+        "id": "acceptance-domain-将-acceptance-discovery-brainstorm-和-ac-quality",
+        "area": "acceptance-domain",
+        "need": "将 acceptance discovery、brainstorm 和 AC quality audit 从 CLI 入口拆到领域模块",
+        "recommendation": "self-build",
+        "summary": "Acceptance discovery 和 AC quality audit 是 OpenNori 的核心产品领域逻辑，应从 CLI 入口拆到 src/acceptance.js；当前规则是小型、确定性的启发式，不需要引入 NLP 或 schema 库。",
+        "path": ".opennori/architecture/decisions/acceptance-domain-将-acceptance-discovery-brainstorm-和-ac-quality.json"
+      },
+      {
+        "id": "architecture-check-让-opennori-check-同时暴露-active-goal-的-architect",
+        "area": "architecture-check",
+        "need": "让 opennori check 同时暴露 active goal 的 Architecture Baseline 健康和恢复建议",
+        "recommendation": "self-build",
+        "summary": "architecture_check 是 OpenNori 自有验收状态语义：它复用现有 architectureState、agent surface 和 active goal 恢复逻辑，把 baseline missing/draft/invalid/challenged/stale surface 作为 check warnings 暴露给 agent 和用户。",
+        "path": ".opennori/architecture/decisions/architecture-check-让-opennori-check-同时暴露-active-goal-的-architect.json"
+      },
+      {
+        "id": "architecture-profile-review-surface",
+        "area": "architecture-profile",
+        "need": "Expose reviewable Architecture Profile details before baseline confirmation",
+        "recommendation": "self-build",
+        "summary": "Reuse OpenNori's existing architecture profile state and CLI JSON surface to expose applies_to, sources, principles, checks, preferred libraries, avoid boundaries, and build-vs-buy policy before baseline confirmation.",
+        "path": ".opennori/architecture/decisions/architecture-profile-review-surface.json"
+      },
+      {
+        "id": "cli-argument-parsing-replace-growing-ad-hoc-option-scanning-with",
+        "area": "cli-argument-parsing",
+        "need": "Replace growing ad hoc option scanning with a standard-library-backed argument parser while preserving the existing opennori command surface.",
+        "recommendation": "reuse",
+        "summary": "Reuse Node.js standard library parseArgs tokens for option lookup and repeated flags instead of adding commander/cac or expanding custom array scanning. This keeps the CLI dependency-free while aligning with agent-native-cli build-vs-buy policy.",
+        "path": ".opennori/architecture/decisions/cli-argument-parsing-replace-growing-ad-hoc-option-scanning-with.json"
+      },
+      {
+        "id": "cli-支持-architecture-baseline-命令入口和-agent-readable-状态",
+        "area": "cli",
+        "need": "支持 Architecture Baseline 命令入口和 agent-readable 状态",
+        "recommendation": "self-build",
+        "summary": "当前阶段先沿用现有单文件 CLI 命令分发补齐产品状态对象，避免在架构修复前引入 CLI 框架迁移风险；后续 CLI 架构修复必须重新评估 commander/citty/cac 等成熟库。",
+        "path": ".opennori/architecture/decisions/cli-支持-architecture-baseline-命令入口和-agent-readable-状态.json"
+      },
+      {
+        "id": "evidence-health-audit",
+        "area": "evidence-health",
+        "need": "Warn when a complete-looking OpenNori goal relies on stale, summary-only, or bulk-template evidence",
+        "recommendation": "self-build",
+        "summary": "Reuse OpenNori's existing evidence ledger fields to audit evidence health without forcing adapters: created_at, sources, reviewability, limitations, basis, confidence, and summary patterns are enough for first-pass warnings.",
+        "path": ".opennori/architecture/decisions/evidence-health-audit.json"
+      },
+      {
+        "id": "skill-pack-将-opennori-skill-pack-从-cli-入口拆到独立产品面模块",
+        "area": "skill-pack",
+        "need": "将 OpenNori Skill Pack 从 CLI 入口拆到独立产品面模块",
+        "recommendation": "self-build",
+        "summary": "Skill Pack 是 OpenNori 自有产品文案和 agent 路由面，不需要新增运行时依赖；拆成 src/skills.js 可以让 CLI 更 thin，同时保留纯字符串定义和生成函数。",
+        "path": ".opennori/architecture/decisions/skill-pack-将-opennori-skill-pack-从-cli-入口拆到独立产品面模块.json"
+      }
+    ],
+    "agent_surface": {
+      "guide": {
+        "path": ".opennori/agent-guide.md",
+        "installed": true,
+        "in_sync": true
+      },
+      "agents": {
+        "path": "AGENTS.md",
+        "installed": true,
+        "references_baseline": true
+      },
+      "claude": {
+        "path": "CLAUDE.md",
+        "installed": true,
+        "references_baseline": true
+      }
+    },
+    "paths": {
+      "baseline_json": ".opennori/architecture/baseline.json",
+      "baseline_markdown": ".opennori/architecture/baseline.md",
+      "agent_guide": ".opennori/agent-guide.md"
+    }
   }
 }

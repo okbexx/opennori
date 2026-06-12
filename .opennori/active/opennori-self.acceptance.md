@@ -2,12 +2,12 @@
 
 ## Goal
 
-让 OpenNori 成为人类用户可验收、agent 可执行、跨会话可恢复的验收驱动协议；用户通过真实工具判断目标是否达成，而不是追踪过程计划。
+让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收驱动产品；用户不仅能判断产品目标是否完成，也能判断交付物是否按确认过的优秀技术架构完成。
 
 ## Acceptance Basis
 
 Status: approved
-Summary: User agreed existing OpenNori projects need an upgrade-safe AC quality audit.
+Summary: User approved Architecture Baseline as part of the OpenNori acceptance loop while keeping Product AC and Architecture Checks separate.
 
 ## Nori Profile
 
@@ -55,6 +55,16 @@ Summary: User agreed existing OpenNori projects need an upgrade-safe AC quality 
 | AC-Z-15 | productization | 作为用户，我让 agent 记录验收证据时，不需要 agent 为常见来源手写复杂结构。 | 运行 opennori evidence add，分别使用 --source-command、--source-path、--source-url 和自由 --source 记录证据，再查看 status/report。 | 证据来源能显示为 command、artifact、url 或自由 reference；report/status 中仍保留 basis、reviewability、limitations 和 confidence。 | passing |
 | AC-Z-16 | productization | 作为用户，我通过 npm 获取 OpenNori 后，在项目终端运行 npx opennori 就能看到简短接入预览，并选择是否安装，而不需要理解 install、root、dry-run 或 Skill Pack 参数。 | 在全新临时项目的终端运行 npx opennori 或本地等价 opennori bin，分别选择取消和确认；再让 agent 或 CI 用机器可读方式检查同一入口。 | 终端用户先看到将添加 .opennori 和 OpenNori Skill Pack 的简短预览；选择取消不会写入项目；选择确认后创建 .opennori 和项目 Skill Pack 且 doctor 为 ready；agent 或 CI 仍能获得结构化输出。 | passing |
 | AC-Z-17 | productization | 作为用户，我第一次打开 README 或官网 Quick Start 时，能看到短到可以直接复制的 npx opennori 入口，而不是一串内部安装参数。 | 阅读 README Try It 和官网首屏 Quick Start / Start 区域。 | README 和官网第一眼 Quick Start 展示 npx opennori；更详细的 opennori bootstrap、install、dry-run、confirm 只作为 agent 或高级用户的底层安全路径出现。 | passing |
+| AC-A-1 | architecture | 作为用户，我用自然语言告诉 agent 一个非平凡目标后，能先看到 Product AC 和 Architecture Baseline，让我判断要完成什么以及准备按什么技术架构完成。 | 在 OpenNori Skill 指引下查看 draft/discover 输出和 architecture baseline preview。 | 用户能在实现开始前分别确认 Product AC 和 Architecture Baseline；baseline 不呈现为阶段计划或任务列表。 | passing |
+| AC-A-2 | architecture | 作为用户，我确认 Architecture Baseline 后，新开的 agent session 能在项目里看到这条架构约束，并知道后续实现必须沿用它。 | 在新会话中查看 OpenNori agent guide、agent route、Skill Pack 和 architecture show/status 输出。 | 用户能判断新 session 不依赖旧聊天上下文也能找到架构约束；报告明确提示 agent 应提出 challenge 而不是静默替换。 | passing |
+| AC-A-3 | architecture | 作为用户，我可以选择 OpenNori 内置优秀架构 profile，也可以声明自己的项目架构 profile，并让它影响 baseline 和完成判断。 | 运行 architecture profiles、architecture profile --from 和 architecture baseline --profile。 | 内置 profile 和项目 profile 都能列出；项目 profile 可生成 baseline；技术偏好不会被写成 Product AC。 | passing |
+| AC-A-4 | architecture | 作为用户，当 agent 认为 baseline 不适合当前项目时，我看到明确 Architecture Challenge，而不是 agent 静默改架构。 | 运行 opennori architecture challenge 后查看 status/report 和 challenge 文件。 | challenge 展示当前 baseline、项目证据、冲突说明、建议修正和是否需要用户确认。 | passing |
+| AC-A-5 | architecture | 作为用户，我查看 status/report 时，能看到 Product decision 和 Architecture decision 分开呈现。 | 运行 opennori status、opennori report 和 context export。 | 输出分别展示产品 AC 状态、Architecture Baseline 状态、open challenges、build-vs-buy decisions、当前缺口和下一步证据。 | passing |
+| AC-A-6 | architecture | 作为用户，我运行 doctor/check 时，能知道 Architecture Baseline 是否可用、项目提示是否同步、Skill Pack 和 manifest 是否记录该能力。 | 运行 opennori doctor/check，并查看缺失 baseline、缺失 Skill、manifest stale 或项目提示过期时的输出。 | doctor/check 返回 ready、needs-action 或 broken，并显示用户能执行或交给 agent 执行的恢复建议。 | passing |
+| AC-A-7 | architecture | 作为用户，我在 agent 准备自研基础设施前，能看到它已经比较过可复用选择，并说明为什么仍要自研或复用。 | 查看 architecture build-vs-buy 输出、architecture decisions 记录、status 或 report。 | 报告能让我判断 agent 是否检查过项目现有依赖、标准库、官方方案、成熟开源方案和自研理由；自研不能只有口头总结。 | passing |
+| AC-A-8 | architecture | 作为用户，我查看 OpenNori 自身 dogfood 状态时，能知道 Architecture Baseline 已建立，但后续架构修复是否真的完成不能被最小可运行结果误报。 | 查看 OpenNori 自身 status/report、Architecture Baseline、build-vs-buy decision、代码结构审查和后续架构修复证据。 | 报告能清楚显示 baseline 已建立、当前仍有哪些架构风险或未完成缺口；如果核心结构仍未完成修复，目标不能显示 complete。 | passing |
+| AC-A-9 | architecture | 作为用户，我打开 README 或官网时，能理解 OpenNori 同时提供产品验收、架构基线、证据和完成判断，而不是只看到旧的验收工具心智。 | 阅读 README、官网首页、protocol 和 Skill Pack。 | 用户能看到 Architecture Baseline、Architecture Challenge、build-vs-buy、项目 profile 和 Product AC 分离的说明与用例。 | passing |
+| AC-A-10 | architecture | 作为用户，我能在一个非 OpenNori 项目里完整跑通自然语言目标、Product AC、Architecture Baseline、执行、证据、报告和完成判断。 | 选择一个非 OpenNori 项目，使用 OpenNori 从目标到报告跑完，并记录摩擦点。 | 报告同时呈现产品完成状态、架构健康状态、证据、未解决风险和是否需要用户确认；用户不需要记住 CLI 参数。 | passing |
 
 ## Rule
 

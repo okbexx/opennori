@@ -17,6 +17,14 @@ export const STRONG_EVIDENCE_KINDS = new Set([
   "protocol-v1"
 ]);
 export const STRONG_CONFIDENCE = new Set(["verified", "reviewed", "human-confirmed"]);
+const STRONG_EVIDENCE_BASIS = new Set(["human-confirmation", "tool-observation", "artifact-review", "protocol-check"]);
+const REVIEWABLE_SOURCE_TYPES = new Set(["command", "artifact", "url"]);
+const EVIDENCE_HEALTH_STALE_DAYS = 14;
+const BULK_EVIDENCE_PATTERNS = [
+  /is covered by the OpenNori .*implementation/i,
+  /self contract refresh, tests, and reviewable artifacts/i,
+  /covered by .* tests, and reviewable artifacts/i
+];
 
 const PLAN_FIELD_NAMES = new Set(["plan", "steps", "tasks", "todos", "next_steps", "implementation_plan"]);
 const FORBIDDEN_USER_STORY_TERMS = [
@@ -658,7 +666,14 @@ export function applyRiskGate(criterion, evidence) {
     return { result: requestedResult, confidence, gate: "accepted" };
   }
 
-  if (STRONG_EVIDENCE_KINDS.has(evidence.kind) || STRONG_CONFIDENCE.has(evidence.confidence)) {
+  const hasReviewableSource = Array.isArray(evidence.sources)
+    && evidence.sources.some((source) => REVIEWABLE_SOURCE_TYPES.has(source.type));
+  const hasStrongEvidence = STRONG_EVIDENCE_KINDS.has(evidence.kind)
+    || STRONG_EVIDENCE_BASIS.has(evidence.basis)
+    || STRONG_CONFIDENCE.has(evidence.confidence)
+    || hasReviewableSource;
+
+  if (hasStrongEvidence) {
     return {
       result: "passing",
       confidence: evidence.confidence || "verified",
@@ -775,6 +790,13 @@ export function intervention(contract, ledger) {
 
 export function completionAnswer(contract, ledger) {
   const gap = currentGap(contract, ledger);
+  const health = evidenceHealth(contract, ledger);
+  if (!gap && ledger.status === "complete" && health.status !== "clear") {
+    return {
+      complete: false,
+      answer: `Not confidently complete: ${health.summary}`
+    };
+  }
   if (!gap && ledger.status === "complete") {
     return {
       complete: true,
@@ -790,6 +812,7 @@ export function completionAnswer(contract, ledger) {
 export function nextRecommendation(contract, ledger) {
   const gap = currentGap(contract, ledger);
   const needed = intervention(contract, ledger);
+  const health = evidenceHealth(contract, ledger);
 
   if (needed.required) {
     return {
@@ -822,6 +845,18 @@ export function nextRecommendation(contract, ledger) {
       actions: [
         `Create or collect reviewable evidence for ${gap.id}.`,
         `Record the result for ${gap.id}, then rerun OpenNori status.`
+      ]
+    };
+  }
+
+  if (ledger.status === "complete" && health.status !== "clear") {
+    return {
+      status: "evidence-review-required",
+      focus: null,
+      summary: "All required ACs have passing or waived evidence, but evidence health needs review before confidently claiming completion.",
+      actions: [
+        "Review evidence_health findings.",
+        "Refresh stale, broad, or summary-only evidence with reviewable sources, reviewability, and limitations."
       ]
     };
   }
@@ -886,6 +921,107 @@ export function criterionStatusRows(contract, ledger) {
   });
 }
 
+function evidenceAgeDays(evidence, now = Date.now()) {
+  if (!evidence?.created_at) return null;
+  const timestamp = Date.parse(evidence.created_at);
+  if (Number.isNaN(timestamp)) return null;
+  return Math.max(0, Math.floor((now - timestamp) / 86400000));
+}
+
+function evidenceHasReviewableSource(evidence) {
+  const sources = Array.isArray(evidence?.sources) ? evidence.sources : [];
+  return sources.some((source) => REVIEWABLE_SOURCE_TYPES.has(source.type)) || Boolean(evidence?.path);
+}
+
+function evidenceHasReviewability(evidence) {
+  const value = String(evidence?.reviewability || "").trim();
+  return value.length > 0 && value !== "summary-only";
+}
+
+function evidenceSummaryLooksBulk(evidence) {
+  const summary = String(evidence?.summary || "");
+  return BULK_EVIDENCE_PATTERNS.some((pattern) => pattern.test(summary));
+}
+
+export function evidenceHealth(contract, ledger, { now = Date.now(), staleDays = EVIDENCE_HEALTH_STALE_DAYS } = {}) {
+  const findings = [];
+  for (const criterion of contract.criteria || []) {
+    if (criterion.required === false) continue;
+    const state = ledger.criteria?.[criterion.id];
+    const latest = state?.evidence?.at(-1);
+    if (!["passing", "waived"].includes(state.status)) continue;
+    if (!latest) continue;
+
+    const ageDays = evidenceAgeDays(latest, now);
+    if (ageDays === null) {
+      findings.push({
+        criterion_id: criterion.id,
+        severity: "review",
+        issue: "missing-evidence-date",
+        message: "Latest passing evidence has no created_at timestamp.",
+        recovery: "Record fresh evidence with a timestamp before relying on completion."
+      });
+    } else if (ageDays > staleDays) {
+      findings.push({
+        criterion_id: criterion.id,
+        severity: "review",
+        issue: "stale-evidence",
+        message: `Latest passing evidence is ${ageDays} days old.`,
+        recovery: "Refresh the evidence if the changed code, docs, website, package, or project state has moved since then."
+      });
+    }
+
+    if (!evidenceHasReviewableSource(latest)) {
+      findings.push({
+        criterion_id: criterion.id,
+        severity: "review",
+        issue: "missing-reviewable-source",
+        message: "Latest passing evidence has no command, artifact, URL, or path source.",
+        recovery: "Add a source that a human or review tool can inspect."
+      });
+    }
+
+    if (!evidenceHasReviewability(latest)) {
+      findings.push({
+        criterion_id: criterion.id,
+        severity: "review",
+        issue: "missing-reviewability",
+        message: "Latest passing evidence does not explain how to review it.",
+        recovery: "Add a short reviewability note."
+      });
+    }
+
+    if (!String(latest.limitations || "").trim()) {
+      findings.push({
+        criterion_id: criterion.id,
+        severity: "review",
+        issue: "missing-limitations",
+        message: "Latest passing evidence has no stated limitations.",
+        recovery: "State what the evidence does not prove."
+      });
+    }
+
+    if (evidenceSummaryLooksBulk(latest)) {
+      findings.push({
+        criterion_id: criterion.id,
+        severity: "review",
+        issue: "bulk-evidence-summary",
+        message: "Latest passing evidence looks like a broad batch summary rather than criterion-specific proof.",
+        recovery: "Replace or supplement it with criterion-specific evidence."
+      });
+    }
+  }
+
+  return {
+    status: findings.length === 0 ? "clear" : "review",
+    summary: findings.length === 0
+      ? "Latest evidence is reviewable enough for the current contract."
+      : `${findings.length} evidence health finding(s) need review.`,
+    stale_days: staleDays,
+    findings
+  };
+}
+
 function escapeTableCell(value) {
   return String(value || "")
     .replace(/\|/g, "\\|")
@@ -924,6 +1060,7 @@ export function renderReport(contract, ledger) {
   const gap = currentGap(contract, ledger);
   const needed = intervention(contract, ledger);
   const completion = completionAnswer(contract, ledger);
+  const health = evidenceHealth(contract, ledger);
   const lines = [
     `# ${contract.goal_id} Acceptance Report`,
     "",
@@ -964,6 +1101,16 @@ export function renderReport(contract, ledger) {
 
   lines.push("", "## Current Acceptance Gap", "");
   lines.push(gap ? `${gap.id} - ${gap.reason}` : "None. All required acceptance criteria have passing or waived evidence.");
+  lines.push("", "## Evidence Health", "");
+  lines.push(`Status: ${health.status}`);
+  lines.push(`Summary: ${health.summary}`);
+  if (health.findings.length > 0) {
+    lines.push("", "| Criterion | Severity | Issue | Message | Recovery |");
+    lines.push("| --- | --- | --- | --- | --- |");
+    for (const finding of health.findings) {
+      lines.push(`| ${finding.criterion_id} | ${finding.severity} | ${finding.issue} | ${escapeTableCell(finding.message)} | ${escapeTableCell(finding.recovery)} |`);
+    }
+  }
   lines.push("", "## User Intervention", "");
   lines.push(needed.required ? `${needed.criterion} - ${needed.action}` : needed.action);
   lines.push("", "## Conclusion", "", `Current status: ${ledger.status}`);
