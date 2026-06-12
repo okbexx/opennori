@@ -30,17 +30,14 @@ import {
 } from "./core.js";
 import {
   ARCHITECTURE_CHALLENGE_SCHEMA_VERSION,
-  BUILD_VS_BUY_SCHEMA_VERSION,
   architectureBaselinePaths,
   architectureChallengePath,
   architectureProfiles,
   architectureState,
   buildArchitectureBaseline,
-  buildVsBuyPath,
   normalizeArchitectureProfile,
   readArchitectureBaseline,
   renderArchitectureChallengeMarkdown,
-  renderBuildVsBuyMarkdown,
   renderReportWithArchitecture,
   validateArchitectureProfile,
   writeArchitectureBaseline,
@@ -48,7 +45,7 @@ import {
 } from "./architecture.js";
 import { packagePath } from "./package-root.js";
 import { runApproveCommand, runCriterionUpdateCommand, runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "./cli/commands/acceptance.js";
-import { runArchitectureProfilesCommand, runArchitectureShowCommand } from "./cli/commands/architecture.js";
+import { runArchitectureBuildVsBuyCommand, runArchitectureProfilesCommand, runArchitectureShowCommand } from "./cli/commands/architecture.js";
 import { runContextExportCommand } from "./cli/commands/context.js";
 import { runEvidenceAddCommand } from "./cli/commands/evidence.js";
 import { runChangesCommand, runCheckCommand, runDoctorCommand, runListCommand } from "./cli/commands/health.js";
@@ -471,55 +468,7 @@ export async function main(args) {
   }
 
   if (command === "architecture" && args[1] === "build-vs-buy") {
-    const root = resolveRoot(args);
-    const area = String(argValue(args, "--area", "")).trim();
-    const need = String(argValue(args, "--need", "")).trim();
-    const recommendation = String(argValue(args, "--recommendation", "")).trim();
-    const summary = String(argValue(args, "--summary", "")).trim();
-    if (!area) throw new Error("--area is required");
-    if (!need) throw new Error("--need is required");
-    if (!recommendation) throw new Error("--recommendation is required");
-    if (!summary) throw new Error("--summary is required");
-    const id = argValue(args, "--id") || slugify(`${area}-${need}`.slice(0, 64));
-    const decision = {
-      schema_version: BUILD_VS_BUY_SCHEMA_VERSION,
-      id,
-      created_at: new Date().toISOString(),
-      area,
-      need,
-      recommendation,
-      status: argValue(args, "--status", "active"),
-      summary,
-      current_project: argValue(args, "--current-project", ""),
-      standard_library: argValue(args, "--standard-library", ""),
-      official_sdk: argValue(args, "--official-sdk", ""),
-      open_source: argValue(args, "--open-source", ""),
-      self_build_reason: argValue(args, "--self-build-reason", ""),
-      superseded_by: argValue(args, "--superseded-by", ""),
-      superseded_reason: argValue(args, "--superseded-reason", "")
-    };
-    const paths = buildVsBuyPath(root, id);
-    writeJson(paths.jsonPath, decision);
-    fs.mkdirSync(path.dirname(paths.markdownPath), { recursive: true });
-    fs.writeFileSync(paths.markdownPath, renderBuildVsBuyMarkdown(decision));
-    refreshManifest(root);
-    printJson(ok(
-      {
-        root,
-        decision,
-        decision_path: paths.jsonPath,
-        markdown_path: paths.markdownPath,
-        architecture: architectureState(root)
-      },
-      [
-        { kind: "build_vs_buy_decision", path: paths.jsonPath },
-        { kind: "build_vs_buy_markdown", path: paths.markdownPath }
-      ],
-      decision.recommendation === "self-build" && !decision.self_build_reason
-        ? [{ type: "build_vs_buy", message: "Self-build recommendation should include --self-build-reason." }]
-        : [],
-      ["Use this decision as architecture evidence when implementing related acceptance gaps."]
-    ));
+    printJson(await runArchitectureBuildVsBuyCommand(args.slice(2)));
     return;
   }
 

@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "vitest";
 import { runApproveCommand, runCriterionUpdateCommand, runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../src/cli/commands/acceptance.js";
-import { runArchitectureProfilesCommand } from "../src/cli/commands/architecture.js";
+import { runArchitectureBuildVsBuyCommand, runArchitectureProfilesCommand } from "../src/cli/commands/architecture.js";
 import { runContextExportCommand } from "../src/cli/commands/context.js";
 import { runEvidenceAddCommand } from "../src/cli/commands/evidence.js";
 import { runChangesCommand, runCheckCommand, runDoctorCommand, runListCommand } from "../src/cli/commands/health.js";
@@ -98,6 +98,37 @@ test("check command module reports acceptance architecture and evidence health",
   assert.equal(checked.data.evidence_health.status, "clear");
   assert.equal(checked.warnings.some((warning) => warning.type === "architecture"), true);
   assert.equal(checked.next_actions.some((action) => /architecture_check/.test(action)), true);
+});
+
+test("architecture build-vs-buy command module records reviewable decisions", async () => {
+  const root = tempRoot();
+
+  const decision = await runArchitectureBuildVsBuyCommand([
+    "--root", root,
+    "--id", "module-parser-choice",
+    "--area", "cli",
+    "--need", "Parse OpenNori subcommands",
+    "--recommendation", "self-build",
+    "--summary", "Keep a small parser only when framework migration is blocked.",
+    "--current-project", "Current project has a legacy dispatcher.",
+    "--standard-library", "node:util parseArgs does not provide nested commands.",
+    "--official-sdk", "No official SDK applies.",
+    "--json"
+  ]);
+
+  assert.equal(decision.ok, true);
+  assert.equal(decision.data.decision.schema_version, "opennori/build-vs-buy-v1");
+  assert.equal(decision.data.decision.id, "module-parser-choice");
+  assert.equal(decision.data.decision.recommendation, "self-build");
+  assert.equal(decision.data.decision.current_project, "Current project has a legacy dispatcher.");
+  assert.equal(decision.data.decision.standard_library, "node:util parseArgs does not provide nested commands.");
+  assert.equal(decision.data.decision.official_sdk, "No official SDK applies.");
+  assert.equal(decision.data.decision_path, path.join(root, ".opennori", "architecture", "decisions", "module-parser-choice.json"));
+  assert.equal(fs.existsSync(decision.data.decision_path), true);
+  assert.equal(fs.existsSync(decision.data.markdown_path), true);
+  assert.equal(decision.artifacts.some((artifact) => artifact.kind === "build_vs_buy_decision"), true);
+  assert.equal(decision.warnings.some((warning) => warning.type === "build_vs_buy"), true);
+  assert.match(fs.readFileSync(decision.data.markdown_path, "utf8"), /Build-vs-Buy Decision/);
 });
 
 test("context export command module can write a review artifact", async () => {
