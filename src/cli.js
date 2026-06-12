@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { applyUninstallActions, applyUpgradeActions, bootstrap, buildInstallPlan, buildManifest, buildUninstallActions, buildUninstallPlan, buildUpgradePlan, installActions, refreshManifest, safeReadManifest, upgradeActions, writeManifest } from "./lifecycle.js";
-import { auditAcceptanceQuality, briefFromBrainstorm, briefFromGoal, buildBrainstorm, discoverAcceptance, renderBrainstormMarkdown, renderDiscoveryMarkdown } from "./acceptance.js";
+import { auditAcceptanceQuality, briefFromBrainstorm, briefFromGoal, discoverAcceptance, renderDiscoveryMarkdown } from "./acceptance.js";
 import {
   addEvidence,
   addProfileEvidence,
@@ -30,7 +30,7 @@ import {
 } from "./core.js";
 import { readArchitectureBaseline, renderReportWithArchitecture } from "./architecture.js";
 import { packagePath } from "./package-root.js";
-import { runApproveCommand, runCriterionUpdateCommand, runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "./cli/commands/acceptance.js";
+import { runApproveCommand, runBrainstormCommand, runCriterionUpdateCommand, runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "./cli/commands/acceptance.js";
 import { runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand, runArchitectureShowCommand } from "./cli/commands/architecture.js";
 import { runContextExportCommand } from "./cli/commands/context.js";
 import { runEvidenceAddCommand } from "./cli/commands/evidence.js";
@@ -474,32 +474,7 @@ export async function main(args) {
   }
 
   if (command === "brainstorm") {
-    const root = resolveRoot(args);
-    const idea = String(argValue(args, "--idea", "")).trim();
-    if (!idea) throw new Error("--idea is required");
-    const brainstorm = buildBrainstorm(idea, argValue(args, "--id"));
-    const paths = brainstormPaths(root, brainstorm.id);
-    writeJson(paths.jsonPath, brainstorm);
-    fs.mkdirSync(path.dirname(paths.markdownPath), { recursive: true });
-    fs.writeFileSync(paths.markdownPath, renderBrainstormMarkdown(brainstorm));
-    refreshManifest(root);
-    printJson(ok(
-      {
-        brainstorm_id: brainstorm.id,
-        status: brainstorm.status,
-        idea: brainstorm.idea,
-        candidates: brainstorm.candidates,
-        brainstorm_path: paths.jsonPath,
-        markdown_path: paths.markdownPath,
-        is_acceptance_contract: false
-      },
-      [
-        { kind: "brainstorm_source", path: paths.jsonPath },
-        { kind: "brainstorm_markdown", path: paths.markdownPath }
-      ],
-      [],
-      ["Ask the user to choose or revise a candidate before running opennori draft."]
-    ));
+    printJson(await runBrainstormCommand(args.slice(1)));
     return;
   }
 

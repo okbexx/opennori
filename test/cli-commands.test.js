@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { test } from "vitest";
-import { runApproveCommand, runCriterionUpdateCommand, runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../src/cli/commands/acceptance.js";
+import { runApproveCommand, runBrainstormCommand, runCriterionUpdateCommand, runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../src/cli/commands/acceptance.js";
 import { runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand } from "../src/cli/commands/architecture.js";
 import { runContextExportCommand } from "../src/cli/commands/context.js";
 import { runEvidenceAddCommand } from "../src/cli/commands/evidence.js";
@@ -67,6 +67,24 @@ test("list command module reports active goal gaps without CLI dispatch", async 
   assert.equal(list.data.active_goals.length, 1);
   assert.equal(list.data.active_goals[0].goal_id, "module-goal");
   assert.equal(list.data.active_goals[0].current_gap.id, "ACCEPTANCE-BASIS");
+});
+
+test("brainstorm command module creates selectable directions without a contract", async () => {
+  const root = tempRoot();
+  const brainstorm = await runBrainstormCommand([
+    "--root", root,
+    "--idea", "我想让 OpenNori 支持头脑风暴",
+    "--json"
+  ]);
+
+  assert.equal(brainstorm.ok, true);
+  assert.equal(brainstorm.data.status, "draft-source");
+  assert.equal(brainstorm.data.is_acceptance_contract, false);
+  assert.equal(brainstorm.data.candidates.length, 3);
+  assert.equal(fs.existsSync(brainstorm.data.brainstorm_path), true);
+  assert.equal(fs.existsSync(brainstorm.data.markdown_path), true);
+  assert.equal(brainstorm.artifacts.some((artifact) => artifact.kind === "brainstorm_source"), true);
+  assert.match(fs.readFileSync(brainstorm.data.markdown_path, "utf8"), /not a Nori Contract/);
 });
 
 test("check command module reports acceptance architecture and evidence health", async () => {

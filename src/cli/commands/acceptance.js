@@ -1,4 +1,7 @@
 import { defineCommand } from "citty";
+import fs from "node:fs";
+import path from "node:path";
+import { buildBrainstorm, renderBrainstormMarkdown } from "../../acceptance.js";
 import {
   completionAnswer,
   criterionStatusRows,
@@ -15,6 +18,73 @@ import {
 import { architectureState } from "../../architecture.js";
 import { refreshManifest } from "../../lifecycle.js";
 import { runJsonCommand } from "../runtime.js";
+
+function brainstormPaths(root, brainstormId) {
+  const dir = path.join(root, ".opennori", "brainstorms");
+  return {
+    jsonPath: path.join(dir, `${brainstormId}.json`),
+    markdownPath: path.join(dir, `${brainstormId}.md`)
+  };
+}
+
+export const brainstormCommand = defineCommand({
+  meta: {
+    name: "brainstorm",
+    description: "Create selectable acceptance directions from a natural language idea."
+  },
+  args: {
+    root: {
+      type: "string",
+      description: "Project root.",
+      default: process.cwd()
+    },
+    idea: {
+      type: "string",
+      description: "Natural language idea to explore."
+    },
+    id: {
+      type: "string",
+      description: "Optional stable brainstorm id."
+    },
+    json: {
+      type: "boolean",
+      description: "Keep deterministic JSON output for agents.",
+      default: false
+    }
+  },
+  run({ args }) {
+    const root = path.resolve(String(args.root || process.cwd()));
+    const idea = String(args.idea || "").trim();
+    if (!idea) throw new Error("--idea is required");
+    const brainstorm = buildBrainstorm(idea, args.id);
+    const paths = brainstormPaths(root, brainstorm.id);
+    writeJson(paths.jsonPath, brainstorm);
+    fs.mkdirSync(path.dirname(paths.markdownPath), { recursive: true });
+    fs.writeFileSync(paths.markdownPath, renderBrainstormMarkdown(brainstorm));
+    refreshManifest(root);
+    return ok(
+      {
+        brainstorm_id: brainstorm.id,
+        status: brainstorm.status,
+        idea: brainstorm.idea,
+        candidates: brainstorm.candidates,
+        brainstorm_path: paths.jsonPath,
+        markdown_path: paths.markdownPath,
+        is_acceptance_contract: false
+      },
+      [
+        { kind: "brainstorm_source", path: paths.jsonPath },
+        { kind: "brainstorm_markdown", path: paths.markdownPath }
+      ],
+      [],
+      ["Ask the user to choose or revise a candidate before running opennori draft."]
+    );
+  }
+});
+
+export async function runBrainstormCommand(rawArgs) {
+  return runJsonCommand(brainstormCommand, rawArgs);
+}
 
 export const nextCommand = defineCommand({
   meta: {
