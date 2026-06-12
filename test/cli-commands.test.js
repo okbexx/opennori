@@ -10,7 +10,7 @@ import { runContextExportCommand } from "../src/cli/commands/context.js";
 import { runEvidenceAddCommand } from "../src/cli/commands/evidence.js";
 import { runChangesCommand, runDoctorCommand, runListCommand } from "../src/cli/commands/health.js";
 import { runProfileAddCommand, runProfileEvidenceCommand, runProfileShowCommand } from "../src/cli/commands/profile.js";
-import { runReportCommand } from "../src/cli/commands/reporting.js";
+import { runArchiveCommand, runReportCommand } from "../src/cli/commands/reporting.js";
 import { runSkillExportCommand } from "../src/cli/commands/skill.js";
 import { addEvidence, buildEvidenceLedger, writeJson } from "../src/core.js";
 
@@ -249,6 +249,76 @@ test("report command module renders a report artifact", async () => {
   assert.equal(report.data.evidence_health.status, "clear");
   assert.equal(report.artifacts[0].kind, "acceptance_report");
   assert.match(fs.readFileSync(outputPath, "utf8"), /## Decision Summary/);
+});
+
+test("archive command module moves complete goals and preserves a report", async () => {
+  const root = tempRoot();
+  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const contract = {
+    schema_version: "opennori/contract-v1",
+    protocol_version: "opennori/v1",
+    goal_id: "module-goal",
+    goal: "Archive module goal",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "As a user, I can archive a complete goal.",
+        measurement: "Run archive.",
+        threshold: "I can see the archived artifacts."
+      }
+    ],
+    acceptance_basis: { status: "approved" }
+  };
+  const ledger = buildEvidenceLedger(contract);
+  addEvidence(contract, ledger, "AC-1", { kind: "test-summary", summary: "AC-1 passes.", result: "passing" });
+  fs.mkdirSync(path.dirname(acceptancePath), { recursive: true });
+  fs.writeFileSync(acceptancePath, "# Module goal\n");
+  writeJson(evidencePath, { contract, ledger });
+
+  const archived = await runArchiveCommand(["--root", root, "--json"], {
+    loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root })
+  });
+  assert.equal(archived.ok, true);
+  assert.equal(archived.data.archived_as, "completed");
+  assert.equal(fs.existsSync(acceptancePath), false);
+  assert.equal(fs.existsSync(evidencePath), false);
+  assert.equal(fs.existsSync(archived.data.acceptance_path), true);
+  assert.equal(fs.existsSync(archived.data.evidence_path), true);
+  assert.equal(fs.existsSync(archived.data.report_path), true);
+});
+
+test("archive command module rejects active goals", async () => {
+  const root = tempRoot();
+  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const contract = {
+    schema_version: "opennori/contract-v1",
+    protocol_version: "opennori/v1",
+    goal_id: "module-goal",
+    goal: "Do not archive active goal",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "As a user, I can keep active work in active state.",
+        measurement: "Open status.",
+        threshold: "I can see the remaining gap."
+      }
+    ],
+    acceptance_basis: { status: "approved" }
+  };
+  const ledger = buildEvidenceLedger(contract);
+  fs.mkdirSync(path.dirname(acceptancePath), { recursive: true });
+  fs.writeFileSync(acceptancePath, "# Module goal\n");
+  writeJson(evidencePath, { contract, ledger });
+
+  const archived = await runArchiveCommand(["--root", root, "--json"], {
+    loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root })
+  });
+  assert.equal(archived.ok, false);
+  assert.equal(archived.error.type, "not_archivable");
+  assert.equal(fs.existsSync(acceptancePath), true);
+  assert.equal(fs.existsSync(evidencePath), true);
 });
 
 test("evaluate command module recomputes and writes workflow state", async () => {

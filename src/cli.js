@@ -53,7 +53,7 @@ import { runContextExportCommand } from "./cli/commands/context.js";
 import { runEvidenceAddCommand } from "./cli/commands/evidence.js";
 import { runChangesCommand, runDoctorCommand, runListCommand } from "./cli/commands/health.js";
 import { runProfileAddCommand, runProfileCheckCommand, runProfileEvidenceCommand, runProfileShowCommand } from "./cli/commands/profile.js";
-import { runReportCommand } from "./cli/commands/reporting.js";
+import { runArchiveCommand, runReportCommand } from "./cli/commands/reporting.js";
 import { runSkillExportCommand } from "./cli/commands/skill.js";
 
 const PACKAGE_JSON = JSON.parse(fs.readFileSync(packagePath("package.json"), "utf8"));
@@ -986,49 +986,9 @@ export async function main(args) {
   }
 
   if (command === "archive") {
-    const root = resolveRoot(args);
-    const { contract, ledger, acceptancePath, evidencePath } = loadPair(args);
-    recomputeWorkflowStatus(contract, ledger);
-    if (ledger.status !== "complete" && ledger.status !== "blocked") {
-      printJson(fail("not_archivable", `Goal ${contract.goal_id} is ${ledger.status}`, "Only complete or blocked OpenNori goals can be archived."));
-      process.exitCode = 1;
-      return;
-    }
-
-    const archiveDir = ledger.status === "complete" ? "completed" : "blocked";
-    const targetAcceptance = path.join(root, ".opennori", archiveDir, path.basename(acceptancePath));
-    const targetEvidence = path.join(root, ".opennori", archiveDir, path.basename(evidencePath));
-    const reportPath = pathsForGoal(root, contract.goal_id).reportPath;
-    for (const target of [targetAcceptance, targetEvidence]) {
-      if (fs.existsSync(target) && !hasFlag(args, "--force")) {
-        printJson(fail("archive_target_exists", `Archive target exists: ${relativeTo(root, target)}`, "Pass --force or move the existing archive file."));
-        process.exitCode = 1;
-        return;
-      }
-    }
-
-    writeJson(evidencePath, { contract, ledger });
-    syncAcceptanceMarkdown(acceptancePath, contract, ledger);
-    fs.mkdirSync(path.dirname(reportPath), { recursive: true });
-    fs.writeFileSync(reportPath, renderReportWithArchitecture(root, contract, ledger));
-    fs.mkdirSync(path.dirname(targetAcceptance), { recursive: true });
-    fs.renameSync(acceptancePath, targetAcceptance);
-    fs.renameSync(evidencePath, targetEvidence);
-    refreshManifest(root);
-    printJson(ok(
-      {
-        goal_id: contract.goal_id,
-        archived_as: archiveDir,
-        acceptance_path: targetAcceptance,
-        evidence_path: targetEvidence,
-        report_path: reportPath
-      },
-      [
-        { kind: "archived_acceptance_contract", path: targetAcceptance },
-        { kind: "archived_evidence_ledger", path: targetEvidence },
-        { kind: "acceptance_report", path: reportPath }
-      ]
-    ));
+    const result = await runArchiveCommand(args.slice(1), { loadPair: () => loadPair(args) });
+    printJson(result);
+    if (!result.ok) process.exitCode = 1;
     return;
   }
 
