@@ -48,8 +48,9 @@ import {
   writeArchitectureBaseline,
   writeArchitectureProfile
 } from "./architecture.js";
+import { packagePath } from "./package-root.js";
 
-const PACKAGE_JSON = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, "..", "package.json"), "utf8"));
+const PACKAGE_JSON = JSON.parse(fs.readFileSync(packagePath("package.json"), "utf8"));
 function printJson(payload) {
   console.log(JSON.stringify(payload, null, 2));
 }
@@ -431,7 +432,7 @@ export async function main(args) {
   if (command === "architecture" && args[1] === "baseline") {
     const root = resolveRoot(args);
     const goal = String(argValue(args, "--goal", "")).trim();
-    const profileId = argValue(args, "--profile", "agent-native-cli");
+    const profileId = argValue(args, "--profile", "typescript-agent-state-cli");
     const goalId = argValue(args, "--goal-id") || slugify(goal || profileId);
     const confirmed = hasFlag(args, "--confirm");
     if (!goal) throw new Error("--goal is required");
@@ -555,12 +556,15 @@ export async function main(args) {
       area,
       need,
       recommendation,
+      status: argValue(args, "--status", "active"),
       summary,
       current_project: argValue(args, "--current-project", ""),
       standard_library: argValue(args, "--standard-library", ""),
       official_sdk: argValue(args, "--official-sdk", ""),
       open_source: argValue(args, "--open-source", ""),
-      self_build_reason: argValue(args, "--self-build-reason", "")
+      self_build_reason: argValue(args, "--self-build-reason", ""),
+      superseded_by: argValue(args, "--superseded-by", ""),
+      superseded_reason: argValue(args, "--superseded-reason", "")
     };
     const paths = buildVsBuyPath(root, id);
     writeJson(paths.jsonPath, decision);
@@ -932,6 +936,14 @@ export async function main(args) {
       });
     }
     const architectureStatus = architectureWarnings.length > 0 ? "needs-action" : "clear";
+    const buildVsBuyWarnings = architecture.build_vs_buy.findings.map((finding) => ({
+      type: "build_vs_buy",
+      decision_id: finding.decision_id,
+      severity: finding.severity,
+      issue: finding.issue,
+      message: finding.message,
+      recovery: finding.recovery
+    }));
     const health = evidenceHealth(contract, ledger);
     const evidenceHealthWarnings = health.findings.map((finding) => ({
       type: "evidence_health",
@@ -941,9 +953,12 @@ export async function main(args) {
       message: finding.message,
       recovery: finding.recovery
     }));
-    const combinedWarnings = [...warnings, ...architectureWarnings, ...evidenceHealthWarnings];
+    const combinedWarnings = [...warnings, ...architectureWarnings, ...buildVsBuyWarnings, ...evidenceHealthWarnings];
     if (architectureStatus === "needs-action") {
       nextActions.push("Resolve architecture_check warnings before treating this goal as architecture-complete.");
+    }
+    if (architecture.build_vs_buy.status !== "clear") {
+      nextActions.push("Resolve build_vs_buy warnings before treating custom infrastructure as mature.");
     }
     if (health.status !== "clear") {
       nextActions.push("Review evidence_health warnings before treating this goal as confidently complete.");

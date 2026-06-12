@@ -4,19 +4,39 @@
   "description": "OpenNori: human-centered Nori Contracts and evidence records for coding agents.",
   "type": "module",
   "bin": {
-    "opennori": "bin/opennori.js"
+    "opennori": "dist/bin/opennori.js"
   },
   "files": [
     ".opennori/protocol.md",
     "bin/",
+    "dist/",
+    "skills/",
     "src/",
+    "schemas/",
     "examples/",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test",
-    "check": "node --test && node ./bin/opennori.js doctor --json"
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "format": "biome format --write package.json tsconfig.json tsconfig.build.json vitest.config.ts",
+    "lint": "biome lint .",
+    "test": "vitest run",
+    "test:node": "node --test",
+    "check": "biome lint . && tsc --noEmit && vitest run && npm run build && node ./bin/opennori.js doctor --json"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.5.1",
+    "ajv": "^8.17.1",
+    "citty": "^0.2.2",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@types/node": "^22.19.20",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
   },
   "publishConfig": {
     "access": "public"

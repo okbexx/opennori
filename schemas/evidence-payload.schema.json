@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opennori.dev/schemas/evidence-payload.schema.json",
+  "title": "OpenNori Evidence Payload",
+  "type": "object",
+  "required": ["contract", "ledger"],
+  "additionalProperties": true,
+  "properties": {
+    "contract": {
+      "type": "object",
+      "required": ["protocol_version", "goal_id", "goal", "criteria"],
+      "additionalProperties": true,
+      "properties": {
+        "protocol_version": { "const": "opennori/v1" },
+        "goal_id": { "type": "string", "minLength": 1 },
+        "goal": { "type": "string", "minLength": 1 },
+        "acceptance_basis": { "type": "object" },
+        "criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "user_story", "measurement", "threshold"],
+            "additionalProperties": true,
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "layer": { "type": "string" },
+              "user_story": { "type": "string", "minLength": 1 },
+              "measurement": { "type": "string", "minLength": 1 },
+              "threshold": { "type": "string", "minLength": 1 },
+              "required": { "type": "boolean" },
+              "risk": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "ledger": {
+      "type": "object",
+      "required": ["protocol_version", "goal_id", "status", "criteria"],
+      "additionalProperties": true,
+      "properties": {
+        "protocol_version": { "const": "opennori/v1" },
+        "goal_id": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["active", "unknown", "failing", "passing", "blocked", "complete", "waived"]
+        },
+        "criteria": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["status"],
+            "additionalProperties": true,
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["unknown", "failing", "passing", "blocked", "waived"]
+              },
+              "confidence": { "type": "string" },
+              "required": { "type": "boolean" },
+              "risk": { "type": "string" },
+              "evidence": { "type": "array" }
+            }
+          }
+        },
+        "capability_profile": { "type": "object" }
+      }
+    }
+  }
+}

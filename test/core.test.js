@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import test from "node:test";
-import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { test } from "vitest";
+import { validateContract } from "../src/core.js";
+import { validateSchema } from "../src/validation.js";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const CLI = path.join(ROOT, "bin", "opennori.js");
@@ -48,6 +50,27 @@ test("command help is side-effect free", () => {
   assert.equal(payload.data.side_effect, "none");
   assert.match(payload.data.usage, /opennori install/);
   assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
+});
+
+test("published package uses built dist bin while local source bin remains available", () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
+  assert.equal(packageJson.bin.opennori, "dist/bin/opennori.js");
+  assert.equal(fs.existsSync(path.join(ROOT, "bin", "opennori.js")), true);
+  assert.equal(fs.readFileSync(path.join(ROOT, "bin", "opennori.js"), "utf8").includes("../src/cli.js"), true);
+});
+
+test("built dist bin can read package-root Skill assets", () => {
+  const build = spawnSync("npm", ["run", "build"], {
+    cwd: ROOT,
+    encoding: "utf8"
+  });
+  assert.equal(build.status, 0, build.stderr || build.stdout);
+
+  const payload = run(["skill", "export", "--pack", "--json"], {
+    cli: path.join(ROOT, "dist", "bin", "opennori.js")
+  });
+  assert.equal(payload.data.skills.length, 10);
+  assert.match(payload.data.skills.find((skill) => skill.name === "nori").skill_md, /OpenNori/);
 });
 
 test("opennori quickstart previews bootstrap without requiring install flags", () => {
@@ -617,7 +640,9 @@ test("protocol v1 example contains concrete user tool operations", () => {
 
 test("skill export gives agents the full OpenNori command loop", () => {
   const payload = run(["skill", "export", "--json"]);
+  const noriAsset = fs.readFileSync(path.join(ROOT, "skills", "nori", "SKILL.md"), "utf8");
   assert.equal(payload.data.skill_name, "nori");
+  assert.equal(payload.data.skill_md, noriAsset);
   assert.match(payload.data.skill_md, /nori-acceptance/);
   assert.match(payload.data.skill_md, /nori-evidence/);
   assert.match(payload.data.skill_md, /nori-capability-profile/);
@@ -656,6 +681,56 @@ test("skill export gives agents the full OpenNori command loop", () => {
   assert.match(pack.data.skills.find((skill) => skill.name === "nori-build-vs-buy").skill_md, /current project dependency/);
   assert.match(pack.data.skills.find((skill) => skill.name === "nori-reporting").skill_md, /opennori report --root <repo> --json/);
   assert.match(pack.data.skills.find((skill) => skill.name === "nori-project-health").skill_md, /opennori doctor --root <repo> --json/);
+  for (const skill of pack.data.skills) {
+    const asset = fs.readFileSync(path.join(ROOT, "skills", skill.name, "SKILL.md"), "utf8");
+    assert.equal(skill.skill_md, asset);
+  }
+});
+
+test("public JSON Schemas validate persisted OpenNori state and separate structure from semantics", () => {
+  const root = tempRoot();
+  run(["install", "--root", root, "--skill", "--json"]);
+  run(["draft", "--goal", "Ship schema-backed OpenNori state", "--root", root, "--json"]);
+  run([
+    "architecture", "baseline",
+    "--root", root,
+    "--goal", "Ship schema-backed OpenNori state",
+    "--goal-id", "ship-schema-backed-opennori-state",
+    "--confirm",
+    "--json"
+  ]);
+  run([
+    "architecture", "build-vs-buy",
+    "--root", root,
+    "--id", "schema-validation",
+    "--area", "schema-validation",
+    "--need", "Validate persisted OpenNori state",
+    "--recommendation", "reuse",
+    "--summary", "Use JSON Schema and Ajv for structural validation.",
+    "--current-project", "OpenNori writes JSON state files under .opennori.",
+    "--standard-library", "JSON.parse only validates syntax.",
+    "--official-sdk", "No official SDK applies.",
+    "--open-source", "Ajv is the selected JSON Schema validator.",
+    "--json"
+  ]);
+
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "manifest.json"), "utf8"));
+  const evidence = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "active", "ship-schema-backed-opennori-state.evidence.json"), "utf8"));
+  const baseline = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.json"), "utf8"));
+  const decision = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "decisions", "schema-validation.json"), "utf8"));
+
+  assert.equal(validateSchema("manifest", manifest).valid, true);
+  assert.equal(validateSchema("evidence-payload", evidence).valid, true);
+  assert.equal(validateSchema("architecture-baseline", baseline).valid, true);
+  assert.equal(validateSchema("build-vs-buy", decision).valid, true);
+
+  const invalidShape = validateSchema("evidence-payload", { contract: { goal: "missing required fields" }, ledger: {} });
+  assert.equal(invalidShape.valid, false);
+  assert.equal(invalidShape.errors.some((error) => error.path.includes("/contract")), true);
+
+  evidence.contract.criteria[0].user_story = "Implementation detail only";
+  assert.equal(validateSchema("evidence-payload", evidence).valid, true);
+  assert.equal(validateContract(evidence.contract, evidence.ledger).some((issue) => issue.path === "criteria[0].user_story"), true);
 });
 
 test("install creates project assets and skips existing user content by default", () => {
@@ -848,10 +923,22 @@ test("doctor reports ready, needs-action, and broken project health", () => {
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   const stale = run(["doctor", "--root", staleManifestRoot, "--json"]);
   assert.equal(stale.data.status, "needs-action");
+  assert.equal(stale.data.checks.find((check) => check.name === "manifest_schema").ok, true);
   assert.equal(stale.data.checks.find((check) => check.name === "manifest_cli_version").ok, false);
   assert.equal(stale.data.checks.find((check) => check.name === "manifest_capabilities").ok, false);
   assert.equal(stale.data.recovery_actions.some((action) => action.check === "manifest_cli_version" && /Refresh the manifest/.test(action.action)), true);
   assert.equal(stale.data.recovery_actions.some((action) => action.check === "manifest_capabilities" && /Refresh the manifest/.test(action.action)), true);
+
+  const invalidManifestRoot = tempRoot();
+  run(["install", "--root", invalidManifestRoot, "--json"]);
+  const invalidManifestPath = path.join(invalidManifestRoot, ".opennori", "manifest.json");
+  const invalidManifest = JSON.parse(fs.readFileSync(invalidManifestPath, "utf8"));
+  delete invalidManifest.managed_files;
+  fs.writeFileSync(invalidManifestPath, `${JSON.stringify(invalidManifest, null, 2)}\n`);
+  const invalidManifestDoctor = run(["doctor", "--root", invalidManifestRoot, "--json"]);
+  assert.equal(invalidManifestDoctor.data.status, "broken");
+  assert.equal(invalidManifestDoctor.data.checks.find((check) => check.name === "manifest_schema").ok, false);
+  assert.equal(invalidManifestDoctor.data.recovery_actions.some((action) => action.check === "manifest_schema"), true);
 
   const brokenRoot = tempRoot();
   run(["install", "--root", brokenRoot, "--json"]);
@@ -863,6 +950,16 @@ test("doctor reports ready, needs-action, and broken project health", () => {
   assert.match(broken.data.checks.find((check) => check.name === "active_goals_recoverable").recovery, /Inspect active_goal_issues/);
   assert.equal(broken.data.recovery_actions.some((action) => action.check === "active_goals_recoverable" && /nori\/active\/<goal>/.test(action.action)), true);
   assert.equal(broken.data.recovery_actions.some((action) => action.check === "active_goal_issue" && action.goal_id === "broken" && /broken\.evidence\.json/.test(action.action)), true);
+
+  const schemaBrokenRoot = tempRoot();
+  run(["draft", "--goal", "Ship schema validation diagnostics", "--root", schemaBrokenRoot, "--json"]);
+  const evidencePath = path.join(schemaBrokenRoot, ".opennori", "active", "ship-schema-validation-diagnostics.evidence.json");
+  const evidencePayload = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  delete evidencePayload.ledger.criteria;
+  fs.writeFileSync(evidencePath, `${JSON.stringify(evidencePayload, null, 2)}\n`);
+  const schemaBroken = run(["doctor", "--root", schemaBrokenRoot, "--json"]);
+  assert.equal(schemaBroken.data.status, "broken");
+  assert.equal(schemaBroken.data.active_goal_issues.some((issue) => issue.path?.startsWith("schema/ledger")), true);
 });
 
 test("uninstall previews removals and preserves OpenNori state by default", () => {
@@ -1022,7 +1119,7 @@ test("profile check automatically checks local Skills and package stacks without
 test("architecture baseline loop is agent-readable sticky and challengeable", () => {
   const root = tempRoot();
   run(["install", "--root", root, "--skill", "--json"]);
-  const draft = run(["draft", "--goal", "Refactor OpenNori into an agent-native CLI product", "--root", root, "--json"]);
+  const draft = run(["draft", "--goal", "Refactor OpenNori into a TypeScript agent state CLI product", "--root", root, "--json"]);
 
   const missingBaselineCheck = run(["check", "--root", root, "--json"]);
   assert.equal(missingBaselineCheck.data.architecture_check.status, "needs-action");
@@ -1031,14 +1128,14 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   assert.equal(missingBaselineCheck.next_actions.some((action) => /architecture_check/.test(action)), true);
 
   const profiles = run(["architecture", "profiles", "--root", root, "--json"]);
-  assert.equal(profiles.data.profiles.some((profile) => profile.id === "agent-native-cli"), true);
-  const builtinProfile = profiles.data.profiles.find((profile) => profile.id === "agent-native-cli");
-  assert.match(builtinProfile.summary, /thin deterministic CLI/);
+  assert.equal(profiles.data.profiles.some((profile) => profile.id === "typescript-agent-state-cli"), true);
+  const builtinProfile = profiles.data.profiles.find((profile) => profile.id === "typescript-agent-state-cli");
+  assert.match(builtinProfile.summary, /strict TypeScript/);
   assert.equal(builtinProfile.valid, true);
   assert.equal(builtinProfile.review.can_generate_baseline, true);
   assert.equal(builtinProfile.sources.some((source) => source.label === "CodeGraph / GitNexus"), true);
   assert.equal(builtinProfile.principles.includes("build-vs-buy-before-custom-infrastructure"), true);
-  assert.equal(builtinProfile.checks.some((check) => check.id === "ARCH-4" && check.audience === "agent"), true);
+  assert.equal(builtinProfile.checks.some((check) => check.id === "ARCH-5" && check.audience === "agent"), true);
   assert.equal(builtinProfile.preferred_libraries.some((entry) => entry.area === "cli"), true);
   assert.equal(builtinProfile.avoid.includes("silent architecture replacement"), true);
   assert.equal(builtinProfile.build_vs_buy_policy.require_reason_when_self_building, true);
@@ -1046,8 +1143,8 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   const preview = run([
     "architecture", "baseline",
     "--root", root,
-    "--goal", "Refactor OpenNori into an agent-native CLI product",
-    "--goal-id", "refactor-opennori-into-an-agent-native-cli-product",
+    "--goal", "Refactor OpenNori into a TypeScript agent state CLI product",
+    "--goal-id", "refactor-opennori-into-a-typescript-agent-state-cli-product",
     "--json"
   ]);
   assert.equal(preview.data.confirmed, false);
@@ -1058,8 +1155,8 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   const confirmed = run([
     "architecture", "baseline",
     "--root", root,
-    "--goal", "Refactor OpenNori into an agent-native CLI product",
-    "--goal-id", "refactor-opennori-into-an-agent-native-cli-product",
+    "--goal", "Refactor OpenNori into a TypeScript agent state CLI product",
+    "--goal-id", "refactor-opennori-into-a-typescript-agent-state-cli-product",
     "--confirm",
     "--json"
   ]);
@@ -1090,7 +1187,7 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
 
   const status = run(["status", "--root", root, "--json"]);
   assert.equal(status.data.architecture.decision, "valid");
-  assert.equal(status.data.architecture.baseline.profile, "agent-native-cli");
+  assert.equal(status.data.architecture.baseline.profile, "typescript-agent-state-cli");
   assert.equal(status.data.architecture.build_vs_buy_decisions.length, 1);
 
   const clearCheck = run(["check", "--root", root, "--json"]);
@@ -1100,17 +1197,17 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
 
   const manifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "manifest.json"), "utf8"));
   assert.equal(manifest.architecture.required_for_goal, true);
-  assert.equal(manifest.architecture.baseline.goal_id, "refactor-opennori-into-an-agent-native-cli-product");
+  assert.equal(manifest.architecture.baseline.goal_id, "refactor-opennori-into-a-typescript-agent-state-cli-product");
 
   const report = run(["report", "--root", root, "--json"]);
   const reportText = fs.readFileSync(report.data.report_path, "utf8");
   assert.match(reportText, /## Architecture Baseline/);
   assert.match(reportText, /Architecture decision: valid/);
-  assert.match(reportText, /Build-vs-buy decisions: 1/);
+  assert.match(reportText, /Build-vs-buy: clear \(1 decisions\)/);
 
   const exported = run(["context", "export", "--root", root, "--json"]);
   assert.equal(exported.data.architecture.decision, "valid");
-  assert.equal(exported.data.architecture.baseline.profile, "agent-native-cli");
+  assert.equal(exported.data.architecture.baseline.profile, "typescript-agent-state-cli");
 
   const challenge = run([
     "architecture", "challenge",
@@ -1196,9 +1293,107 @@ test("project architecture profiles can be added and used for baselines", () => 
   assert.match(fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.md"), "utf8"), /team-parser-first/);
 });
 
+test("build-vs-buy health surfaces missing reuse review before self-build", () => {
+  const root = tempRoot();
+  run(["install", "--root", root, "--skill", "--json"]);
+  const draft = run(["draft", "--goal", "Ship a reusable infrastructure choice", "--root", root, "--json"]);
+  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  run([
+    "architecture", "baseline",
+    "--root", root,
+    "--goal", "Ship a reusable infrastructure choice",
+    "--goal-id", draft.data.goal_id,
+    "--confirm",
+    "--json"
+  ]);
+
+  run([
+    "architecture", "build-vs-buy",
+    "--root", root,
+    "--id", "schema-validation",
+    "--area", "schema-validation",
+    "--need", "Validate OpenNori project state",
+    "--recommendation", "reuse",
+    "--summary", "Use a schema validation library when state contracts grow.",
+    "--current-project", "No existing runtime schema dependency.",
+    "--standard-library", "Node has JSON.parse but no schema validation.",
+    "--official-sdk", "No official OpenNori SDK applies.",
+    "--open-source", "Ajv, Zod, Valibot, TypeBox were reviewed.",
+    "--json"
+  ]);
+
+  const healthy = run(["check", "--root", root, "--json"]);
+  assert.equal(healthy.data.architecture_check.architecture.build_vs_buy.status, "clear");
+  assert.equal(healthy.warnings.some((warning) => warning.type === "build_vs_buy"), false);
+  assert.equal(healthy.data.architecture_check.architecture.build_vs_buy_decisions[0].open_source.includes("Ajv"), true);
+  const ready = run(["doctor", "--root", root, "--json"]);
+  assert.equal(ready.data.checks.find((check) => check.name === "build_vs_buy_health").ok, true);
+
+  run([
+    "architecture", "build-vs-buy",
+    "--root", root,
+    "--id", "custom-markdown-parser",
+    "--area", "markdown",
+    "--need", "Parse editable OpenNori markdown",
+    "--recommendation", "self-build",
+    "--summary", "Keep parsing local for now.",
+    "--current-project", "Current parser uses a local regex helper.",
+    "--standard-library", "Node has no markdown parser.",
+    "--official-sdk", "No official SDK applies.",
+    "--json"
+  ]);
+
+  const unhealthy = run(["check", "--root", root, "--json"]);
+  assert.equal(unhealthy.data.architecture_check.architecture.build_vs_buy.status, "needs-action");
+  assert.equal(unhealthy.warnings.some((warning) => warning.type === "build_vs_buy" && warning.issue === "missing-open-source"), true);
+  assert.equal(unhealthy.warnings.some((warning) => warning.type === "build_vs_buy" && warning.issue === "missing-self-build-reason"), true);
+  assert.equal(unhealthy.next_actions.some((action) => /build_vs_buy/.test(action)), true);
+
+  const doctorPayload = run(["doctor", "--root", root, "--json"]);
+  const buildVsBuyCheck = doctorPayload.data.checks.find((check) => check.name === "build_vs_buy_health");
+  assert.equal(buildVsBuyCheck.ok, false);
+  assert.match(buildVsBuyCheck.summary, /build-vs-buy issue/);
+
+  const decisionPath = path.join(root, ".opennori", "architecture", "decisions", "custom-markdown-parser.json");
+  const invalidDecision = JSON.parse(fs.readFileSync(decisionPath, "utf8"));
+  invalidDecision.recommendation = "maybe";
+  fs.writeFileSync(decisionPath, `${JSON.stringify(invalidDecision, null, 2)}\n`);
+  const schemaBroken = run(["check", "--root", root, "--json"]);
+  assert.equal(schemaBroken.data.architecture_check.architecture.build_vs_buy.status, "broken");
+  assert.equal(schemaBroken.warnings.some((warning) => warning.type === "build_vs_buy" && warning.issue === "schema-invalid-decision"), true);
+});
+
+test("superseded build-vs-buy decisions stay reviewable without blocking current health", () => {
+  const root = tempRoot();
+  run(["install", "--root", root, "--skill", "--json"]);
+  run([
+    "architecture", "build-vs-buy",
+    "--root", root,
+    "--id", "old-parser-choice",
+    "--area", "cli",
+    "--need", "Choose a parser for an earlier CLI shape",
+    "--recommendation", "self-build",
+    "--status", "superseded",
+    "--superseded-by", "citty-command-layer",
+    "--superseded-reason", "The confirmed Architecture Baseline now prefers a CLI framework.",
+    "--summary", "Old local parser decision retained for history.",
+    "--current-project", "Previous implementation used a small local parser.",
+    "--standard-library", "node:util parseArgs was available.",
+    "--official-sdk", "No official SDK applies.",
+    "--json"
+  ]);
+
+  const status = run(["architecture", "show", "--root", root, "--json"]);
+  assert.equal(status.data.architecture.build_vs_buy_decisions.length, 1);
+  assert.equal(status.data.architecture.build_vs_buy_decisions[0].status, "superseded");
+  assert.equal(status.data.architecture.build_vs_buy.status, "clear");
+  assert.equal(status.data.architecture.build_vs_buy.decision_count, 0);
+  assert.equal(status.data.architecture.build_vs_buy.superseded_decision_count, 1);
+});
+
 test("context export exposes goal AC profile evidence and report paths for review tools", () => {
   const root = tempRoot();
-  const init = run(["draft", "--goal", "Ship a reviewable workflow", "--root", root, "--json"]);
+  run(["draft", "--goal", "Ship a reviewable workflow", "--root", root, "--json"]);
   run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
   run([
     "profile", "add",
@@ -1234,7 +1429,7 @@ test("context export exposes goal AC profile evidence and report paths for revie
   assert.equal(exported.data.criteria.some((criterion) => criterion.id === "AC-1" && criterion.latest_evidence.summary === "The user-visible operation is satisfied."), true);
   assert.equal(exported.data.capability_profile.items.some((item) => item.name === "profile-stays-out-of-acs"), true);
   assert.equal(exported.data.architecture.decision, "valid");
-  assert.equal(exported.data.architecture.baseline.profile, "agent-native-cli");
+  assert.equal(exported.data.architecture.baseline.profile, "typescript-agent-state-cli");
   assert.equal(exported.data.paths.acceptance, ".opennori/active/ship-a-reviewable-workflow.acceptance.md");
   assert.equal(exported.data.paths.report_exists, true);
   assert.equal(exported.data.manifest.capabilities.includes("context-export"), true);

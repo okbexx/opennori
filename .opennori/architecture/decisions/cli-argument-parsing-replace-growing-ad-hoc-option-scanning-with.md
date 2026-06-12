@@ -1,20 +1,23 @@
 # cli-argument-parsing-replace-growing-ad-hoc-option-scanning-with Build-vs-Buy Decision
 
 Area: cli-argument-parsing
-Need: Replace growing ad hoc option scanning with a standard-library-backed argument parser while preserving the existing opennori command surface.
+Need: Replace growing ad hoc option scanning while preserving the existing opennori command surface
 Recommendation: reuse
+Status: superseded
+Superseded by: cli-command-layer-adopt-citty-for-long-term-typescript-cli
+Superseded reason: The parseArgs wrapper is now transitional compatibility work; the active long-term architecture is citty command modules in TypeScript.
 
 ## Summary
 
-Reuse Node.js standard library parseArgs tokens for option lookup and repeated flags instead of adding commander/cac or expanding custom array scanning. This keeps the CLI dependency-free while aligning with agent-native-cli build-vs-buy policy.
+Historical decision retained for review: OpenNori previously reused node:util parseArgs for option lookup and repeated flags before confirming the TypeScript/citty baseline.
 
 ## Candidates Checked
 
-- Current project: OpenNori currently has small argValue/hasFlag/argValues helpers and no runtime dependencies.
-- Standard library: node:util parseArgs supports unknown options, positionals, inline values, repeated option tokens, and no extra dependency.
-- Official SDK: No official OpenNori SDK is relevant for CLI parsing.
-- Open source: commander, cac, and citty are mature, but adding a dependency for the current thin parser would increase package surface without enough payoff.
+- Current project: src/cli.js still contains compatibility helpers and tests; the migration path is to keep behavior stable while moving command definitions to citty modules.
+- Standard library: node:util parseArgs handles tokens but does not define the long-term command architecture.
+- Official SDK: No official OpenNori SDK applies.
+- Open source: citty 0.2.2 MIT is the active baseline; commander and cac remain fallback candidates.
 
 ## Self-build Reason
 
-Only a tiny compatibility wrapper remains around parseArgs to preserve existing --flag value and repeated source flag behavior.
+<none>

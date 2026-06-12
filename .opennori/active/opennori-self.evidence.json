@@ -448,7 +448,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-12T03:33:39.276Z",
+    "updated_at": "2026-06-12T08:14:59.966Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -4760,6 +4760,64 @@
             "limitations": "This proves the local OpenNori Architecture Baseline loop; true external-user validation still requires a non-OpenNori dogfood project.",
             "gate": "accepted",
             "created_at": "2026-06-12T00:38:17.848Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "OpenNori package bin now points to dist/bin/opennori.js, the built CLI can run doctor and read package-root skills/schemas/protocol assets through a shared package-root resolver, and tests cover the built dist bin export path.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "command",
+                "label": "npm run build && node ./dist/bin/opennori.js doctor --root . --json",
+                "command": "npm run build && node ./dist/bin/opennori.js doctor --root . --json"
+              },
+              {
+                "type": "command",
+                "label": "npm pack --dry-run --json",
+                "command": "npm pack --dry-run --json"
+              },
+              {
+                "type": "artifact",
+                "label": "package.json",
+                "path": "package.json"
+              },
+              {
+                "type": "artifact",
+                "label": "src/package-root.js",
+                "path": "src/package-root.js"
+              },
+              {
+                "type": "artifact",
+                "label": "src/skills.js",
+                "path": "src/skills.js"
+              },
+              {
+                "type": "artifact",
+                "label": "src/validation.js",
+                "path": "src/validation.js"
+              },
+              {
+                "type": "artifact",
+                "label": "src/lifecycle.js",
+                "path": "src/lifecycle.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Run npm run check and the dist doctor command, then inspect package.json bin, src/package-root.js, and the built-dist regression test.",
+            "limitations": "The source code is still mostly JavaScript with allowJs; this slice only moves the publish/runtime entry toward built output and keeps the later citty command-module migration separate.",
+            "gate": "accepted",
+            "created_at": "2026-06-12T08:14:59.965Z"
           }
         ]
       },
@@ -4902,6 +4960,74 @@
             "limitations": "This proves current local Codex-accessible Skill surfaces and the AW dogfood checkout; other machines need their own Skill installation or project-local Skill Pack refresh.",
             "gate": "accepted",
             "created_at": "2026-06-12T03:26:58.133Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "OpenNori now ships public JSON Schema files and Ajv runtime validation for manifest, active evidence payloads, Architecture Baseline, and build-vs-buy decisions while keeping semantic AC/architecture checks in the existing domain validators.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm test",
+                "command": "npm test"
+              },
+              {
+                "type": "command",
+                "label": "npm run typecheck",
+                "command": "npm run typecheck"
+              },
+              {
+                "type": "command",
+                "label": "node ./bin/opennori.js doctor --root . --json",
+                "command": "node ./bin/opennori.js doctor --root . --json"
+              },
+              {
+                "type": "artifact",
+                "label": "schemas/manifest.schema.json",
+                "path": "schemas/manifest.schema.json"
+              },
+              {
+                "type": "artifact",
+                "label": "schemas/evidence-payload.schema.json",
+                "path": "schemas/evidence-payload.schema.json"
+              },
+              {
+                "type": "artifact",
+                "label": "schemas/architecture-baseline.schema.json",
+                "path": "schemas/architecture-baseline.schema.json"
+              },
+              {
+                "type": "artifact",
+                "label": "schemas/build-vs-buy.schema.json",
+                "path": "schemas/build-vs-buy.schema.json"
+              },
+              {
+                "type": "artifact",
+                "label": "src/validation.js",
+                "path": "src/validation.js"
+              },
+              {
+                "type": "artifact",
+                "label": "src/lifecycle.js",
+                "path": "src/lifecycle.js"
+              },
+              {
+                "type": "artifact",
+                "label": "src/architecture.js",
+                "path": "src/architecture.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Run the listed tests and doctor, then inspect schemas/*, src/validation.js, lifecycle doctor checks, architecture build-vs-buy schema health, and the public JSON Schema regression test.",
+            "limitations": "This is structural validation for persisted JSON state; it intentionally does not replace human-centered AC quality checks, build-vs-buy health, or Architecture Baseline semantic rules.",
+            "gate": "accepted",
+            "created_at": "2026-06-12T08:08:19.011Z"
           }
         ]
       },

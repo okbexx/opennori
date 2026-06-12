@@ -30,8 +30,10 @@ import {
   renderAgentRouteMarkdown,
   renderAgentRouteSectionMarkdown
 } from "./architecture.js";
+import { packagePath } from "./package-root.js";
+import { schemaErrorSummary, validateSchema } from "./validation.js";
 
-const PACKAGE_JSON = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, "..", "package.json"), "utf8"));
+const PACKAGE_JSON = JSON.parse(fs.readFileSync(packagePath("package.json"), "utf8"));
 
 function relativeTo(root, filePath) {
   return path.relative(root, filePath) || ".";
@@ -584,7 +586,7 @@ function ensureDir(dirPath, { dryRun = false, kind = "directory", managed = true
 }
 
 function protocolTemplate() {
-  const source = path.resolve(import.meta.dirname, "..", ".opennori", "protocol.md");
+  const source = packagePath(".opennori", "protocol.md");
   if (fs.existsSync(source)) return fs.readFileSync(source, "utf8");
   return [
     "# OpenNori Protocol",
@@ -885,6 +887,7 @@ function inspectActiveGoals(root) {
     }
     try {
       const payload = readJson(evidencePath);
+      const schemaResult = validateSchema("evidence-payload", payload);
       const validationIssues = validateContract(payload.contract, payload.ledger);
       details.push({
         goal_id: goalId,
@@ -892,8 +895,12 @@ function inspectActiveGoals(root) {
         current_gap: currentGap(payload.contract, payload.ledger),
         acceptance_path: relativeTo(root, acceptancePath),
         evidence_path: relativeTo(root, evidencePath),
-        recoverable: validationIssues.length === 0
+        recoverable: schemaResult.valid && validationIssues.length === 0,
+        schema_valid: schemaResult.valid
       });
+      for (const error of schemaResult.errors) {
+        issues.push({ goal_id: goalId, message: error.message, path: `schema${error.path}` });
+      }
       for (const issue of validationIssues) {
         issues.push({ goal_id: goalId, message: issue.message, path: issue.path });
       }
@@ -1020,6 +1027,13 @@ export function doctor(root) {
     "Run opennori architecture baseline --root <project> --goal <goal> --confirm --json before implementation, or resolve open architecture issues.",
     architecture.decision === "invalid" ? "broken" : "needs-action"
   ));
+  checks.push(doctorCheck(
+    "build_vs_buy_health",
+    architecture.build_vs_buy.status === "clear",
+    architecture.build_vs_buy.summary,
+    "Run opennori architecture build-vs-buy with current project, standard library, official SDK, open-source candidates, and self-build reason where needed.",
+    architecture.build_vs_buy.status === "broken" ? "broken" : "needs-action"
+  ));
 
   let manifest = null;
   let manifestReadable = false;
@@ -1037,6 +1051,16 @@ export function doctor(root) {
   }
 
   if (manifestReadable) {
+    const manifestSchema = validateSchema("manifest", manifest);
+    checks.push(doctorCheck(
+      "manifest_schema",
+      manifestSchema.valid,
+      manifestSchema.valid
+        ? ".opennori/manifest.json matches the public manifest schema."
+        : `.opennori/manifest.json does not match the public manifest schema: ${schemaErrorSummary(manifestSchema)}.`,
+      "Refresh the manifest with opennori bootstrap --root <project> --json.",
+      "broken"
+    ));
     checks.push(doctorCheck(
       "manifest_file",
       manifest.schema_version === MANIFEST_SCHEMA_VERSION,

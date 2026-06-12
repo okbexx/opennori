@@ -134,7 +134,7 @@ Architecture Baseline is not a plan. It is sticky implementation guidance: if pr
 conflicts with it, the agent creates an Architecture Challenge instead of silently changing the
 technology stack, state model, dependency policy, or directory boundary.
 
-OpenNori includes built-in profiles such as `agent-native-cli`, and projects can add their own
+OpenNori includes built-in profiles such as `typescript-agent-state-cli`, and projects can add their own
 profiles under `.opennori/architecture/profiles/`.
 `opennori architecture profiles --json` exposes each profile's suitable use cases, reference
 sources, principles, checks, preferred libraries, avoid boundaries, and build-vs-buy policy so an

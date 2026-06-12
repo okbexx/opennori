@@ -1,0 +1,23 @@
+# opennori-build-vs-buy-maturity Acceptance Discovery
+
+## Goal
+
+让 OpenNori 自身形成成熟开源库和官方 SDK 优先的 build-vs-buy 工程习惯：通用基础设施在实现前必须评估当前项目依赖、标准库、官方 SDK、成熟开源库；只有许可证、维护性、安全、包体积、性能或产品边界不满足时才允许最小自研。
+
+## Rule
+
+This is an acceptance discovery source, not a Nori Contract, process plan, or completion evidence.
+
+## Acceptance Gaps
+
+### missing-user-entry
+
+Priority: must-answer
+
+Question: 用户从哪个入口开始操作，最终在哪里查看结果？
+
+Why it matters: 没有用户入口，AC 容易变成内部状态而不是可执行验收。
+
+## Next
+
+Ask the must-answer questions before drafting a Nori Contract. Use assumptions only when the user accepts them.

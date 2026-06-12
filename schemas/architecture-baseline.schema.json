@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opennori.dev/schemas/architecture-baseline.schema.json",
+  "title": "OpenNori Architecture Baseline",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "profile",
+    "profile_title",
+    "goal_id",
+    "goal",
+    "principles",
+    "checks",
+    "build_vs_buy_policy"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "const": "opennori/architecture-baseline-v1" },
+    "status": { "type": "string", "enum": ["draft", "active"] },
+    "profile": { "type": "string", "minLength": 1 },
+    "profile_title": { "type": "string" },
+    "goal_id": { "type": "string", "minLength": 1 },
+    "goal": { "type": "string", "minLength": 1 },
+    "principles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "audience", "statement", "review"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "audience": { "type": "string", "minLength": 1 },
+          "statement": { "type": "string", "minLength": 1 },
+          "review": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "build_vs_buy_policy": {
+      "type": "object",
+      "required": ["order", "require_reason_when_self_building"],
+      "additionalProperties": true,
+      "properties": {
+        "order": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "require_reason_when_self_building": { "type": "boolean" }
+      }
+    }
+  }
+}

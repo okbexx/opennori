@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readJson, renderReport, slugify, writeJson } from "./core.js";
+import { schemaErrorSummary, validateSchema } from "./validation.js";
 
 function relativeTo(root, filePath) {
   return path.relative(root, filePath) || ".";
@@ -14,73 +15,85 @@ export const AGENT_ROUTE_END = "<!-- opennori:agent-route:end -->";
 const ARCHITECTURE_BASELINE_SCHEMA_VERSION = "opennori/architecture-baseline-v1";
 
 const BUILTIN_ARCHITECTURE_PROFILES = {
-  "agent-native-cli": {
-    id: "agent-native-cli",
-    title: "Agent-native CLI",
+  "typescript-agent-state-cli": {
+    id: "typescript-agent-state-cli",
+    title: "TypeScript Agent State CLI",
     applies_to: [
-      "project-local state tools",
-      "agent-facing CLI products",
+      "project-local protocol and state tools",
+      "agent-facing deterministic CLI products",
       "Skill Pack and manifest managed tools"
     ],
-    summary: "Use a thin deterministic CLI, domain-first modules, schema-backed project state, manifest-managed lifecycle actions, agent-readable Skills, and build-vs-buy checks before custom infrastructure.",
+    summary: "Use strict TypeScript, a citty command layer, public JSON Schema with Ajv validation, tsc builds without bundling, Vitest and Biome quality gates, manifest-managed lifecycle actions, directory-based Skills, and build-vs-buy checks before custom infrastructure.",
     sources: [
       {
+        label: "OpenAI Codex Agent Skills",
+        lesson: "Skills are directory-based capability units with SKILL.md plus optional references, scripts, assets, and UI metadata; OpenNori ships Skills as package assets instead of JS string prompts."
+      },
+      {
         label: "CodeGraph / GitNexus",
-        lesson: "Expose deterministic agent-readable context, status, doctor, and staleness signals without making OpenNori a code graph platform."
+        lesson: "Expose deterministic agent-readable context, status, doctor, and staleness signals; use strict TypeScript and tested CLI boundaries without becoming a code graph platform."
       },
       {
         label: "Compound Engineering Plugin",
-        lesson: "Keep command, parser, converter/target, and Skill surfaces separate without adopting process-centered multi-agent review."
+        lesson: "Use lightweight TypeScript CLI architecture and citty-style command modules, while avoiding process-centered multi-agent review."
       },
       {
         label: "ECC",
         lesson: "Use manifest/profile/component/install-state style productization without becoming a workflow OS."
       },
       {
-        label: "CLI-Anything",
-        lesson: "Treat CLI, Skill, tests, and registry-like discoverability as product assets without becoming a generic harness market."
-      },
-      {
         label: "vibecode-pro-max-kit",
-        lesson: "Borrow managed-file install and Skill distribution boundaries, but reject RIPER phase folders and process/ as the mainline."
+        lesson: "Borrow Skill directory organization and managed-file install boundaries, but reject RIPER phase folders and process/ as the mainline."
       }
     ],
     principles: [
+      "strict-typescript-source",
+      "citty-command-layer",
       "thin-cli-entry",
       "domain-first-modules",
-      "schema-backed-opennori-state",
+      "json-schema-public-protocol",
+      "ajv-runtime-validation",
+      "tsc-build-no-bundle-by-default",
+      "vitest-and-biome-quality-gates",
+      "directory-based-skill-pack",
       "manifest-managed-install-upgrade-uninstall",
       "skill-driven-natural-language-usage",
-      "agent-readable-baseline-surface",
+      "generic-context-export-for-external-review",
       "build-vs-buy-before-custom-infrastructure"
     ],
     checks: [
       {
         id: "ARCH-1",
         audience: "maintainer",
-        statement: "Opening the CLI entry should make it clear that command parsing, dispatch, and output are separate from domain decisions.",
-        review: "Inspect CLI entry, command handlers, and domain modules before claiming architecture complete."
+        statement: "CLI command definitions are thin citty command modules that delegate product decisions to domain modules.",
+        review: "Inspect src/cli/commands, command handlers, and domain modules before claiming architecture complete."
       },
       {
         id: "ARCH-2",
         audience: "maintainer",
-        statement: "Changing Product AC discovery should not require editing installer, Skill Pack, manifest, or report rendering logic.",
-        review: "Inspect acceptance-discovery modules and tests."
+        statement: "Persisted OpenNori state has public JSON Schema and Ajv runtime validation; OpenNori semantic rules stay separate from structural schema validation.",
+        review: "Inspect schemas/ and src/validation before claiming protocol validation complete."
       },
       {
         id: "ARCH-3",
         audience: "maintainer",
-        statement: "Install, upgrade, uninstall, managed files, and doctor recovery are lifecycle concerns with dry-run preview and explicit confirmation boundaries.",
-        review: "Inspect lifecycle commands, manifest state, and doctor output."
+        statement: "Skill Pack content lives in skills/*/SKILL.md with optional references/scripts/assets/openai metadata, not as hard-coded JS strings.",
+        review: "Inspect skills/ assets, package files, Skill Pack manifest hashes, and doctor sync output."
       },
       {
         id: "ARCH-4",
+        audience: "maintainer",
+        statement: "Install, upgrade, uninstall, managed files, and doctor recovery are lifecycle concerns with deterministic plans, dry-run preview, and explicit confirmation boundaries.",
+        review: "Inspect lifecycle plan/apply modules, manifest state, and contract tests."
+      },
+      {
+        id: "ARCH-5",
         audience: "agent",
         statement: "Before custom infrastructure work, check current project dependencies, standard libraries, official SDKs, mature open-source libraries, and documented reference projects.",
         review: "Record a build-vs-buy decision or challenge before self-building infrastructure."
       },
       {
-        id: "ARCH-5",
+        id: "ARCH-6",
         audience: "agent",
         statement: "Do not replace this baseline silently. Raise an Architecture Challenge when project evidence conflicts with it.",
         review: "Check .opennori/architecture/challenges for unresolved challenges."
@@ -88,24 +101,52 @@ const BUILTIN_ARCHITECTURE_PROFILES = {
     ],
     preferred_libraries: [
       {
+        area: "language",
+        policy: "Use TypeScript strict mode for source modules and keep generated JavaScript as npm runtime output."
+      },
+      {
         area: "cli",
-        policy: "Prefer a mature CLI parser or current project convention over growing custom argument parsing."
+        policy: "Use citty for command definitions; keep commander as a fallback only if packaging, nested command, or compatibility evidence blocks citty."
+      },
+      {
+        area: "interactive",
+        policy: "Use @clack/prompts for minimal project-aware quickstart prompts; keep all state commands JSON-capable."
+      },
+      {
+        area: "build",
+        policy: "Use tsc emit without bundling by default; add tsdown or tsup only when a real packaging need appears."
       },
       {
         area: "schema",
-        policy: "Prefer schema validation libraries or JSON Schema over long-term handwritten schema validation."
+        policy: "Use public JSON Schema files as protocol truth and Ajv for runtime validation."
       },
       {
-        area: "markdown",
-        policy: "Prefer established markdown/frontmatter libraries when parsing becomes non-trivial; keep OpenNori-specific rendering local when it is product domain logic."
+        area: "markdown-frontmatter",
+        policy: "Use yaml for frontmatter when needed; keep JSON authoritative and avoid micromark/unified unless Markdown import requires it."
+      },
+      {
+        area: "test",
+        policy: "Use Vitest plus tsc --noEmit; CLI integration tests should spawn the real bin against temporary projects."
+      },
+      {
+        area: "quality",
+        policy: "Use Biome for lint and format; agents must not weaken quality config to pass checks."
+      },
+      {
+        area: "skills",
+        policy: "Ship directory-based Skills as package assets and install/sync them through manifest-managed lifecycle actions."
       }
     ],
     avoid: [
       "process/ as OpenNori's workflow mainline",
       "phase/task-list state as product completion state",
       "agent self-summary as the only high-risk completion evidence",
+      "Markdown as authoritative protocol state when JSON state exists",
+      "hard-coded Skill bodies in JS strings",
       "silent architecture replacement",
-      "custom infrastructure without build-vs-buy evidence"
+      "custom infrastructure without build-vs-buy evidence",
+      "bundler-first builds before tsc emit proves insufficient",
+      "external review tools as OpenNori's control plane"
     ],
     build_vs_buy_policy: {
       order: [
@@ -115,11 +156,20 @@ const BUILTIN_ARCHITECTURE_PROFILES = {
         "mature-open-source-library",
         "small-local-implementation"
       ],
-      require_reason_when_self_building: true
+      require_reason_when_self_building: true,
+      requires_decision_for: [
+        "cli parsing",
+        "schema validation",
+        "markdown parsing",
+        "installer lifecycle",
+        "state storage",
+        "test harness",
+        "Skill Pack asset management",
+        "frontend components"
+      ]
     }
   }
 };
-
 export function architectureDir(root) {
   return path.join(root, ".opennori", "architecture");
 }
@@ -153,7 +203,7 @@ export function agentGuidePath(root) {
   return path.join(root, ".opennori", "agent-guide.md");
 }
 
-function resolveArchitectureProfile(root, profileId = "agent-native-cli") {
+function resolveArchitectureProfile(root, profileId = "typescript-agent-state-cli") {
   const localPath = architectureProfilePath(root, profileId);
   if (fs.existsSync(localPath)) {
     return {
@@ -237,7 +287,7 @@ export function architectureProfiles(root) {
 }
 
 export function buildArchitectureBaseline(root, {
-  profileId = "agent-native-cli",
+  profileId = "typescript-agent-state-cli",
   goal = "",
   goalId = undefined,
   summary = undefined,
@@ -289,6 +339,10 @@ function validateArchitectureBaseline(baseline) {
   const issues = [];
   if (!baseline || typeof baseline !== "object") {
     return [{ path: "$", message: "Architecture Baseline is not an object." }];
+  }
+  const schemaResult = validateSchema("architecture-baseline", baseline);
+  for (const error of schemaResult.errors) {
+    issues.push({ path: `schema${error.path}`, message: error.message });
   }
   if (baseline.schema_version !== ARCHITECTURE_BASELINE_SCHEMA_VERSION) {
     issues.push({ path: "schema_version", message: `Expected ${ARCHITECTURE_BASELINE_SCHEMA_VERSION}.` });
@@ -528,12 +582,23 @@ function buildVsBuyDecisionSummaries(root) {
     .map((fileName) => {
       try {
         const decision = readJson(path.join(dir, fileName));
+        const schemaResult = validateSchema("build-vs-buy", decision);
         return {
           id: decision.id || fileName.replace(/\.json$/, ""),
+          schema_valid: schemaResult.valid,
+          schema_errors: schemaResult.errors,
           area: decision.area,
           need: decision.need,
           recommendation: decision.recommendation,
+          status: decision.status || "active",
           summary: decision.summary,
+          current_project: decision.current_project,
+          standard_library: decision.standard_library,
+          official_sdk: decision.official_sdk,
+          open_source: decision.open_source,
+          self_build_reason: decision.self_build_reason,
+          superseded_by: decision.superseded_by,
+          superseded_reason: decision.superseded_reason,
           path: relativeTo(root, path.join(dir, fileName))
         };
       } catch (error) {
@@ -546,12 +611,78 @@ function buildVsBuyDecisionSummaries(root) {
     });
 }
 
+function buildVsBuyHealth(decisions) {
+  const findings = [];
+  const activeDecisions = decisions.filter((decision) => decision.status !== "superseded");
+  for (const decision of activeDecisions) {
+    if (decision.error) {
+      findings.push({
+        decision_id: decision.id,
+        severity: "broken",
+        issue: "unreadable-decision",
+        message: `Build-vs-buy decision ${decision.id} is unreadable: ${decision.error}`,
+        recovery: `Inspect ${decision.path} and restore valid JSON.`
+      });
+      continue;
+    }
+
+    if (decision.schema_valid === false) {
+      findings.push({
+        decision_id: decision.id,
+        severity: "broken",
+        issue: "schema-invalid-decision",
+        message: `Build-vs-buy decision ${decision.id} does not match the public schema: ${schemaErrorSummary({ valid: false, errors: decision.schema_errors || [] })}`,
+        recovery: `Inspect ${decision.path} and restore a valid opennori/build-vs-buy-v1 decision.`
+      });
+      continue;
+    }
+
+    for (const field of ["current_project", "standard_library", "official_sdk", "open_source"]) {
+      if (!decision[field]) {
+        findings.push({
+          decision_id: decision.id,
+          severity: "needs-action",
+          issue: `missing-${field.replaceAll("_", "-")}`,
+          message: `${decision.id} does not show that ${field.replaceAll("_", " ")} was checked.`,
+          recovery: `Update ${decision.path} with a concrete ${field.replaceAll("_", " ")} candidate or an explicit not-applicable reason.`
+        });
+      }
+    }
+
+    if (decision.recommendation === "self-build" && !decision.self_build_reason) {
+      findings.push({
+        decision_id: decision.id,
+        severity: "needs-action",
+        issue: "missing-self-build-reason",
+        message: `${decision.id} recommends self-build without a reviewable reason.`,
+        recovery: `Update ${decision.path} with the license, maintenance, security, package size, performance, or product-boundary reason for self-build.`
+      });
+    }
+  }
+
+  return {
+    status: findings.some((finding) => finding.severity === "broken")
+      ? "broken"
+      : findings.length > 0
+        ? "needs-action"
+        : "clear",
+    summary: findings.length === 0
+      ? "Every recorded build-vs-buy decision includes reviewable reuse candidates and any self-build reason."
+      : `${findings.length} build-vs-buy issue(s) need review before claiming mature reuse discipline.`,
+    decision_count: activeDecisions.length,
+    total_decision_count: decisions.length,
+    superseded_decision_count: decisions.length - activeDecisions.length,
+    findings
+  };
+}
+
 export function architectureState(root, goalId = undefined) {
   const paths = architectureBaselinePaths(root);
   const surface = architectureSurfaceState(root);
   const challenges = architectureChallengeSummaries(root);
   const openChallenges = challenges.filter((challenge) => challenge.status !== "resolved");
   const decisions = buildVsBuyDecisionSummaries(root);
+  const buildVsBuy = buildVsBuyHealth(decisions);
 
   let baseline = null;
   let issues = [];
@@ -586,6 +717,7 @@ export function architectureState(root, goalId = undefined) {
     issues,
     open_challenges: openChallenges,
     build_vs_buy_decisions: decisions,
+    build_vs_buy: buildVsBuy,
     agent_surface: surface,
     paths: {
       baseline_json: relativeTo(root, paths.jsonPath),
@@ -603,7 +735,7 @@ function renderArchitectureReportSection(root, goalId = undefined) {
     `Architecture decision: ${state.decision}`,
     `Baseline: ${state.baseline ? `${state.baseline.profile} (${state.baseline.status})` : "<missing>"}`,
     `Challenge: ${state.open_challenges.length > 0 ? `${state.open_challenges.length} open` : "none"}`,
-    `Build-vs-buy decisions: ${state.build_vs_buy_decisions.length}`,
+    `Build-vs-buy: ${state.build_vs_buy.status} (${state.build_vs_buy_decisions.length} decisions)`,
     `Agent guide: ${state.agent_surface.guide.installed ? "installed" : "missing"}`,
     "",
     "Paths:",
@@ -615,6 +747,13 @@ function renderArchitectureReportSection(root, goalId = undefined) {
     lines.push("Open challenges:");
     for (const challenge of state.open_challenges) {
       lines.push(`- ${challenge.id}: ${challenge.summary || "<none>"}`);
+    }
+    lines.push("");
+  }
+  if (state.build_vs_buy.findings.length > 0) {
+    lines.push("Build-vs-buy findings:");
+    for (const finding of state.build_vs_buy.findings) {
+      lines.push(`- ${finding.decision_id}: ${finding.message}`);
     }
     lines.push("");
   }
@@ -667,6 +806,9 @@ export function renderBuildVsBuyMarkdown(decision) {
     `Area: ${decision.area}`,
     `Need: ${decision.need}`,
     `Recommendation: ${decision.recommendation}`,
+    `Status: ${decision.status || "active"}`,
+    decision.superseded_by ? `Superseded by: ${decision.superseded_by}` : "",
+    decision.superseded_reason ? `Superseded reason: ${decision.superseded_reason}` : "",
     "",
     "## Summary",
     "",

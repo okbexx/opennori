@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opennori.dev/schemas/manifest.schema.json",
+  "title": "OpenNori Manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "protocol_version",
+    "opennori_version",
+    "created_at",
+    "updated_at",
+    "capabilities",
+    "managed_files",
+    "active_goals",
+    "skill",
+    "skill_pack",
+    "architecture"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "const": "opennori/manifest-v1" },
+    "protocol_version": { "const": "opennori/v1" },
+    "opennori_version": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "minLength": 1 },
+    "updated_at": { "type": "string", "minLength": 1 },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "managed_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "kind", "exists"],
+        "additionalProperties": true,
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "minLength": 1 },
+          "required": { "type": "boolean" },
+          "exists": { "type": "boolean" }
+        }
+      }
+    },
+    "active_goals": { "type": "array" },
+    "skill": {
+      "type": "object",
+      "required": ["installed", "path", "in_sync"],
+      "additionalProperties": true,
+      "properties": {
+        "installed": { "type": "boolean" },
+        "path": { "type": "string" },
+        "in_sync": { "type": "boolean" }
+      }
+    },
+    "skill_pack": {
+      "type": "object",
+      "required": ["schema_version", "installed", "in_sync", "count", "skills"],
+      "additionalProperties": true,
+      "properties": {
+        "schema_version": { "const": "opennori/skill-pack-v1" },
+        "installed": { "type": "boolean" },
+        "in_sync": { "type": "boolean" },
+        "count": { "type": "integer", "minimum": 0 },
+        "skills": { "type": "array" }
+      }
+    },
+    "architecture": { "type": "object" }
+  }
+}
