@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { parseArgs } from "node:util";
-import { applyUninstallActions, applyUpgradeActions, autoProfileChecks, bootstrap, buildInstallPlan, buildManifest, buildUninstallActions, buildUninstallPlan, buildUpgradePlan, installActions, recordAutoProfileChecks, refreshManifest, safeReadManifest, upgradeActions, writeManifest } from "./lifecycle.js";
+import { applyUninstallActions, applyUpgradeActions, bootstrap, buildInstallPlan, buildManifest, buildUninstallActions, buildUninstallPlan, buildUpgradePlan, installActions, refreshManifest, safeReadManifest, upgradeActions, writeManifest } from "./lifecycle.js";
 import { auditAcceptanceQuality, briefFromBrainstorm, briefFromGoal, buildBrainstorm, discoverAcceptance, renderBrainstormMarkdown, renderDiscoveryMarkdown } from "./acceptance.js";
 import {
   addEvidence,
@@ -51,7 +51,7 @@ import { packagePath } from "./package-root.js";
 import { runArchitectureProfilesCommand, runArchitectureShowCommand } from "./cli/commands/architecture.js";
 import { runContextExportCommand } from "./cli/commands/context.js";
 import { runDoctorCommand, runListCommand } from "./cli/commands/health.js";
-import { runProfileShowCommand } from "./cli/commands/profile.js";
+import { runProfileCheckCommand, runProfileShowCommand } from "./cli/commands/profile.js";
 import { runSkillExportCommand } from "./cli/commands/skill.js";
 
 const PACKAGE_JSON = JSON.parse(fs.readFileSync(packagePath("package.json"), "utf8"));
@@ -1087,23 +1087,10 @@ export async function main(args) {
   }
 
   if (command === "profile" && args[1] === "check") {
-    const { contract, ledger, acceptancePath, evidencePath, root } = loadPair(args);
-    const record = hasFlag(args, "--record");
-    const checks = autoProfileChecks(root, ledger);
-    if (record) {
-      recordAutoProfileChecks(ledger, checks);
-      recomputeWorkflowStatus(contract, ledger);
-      savePair(acceptancePath, evidencePath, contract, ledger);
-      refreshManifest(root);
-    }
-    printJson(ok({
-      goal_id: contract.goal_id,
-      recorded: record,
-      checks,
-      profile: ledger.capability_profile || { items: [], evidence: [] },
-      compliance: profileCompliance(ledger),
-      workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger)
+    printJson(await runProfileCheckCommand(args.slice(2), {
+      loadPair: () => loadPair(args),
+      savePair,
+      refreshManifest
     }));
     return;
   }
