@@ -64,41 +64,6 @@ function wantsHelp(args) {
   return args.includes("--help") || args.includes("-h");
 }
 
-function usageFor(args) {
-  const [command, subcommand] = args;
-  if (!command || command === "--help" || command === "-h") return TOP_LEVEL_USAGE;
-  if (command === "bootstrap") return `${CLI_NAME} bootstrap --root <project> [--confirm] [--json]`;
-  if (command === "install") return `${CLI_NAME} install --root <project> [--skill] [--refresh-skill] [--merge-agent-route] [--dry-run] [--force] [--confirm] [--json]`;
-  if (command === "upgrade") return `${CLI_NAME} upgrade --root <project> [--skill] [--refresh-skill] [--merge-agent-route] [--dry-run] [--confirm] [--json]`;
-  if (command === "uninstall") return `${CLI_NAME} uninstall --root <project> [--include-state] [--dry-run] [--confirm] [--json]`;
-  if (command === "doctor") return `${CLI_NAME} doctor --root <project> [--json]`;
-  if (command === "architecture" && subcommand === "profiles") return `${CLI_NAME} architecture profiles --root <project> [--json]`;
-  if (command === "architecture" && subcommand === "profile") return `${CLI_NAME} architecture profile --root <project> --from <profile.json> [--id <id>] [--force] [--json]`;
-  if (command === "architecture" && subcommand === "baseline") return `${CLI_NAME} architecture baseline --root <project> --goal "<goal>" [--profile <id>] [--confirm] [--json]`;
-  if (command === "architecture" && subcommand === "show") return `${CLI_NAME} architecture show --root <project> [--json]`;
-  if (command === "architecture" && subcommand === "challenge") return `${CLI_NAME} architecture challenge --root <project> --summary <summary> --evidence <evidence> --recommendation <recommendation> [--json]`;
-  if (command === "architecture" && subcommand === "build-vs-buy") return `${CLI_NAME} architecture build-vs-buy --root <project> --area <area> --need <need> --recommendation <reuse|buy|self-build> --summary <summary> [--json]`;
-  if (command === "architecture") return `${CLI_NAME} architecture <profiles|profile|baseline|show|challenge|build-vs-buy> --root <project> [--json]`;
-  if (command === "brainstorm") return `${CLI_NAME} brainstorm --idea "<idea>" --root <project> [--id <id>] [--json]`;
-  if (command === "discover") return `${CLI_NAME} discover --goal "<goal>" --root <project> [--id <id>] [--json]`;
-  if (command === "draft") return `${CLI_NAME} draft --goal "<goal>" --root <project> [--goal-id <id>] [--json]`;
-  if (command === "init") return `${CLI_NAME} init <brief.json> --root <project> [--json]`;
-  if (command === "criterion" && subcommand === "update") return `${CLI_NAME} criterion update --root <project> --criterion <id> --user-story ... --measurement ... --threshold ... [--json]`;
-  if (command === "profile" && subcommand === "add") return `${CLI_NAME} profile add --root <project> --type <skill|stack|constraint> --name <name> --strength <must|prefer|avoid> --purpose <purpose> [--json]`;
-  if (command === "profile" && subcommand === "evidence") return `${CLI_NAME} profile evidence --root <project> --item <item-id> --result <satisfied|violated|waived> --summary <summary> [--json]`;
-  if (command === "profile") return `${CLI_NAME} profile <add|evidence|show|check> --root <project> [--json]`;
-  if (command === "evidence" && subcommand === "add") return `${CLI_NAME} evidence add --root <project> --criterion <id> --kind <kind> --summary <summary> --result <passing|failing|blocked|waived> [--json]`;
-  if (command === "evidence") return `${CLI_NAME} evidence add --root <project> --criterion <id> --kind <kind> --summary <summary> --result <passing|failing|blocked|waived> [--json]`;
-  if (command === "context" && subcommand === "export") return `${CLI_NAME} context export --root <project> [--json]`;
-  if (command === "context") return `${CLI_NAME} context export --root <project> [--json]`;
-  if (command === "skill" && subcommand === "export") return `${CLI_NAME} skill export [--pack] [--json]`;
-  if (command === "skill") return `${CLI_NAME} skill export [--pack] [--json]`;
-  if (["list", "check", "approve", "resume", "next", "evaluate", "status", "report", "changes", "archive"].includes(command)) {
-    return `${CLI_NAME} ${command} --root <project> [--goal <goal-id>] [--json]`;
-  }
-  return TOP_LEVEL_USAGE;
-}
-
 function describeBootstrapAction(action) {
   if (action.action === "create") return `create ${action.path}`;
   if (action.action === "skip") return `keep existing ${action.path}`;
@@ -188,54 +153,82 @@ async function runBootstrap(args) {
 }
 
 const TOP_LEVEL_COMMANDS = {
-  doctor: { runner: runDoctorCommand },
-  list: { runner: runListCommand },
-  install: { runner: runInstallCommand, commandResult: true },
-  uninstall: { runner: runUninstallCommand, commandResult: true },
-  upgrade: { runner: runUpgradeCommand, commandResult: true },
-  brainstorm: { runner: runBrainstormCommand },
-  discover: { runner: runDiscoverCommand },
-  draft: { runner: runDraftCommand, commandResult: true },
-  init: { runner: runInitCommand, commandResult: true },
-  check: { runner: runCheckCommand, activeGoal: true, commandResult: true },
-  approve: { runner: runApproveCommand, activeGoal: true },
-  resume: { runner: runResumeCommand, activeGoal: true },
-  next: { runner: runNextCommand, activeGoal: true },
-  evaluate: { runner: runEvaluateCommand, activeGoal: true },
-  status: { runner: runStatusCommand, activeGoal: true },
-  report: { runner: runReportCommand, activeGoal: true },
-  changes: { runner: runChangesCommand },
-  archive: { runner: runArchiveCommand, activeGoal: true, commandResult: true }
+  doctor: { runner: runDoctorCommand, usage: `${CLI_NAME} doctor --root <project> [--json]` },
+  list: { runner: runListCommand, usage: `${CLI_NAME} list --root <project> [--goal <goal-id>] [--json]` },
+  install: { runner: runInstallCommand, commandResult: true, usage: `${CLI_NAME} install --root <project> [--skill] [--refresh-skill] [--merge-agent-route] [--dry-run] [--force] [--confirm] [--json]` },
+  uninstall: { runner: runUninstallCommand, commandResult: true, usage: `${CLI_NAME} uninstall --root <project> [--include-state] [--dry-run] [--confirm] [--json]` },
+  upgrade: { runner: runUpgradeCommand, commandResult: true, usage: `${CLI_NAME} upgrade --root <project> [--skill] [--refresh-skill] [--merge-agent-route] [--dry-run] [--confirm] [--json]` },
+  brainstorm: { runner: runBrainstormCommand, usage: `${CLI_NAME} brainstorm --idea "<idea>" --root <project> [--id <id>] [--json]` },
+  discover: { runner: runDiscoverCommand, usage: `${CLI_NAME} discover --goal "<goal>" --root <project> [--id <id>] [--json]` },
+  draft: { runner: runDraftCommand, commandResult: true, usage: `${CLI_NAME} draft --goal "<goal>" --root <project> [--goal-id <id>] [--json]` },
+  init: { runner: runInitCommand, commandResult: true, usage: `${CLI_NAME} init <brief.json> --root <project> [--json]` },
+  check: { runner: runCheckCommand, activeGoal: true, commandResult: true, usage: `${CLI_NAME} check --root <project> [--goal <goal-id>] [--json]` },
+  approve: { runner: runApproveCommand, activeGoal: true, usage: `${CLI_NAME} approve --root <project> [--goal <goal-id>] [--json]` },
+  resume: { runner: runResumeCommand, activeGoal: true, usage: `${CLI_NAME} resume --root <project> [--goal <goal-id>] [--json]` },
+  next: { runner: runNextCommand, activeGoal: true, usage: `${CLI_NAME} next --root <project> [--goal <goal-id>] [--json]` },
+  evaluate: { runner: runEvaluateCommand, activeGoal: true, usage: `${CLI_NAME} evaluate --root <project> [--goal <goal-id>] [--json]` },
+  status: { runner: runStatusCommand, activeGoal: true, usage: `${CLI_NAME} status --root <project> [--goal <goal-id>] [--json]` },
+  report: { runner: runReportCommand, activeGoal: true, usage: `${CLI_NAME} report --root <project> [--goal <goal-id>] [--json]` },
+  changes: { runner: runChangesCommand, usage: `${CLI_NAME} changes --root <project> [--goal <goal-id>] [--json]` },
+  archive: { runner: runArchiveCommand, activeGoal: true, commandResult: true, usage: `${CLI_NAME} archive --root <project> [--goal <goal-id>] [--json]` }
 };
 
 const SUBCOMMANDS = {
   architecture: {
-    profiles: { runner: runArchitectureProfilesCommand, sliceStart: 2 },
-    profile: { runner: runArchitectureProfileCommand, sliceStart: 2, commandResult: true },
-    baseline: { runner: runArchitectureBaselineCommand, sliceStart: 2 },
-    show: { runner: runArchitectureShowCommand, sliceStart: 2 },
-    challenge: { runner: runArchitectureChallengeCommand, sliceStart: 2 },
-    "build-vs-buy": { runner: runArchitectureBuildVsBuyCommand, sliceStart: 2 }
+    usage: `${CLI_NAME} architecture <profiles|profile|baseline|show|challenge|build-vs-buy> --root <project> [--json]`,
+    commands: {
+      profiles: { runner: runArchitectureProfilesCommand, sliceStart: 2, usage: `${CLI_NAME} architecture profiles --root <project> [--json]` },
+      profile: { runner: runArchitectureProfileCommand, sliceStart: 2, commandResult: true, usage: `${CLI_NAME} architecture profile --root <project> --from <profile.json> [--id <id>] [--force] [--json]` },
+      baseline: { runner: runArchitectureBaselineCommand, sliceStart: 2, usage: `${CLI_NAME} architecture baseline --root <project> --goal "<goal>" [--profile <id>] [--confirm] [--json]` },
+      show: { runner: runArchitectureShowCommand, sliceStart: 2, usage: `${CLI_NAME} architecture show --root <project> [--json]` },
+      challenge: { runner: runArchitectureChallengeCommand, sliceStart: 2, usage: `${CLI_NAME} architecture challenge --root <project> --summary <summary> --evidence <evidence> --recommendation <recommendation> [--json]` },
+      "build-vs-buy": { runner: runArchitectureBuildVsBuyCommand, sliceStart: 2, usage: `${CLI_NAME} architecture build-vs-buy --root <project> --area <area> --need <need> --recommendation <reuse|buy|self-build> --summary <summary> [--json]` }
+    }
   },
   criterion: {
-    update: { runner: runCriterionUpdateCommand, sliceStart: 2, activeGoal: true, commandResult: true }
+    commands: {
+      update: { runner: runCriterionUpdateCommand, sliceStart: 2, activeGoal: true, commandResult: true, usage: `${CLI_NAME} criterion update --root <project> --criterion <id> --user-story ... --measurement ... --threshold ... [--json]` }
+    }
   },
   profile: {
-    add: { runner: runProfileAddCommand, sliceStart: 2, activeGoal: true },
-    evidence: { runner: runProfileEvidenceCommand, sliceStart: 2, activeGoal: true },
-    show: { runner: runProfileShowCommand, sliceStart: 2, activeGoal: true },
-    check: { runner: runProfileCheckCommand, sliceStart: 2, activeGoal: true }
+    usage: `${CLI_NAME} profile <add|evidence|show|check> --root <project> [--json]`,
+    commands: {
+      add: { runner: runProfileAddCommand, sliceStart: 2, activeGoal: true, usage: `${CLI_NAME} profile add --root <project> --type <skill|stack|constraint> --name <name> --strength <must|prefer|avoid> --purpose <purpose> [--json]` },
+      evidence: { runner: runProfileEvidenceCommand, sliceStart: 2, activeGoal: true, usage: `${CLI_NAME} profile evidence --root <project> --item <item-id> --result <satisfied|violated|waived> --summary <summary> [--json]` },
+      show: { runner: runProfileShowCommand, sliceStart: 2, activeGoal: true },
+      check: { runner: runProfileCheckCommand, sliceStart: 2, activeGoal: true }
+    }
   },
   evidence: {
-    add: { runner: runEvidenceAddCommand, sliceStart: 2, activeGoal: true }
+    usage: `${CLI_NAME} evidence add --root <project> --criterion <id> --kind <kind> --summary <summary> --result <passing|failing|blocked|waived> [--json]`,
+    commands: {
+      add: { runner: runEvidenceAddCommand, sliceStart: 2, activeGoal: true, usage: `${CLI_NAME} evidence add --root <project> --criterion <id> --kind <kind> --summary <summary> --result <passing|failing|blocked|waived> [--json]` }
+    }
   },
   context: {
-    export: { runner: runContextExportCommand, sliceStart: 2 }
+    usage: `${CLI_NAME} context export --root <project> [--json]`,
+    commands: {
+      export: { runner: runContextExportCommand, sliceStart: 2, usage: `${CLI_NAME} context export --root <project> [--json]` }
+    }
   },
   skill: {
-    export: { runner: runSkillExportCommand, sliceStart: 2, commandResult: true }
+    usage: `${CLI_NAME} skill export [--pack] [--json]`,
+    commands: {
+      export: { runner: runSkillExportCommand, sliceStart: 2, commandResult: true, usage: `${CLI_NAME} skill export [--pack] [--json]` }
+    }
   }
 };
+
+function usageFor(args) {
+  const [command, subcommand] = args;
+  if (!command || command === "--help" || command === "-h") return TOP_LEVEL_USAGE;
+  if (command === "bootstrap") return `${CLI_NAME} bootstrap --root <project> [--confirm] [--json]`;
+  if (TOP_LEVEL_COMMANDS[command]) return TOP_LEVEL_COMMANDS[command].usage;
+
+  const subcommandGroup = SUBCOMMANDS[command];
+  if (!subcommandGroup) return TOP_LEVEL_USAGE;
+  return subcommandGroup.commands[subcommand]?.usage || subcommandGroup.usage || TOP_LEVEL_USAGE;
+}
 
 export async function main(args) {
   const command = args[0];
@@ -260,7 +253,7 @@ export async function main(args) {
     return;
   }
 
-  const subcommandRoute = SUBCOMMANDS[command]?.[args[1]];
+  const subcommandRoute = SUBCOMMANDS[command]?.commands[args[1]];
   if (subcommandRoute) {
     await runConfiguredRoute(subcommandRoute, args);
     return;
