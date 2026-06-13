@@ -5,8 +5,9 @@ import { runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runAr
 import { runCheckCommand } from "./cli/commands/check.js";
 import { runChangesCommand } from "./cli/commands/changes.js";
 import { runContextExportCommand } from "./cli/commands/context.js";
+import { runDoctorCommand } from "./cli/commands/doctor.js";
 import { runEvidenceAddCommand } from "./cli/commands/evidence.js";
-import { bootstrapResult, runBootstrapCommand, runDoctorCommand, runInstallCommand, runListCommand, runUninstallCommand, runUpgradeCommand } from "./cli/commands/health.js";
+import { bootstrapResult, runBootstrapCommand, runInstallCommand, runListCommand, runUninstallCommand, runUpgradeCommand } from "./cli/commands/health.js";
 import { runProfileAddCommand, runProfileCheckCommand, runProfileEvidenceCommand, runProfileShowCommand } from "./cli/commands/profile.js";
 import { runArchiveCommand, runReportCommand } from "./cli/commands/reporting.js";
 import { activeGoalRuntime, argValue, resolveRoot } from "./cli/runtime.js";

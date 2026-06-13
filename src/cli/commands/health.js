@@ -10,7 +10,6 @@ import {
   buildUninstallActions,
   buildUninstallPlan,
   buildUpgradePlan,
-  doctor,
   installActions,
   safeReadManifest,
   upgradeActions,
@@ -139,34 +138,6 @@ export function upgradeResult({
     manifest: dryRun ? buildManifest(projectRoot) : safeReadManifest(projectRoot)
   }, [], [], nextActions);
 }
-
-export const doctorCommand = defineCommand({
-  meta: {
-    name: "doctor",
-    description: "Diagnose OpenNori project state and recovery actions."
-  },
-  args: {
-    root: {
-      type: "string",
-      description: "Project root.",
-      default: process.cwd()
-    },
-    json: {
-      type: "boolean",
-      description: "Keep deterministic JSON output for agents.",
-      default: false
-    }
-  },
-  run({ args }) {
-    const root = path.resolve(String(args.root || process.cwd()));
-    return ok({
-      name: "opennori",
-      root,
-      ...doctor(root),
-      side_effect: "none"
-    });
-  }
-});
 
 export const bootstrapCommand = defineCommand({
   meta: {
@@ -364,10 +335,6 @@ export const upgradeCommand = defineCommand({
 
 export async function runUpgradeCommand(rawArgs) {
   return runJsonCommand(upgradeCommand, rawArgs);
-}
-
-export async function runDoctorCommand(rawArgs) {
-  return runJsonCommand(doctorCommand, rawArgs);
 }
 
 export const listCommand = defineCommand({
