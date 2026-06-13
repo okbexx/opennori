@@ -3,16 +3,9 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import {
   addProfileEvidence,
-  completionAnswer,
-  criterionStatusRows,
   currentGap,
-  evidenceHealth,
   findActivePairs,
-  intervention,
-  nextRecommendation,
   ok,
-  pathsForGoal,
-  profileCompliance,
   PROTOCOL_VERSION,
   readJson,
   validateContract,
@@ -45,6 +38,7 @@ export {
   buildUpgradePlan
 };
 export { applyUninstallActions, buildUninstallActions } from "./lifecycle/uninstall.js";
+export { buildContextExport } from "./lifecycle/context-export.js";
 
 const PACKAGE_JSON = JSON.parse(fs.readFileSync(packagePath("package.json"), "utf8"));
 
@@ -88,41 +82,6 @@ export function applyUpgradeActions(actions) {
   for (const action of actions) {
     if (isWritingUpgradeAction(action.action) && action.write) action.write();
   }
-}
-
-export function buildContextExport(root, pair) {
-  const payload = readJson(pair.evidencePath);
-  const contract = payload.contract;
-  const ledger = payload.ledger;
-  const reportPath = pathsForGoal(root, contract.goal_id).reportPath;
-  const recommendation = nextRecommendation(contract, ledger);
-  const architecture = architectureState(root, contract.goal_id);
-  return {
-    schema_version: "opennori/context-export-v1",
-    exported_at: new Date().toISOString(),
-    root,
-    goal_id: contract.goal_id,
-    goal: contract.goal,
-    acceptance_basis: contract.acceptance_basis || { status: "draft" },
-    workflow_status: ledger.status,
-    current_gap: currentGap(contract, ledger),
-    completion: completionAnswer(contract, ledger),
-    intervention: intervention(contract, ledger),
-    evidence_health: evidenceHealth(contract, ledger),
-    next_recommendation: recommendation,
-    criteria: criterionStatusRows(contract, ledger),
-    capability_profile: ledger.capability_profile || { items: [], evidence: [] },
-    capability_compliance: profileCompliance(ledger),
-    architecture,
-    paths: {
-      acceptance: relativeTo(root, pair.acceptancePath),
-      evidence: relativeTo(root, pair.evidencePath),
-      report: relativeTo(root, reportPath),
-      report_exists: fs.existsSync(reportPath),
-      manifest: relativeTo(root, manifestPath(root))
-    },
-    manifest: safeReadManifest(root)
-  };
 }
 
 function skillPackPath(root, skillName) {
