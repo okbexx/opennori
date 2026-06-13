@@ -32,6 +32,10 @@ async function runConfiguredCommand(route, args, rawArgs) {
   });
 }
 
+async function runConfiguredRoute(route, args) {
+  await runConfiguredCommand(route, args, args.slice(route.sliceStart));
+}
+
 function printText(line = "") {
   process.stdout.write(`${line}\n`);
 }
@@ -204,6 +208,35 @@ const TOP_LEVEL_COMMANDS = {
   archive: { runner: runArchiveCommand, activeGoal: true, commandResult: true }
 };
 
+const SUBCOMMANDS = {
+  architecture: {
+    profiles: { runner: runArchitectureProfilesCommand, sliceStart: 2 },
+    profile: { runner: runArchitectureProfileCommand, sliceStart: 2, commandResult: true },
+    baseline: { runner: runArchitectureBaselineCommand, sliceStart: 2 },
+    show: { runner: runArchitectureShowCommand, sliceStart: 2 },
+    challenge: { runner: runArchitectureChallengeCommand, sliceStart: 2 },
+    "build-vs-buy": { runner: runArchitectureBuildVsBuyCommand, sliceStart: 2 }
+  },
+  criterion: {
+    update: { runner: runCriterionUpdateCommand, sliceStart: 2, activeGoal: true, commandResult: true }
+  },
+  profile: {
+    add: { runner: runProfileAddCommand, sliceStart: 2, activeGoal: true },
+    evidence: { runner: runProfileEvidenceCommand, sliceStart: 2, activeGoal: true },
+    show: { runner: runProfileShowCommand, sliceStart: 2, activeGoal: true },
+    check: { runner: runProfileCheckCommand, sliceStart: 2, activeGoal: true }
+  },
+  evidence: {
+    add: { runner: runEvidenceAddCommand, sliceStart: 2, activeGoal: true }
+  },
+  context: {
+    export: { runner: runContextExportCommand, sliceStart: 2 }
+  },
+  skill: {
+    export: { runner: runSkillExportCommand, sliceStart: 2, commandResult: true }
+  }
+};
+
 export async function main(args) {
   const command = args[0];
   if (!command || command === "--help" || command === "-h") {
@@ -221,79 +254,15 @@ export async function main(args) {
     return;
   }
 
-  if (command === "architecture" && args[1] === "profiles") {
-    await runAndPrint(runArchitectureProfilesCommand, args.slice(2));
-    return;
-  }
-
-  if (command === "architecture" && args[1] === "profile") {
-    await runAndPrint(runArchitectureProfileCommand, args.slice(2), { commandResult: true });
-    return;
-  }
-
-  if (command === "architecture" && args[1] === "baseline") {
-    await runAndPrint(runArchitectureBaselineCommand, args.slice(2));
-    return;
-  }
-
-  if (command === "architecture" && args[1] === "show") {
-    await runAndPrint(runArchitectureShowCommand, args.slice(2));
-    return;
-  }
-
-  if (command === "architecture" && args[1] === "challenge") {
-    await runAndPrint(runArchitectureChallengeCommand, args.slice(2));
-    return;
-  }
-
-  if (command === "architecture" && args[1] === "build-vs-buy") {
-    await runAndPrint(runArchitectureBuildVsBuyCommand, args.slice(2));
-    return;
-  }
-
   const topLevelRoute = TOP_LEVEL_COMMANDS[command];
   if (topLevelRoute) {
     await runConfiguredCommand(topLevelRoute, args, args.slice(1));
     return;
   }
 
-  if (command === "criterion" && args[1] === "update") {
-    await runAndPrint(runCriterionUpdateCommand, args.slice(2), { runtime: activeGoalRuntime(args), commandResult: true });
-    return;
-  }
-
-  if (command === "profile" && args[1] === "add") {
-    await runAndPrint(runProfileAddCommand, args.slice(2), { runtime: activeGoalRuntime(args) });
-    return;
-  }
-
-  if (command === "profile" && args[1] === "evidence") {
-    await runAndPrint(runProfileEvidenceCommand, args.slice(2), { runtime: activeGoalRuntime(args) });
-    return;
-  }
-
-  if (command === "profile" && args[1] === "show") {
-    await runAndPrint(runProfileShowCommand, args.slice(2), { runtime: activeGoalRuntime(args) });
-    return;
-  }
-
-  if (command === "profile" && args[1] === "check") {
-    await runAndPrint(runProfileCheckCommand, args.slice(2), { runtime: activeGoalRuntime(args) });
-    return;
-  }
-
-  if (command === "evidence" && args[1] === "add") {
-    await runAndPrint(runEvidenceAddCommand, args.slice(2), { runtime: activeGoalRuntime(args) });
-    return;
-  }
-
-  if (command === "context" && args[1] === "export") {
-    await runAndPrint(runContextExportCommand, args.slice(2));
-    return;
-  }
-
-  if (command === "skill" && args[1] === "export") {
-    await runAndPrint(runSkillExportCommand, args.slice(2), { commandResult: true });
+  const subcommandRoute = SUBCOMMANDS[command]?.[args[1]];
+  if (subcommandRoute) {
+    await runConfiguredRoute(subcommandRoute, args);
     return;
   }
 
