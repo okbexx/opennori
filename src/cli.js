@@ -30,7 +30,7 @@ import {
 } from "./core.js";
 import { readArchitectureBaseline, renderReportWithArchitecture } from "./architecture.js";
 import { packagePath } from "./package-root.js";
-import { runApproveCommand, runBrainstormCommand, runCriterionUpdateCommand, runDiscoverCommand, runDraftCommand, runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "./cli/commands/acceptance.js";
+import { runApproveCommand, runBrainstormCommand, runCriterionUpdateCommand, runDiscoverCommand, runDraftCommand, runEvaluateCommand, runInitCommand, runNextCommand, runResumeCommand, runStatusCommand } from "./cli/commands/acceptance.js";
 import { runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand, runArchitectureShowCommand } from "./cli/commands/architecture.js";
 import { runContextExportCommand } from "./cli/commands/context.js";
 import { runEvidenceAddCommand } from "./cli/commands/evidence.js";
@@ -491,39 +491,9 @@ export async function main(args) {
   }
 
   if (command === "init") {
-    const briefPath = path.resolve(args[1] || "");
-    const root = resolveRoot(args);
-    const brief = readJson(briefPath);
-    const contract = buildContractFromBrief(brief);
-    const ledger = buildEvidenceLedger(contract);
-    const issues = validateContract(contract, ledger);
-    if (issues.length > 0) {
-      printJson({ ...fail("invalid_acceptance", "Brief does not produce a valid OpenNori contract", "Rewrite ACs from the user's perspective"), issues });
-      process.exitCode = 1;
-      return;
-    }
-
-    const paths = pathsForGoal(root, contract.goal_id);
-    const evidencePayload = { contract, ledger };
-    fs.mkdirSync(path.dirname(paths.acceptancePath), { recursive: true });
-    fs.writeFileSync(paths.acceptancePath, renderAcceptanceMarkdown(contract, ledger));
-    writeJson(paths.evidencePath, evidencePayload);
-    refreshManifest(root);
-
-    printJson(ok(
-      {
-        goal_id: contract.goal_id,
-        acceptance_path: paths.acceptancePath,
-        evidence_path: paths.evidencePath,
-        current_gap: currentGap(contract, ledger)
-      },
-      [
-        { kind: "acceptance_contract", path: paths.acceptancePath },
-        { kind: "evidence_ledger", path: paths.evidencePath }
-      ],
-      [],
-      ["Run opennori next --acceptance <path> --evidence <path> --json before choosing implementation work."]
-    ));
+    const result = await runInitCommand(args.slice(1));
+    printJson(result);
+    if (!result.ok) process.exitCode = 1;
     return;
   }
 

@@ -244,6 +244,62 @@ export async function runDraftCommand(rawArgs) {
   return runJsonCommand(draftCommand, rawArgs);
 }
 
+export const initCommand = defineCommand({
+  meta: {
+    name: "init",
+    description: "Create a Nori Contract from a brief JSON file."
+  },
+  args: {
+    root: {
+      type: "string",
+      description: "Project root.",
+      default: process.cwd()
+    },
+    json: {
+      type: "boolean",
+      description: "Keep deterministic JSON output for agents.",
+      default: false
+    }
+  },
+  run({ args }) {
+    const briefPath = path.resolve(String(args._?.[0] || ""));
+    const root = path.resolve(String(args.root || process.cwd()));
+    const brief = readJson(briefPath);
+    const contract = buildContractFromBrief(brief);
+    const ledger = buildEvidenceLedger(contract);
+    const issues = validateContract(contract, ledger);
+    if (issues.length > 0) {
+      return { ...fail("invalid_acceptance", "Brief does not produce a valid OpenNori contract", "Rewrite ACs from the user's perspective"), issues };
+    }
+
+    const paths = pathsForGoal(root, contract.goal_id);
+    const evidencePayload = { contract, ledger };
+    fs.mkdirSync(path.dirname(paths.acceptancePath), { recursive: true });
+    fs.writeFileSync(paths.acceptancePath, renderAcceptanceMarkdown(contract, ledger));
+    writeJson(paths.evidencePath, evidencePayload);
+    refreshManifest(root);
+
+    return ok(
+      {
+        goal_id: contract.goal_id,
+        acceptance_path: paths.acceptancePath,
+        evidence_path: paths.evidencePath,
+        current_gap: currentGap(contract, ledger)
+      },
+      [
+        { kind: "acceptance_contract", path: paths.acceptancePath },
+        { kind: "evidence_ledger", path: paths.evidencePath }
+      ],
+      [],
+      ["Run opennori next --acceptance <path> --evidence <path> --json before choosing implementation work."]
+    );
+  }
+});
+
+export async function runInitCommand(rawArgs) {
+  return runJsonCommand(initCommand, rawArgs);
+}
+
 export const nextCommand = defineCommand({
   meta: {
     name: "next",

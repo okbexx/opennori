@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { test } from "vitest";
-import { runApproveCommand, runBrainstormCommand, runCriterionUpdateCommand, runDiscoverCommand, runDraftCommand, runEvaluateCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../src/cli/commands/acceptance.js";
+import { runApproveCommand, runBrainstormCommand, runCriterionUpdateCommand, runDiscoverCommand, runDraftCommand, runEvaluateCommand, runInitCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../src/cli/commands/acceptance.js";
 import { runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand } from "../src/cli/commands/architecture.js";
 import { runContextExportCommand } from "../src/cli/commands/context.js";
 import { runEvidenceAddCommand } from "../src/cli/commands/evidence.js";
@@ -140,6 +140,31 @@ test("draft command module creates active Nori Contracts from goals and brainsto
   assert.equal(fromBrainstorm.data.acceptance_basis.status, "draft");
   assert.equal(fromBrainstorm.data.current_gap.id, "ACCEPTANCE-BASIS");
   assert.equal(fromBrainstorm.data.criteria.every((criterion) => criterion.user_story.startsWith("作为用户")), true);
+});
+
+test("init command module creates active Nori Contracts from brief files", async () => {
+  const root = tempRoot();
+  const briefPath = path.join(root, "brief.json");
+  writeJson(briefPath, {
+    goal_id: "module-brief-goal",
+    goal: "Ship a brief-backed OpenNori task",
+    criteria: [
+      {
+        id: "AC-BRIEF",
+        user_story: "作为用户，我能查看 brief 生成的验收目标。",
+        measurement: "用户运行 status 并查看当前缺口。",
+        threshold: "输出显示 AC-BRIEF 或验收审批缺口。"
+      }
+    ]
+  });
+
+  const initialized = await runInitCommand([briefPath, "--root", root, "--json"]);
+  assert.equal(initialized.ok, true);
+  assert.equal(initialized.data.goal_id, "module-brief-goal");
+  assert.equal(initialized.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(fs.existsSync(initialized.data.acceptance_path), true);
+  assert.equal(fs.existsSync(initialized.data.evidence_path), true);
+  assert.equal(initialized.artifacts.some((artifact) => artifact.kind === "acceptance_contract"), true);
 });
 
 test("check command module reports acceptance architecture and evidence health", async () => {
