@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
-import { applyUpgradeActions, buildManifest, buildUpgradePlan, refreshManifest, safeReadManifest, upgradeActions, writeManifest } from "./lifecycle.js";
+import { refreshManifest } from "./lifecycle.js";
 import { auditAcceptanceQuality } from "./acceptance.js";
 import {
   addEvidence,
@@ -34,7 +34,7 @@ import { runApproveCommand, runBrainstormCommand, runCriterionUpdateCommand, run
 import { runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand, runArchitectureShowCommand } from "./cli/commands/architecture.js";
 import { runContextExportCommand } from "./cli/commands/context.js";
 import { runEvidenceAddCommand } from "./cli/commands/evidence.js";
-import { bootstrapResult, runBootstrapCommand, runChangesCommand, runCheckCommand, runDoctorCommand, runInstallCommand, runListCommand, runUninstallCommand } from "./cli/commands/health.js";
+import { bootstrapResult, runBootstrapCommand, runChangesCommand, runCheckCommand, runDoctorCommand, runInstallCommand, runListCommand, runUninstallCommand, runUpgradeCommand } from "./cli/commands/health.js";
 import { runProfileAddCommand, runProfileCheckCommand, runProfileEvidenceCommand, runProfileShowCommand } from "./cli/commands/profile.js";
 import { runArchiveCommand, runReportCommand } from "./cli/commands/reporting.js";
 import { runSkillExportCommand } from "./cli/commands/skill.js";
@@ -365,51 +365,9 @@ export async function main(args) {
   }
 
   if (command === "upgrade") {
-    const root = resolveRoot(args);
-    const dryRun = hasFlag(args, "--dry-run");
-    const confirmed = hasFlag(args, "--confirm");
-    const requestedSkill = hasFlag(args, "--skill") || hasFlag(args, "--refresh-skill");
-    const mergeAgentRoute = hasFlag(args, "--merge-agent-route");
-    const actions = upgradeActions(root, { requestedSkill, mergeAgentRoute });
-    const upgradePlan = buildUpgradePlan(root, actions, { dryRun, requestedSkill, mergeAgentRoute });
-
-    if (!dryRun && !confirmed) {
-      printJson(fail(
-        "confirm_required",
-        "Upgrade refreshes OpenNori manifest, protocol, and optionally Skill Pack assets.",
-        "Run opennori upgrade --root <project> --dry-run --json first, then rerun with --confirm if the planned updates are acceptable."
-      ));
-      process.exitCode = 1;
-      return;
-    }
-
-    if (!dryRun && actions.some((action) => action.action === "missing")) {
-      printJson(fail(
-        "install_required",
-        "Upgrade found missing OpenNori entry assets.",
-        "Run opennori install --root <project> --dry-run --json before upgrading missing assets."
-      ));
-      process.exitCode = 1;
-      return;
-    }
-
-    if (!dryRun) {
-      applyUpgradeActions(actions);
-      writeManifest(root);
-    }
-
-    const nextActions = dryRun
-      ? ["Review the upgrade plan, then rerun with --confirm if the planned updates are acceptable."]
-      : ["Run opennori check --root <project> --json to audit existing active Nori Contracts for underspecified ACs before continuing work."];
-
-    printJson(ok({
-      root,
-      dry_run: dryRun,
-      confirmed,
-      upgrade_plan: upgradePlan,
-      actions: upgradePlan.actions,
-      manifest: dryRun ? buildManifest(root) : safeReadManifest(root)
-    }, [], [], nextActions));
+    const result = await runUpgradeCommand(args.slice(1));
+    printJson(result);
+    if (!result.ok) process.exitCode = 1;
     return;
   }
 

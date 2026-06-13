@@ -8,7 +8,7 @@ import { runApproveCommand, runBrainstormCommand, runCriterionUpdateCommand, run
 import { runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand } from "../src/cli/commands/architecture.js";
 import { runContextExportCommand } from "../src/cli/commands/context.js";
 import { runEvidenceAddCommand } from "../src/cli/commands/evidence.js";
-import { runBootstrapCommand, runChangesCommand, runCheckCommand, runDoctorCommand, runInstallCommand, runListCommand, runUninstallCommand } from "../src/cli/commands/health.js";
+import { runBootstrapCommand, runChangesCommand, runCheckCommand, runDoctorCommand, runInstallCommand, runListCommand, runUninstallCommand, runUpgradeCommand } from "../src/cli/commands/health.js";
 import { runProfileAddCommand, runProfileEvidenceCommand, runProfileShowCommand } from "../src/cli/commands/profile.js";
 import { runArchiveCommand, runReportCommand } from "../src/cli/commands/reporting.js";
 import { runSkillExportCommand } from "../src/cli/commands/skill.js";
@@ -123,6 +123,34 @@ test("uninstall command module preserves state unless include-state is confirmed
   const stateRemoved = await runUninstallCommand(["--root", stateRemovedRoot, "--include-state", "--confirm", "--json"]);
   assert.equal(stateRemoved.data.include_state, true);
   assert.equal(fs.existsSync(path.join(stateRemovedRoot, ".opennori")), false);
+});
+
+test("upgrade command module preserves preview and install-required safety", async () => {
+  const root = tempRoot();
+  await runInstallCommand(["--root", root, "--skill", "--json"]);
+  fs.writeFileSync(path.join(root, ".opennori", "protocol.md"), "old protocol\n");
+  fs.writeFileSync(path.join(root, ".agents", "skills", "nori", "SKILL.md"), "old nori skill\n");
+
+  const dryRun = await runUpgradeCommand(["--root", root, "--skill", "--dry-run", "--json"]);
+  assert.equal(dryRun.ok, true);
+  assert.equal(dryRun.data.upgrade_plan.schema_version, "opennori/upgrade-plan-v1");
+  assert.equal(dryRun.data.upgrade_plan.summary.will_write, 0);
+  assert.equal(dryRun.data.upgrade_plan.actions.find((action) => action.path === ".opennori/protocol.md").action, "overwrite");
+  assert.equal(fs.readFileSync(path.join(root, ".opennori", "protocol.md"), "utf8"), "old protocol\n");
+
+  const unconfirmed = await runUpgradeCommand(["--root", root, "--skill", "--json"]);
+  assert.equal(unconfirmed.ok, false);
+  assert.equal(unconfirmed.error.type, "confirm_required");
+
+  const upgraded = await runUpgradeCommand(["--root", root, "--skill", "--confirm", "--json"]);
+  assert.equal(upgraded.ok, true);
+  assert.equal(upgraded.data.confirmed, true);
+  assert.match(fs.readFileSync(path.join(root, ".opennori", "protocol.md"), "utf8"), /OpenNori Protocol/);
+  assert.equal(upgraded.next_actions.some((action) => /opennori check/.test(action)), true);
+
+  const missing = await runUpgradeCommand(["--root", tempRoot(), "--confirm", "--json"]);
+  assert.equal(missing.ok, false);
+  assert.equal(missing.error.type, "install_required");
 });
 
 test("list command module reports active goal gaps without CLI dispatch", async () => {
