@@ -1,7 +1,7 @@
 import { defineCommand } from "citty";
 import { parseArgs } from "node:util";
-import { addEvidence, criterionStatusRows, currentGap, ok, syncAcceptanceMarkdown, writeJson } from "../../core.js";
-import { refreshManifest } from "../../lifecycle.js";
+import { addEvidence, criterionStatusRows, currentGap, ok, syncAcceptanceMarkdown, writeJson } from "../../core.ts";
+import { refreshManifest } from "../../lifecycle.ts";
 import { type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
 
 type CliArgs = Record<string, any>;

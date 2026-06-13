@@ -1,7 +1,7 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { ok } from "../../core.js";
-import { doctor } from "../../lifecycle.js";
+import { ok } from "../../core.ts";
+import { doctor } from "../../lifecycle.ts";
 import { runJsonCommand } from "../runtime.ts";
 
 export const doctorCommand = defineCommand({

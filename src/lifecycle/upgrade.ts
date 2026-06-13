@@ -8,11 +8,11 @@ import {
   renderAgentGuideMarkdown,
   renderAgentRouteMarkdown,
   renderAgentRouteSectionMarkdown
-} from "../architecture.js";
-import { SKILL_PACK, skillPackMarkdowns } from "../skills.js";
-import { fileHash, managedSectionBounds, upsertManagedSection } from "./managed-files.js";
-import { safeReadManifest, writeManifest } from "./manifest.js";
-import { isWritingUpgradeAction } from "./plans.js";
+} from "../architecture.ts";
+import { SKILL_PACK, skillPackMarkdowns } from "../skills.ts";
+import { fileHash, managedSectionBounds, upsertManagedSection } from "./managed-files.ts";
+import { safeReadManifest, writeManifest } from "./manifest.ts";
+import { isWritingUpgradeAction } from "./plans.ts";
 import {
   NORI_CAPABILITIES,
   PACKAGE_JSON,
@@ -20,23 +20,24 @@ import {
   protocolTemplate,
   sameStringSet,
   skillPackPath
-} from "./shared.js";
+} from "./shared.ts";
+import type { ManagedAction } from "../types.ts";
 
-export function applyUpgradeActions(actions) {
+export function applyUpgradeActions(actions: ManagedAction[]): void {
   for (const action of actions) {
     if (isWritingUpgradeAction(action.action) && action.write) action.write();
   }
 }
 
 export function upgradeActions(
-  root,
+  root: string,
   {
     requestedSkill = false,
     mergeAgentRoute = false
   } = {}
-) {
+): ManagedAction[] {
   const existingManifest = safeReadManifest(root);
-  const actions = [];
+  const actions: ManagedAction[] = [];
   const protocolPath = path.join(root, ".opennori", "protocol.md");
   const protocolContent = protocolTemplate();
 
@@ -112,7 +113,7 @@ export function upgradeActions(
     for (const [agentName, routePath] of [
       ["AGENTS", path.join(root, "AGENTS.md")],
       ["CLAUDE", path.join(root, "CLAUDE.md")]
-    ]) {
+    ] as const) {
       const routeContent = renderAgentRouteMarkdown(agentName);
       const routeSection = renderAgentRouteSectionMarkdown();
       if (!fs.existsSync(routePath)) {
@@ -155,7 +156,7 @@ export function upgradeActions(
         actions.push({ path: target, action: "missing", kind: "skill", managed: true });
         continue;
       }
-      const expectedHash = createHash("sha256").update(markdowns[skill.name]).digest("hex");
+      const expectedHash = createHash("sha256").update(markdowns[skill.name] || "").digest("hex");
       const currentHash = fileHash(target);
       actions.push({
         path: target,
@@ -164,7 +165,7 @@ export function upgradeActions(
         managed: true,
         write: () => {
           fs.mkdirSync(path.dirname(target), { recursive: true });
-          fs.writeFileSync(target, markdowns[skill.name]);
+          fs.writeFileSync(target, markdowns[skill.name] || "");
         }
       });
     }

@@ -1,7 +1,8 @@
 import { defineCommand } from "citty";
-import { auditAcceptanceQuality } from "../../acceptance.js";
-import { architectureState } from "../../architecture.js";
-import { currentGap, evidenceHealth, fail, ok, validateContract } from "../../core.js";
+import { auditAcceptanceQuality } from "../../acceptance.ts";
+import { architectureState } from "../../architecture.ts";
+import { currentGap, evidenceHealth, fail, ok, validateContract } from "../../core.ts";
+import type { JsonObject } from "../../types.ts";
 import { type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
 
 export const checkCommand = defineCommand({
@@ -32,7 +33,7 @@ export const checkCommand = defineCommand({
       return { ...fail("invalid_acceptance", "Acceptance contract failed validation", "Fix reported issues before continuing"), issues };
     }
     const acceptanceQuality = auditAcceptanceQuality(contract);
-    const warnings = acceptanceQuality.findings.map((finding) => ({
+    const warnings = acceptanceQuality.findings.map((finding: JsonObject) => ({
       type: "acceptance_quality",
       criterion_id: finding.criterion_id,
       gap_id: finding.gap_id,
@@ -42,7 +43,7 @@ export const checkCommand = defineCommand({
       ? ["Ask the user the acceptance_quality questions, then revise the affected criteria before relying on this contract as complete."]
       : [];
     const architecture = architectureState(root, contract.goal_id);
-    const architectureWarnings = [];
+    const architectureWarnings: JsonObject[] = [];
     if (architecture.decision === "missing") {
       architectureWarnings.push({
         type: "architecture",
@@ -86,7 +87,7 @@ export const checkCommand = defineCommand({
       });
     }
     const architectureStatus = architectureWarnings.length > 0 ? "needs-action" : "clear";
-    const buildVsBuyWarnings = architecture.build_vs_buy.findings.map((finding) => ({
+    const buildVsBuyWarnings = architecture.build_vs_buy.findings.map((finding: JsonObject) => ({
       type: "build_vs_buy",
       decision_id: finding.decision_id,
       severity: finding.severity,
@@ -95,7 +96,7 @@ export const checkCommand = defineCommand({
       recovery: finding.recovery
     }));
     const health = evidenceHealth(contract, ledger);
-    const evidenceHealthWarnings = health.findings.map((finding) => ({
+    const evidenceHealthWarnings = health.findings.map((finding: JsonObject) => ({
       type: "evidence_health",
       criterion_id: finding.criterion_id,
       severity: finding.severity,

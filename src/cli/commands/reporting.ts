@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { defineCommand } from "citty";
-import { completionAnswer, currentGap, evidenceHealth, fail, intervention, nextRecommendation, ok, pathsForGoal, recomputeWorkflowStatus, syncAcceptanceMarkdown, writeJson } from "../../core.js";
-import { architectureState, renderReportWithArchitecture } from "../../architecture.js";
-import { refreshManifest } from "../../lifecycle.js";
+import { completionAnswer, currentGap, evidenceHealth, fail, intervention, nextRecommendation, ok, pathsForGoal, recomputeWorkflowStatus, syncAcceptanceMarkdown, writeJson } from "../../core.ts";
+import { architectureState, renderReportWithArchitecture } from "../../architecture.ts";
+import { refreshManifest } from "../../lifecycle.ts";
 import { type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
 
 export const reportCommand = defineCommand({

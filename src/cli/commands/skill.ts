@@ -1,6 +1,6 @@
 import { defineCommand } from "citty";
-import { fail, ok } from "../../core.js";
-import { SKILL_PACK, skillMarkdown } from "../../skills.js";
+import { fail, ok } from "../../core.ts";
+import { SKILL_PACK, skillMarkdown } from "../../skills.ts";
 import { runJsonCommand } from "../runtime.ts";
 
 export const skillExportCommand = defineCommand({

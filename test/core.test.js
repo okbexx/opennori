@@ -5,8 +5,8 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { test } from "vitest";
-import { validateContract } from "../src/core.js";
-import { validateSchema } from "../src/validation.js";
+import { validateContract } from "../src/core.ts";
+import { validateSchema } from "../src/validation.ts";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const CLI = path.join(ROOT, "bin", "opennori.js");
@@ -560,7 +560,7 @@ test("evidence records flexible reviewable sources without fixed adapters", () =
     "--source", "{\"type\":\"command\",\"label\":\"npm run check\",\"command\":\"npm run check\",\"outcome\":\"passed\"}",
     "--source", "screenshots/reviewable-flow.png",
     "--source-command", "npm run check",
-    "--source-path", "src/cli.js",
+    "--source-path", "src/cli.ts",
     "--source-url", "https://example.com/review",
     "--reviewability", "User can rerun the command or open the artifact.",
     "--limitations", "Browser-specific visual review was not performed.",
@@ -582,7 +582,7 @@ test("evidence records flexible reviewable sources without fixed adapters", () =
   assert.equal(criterion.latest_evidence.sources[2].type, "command");
   assert.equal(criterion.latest_evidence.sources[2].command, "npm run check");
   assert.equal(criterion.latest_evidence.sources[3].type, "artifact");
-  assert.equal(criterion.latest_evidence.sources[3].path, "src/cli.js");
+  assert.equal(criterion.latest_evidence.sources[3].path, "src/cli.ts");
   assert.equal(criterion.latest_evidence.sources[4].type, "url");
   assert.equal(criterion.latest_evidence.sources[4].url, "https://example.com/review");
 

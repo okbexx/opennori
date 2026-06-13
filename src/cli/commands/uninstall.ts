@@ -1,7 +1,7 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { fail, ok } from "../../core.js";
-import { applyUninstallActions, buildUninstallActions, buildUninstallPlan } from "../../lifecycle.js";
+import { fail, ok } from "../../core.ts";
+import { applyUninstallActions, buildUninstallActions, buildUninstallPlan } from "../../lifecycle.ts";
 import { runJsonCommand } from "../runtime.ts";
 
 type UninstallResultOptions = {

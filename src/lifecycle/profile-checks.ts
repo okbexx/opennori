@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { addProfileEvidence, readJson } from "../core.js";
+import { addProfileEvidence, readJson } from "../core.ts";
+import type { JsonObject } from "../types.ts";
 
-function skillSearchPaths(name) {
+function skillSearchPaths(name: string): string[] {
   const home = process.env.HOME || "";
   return [
     path.join(home, ".agents", "skills", name, "SKILL.md"),
@@ -10,7 +11,7 @@ function skillSearchPaths(name) {
   ].filter(Boolean);
 }
 
-function stackIsPresent(root, name) {
+function stackIsPresent(root: string, name: string): boolean | null {
   const packageJsonPath = path.join(root, "package.json");
   if (!fs.existsSync(packageJsonPath)) return null;
   try {
@@ -21,15 +22,15 @@ function stackIsPresent(root, name) {
       packageJson.peerDependencies,
       packageJson.optionalDependencies
     ].filter(Boolean);
-    return dependencySets.some((dependencies) => Object.prototype.hasOwnProperty.call(dependencies, name));
+    return dependencySets.some((dependencies: JsonObject) => Object.prototype.hasOwnProperty.call(dependencies, name));
   } catch {
     return null;
   }
 }
 
-export function autoProfileChecks(root, ledger) {
+export function autoProfileChecks(root: string, ledger: JsonObject): JsonObject[] {
   const items = ledger.capability_profile?.items || [];
-  return items.map((item) => {
+  return items.map((item: JsonObject) => {
     if (item.type === "skill") {
       const paths = skillSearchPaths(item.name);
       const foundPath = paths.find((candidate) => fs.existsSync(candidate));
@@ -104,9 +105,9 @@ export function autoProfileChecks(root, ledger) {
   });
 }
 
-export function recordAutoProfileChecks(ledger, checks) {
-  for (const check of checks.filter((entry) => entry.can_auto_record)) {
-    const item = ledger.capability_profile?.items?.find((entry) => entry.id === check.item_id);
+export function recordAutoProfileChecks(ledger: JsonObject, checks: JsonObject[]): JsonObject {
+  for (const check of checks.filter((entry: JsonObject) => entry.can_auto_record)) {
+    const item = ledger.capability_profile?.items?.find((entry: JsonObject) => entry.id === check.item_id);
     const latest = item?.evidence?.at(-1);
     if (latest?.result === check.result && latest?.summary === check.summary) continue;
     addProfileEvidence(ledger, check.item_id, {

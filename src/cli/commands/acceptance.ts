@@ -1,7 +1,7 @@
 import { defineCommand } from "citty";
 import fs from "node:fs";
 import path from "node:path";
-import { briefFromBrainstorm, briefFromGoal, buildBrainstorm, discoverAcceptance, renderBrainstormMarkdown, renderDiscoveryMarkdown } from "../../acceptance.js";
+import { briefFromBrainstorm, briefFromGoal, buildBrainstorm, discoverAcceptance, renderBrainstormMarkdown, renderDiscoveryMarkdown } from "../../acceptance.ts";
 import {
   buildContractFromBrief,
   buildEvidenceLedger,
@@ -20,9 +20,9 @@ import {
   syncAcceptanceMarkdown,
   validateContract,
   writeJson
-} from "../../core.js";
-import { architectureState } from "../../architecture.js";
-import { refreshManifest } from "../../lifecycle.js";
+} from "../../core.ts";
+import { architectureState } from "../../architecture.ts";
+import { refreshManifest } from "../../lifecycle.ts";
 import { type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
 
 type CliPayload = Record<string, any>;

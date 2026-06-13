@@ -4,14 +4,14 @@ import {
   REQUIRED_ARCHITECTURE_DIRS,
   architectureDir,
   architectureState
-} from "../architecture.js";
+} from "../architecture.ts";
 import {
   PROTOCOL_VERSION,
   currentGap,
   readJson,
   validateContract
-} from "../core.js";
-import { schemaErrorSummary, validateSchema } from "../validation.js";
+} from "../core.ts";
+import { schemaErrorSummary, validateSchema } from "../validation.ts";
 import {
   MANIFEST_SCHEMA_VERSION,
   NORI_CAPABILITIES,
@@ -20,13 +20,32 @@ import {
   manifestPath,
   relativeTo,
   sameStringSet
-} from "./shared.js";
-import { projectSkillPackState, projectSkillState } from "./manifest.js";
+} from "./shared.ts";
+import { projectSkillPackState, projectSkillState } from "./manifest.ts";
+import type { JsonObject } from "../types.ts";
 
-function inspectActiveGoals(root) {
+type DoctorIssue = {
+  goal_id: string;
+  message: string;
+  path?: string;
+};
+
+type DoctorCheck = {
+  name: string;
+  ok: boolean;
+  summary: string;
+  recovery?: string;
+  severity?: string;
+};
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function inspectActiveGoals(root: string): { details: JsonObject[]; issues: DoctorIssue[] } {
   const activeDir = path.join(root, ".opennori", "active");
-  const details = [];
-  const issues = [];
+  const details: JsonObject[] = [];
+  const issues: DoctorIssue[] = [];
   if (!fs.existsSync(activeDir)) return { details, issues };
 
   const files = fs.readdirSync(activeDir);
@@ -69,22 +88,22 @@ function inspectActiveGoals(root) {
         issues.push({ goal_id: goalId, message: issue.message, path: issue.path });
       }
     } catch (error) {
-      issues.push({ goal_id: goalId, message: error.message });
+      issues.push({ goal_id: goalId, message: errorMessage(error) });
     }
   }
 
   return { details, issues };
 }
 
-function doctorCheck(name, condition, summary, recovery = undefined, severity = "needs-action") {
-  const check = { name, ok: Boolean(condition), summary };
+function doctorCheck(name: string, condition: boolean, summary: string, recovery?: string, severity = "needs-action"): DoctorCheck {
+  const check: DoctorCheck = { name, ok: Boolean(condition), summary };
   if (!condition && recovery) check.recovery = recovery;
   if (!condition) check.severity = severity;
   return check;
 }
 
-function doctorRecoveryActions(checks, activeIssues = []) {
-  const actions = checks
+function doctorRecoveryActions(checks: DoctorCheck[], activeIssues: DoctorIssue[] = []): JsonObject[] {
+  const actions: JsonObject[] = checks
     .filter((check) => !check.ok && check.recovery)
     .map((check) => ({
       check: check.name,
@@ -107,8 +126,8 @@ function doctorRecoveryActions(checks, activeIssues = []) {
   return actions;
 }
 
-export function doctor(root) {
-  const checks = [];
+export function doctor(root: string): JsonObject {
+  const checks: DoctorCheck[] = [];
   const noriDir = path.join(root, ".opennori");
   const protocolPath = path.join(root, ".opennori", "protocol.md");
   const manifestFile = manifestPath(root);
@@ -199,7 +218,7 @@ export function doctor(root) {
     architecture.build_vs_buy.status === "broken" ? "broken" : "needs-action"
   ));
 
-  let manifest = null;
+  let manifest: JsonObject | null = null;
   let manifestReadable = false;
   try {
     manifest = readJson(manifestFile);
@@ -208,13 +227,14 @@ export function doctor(root) {
     checks.push(doctorCheck(
       "manifest_file",
       false,
-      fs.existsSync(manifestFile) ? `.opennori/manifest.json is unreadable: ${error.message}` : ".opennori/manifest.json is missing.",
+      fs.existsSync(manifestFile) ? `.opennori/manifest.json is unreadable: ${errorMessage(error)}` : ".opennori/manifest.json is missing.",
       "Run opennori bootstrap --root <project> --json to preview setup or refresh the OpenNori manifest.",
       fs.existsSync(manifestFile) ? "broken" : "needs-action"
     ));
   }
 
   if (manifestReadable) {
+    const readableManifest = manifest as JsonObject;
     const manifestSchema = validateSchema("manifest", manifest);
     checks.push(doctorCheck(
       "manifest_schema",
@@ -227,33 +247,33 @@ export function doctor(root) {
     ));
     checks.push(doctorCheck(
       "manifest_file",
-      manifest.schema_version === MANIFEST_SCHEMA_VERSION,
-      `.opennori/manifest.json uses schema ${manifest.schema_version || "<missing>"}.`,
+      readableManifest.schema_version === MANIFEST_SCHEMA_VERSION,
+      `.opennori/manifest.json uses schema ${readableManifest.schema_version || "<missing>"}.`,
       "Refresh the manifest with opennori bootstrap --root <project> --json.",
       "broken"
     ));
     checks.push(doctorCheck(
       "manifest_protocol",
-      manifest.protocol_version === PROTOCOL_VERSION,
-      `.opennori/manifest.json records protocol ${manifest.protocol_version || "<missing>"}.`,
+      readableManifest.protocol_version === PROTOCOL_VERSION,
+      `.opennori/manifest.json records protocol ${readableManifest.protocol_version || "<missing>"}.`,
       "Refresh the manifest with opennori bootstrap --root <project> --json.",
       "broken"
     ));
     checks.push(doctorCheck(
       "manifest_cli_version",
-      manifest.opennori_version === PACKAGE_JSON.version,
-      `.opennori/manifest.json records OpenNori version ${manifest.opennori_version || "<missing>"}.`,
+      readableManifest.opennori_version === PACKAGE_JSON.version,
+      `.opennori/manifest.json records OpenNori version ${readableManifest.opennori_version || "<missing>"}.`,
       "Refresh the manifest with opennori bootstrap --root <project> --json."
     ));
     checks.push(doctorCheck(
       "manifest_capabilities",
-      sameStringSet(manifest.capabilities, NORI_CAPABILITIES),
-      Array.isArray(manifest.capabilities) ? "Manifest protocol capabilities are readable." : "Manifest protocol capabilities are missing.",
+      sameStringSet(readableManifest.capabilities, NORI_CAPABILITIES),
+      Array.isArray(readableManifest.capabilities) ? "Manifest protocol capabilities are readable." : "Manifest protocol capabilities are missing.",
       "Refresh the manifest with opennori bootstrap --root <project> --json."
     ));
 
     const currentGoals = new Set(active.details.filter((goal) => goal.recoverable).map((goal) => goal.goal_id));
-    const manifestGoals = new Set((manifest.active_goals || []).map((goal) => goal.goal_id));
+    const manifestGoals = new Set((readableManifest.active_goals || []).map((goal: JsonObject) => goal.goal_id));
     const staleGoals = [
       ...[...currentGoals].filter((goalId) => !manifestGoals.has(goalId)),
       ...[...manifestGoals].filter((goalId) => !currentGoals.has(goalId))
@@ -265,10 +285,10 @@ export function doctor(root) {
       "Run any OpenNori state-changing command, or run opennori bootstrap --root <project> --json, to refresh the manifest."
     ));
 
-    const missingManaged = (manifest.managed_files || [])
-      .filter((entry) => entry.required !== false)
-      .filter((entry) => !fs.existsSync(path.join(root, entry.path)))
-      .map((entry) => entry.path);
+    const missingManaged = (readableManifest.managed_files || [])
+      .filter((entry: JsonObject) => entry.required !== false)
+      .filter((entry: JsonObject) => !fs.existsSync(path.join(root, entry.path)))
+      .map((entry: JsonObject) => entry.path);
     checks.push(doctorCheck(
       "managed_files",
       missingManaged.length === 0,
@@ -290,9 +310,10 @@ export function doctor(root) {
   const manifestSkillInstalled = manifest?.skill?.installed === true;
   const skillOk = !skill.installed && !manifestSkillInstalled ? true : skill.installed && skill.in_sync;
   if (manifestReadable) {
+    const readableManifest = manifest as JsonObject;
     checks.push(doctorCheck(
       "manifest_skill_state",
-      Boolean(manifest.skill) && manifest.skill.installed === skill.installed && manifest.skill.path === skill.path,
+      Boolean(readableManifest.skill) && readableManifest.skill.installed === skill.installed && readableManifest.skill.path === skill.path,
       "Manifest Skill state matches the project Skill location.",
       "Refresh the manifest with opennori bootstrap --root <project> --json."
     ));
@@ -305,8 +326,8 @@ export function doctor(root) {
       : "Project OpenNori Skill is not installed; this is optional unless the manifest expects it.",
     "Preview opennori install --root <project> --skill --refresh-skill --dry-run --json, then rerun with --confirm if the updates are acceptable."
   ));
-  const manifestPackNames = new Set((manifest?.skill_pack?.skills || []).map((entry) => entry.name));
-  const packNames = new Set(skillPack.skills.map((entry) => entry.name));
+  const manifestPackNames = new Set((manifest?.skill_pack?.skills || []).map((entry: JsonObject) => entry.name));
+  const packNames = new Set(skillPack.skills.map((entry: JsonObject) => entry.name));
   const manifestPackMatches = !manifestReadable || (
     manifest?.skill_pack?.schema_version === "opennori/skill-pack-v1"
     && sameStringSet([...manifestPackNames], [...packNames])
@@ -317,7 +338,7 @@ export function doctor(root) {
     manifestPackMatches ? "Manifest Skill Pack state is readable." : "Manifest Skill Pack state is missing or stale.",
     "Refresh the manifest with opennori install --root <project> --skill --json."
   ));
-  const packExpected = manifest?.skill_pack?.installed === true || skillPack.skills.some((entry) => entry.installed);
+  const packExpected = manifest?.skill_pack?.installed === true || skillPack.skills.some((entry: JsonObject) => entry.installed);
   const packOk = packExpected ? skillPack.installed && skillPack.in_sync : true;
   checks.push(doctorCheck(
     "skill_pack_sync",

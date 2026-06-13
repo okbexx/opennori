@@ -1,6 +1,6 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { bootstrap } from "../../lifecycle.js";
+import { bootstrap } from "../../lifecycle.ts";
 import { runJsonCommand } from "../runtime.ts";
 
 type BootstrapResultOptions = {

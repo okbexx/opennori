@@ -9,12 +9,13 @@ import {
   pathsForGoal,
   profileCompliance,
   readJson
-} from "../core.js";
-import { architectureState } from "../architecture.js";
-import { safeReadManifest } from "./manifest.js";
-import { manifestPath, relativeTo } from "./shared.js";
+} from "../core.ts";
+import { architectureState } from "../architecture.ts";
+import { safeReadManifest } from "./manifest.ts";
+import { manifestPath, relativeTo } from "./shared.ts";
+import type { JsonObject } from "../types.ts";
 
-export function buildContextExport(root, pair) {
+export function buildContextExport(root: string, pair: { acceptancePath: string; evidencePath: string }): JsonObject {
   const payload = readJson(pair.evidencePath);
   const contract = payload.contract;
   const ledger = payload.ledger;

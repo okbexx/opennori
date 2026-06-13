@@ -18,9 +18,9 @@ import {
   validateArchitectureProfile,
   writeArchitectureBaseline,
   writeArchitectureProfile
-} from "../../architecture.js";
-import { fail, ok, readJson, slugify, writeJson } from "../../core.js";
-import { refreshManifest } from "../../lifecycle.js";
+} from "../../architecture.ts";
+import { fail, ok, readJson, slugify, writeJson } from "../../core.ts";
+import { refreshManifest } from "../../lifecycle.ts";
 import { runJsonCommand } from "../runtime.ts";
 
 type CliPayload = Record<string, any>;

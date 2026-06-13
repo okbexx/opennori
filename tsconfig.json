@@ -21,6 +21,6 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["node", "vitest"]
   },
-  "include": ["src/**/*.js", "src/**/*.ts", "bin/**/*.js", "bin/**/*.ts", "test/**/*.js", "test/**/*.ts", "vitest.config.ts"],
+  "include": ["src/**/*.ts", "bin/**/*.js", "bin/**/*.ts", "test/**/*.js", "test/**/*.ts", "vitest.config.ts"],
   "exclude": ["dist", "node_modules"]
 }

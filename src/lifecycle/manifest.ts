@@ -1,16 +1,17 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import { REQUIRED_ARCHITECTURE_DIRS, architectureState } from "../architecture.js";
+import { REQUIRED_ARCHITECTURE_DIRS, architectureState } from "../architecture.ts";
 import {
   PROTOCOL_VERSION,
   currentGap,
   findActivePairs,
   readJson,
   writeJson
-} from "../core.js";
-import { SKILL_PACK, exportedSkillMarkdown, skillPackMarkdowns } from "../skills.js";
-import { fileHash } from "./managed-files.js";
+} from "../core.ts";
+import { SKILL_PACK, exportedSkillMarkdown, skillPackMarkdowns } from "../skills.ts";
+import { fileHash } from "./managed-files.ts";
+import type { JsonObject } from "../types.ts";
 import {
   MANIFEST_SCHEMA_VERSION,
   NORI_CAPABILITIES,
@@ -19,9 +20,9 @@ import {
   manifestPath,
   relativeTo,
   skillPackPath
-} from "./shared.js";
+} from "./shared.ts";
 
-export function projectSkillState(root) {
+export function projectSkillState(root: string): JsonObject {
   const noriSkillPath = skillPackPath(root, "nori");
   const exists = fs.existsSync(noriSkillPath);
   const expectedHash = createHash("sha256").update(exportedSkillMarkdown()).digest("hex");
@@ -35,12 +36,12 @@ export function projectSkillState(root) {
   };
 }
 
-export function projectSkillPackState(root) {
+export function projectSkillPackState(root: string): JsonObject {
   const markdowns = skillPackMarkdowns();
   const skills = SKILL_PACK.map((skill) => {
     const noriSkillPath = skillPackPath(root, skill.name);
     const exists = fs.existsSync(noriSkillPath);
-    const expectedHash = createHash("sha256").update(markdowns[skill.name]).digest("hex");
+    const expectedHash = createHash("sha256").update(markdowns[skill.name] || "").digest("hex");
     const actualHash = fileHash(noriSkillPath);
     return {
       name: skill.name,
@@ -60,7 +61,7 @@ export function projectSkillPackState(root) {
   };
 }
 
-function activeGoalSummaries(root) {
+function activeGoalSummaries(root: string): JsonObject[] {
   return findActivePairs(root).map((pair) => {
     try {
       const payload = readJson(pair.evidencePath);
@@ -80,13 +81,13 @@ function activeGoalSummaries(root) {
         acceptance_path: relativeTo(root, pair.acceptancePath),
         evidence_path: relativeTo(root, pair.evidencePath),
         recoverable: false,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   });
 }
 
-export function managedFiles(root, skill = projectSkillState(root), { assumeManifestExists = false } = {}) {
+export function managedFiles(root: string, skill = projectSkillState(root), { assumeManifestExists = false } = {}): JsonObject[] {
   const entries = [
     { path: ".opennori/manifest.json", kind: "manifest", required: true },
     { path: ".opennori/protocol.md", kind: "protocol", required: true },
@@ -99,7 +100,7 @@ export function managedFiles(root, skill = projectSkillState(root), { assumeMani
     { path: ".opennori/architecture/baseline.json", kind: "architecture-baseline", required: false },
     { path: ".opennori/architecture/baseline.md", kind: "architecture-baseline", required: false }
   ];
-  for (const packSkill of projectSkillPackState(root).skills.filter((entry) => entry.installed)) {
+  for (const packSkill of projectSkillPackState(root).skills.filter((entry: JsonObject) => entry.installed)) {
     entries.push({ path: packSkill.path, kind: "skill", required: false });
   }
   return entries.map((entry) => ({
@@ -110,7 +111,7 @@ export function managedFiles(root, skill = projectSkillState(root), { assumeMani
   }));
 }
 
-export function safeReadManifest(root) {
+export function safeReadManifest(root: string): JsonObject | null {
   try {
     return readJson(manifestPath(root));
   } catch {
@@ -118,12 +119,12 @@ export function safeReadManifest(root) {
   }
 }
 
-export function buildManifest(root, options = {}) {
+export function buildManifest(root: string, options: JsonObject = {}): JsonObject {
   const existing = safeReadManifest(root);
   const skill = projectSkillState(root);
   const skillPack = projectSkillPackState(root);
   const activeGoals = activeGoalSummaries(root);
-  const architectureGoalId = activeGoals.length === 1 ? activeGoals[0].goal_id : undefined;
+  const architectureGoalId = activeGoals.length === 1 ? activeGoals[0]?.goal_id : undefined;
   const architecture = architectureState(root, architectureGoalId);
   const now = new Date().toISOString();
   return {
@@ -141,7 +142,7 @@ export function buildManifest(root, options = {}) {
   };
 }
 
-export function writeManifest(root, { dryRun = false } = {}) {
+export function writeManifest(root: string, { dryRun = false } = {}) {
   const target = manifestPath(root);
   const exists = fs.existsSync(target);
   const manifest = buildManifest(root, { assumeManifestExists: !dryRun || exists });
@@ -157,7 +158,7 @@ export function writeManifest(root, { dryRun = false } = {}) {
   };
 }
 
-export function refreshManifest(root) {
+export function refreshManifest(root: string): void {
   if (fs.existsSync(path.join(root, ".opennori"))) {
     writeManifest(root);
   }

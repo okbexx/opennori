@@ -1,6 +1,6 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { fail, ok } from "../../core.js";
+import { fail, ok } from "../../core.ts";
 import {
   applyUpgradeActions,
   buildManifest,
@@ -8,7 +8,7 @@ import {
   safeReadManifest,
   upgradeActions,
   writeManifest
-} from "../../lifecycle.js";
+} from "../../lifecycle.ts";
 import { runJsonCommand } from "../runtime.ts";
 
 type UpgradeResultOptions = {

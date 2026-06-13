@@ -1,9 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
-import { readJson, renderReport, slugify, writeJson } from "./core.js";
-import { schemaErrorSummary, validateSchema } from "./validation.js";
+import { readJson, renderReport, slugify, writeJson } from "./core.ts";
+import type { JsonObject, PathPair, ValidationIssue } from "./types.ts";
+import { schemaErrorSummary, validateSchema } from "./validation.ts";
 
-function relativeTo(root, filePath) {
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function relativeTo(root: string, filePath: string): string {
   return path.relative(root, filePath) || ".";
 }
 
@@ -14,7 +19,7 @@ export const AGENT_ROUTE_START = "<!-- opennori:agent-route:start -->";
 export const AGENT_ROUTE_END = "<!-- opennori:agent-route:end -->";
 const ARCHITECTURE_BASELINE_SCHEMA_VERSION = "opennori/architecture-baseline-v1";
 
-const BUILTIN_ARCHITECTURE_PROFILES = {
+const BUILTIN_ARCHITECTURE_PROFILES: Record<string, JsonObject> = {
   "typescript-agent-state-cli": {
     id: "typescript-agent-state-cli",
     title: "TypeScript Agent State CLI",
@@ -170,40 +175,40 @@ const BUILTIN_ARCHITECTURE_PROFILES = {
     }
   }
 };
-export function architectureDir(root) {
+export function architectureDir(root: string): string {
   return path.join(root, ".opennori", "architecture");
 }
 
-export function architectureBaselinePaths(root) {
+export function architectureBaselinePaths(root: string): PathPair {
   return {
     jsonPath: path.join(architectureDir(root), "baseline.json"),
     markdownPath: path.join(architectureDir(root), "baseline.md")
   };
 }
 
-function architectureProfilePath(root, profileId) {
+function architectureProfilePath(root: string, profileId: string): string {
   return path.join(architectureDir(root), "profiles", `${profileId}.json`);
 }
 
-export function architectureChallengePath(root, challengeId) {
+export function architectureChallengePath(root: string, challengeId: string): PathPair {
   return {
     jsonPath: path.join(architectureDir(root), "challenges", `${challengeId}.json`),
     markdownPath: path.join(architectureDir(root), "challenges", `${challengeId}.md`)
   };
 }
 
-export function buildVsBuyPath(root, decisionId) {
+export function buildVsBuyPath(root: string, decisionId: string): PathPair {
   return {
     jsonPath: path.join(architectureDir(root), "decisions", `${decisionId}.json`),
     markdownPath: path.join(architectureDir(root), "decisions", `${decisionId}.md`)
   };
 }
 
-export function agentGuidePath(root) {
+export function agentGuidePath(root: string): string {
   return path.join(root, ".opennori", "agent-guide.md");
 }
 
-function resolveArchitectureProfile(root, profileId = "typescript-agent-state-cli") {
+function resolveArchitectureProfile(root: string, profileId = "typescript-agent-state-cli"): JsonObject {
   const localPath = architectureProfilePath(root, profileId);
   if (fs.existsSync(localPath)) {
     return {
@@ -219,7 +224,7 @@ function resolveArchitectureProfile(root, profileId = "typescript-agent-state-cl
   };
 }
 
-function localArchitectureProfiles(root) {
+function localArchitectureProfiles(root: string): JsonObject[] {
   const dir = path.join(architectureDir(root), "profiles");
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir)
@@ -240,13 +245,13 @@ function localArchitectureProfiles(root) {
           origin: "project",
           path: relativeTo(root, profilePath),
           valid: false,
-          error: error.message
+          error: errorMessage(error)
         };
       }
     });
 }
 
-function architectureProfileDescriptor(profile, { origin, path: profilePath = undefined } = {}) {
+function architectureProfileDescriptor(profile: JsonObject, { origin, path: profilePath = undefined }: { origin?: string; path?: string } = {}): JsonObject {
   const issues = validateArchitectureProfile(profile);
   return {
     id: profile.id,
@@ -275,7 +280,7 @@ function architectureProfileDescriptor(profile, { origin, path: profilePath = un
   };
 }
 
-export function architectureProfiles(root) {
+export function architectureProfiles(root: string): JsonObject[] {
   const builtins = Object.values(BUILTIN_ARCHITECTURE_PROFILES)
     .map((profile) => architectureProfileDescriptor(profile, { origin: "builtin" }));
   const local = localArchitectureProfiles(root);
@@ -286,13 +291,13 @@ export function architectureProfiles(root) {
   ];
 }
 
-export function buildArchitectureBaseline(root, {
+export function buildArchitectureBaseline(root: string, {
   profileId = "typescript-agent-state-cli",
   goal = "",
   goalId = undefined,
   summary = undefined,
   accepted = false
-} = {}) {
+}: { profileId?: string; goal?: string; goalId?: string; summary?: string; accepted?: boolean } = {}): JsonObject {
   const profile = resolveArchitectureProfile(root, profileId);
   const now = new Date().toISOString();
   return {
@@ -335,8 +340,8 @@ export function buildArchitectureBaseline(root, {
   };
 }
 
-function validateArchitectureBaseline(baseline) {
-  const issues = [];
+function validateArchitectureBaseline(baseline: JsonObject): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
   if (!baseline || typeof baseline !== "object") {
     return [{ path: "$", message: "Architecture Baseline is not an object." }];
   }
@@ -364,8 +369,8 @@ function validateArchitectureBaseline(baseline) {
   return issues;
 }
 
-export function validateArchitectureProfile(profile) {
-  const issues = [];
+export function validateArchitectureProfile(profile: JsonObject): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
   if (!profile || typeof profile !== "object") {
     return [{ path: "$", message: "Architecture Profile is not an object." }];
   }
@@ -384,13 +389,13 @@ export function validateArchitectureProfile(profile) {
   return issues;
 }
 
-export function readArchitectureBaseline(root) {
+export function readArchitectureBaseline(root: string): JsonObject | null {
   const paths = architectureBaselinePaths(root);
   if (!fs.existsSync(paths.jsonPath)) return null;
   return readJson(paths.jsonPath);
 }
 
-function renderArchitectureBaselineMarkdown(baseline) {
+function renderArchitectureBaselineMarkdown(baseline: JsonObject): string {
   const lines = [
     "# OpenNori Architecture Baseline",
     "",
@@ -409,7 +414,7 @@ function renderArchitectureBaselineMarkdown(baseline) {
     "",
     "## Principles",
     "",
-    ...baseline.principles.map((principle) => `- ${principle}`),
+    ...baseline.principles.map((principle: string) => `- ${principle}`),
     "",
     "## Architecture Checks",
     ""
@@ -421,15 +426,15 @@ function renderArchitectureBaselineMarkdown(baseline) {
     "",
     "## Build-vs-Buy Policy",
     "",
-    ...((baseline.build_vs_buy_policy?.order || []).map((item, index) => `${index + 1}. ${item}`)),
+    ...((baseline.build_vs_buy_policy?.order || []).map((item: string, index: number) => `${index + 1}. ${item}`)),
     "",
     "## Prefer",
     "",
-    ...((baseline.preferred_libraries || []).map((entry) => `- ${entry.area}: ${entry.policy}`)),
+    ...((baseline.preferred_libraries || []).map((entry: JsonObject) => `- ${entry.area}: ${entry.policy}`)),
     "",
     "## Avoid",
     "",
-    ...((baseline.avoid || []).map((item) => `- ${item}`)),
+    ...((baseline.avoid || []).map((item: string) => `- ${item}`)),
     "",
     "## Agent Rule",
     "",
@@ -440,7 +445,7 @@ function renderArchitectureBaselineMarkdown(baseline) {
   return `${lines.join("\n")}\n`;
 }
 
-export function normalizeArchitectureProfile(input, idOverride = undefined) {
+export function normalizeArchitectureProfile(input: JsonObject, idOverride: string | undefined = undefined): JsonObject {
   const id = idOverride || input.id || slugify(input.title || input.summary || "architecture-profile");
   return {
     ...input,
@@ -460,7 +465,7 @@ export function normalizeArchitectureProfile(input, idOverride = undefined) {
   };
 }
 
-export function writeArchitectureProfile(root, profile, { force = false } = {}) {
+export function writeArchitectureProfile(root: string, profile: JsonObject, { force = false } = {}): string {
   const target = architectureProfilePath(root, profile.id);
   if (fs.existsSync(target) && !force) {
     throw new Error(`Architecture Profile already exists: ${relativeTo(root, target)}. Rerun with --force only after review.`);
@@ -469,7 +474,7 @@ export function writeArchitectureProfile(root, profile, { force = false } = {}) 
   return target;
 }
 
-export function writeArchitectureBaseline(root, baseline) {
+export function writeArchitectureBaseline(root: string, baseline: JsonObject): PathPair {
   const paths = architectureBaselinePaths(root);
   writeJson(paths.jsonPath, baseline);
   fs.mkdirSync(path.dirname(paths.markdownPath), { recursive: true });
@@ -477,7 +482,7 @@ export function writeArchitectureBaseline(root, baseline) {
   return paths;
 }
 
-export function renderAgentGuideMarkdown() {
+export function renderAgentGuideMarkdown(): string {
   return [
     "# OpenNori Agent Guide",
     "",
@@ -496,7 +501,7 @@ export function renderAgentGuideMarkdown() {
   ].join("\n");
 }
 
-export function renderAgentRouteSectionMarkdown() {
+export function renderAgentRouteSectionMarkdown(): string {
   return [
     AGENT_ROUTE_START,
     "## OpenNori",
@@ -514,7 +519,7 @@ export function renderAgentRouteSectionMarkdown() {
   ].join("\n");
 }
 
-export function renderAgentRouteMarkdown(agentName) {
+export function renderAgentRouteMarkdown(agentName: string): string {
   return [
     `# ${agentName} Project Instructions`,
     "",
@@ -522,11 +527,11 @@ export function renderAgentRouteMarkdown(agentName) {
   ].join("\n");
 }
 
-function architectureSurfaceState(root) {
+function architectureSurfaceState(root: string): JsonObject {
   const guide = agentGuidePath(root);
   const agents = path.join(root, "AGENTS.md");
   const claude = path.join(root, "CLAUDE.md");
-  const containsRoute = (filePath) => fs.existsSync(filePath)
+  const containsRoute = (filePath: string) => fs.existsSync(filePath)
     && fs.readFileSync(filePath, "utf8").includes(".opennori/architecture/baseline.md");
   return {
     guide: {
@@ -547,7 +552,7 @@ function architectureSurfaceState(root) {
   };
 }
 
-function architectureChallengeSummaries(root) {
+function architectureChallengeSummaries(root: string): JsonObject[] {
   const dir = path.join(architectureDir(root), "challenges");
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir)
@@ -566,7 +571,7 @@ function architectureChallengeSummaries(root) {
         return {
           id: fileName.replace(/\.json$/, ""),
           status: "unreadable",
-          summary: error.message,
+          summary: errorMessage(error),
           needs_user: true,
           path: relativeTo(root, path.join(dir, fileName))
         };
@@ -574,7 +579,7 @@ function architectureChallengeSummaries(root) {
     });
 }
 
-function buildVsBuyDecisionSummaries(root) {
+function buildVsBuyDecisionSummaries(root: string): JsonObject[] {
   const dir = path.join(architectureDir(root), "decisions");
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir)
@@ -604,15 +609,15 @@ function buildVsBuyDecisionSummaries(root) {
       } catch (error) {
         return {
           id: fileName.replace(/\.json$/, ""),
-          error: error.message,
+          error: errorMessage(error),
           path: relativeTo(root, path.join(dir, fileName))
         };
       }
     });
 }
 
-function buildVsBuyHealth(decisions) {
-  const findings = [];
+function buildVsBuyHealth(decisions: JsonObject[]): JsonObject {
+  const findings: JsonObject[] = [];
   const activeDecisions = decisions.filter((decision) => decision.status !== "superseded");
   for (const decision of activeDecisions) {
     if (decision.error) {
@@ -676,7 +681,7 @@ function buildVsBuyHealth(decisions) {
   };
 }
 
-export function architectureState(root, goalId = undefined) {
+export function architectureState(root: string, goalId: string | undefined = undefined): JsonObject {
   const paths = architectureBaselinePaths(root);
   const surface = architectureSurfaceState(root);
   const challenges = architectureChallengeSummaries(root);
@@ -684,14 +689,14 @@ export function architectureState(root, goalId = undefined) {
   const decisions = buildVsBuyDecisionSummaries(root);
   const buildVsBuy = buildVsBuyHealth(decisions);
 
-  let baseline = null;
-  let issues = [];
+  let baseline: JsonObject | null = null;
+  let issues: ValidationIssue[] = [];
   if (fs.existsSync(paths.jsonPath)) {
     try {
       baseline = readJson(paths.jsonPath);
       issues = validateArchitectureBaseline(baseline);
     } catch (error) {
-      issues = [{ path: "baseline", message: error.message }];
+      issues = [{ path: "baseline", message: errorMessage(error) }];
     }
   }
 
@@ -727,7 +732,7 @@ export function architectureState(root, goalId = undefined) {
   };
 }
 
-function renderArchitectureReportSection(root, goalId = undefined) {
+function renderArchitectureReportSection(root: string, goalId: string | undefined = undefined): string {
   const state = architectureState(root, goalId);
   const lines = [
     "## Architecture Baseline",
@@ -767,12 +772,12 @@ function renderArchitectureReportSection(root, goalId = undefined) {
   return lines.join("\n");
 }
 
-export function renderReportWithArchitecture(root, contract, ledger) {
+export function renderReportWithArchitecture(root: string, contract: JsonObject, ledger: JsonObject): string {
   const base = renderReport(contract, ledger).trimEnd();
   return `${base}\n\n${renderArchitectureReportSection(root, contract.goal_id).trimEnd()}\n`;
 }
 
-export function renderArchitectureChallengeMarkdown(challenge) {
+export function renderArchitectureChallengeMarkdown(challenge: JsonObject): string {
   return [
     `# ${challenge.id} Architecture Challenge`,
     "",
@@ -799,7 +804,7 @@ export function renderArchitectureChallengeMarkdown(challenge) {
   ].join("\n");
 }
 
-export function renderBuildVsBuyMarkdown(decision) {
+export function renderBuildVsBuyMarkdown(decision: JsonObject): string {
   return [
     `# ${decision.id} Build-vs-Buy Decision`,
     "",

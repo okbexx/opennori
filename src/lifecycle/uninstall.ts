@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { SKILL_PACK } from "../skills.js";
+import { SKILL_PACK } from "../skills.ts";
+import type { ManagedAction } from "../types.ts";
 
-function plannedDelete(root, relativePath, kind, { recursive = false, reason = undefined } = {}) {
+function plannedDelete(root: string, relativePath: string, kind: string, { recursive = false, reason = undefined as string | undefined } = {}): ManagedAction {
   const target = path.join(root, relativePath);
   const exists = fs.existsSync(target);
   return {
@@ -15,7 +16,7 @@ function plannedDelete(root, relativePath, kind, { recursive = false, reason = u
   };
 }
 
-function plannedPreserve(root, relativePath, kind, reason) {
+function plannedPreserve(root: string, relativePath: string, kind: string, reason: string): ManagedAction {
   return {
     path: path.join(root, relativePath),
     kind,
@@ -26,8 +27,8 @@ function plannedPreserve(root, relativePath, kind, reason) {
   };
 }
 
-export function buildUninstallActions(root, { includeState = false } = {}) {
-  const actions = SKILL_PACK.map((skill) => plannedDelete(root, `.agents/skills/${skill.name}/SKILL.md`, "skill"));
+export function buildUninstallActions(root: string, { includeState = false } = {}): ManagedAction[] {
+  const actions: ManagedAction[] = SKILL_PACK.map((skill) => plannedDelete(root, `.agents/skills/${skill.name}/SKILL.md`, "skill"));
 
   if (includeState) {
     actions.push(plannedDelete(root, ".opennori", "state-directory", {
@@ -51,7 +52,7 @@ export function buildUninstallActions(root, { includeState = false } = {}) {
   return actions;
 }
 
-export function applyUninstallActions(actions) {
+export function applyUninstallActions(actions: ManagedAction[]): void {
   for (const action of actions) {
     if (action.action === "delete") {
       fs.rmSync(action.path, { force: true });

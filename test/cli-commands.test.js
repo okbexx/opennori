@@ -19,8 +19,8 @@ import { runArchiveCommand, runReportCommand } from "../src/cli/commands/reporti
 import { runSkillExportCommand } from "../src/cli/commands/skill.ts";
 import { runUninstallCommand } from "../src/cli/commands/uninstall.ts";
 import { runUpgradeCommand } from "../src/cli/commands/upgrade.ts";
-import { buildArchitectureBaseline, writeArchitectureBaseline } from "../src/architecture.js";
-import { addEvidence, buildEvidenceLedger, writeJson } from "../src/core.js";
+import { buildArchitectureBaseline, writeArchitectureBaseline } from "../src/architecture.ts";
+import { addEvidence, buildEvidenceLedger, writeJson } from "../src/core.ts";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 
@@ -846,7 +846,7 @@ test("evidence add command module records flexible reviewable sources", async ()
     "--source", "{\"type\":\"command\",\"label\":\"npm run check\",\"command\":\"npm run check\",\"outcome\":\"passed\"}",
     "--source", "screenshots/reviewable-flow.png",
     "--source-command", "npm run check",
-    "--source-path", "src/cli.js",
+    "--source-path", "src/cli.ts",
     "--source-url", "https://example.com/review",
     "--reviewability", "User can rerun the command or open the artifact.",
     "--limitations", "Browser-specific visual review was not performed.",

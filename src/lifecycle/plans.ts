@@ -1,14 +1,15 @@
 import path from "node:path";
+import type { JsonObject, ManagedAction } from "../types.ts";
 
 const WRITING_INSTALL_ACTIONS = new Set(["create", "overwrite", "update", "merge"]);
 const WRITING_UNINSTALL_ACTIONS = new Set(["delete", "delete-tree"]);
 const WRITING_UPGRADE_ACTIONS = new Set(["update", "overwrite", "merge"]);
 
-function relativeTo(root, filePath) {
+function relativeTo(root: string, filePath: string): string {
   return path.relative(root, filePath) || ".";
 }
 
-function installActionReason(action, kind) {
+function installActionReason(action: string, kind: string): string {
   if (action === "create") return `Missing OpenNori ${kind} will be created.`;
   if (action === "exists") return `Required OpenNori ${kind} already exists.`;
   if (action === "skip") return `Existing OpenNori ${kind} is not overwritten without --force.`;
@@ -18,7 +19,7 @@ function installActionReason(action, kind) {
   return `OpenNori ${kind} action: ${action}.`;
 }
 
-function enrichInstallAction(root, action, { dryRun = false } = {}) {
+function enrichInstallAction(root: string, action: ManagedAction, { dryRun = false } = {}): JsonObject {
   const wouldWrite = WRITING_INSTALL_ACTIONS.has(action.action);
   return {
     path: relativeTo(root, action.path),
@@ -32,8 +33,8 @@ function enrichInstallAction(root, action, { dryRun = false } = {}) {
   };
 }
 
-function summarizeInstallPlan(actions) {
-  const byAction = {};
+function summarizeInstallPlan(actions: JsonObject[]): JsonObject {
+  const byAction: Record<string, number> = {};
   for (const action of actions) {
     byAction[action.action] = (byAction[action.action] || 0) + 1;
   }
@@ -47,7 +48,7 @@ function summarizeInstallPlan(actions) {
   };
 }
 
-export function buildInstallPlan(root, actions, { dryRun = false, force = false, requestedSkill = false, refreshSkill = false, mergeAgentRoute = false } = {}) {
+export function buildInstallPlan(root: string, actions: ManagedAction[], { dryRun = false, force = false, requestedSkill = false, refreshSkill = false, mergeAgentRoute = false } = {}): JsonObject {
   const enrichedActions = actions.map((action) => enrichInstallAction(root, action, { dryRun }));
   return {
     schema_version: "opennori/install-plan-v1",
@@ -62,7 +63,7 @@ export function buildInstallPlan(root, actions, { dryRun = false, force = false,
   };
 }
 
-function uninstallActionReason(action, kind) {
+function uninstallActionReason(action: string, kind: string): string {
   if (action === "delete") return `Existing OpenNori ${kind} will be removed.`;
   if (action === "delete-tree") return `Existing OpenNori ${kind} and its contents will be removed.`;
   if (action === "absent") return `OpenNori ${kind} is already absent.`;
@@ -70,7 +71,7 @@ function uninstallActionReason(action, kind) {
   return `OpenNori ${kind} action: ${action}.`;
 }
 
-function enrichUninstallAction(root, action, { dryRun = false } = {}) {
+function enrichUninstallAction(root: string, action: ManagedAction, { dryRun = false } = {}): JsonObject {
   const wouldWrite = WRITING_UNINSTALL_ACTIONS.has(action.action);
   return {
     path: relativeTo(root, action.path),
@@ -85,8 +86,8 @@ function enrichUninstallAction(root, action, { dryRun = false } = {}) {
   };
 }
 
-function summarizeUninstallPlan(actions) {
-  const byAction = {};
+function summarizeUninstallPlan(actions: JsonObject[]): JsonObject {
+  const byAction: Record<string, number> = {};
   for (const action of actions) {
     byAction[action.action] = (byAction[action.action] || 0) + 1;
   }
@@ -101,7 +102,7 @@ function summarizeUninstallPlan(actions) {
   };
 }
 
-export function buildUninstallPlan(root, actions, { dryRun = false, includeState = false } = {}) {
+export function buildUninstallPlan(root: string, actions: ManagedAction[], { dryRun = false, includeState = false } = {}): JsonObject {
   const enrichedActions = actions.map((action) => enrichUninstallAction(root, action, { dryRun }));
   return {
     schema_version: "opennori/uninstall-plan-v1",
@@ -113,7 +114,7 @@ export function buildUninstallPlan(root, actions, { dryRun = false, includeState
   };
 }
 
-function upgradeActionReason(action, kind) {
+function upgradeActionReason(action: string, kind: string): string {
   if (action === "current") return `OpenNori ${kind} is already current.`;
   if (action === "update") return `OpenNori ${kind} will be refreshed to the current CLI version.`;
   if (action === "overwrite") return `OpenNori ${kind} will be overwritten to refresh generated OpenNori assets.`;
@@ -122,7 +123,7 @@ function upgradeActionReason(action, kind) {
   return `OpenNori ${kind} action: ${action}.`;
 }
 
-function enrichUpgradeAction(root, action, { dryRun = false } = {}) {
+function enrichUpgradeAction(root: string, action: ManagedAction, { dryRun = false } = {}): JsonObject {
   const wouldWrite = WRITING_UPGRADE_ACTIONS.has(action.action);
   return {
     path: relativeTo(root, action.path),
@@ -138,8 +139,8 @@ function enrichUpgradeAction(root, action, { dryRun = false } = {}) {
   };
 }
 
-function summarizeUpgradePlan(actions) {
-  const byAction = {};
+function summarizeUpgradePlan(actions: JsonObject[]): JsonObject {
+  const byAction: Record<string, number> = {};
   for (const action of actions) {
     byAction[action.action] = (byAction[action.action] || 0) + 1;
   }
@@ -153,7 +154,7 @@ function summarizeUpgradePlan(actions) {
   };
 }
 
-export function buildUpgradePlan(root, actions, { dryRun = false, requestedSkill = false, mergeAgentRoute = false } = {}) {
+export function buildUpgradePlan(root: string, actions: ManagedAction[], { dryRun = false, requestedSkill = false, mergeAgentRoute = false } = {}): JsonObject {
   const enrichedActions = actions.map((action) => enrichUpgradeAction(root, action, { dryRun }));
   return {
     schema_version: "opennori/upgrade-plan-v1",
@@ -166,6 +167,6 @@ export function buildUpgradePlan(root, actions, { dryRun = false, requestedSkill
   };
 }
 
-export function isWritingUpgradeAction(action) {
+export function isWritingUpgradeAction(action: string): boolean {
   return WRITING_UPGRADE_ACTIONS.has(action);
 }

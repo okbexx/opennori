@@ -1,7 +1,7 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { findActivePairs, ok, writeJson } from "../../core.js";
-import { buildContextExport } from "../../lifecycle.js";
+import { findActivePairs, ok, writeJson } from "../../core.ts";
+import { buildContextExport } from "../../lifecycle.ts";
 import { runJsonCommand } from "../runtime.ts";
 
 export const contextExportCommand = defineCommand({

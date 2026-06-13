@@ -1,4 +1,4 @@
-import { fail, ok } from "./core.js";
+import { fail, ok } from "./core.ts";
 import { runBootstrap } from "./cli/bootstrap.ts";
 import { CLI_NAME, commandLabelFor, resolveCliCommand, runCliCommand, usageFor } from "./cli/command-tree.ts";
 

@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { packagePath } from "../package-root.js";
+import { packagePath } from "../package-root.ts";
+import type { JsonObject } from "../types.ts";
 
-export const PACKAGE_JSON = JSON.parse(fs.readFileSync(packagePath("package.json"), "utf8"));
+export const PACKAGE_JSON = JSON.parse(fs.readFileSync(packagePath("package.json"), "utf8")) as JsonObject;
 export const MANIFEST_SCHEMA_VERSION = "opennori/manifest-v1";
 export const REQUIRED_NORI_DIRS = ["active", "completed", "blocked", "reports", "brainstorms"];
 export const NORI_CAPABILITIES = [
@@ -28,7 +29,7 @@ export const NORI_CAPABILITIES = [
   "build-vs-buy"
 ];
 
-export function sameStringSet(left, right) {
+export function sameStringSet(left: unknown, right: unknown): boolean {
   if (!Array.isArray(left) || !Array.isArray(right)) return false;
   const leftSet = new Set(left);
   const rightSet = new Set(right);
@@ -36,19 +37,19 @@ export function sameStringSet(left, right) {
   return [...leftSet].every((item) => rightSet.has(item));
 }
 
-export function relativeTo(root, filePath) {
+export function relativeTo(root: string, filePath: string): string {
   return path.relative(root, filePath) || ".";
 }
 
-export function manifestPath(root) {
+export function manifestPath(root: string): string {
   return path.join(root, ".opennori", "manifest.json");
 }
 
-export function skillPackPath(root, skillName) {
+export function skillPackPath(root: string, skillName: string): string {
   return path.join(root, ".agents", "skills", skillName, "SKILL.md");
 }
 
-export function protocolTemplate() {
+export function protocolTemplate(): string {
   const source = packagePath(".opennori", "protocol.md");
   if (fs.existsSync(source)) return fs.readFileSync(source, "utf8");
   return [

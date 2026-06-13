@@ -1,11 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
-import { ok } from "../core.js";
-import { doctor } from "./doctor.js";
-import { installActions } from "./install.js";
-import { buildInstallPlan } from "./plans.js";
+import { ok } from "../core.ts";
+import { doctor } from "./doctor.ts";
+import { installActions } from "./install.ts";
+import { buildInstallPlan } from "./plans.ts";
+import type { JsonObject } from "../types.ts";
 
-export function bootstrap(root, { confirmed = false } = {}) {
+export function bootstrap(root: string, { confirmed = false } = {}): JsonObject {
   const health = doctor(root);
   if (health.status === "ready") {
     return ok({
@@ -51,7 +52,7 @@ export function bootstrap(root, { confirmed = false } = {}) {
     },
     [],
     hasState && health.status === "broken"
-      ? ["Existing OpenNori state was not ready before bootstrap; review doctor output after install."]
+      ? [{ message: "Existing OpenNori state was not ready before bootstrap; review doctor output after install." }]
       : [],
     [next]
   );

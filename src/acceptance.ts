@@ -1,4 +1,5 @@
-import { slugify } from "./core.js";
+import { slugify } from "./core.ts";
+import type { JsonObject } from "./types.ts";
 
 const BRAINSTORM_CANDIDATES = [
   {
@@ -114,12 +115,12 @@ const DISCOVERY_GAPS = [
   }
 ];
 
-function sentenceHasSpecifics(text, terms) {
+function sentenceHasSpecifics(text: unknown, terms: string[]): boolean {
   const value = String(text || "").toLowerCase();
   return terms.some((term) => value.includes(term.toLowerCase()));
 }
 
-export function discoverAcceptanceGaps(text, { fallback = false, allowedIds = null } = {}) {
+export function discoverAcceptanceGaps(text: string, { fallback = false, allowedIds = null as Set<string> | null } = {}): JsonObject[] {
   const lowered = text.toLowerCase();
   const gaps = DISCOVERY_GAPS
     .filter((gap) => !allowedIds || allowedIds.has(gap.id))
@@ -146,11 +147,11 @@ export function discoverAcceptanceGaps(text, { fallback = false, allowedIds = nu
   ];
 }
 
-function discoveryGap(gapId) {
+function discoveryGap(gapId: string): JsonObject | undefined {
   return DISCOVERY_GAPS.find((gap) => gap.id === gapId);
 }
 
-export function discoverAcceptance(goal, explicitId = undefined) {
+export function discoverAcceptance(goal: string, explicitId: string | undefined = undefined): JsonObject {
   const text = String(goal || "").trim();
   const selectedGaps = discoverAcceptanceGaps(text, { fallback: true });
 
@@ -170,8 +171,8 @@ export function discoverAcceptance(goal, explicitId = undefined) {
   };
 }
 
-export function auditAcceptanceQuality(contract) {
-  const findings = [];
+export function auditAcceptanceQuality(contract: JsonObject): JsonObject {
+  const findings: JsonObject[] = [];
   for (const [index, criterion] of (contract.criteria || []).entries()) {
     const triggerText = [
       criterion.user_story,
@@ -182,7 +183,7 @@ export function auditAcceptanceQuality(contract) {
       criterion.measurement,
       criterion.threshold
     ].filter(Boolean).join("\n");
-    const addFinding = (gapId) => {
+    const addFinding = (gapId: string) => {
       const gap = discoveryGap(gapId);
       if (!gap) return;
       findings.push({
@@ -248,7 +249,7 @@ export function auditAcceptanceQuality(contract) {
   };
 }
 
-export function renderDiscoveryMarkdown(discovery) {
+export function renderDiscoveryMarkdown(discovery: JsonObject): string {
   const lines = [
     `# ${discovery.id} Acceptance Discovery`,
     "",
@@ -281,7 +282,7 @@ export function renderDiscoveryMarkdown(discovery) {
   return `${lines.join("\n")}\n`;
 }
 
-export function renderBrainstormMarkdown(brainstorm) {
+export function renderBrainstormMarkdown(brainstorm: JsonObject): string {
   const lines = [
     `# ${brainstorm.id} Brainstorm`,
     "",
@@ -304,10 +305,10 @@ export function renderBrainstormMarkdown(brainstorm) {
       `User value: ${candidate.user_value}`,
       "",
       "Acceptance directions:",
-      ...candidate.acceptance_directions.map((direction) => `- ${direction}`),
+      ...candidate.acceptance_directions.map((direction: string) => `- ${direction}`),
       "",
       "Risks:",
-      ...candidate.risks.map((risk) => `- ${risk}`),
+      ...candidate.risks.map((risk: string) => `- ${risk}`),
       ""
     );
   }
@@ -316,7 +317,7 @@ export function renderBrainstormMarkdown(brainstorm) {
   return `${lines.join("\n")}\n`;
 }
 
-export function briefFromGoal(goal, goalId = undefined) {
+export function briefFromGoal(goal: string, goalId: string | undefined = undefined): JsonObject {
   return {
     goal_id: goalId || undefined,
     goal,
@@ -325,7 +326,7 @@ export function briefFromGoal(goal, goalId = undefined) {
   };
 }
 
-export function buildBrainstorm(idea, explicitId = undefined) {
+export function buildBrainstorm(idea: string, explicitId: string | undefined = undefined): JsonObject {
   const id = explicitId || slugify(idea.slice(0, 40));
   return {
     protocol_version: "opennori/brainstorm-v1",
@@ -337,8 +338,8 @@ export function buildBrainstorm(idea, explicitId = undefined) {
   };
 }
 
-export function briefFromBrainstorm(brainstorm, candidateId) {
-  const candidate = brainstorm.candidates.find((item) => item.id === candidateId);
+export function briefFromBrainstorm(brainstorm: JsonObject, candidateId: string): JsonObject {
+  const candidate = brainstorm.candidates.find((item: JsonObject) => item.id === candidateId);
   if (!candidate) throw new Error(`Brainstorm candidate not found: ${candidateId}`);
   return {
     goal_id: slugify(`${brainstorm.id}-${candidate.id}`),
@@ -347,7 +348,7 @@ export function briefFromBrainstorm(brainstorm, candidateId) {
       status: "draft",
       summary: `Draft generated from brainstorm ${brainstorm.id} candidate ${candidate.id}.`
     },
-    criteria: candidate.acceptance_directions.map((direction, index) => ({
+    criteria: candidate.acceptance_directions.map((direction: string, index: number) => ({
       id: `AC-${index + 1}`,
       user_story: direction,
       measurement: "用户查看 OpenNori draft、报告或目标结果后作出判断。",

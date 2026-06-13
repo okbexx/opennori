@@ -2,8 +2,8 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import type { CommandDef } from "citty";
 import { runCommand } from "citty";
-import { findActivePairs, readJson, syncAcceptanceMarkdown, writeJson } from "../core.js";
-import { refreshManifest } from "../lifecycle.js";
+import { findActivePairs, readJson, syncAcceptanceMarkdown, writeJson } from "../core.ts";
+import { refreshManifest } from "../lifecycle.ts";
 
 type ParsedOptionToken = {
   kind: "option";

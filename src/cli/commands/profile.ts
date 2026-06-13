@@ -1,6 +1,6 @@
 import { defineCommand } from "citty";
-import { addProfileEvidence, addProfileItem, currentGap, ok, profileCompliance, recomputeWorkflowStatus } from "../../core.js";
-import { autoProfileChecks, recordAutoProfileChecks } from "../../lifecycle.js";
+import { addProfileEvidence, addProfileItem, currentGap, ok, profileCompliance, recomputeWorkflowStatus } from "../../core.ts";
+import { autoProfileChecks, recordAutoProfileChecks } from "../../lifecycle.ts";
 import { type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
 
 export const profileAddCommand = defineCommand({

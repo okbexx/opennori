@@ -1,6 +1,6 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { currentGap, findActivePairs, ok, readJson } from "../../core.js";
+import { currentGap, findActivePairs, ok, readJson } from "../../core.ts";
 import { runJsonCommand } from "../runtime.ts";
 
 export const listCommand = defineCommand({

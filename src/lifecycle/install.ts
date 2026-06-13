@@ -1,4 +1,5 @@
 import path from "node:path";
+import type { ManagedAction } from "../types.ts";
 import {
   AGENT_ROUTE_END,
   AGENT_ROUTE_START,
@@ -6,29 +7,38 @@ import {
   renderAgentGuideMarkdown,
   renderAgentRouteMarkdown,
   renderAgentRouteSectionMarkdown
-} from "../architecture.js";
-import { SKILL_PACK, skillPackMarkdowns } from "../skills.js";
+} from "../architecture.ts";
+import { SKILL_PACK, skillPackMarkdowns } from "../skills.ts";
 import {
   ensureDir,
   writeAgentRoute,
   writeGeneratedFile,
   writeIfSafe
-} from "./managed-files.js";
-import { writeManifest } from "./manifest.js";
-import { protocolTemplate, skillPackPath } from "./shared.js";
+} from "./managed-files.ts";
+import { writeManifest } from "./manifest.ts";
+import { protocolTemplate, skillPackPath } from "./shared.ts";
 
-function skillPackInstallActions(root, { dryRun = false, force = false, refresh = false } = {}) {
+type InstallOptions = {
+  dryRun?: boolean;
+  force?: boolean;
+  requestedSkill?: boolean;
+  refreshSkill?: boolean;
+  mergeAgentRoute?: boolean;
+  refresh?: boolean;
+};
+
+function skillPackInstallActions(root: string, { dryRun = false, force = false, refresh = false }: InstallOptions = {}): ManagedAction[] {
   const markdowns = skillPackMarkdowns();
   return SKILL_PACK.map((skill) => writeGeneratedFile(
     skillPackPath(root, skill.name),
-    markdowns[skill.name],
+    markdowns[skill.name] || "",
     { dryRun, force, refresh, kind: "skill" }
   ));
 }
 
-export function installActions(root, { dryRun = false, force = false, requestedSkill = false, refreshSkill = false, mergeAgentRoute = false } = {}) {
+export function installActions(root: string, { dryRun = false, force = false, requestedSkill = false, refreshSkill = false, mergeAgentRoute = false }: InstallOptions = {}): ManagedAction[] {
   const agentRouteSection = renderAgentRouteSectionMarkdown();
-  const actions = [
+  const actions: ManagedAction[] = [
     ensureDir(path.join(root, ".opennori", "active"), { dryRun }),
     ensureDir(path.join(root, ".opennori", "completed"), { dryRun }),
     ensureDir(path.join(root, ".opennori", "blocked"), { dryRun }),
