@@ -32,6 +32,18 @@ import {
 } from "./architecture.js";
 import { packagePath } from "./package-root.js";
 import { schemaErrorSummary, validateSchema } from "./validation.js";
+import {
+  buildInstallPlan,
+  buildUninstallPlan,
+  buildUpgradePlan,
+  isWritingUpgradeAction
+} from "./lifecycle/plans.js";
+
+export {
+  buildInstallPlan,
+  buildUninstallPlan,
+  buildUpgradePlan
+};
 
 const PACKAGE_JSON = JSON.parse(fs.readFileSync(packagePath("package.json"), "utf8"));
 
@@ -63,77 +75,12 @@ const NORI_CAPABILITIES = [
   "architecture-profile",
   "build-vs-buy"
 ];
-const WRITING_INSTALL_ACTIONS = new Set(["create", "overwrite", "update", "merge"]);
-const WRITING_UNINSTALL_ACTIONS = new Set(["delete", "delete-tree"]);
-const WRITING_UPGRADE_ACTIONS = new Set(["update", "overwrite", "merge"]);
 function sameStringSet(left, right) {
   if (!Array.isArray(left) || !Array.isArray(right)) return false;
   const leftSet = new Set(left);
   const rightSet = new Set(right);
   if (leftSet.size !== rightSet.size) return false;
   return [...leftSet].every((item) => rightSet.has(item));
-}
-
-function installActionReason(action, kind) {
-  if (action === "create") return `Missing OpenNori ${kind} will be created.`;
-  if (action === "exists") return `Required OpenNori ${kind} already exists.`;
-  if (action === "skip") return `Existing OpenNori ${kind} is not overwritten without --force.`;
-  if (action === "overwrite") return `Existing OpenNori ${kind} will be overwritten because --force was provided.`;
-  if (action === "merge") return `OpenNori ${kind} section will be merged without replacing existing project content.`;
-  if (action === "update") return `OpenNori ${kind} will be refreshed from current project state.`;
-  return `OpenNori ${kind} action: ${action}.`;
-}
-
-function enrichInstallAction(root, action, { dryRun = false } = {}) {
-  const wouldWrite = WRITING_INSTALL_ACTIONS.has(action.action);
-  return {
-    path: relativeTo(root, action.path),
-    kind: action.kind || "file",
-    action: action.action,
-    managed: action.managed !== false,
-    would_write: wouldWrite,
-    will_write: wouldWrite && !dryRun,
-    destructive: action.action === "overwrite",
-    reason: action.reason || installActionReason(action.action, action.kind || "file")
-  };
-}
-
-function summarizeInstallPlan(actions) {
-  const byAction = {};
-  for (const action of actions) {
-    byAction[action.action] = (byAction[action.action] || 0) + 1;
-  }
-  return {
-    total: actions.length,
-    by_action: byAction,
-    would_write: actions.filter((action) => action.would_write).length,
-    will_write: actions.filter((action) => action.will_write).length,
-    destructive: actions.filter((action) => action.destructive).length,
-    managed: actions.filter((action) => action.managed).length
-  };
-}
-
-export function buildInstallPlan(root, actions, { dryRun = false, force = false, requestedSkill = false, refreshSkill = false, mergeAgentRoute = false } = {}) {
-  const enrichedActions = actions.map((action) => enrichInstallAction(root, action, { dryRun }));
-  return {
-    schema_version: "opennori/install-plan-v1",
-    root,
-    dry_run: dryRun,
-    force,
-    requested_skill: requestedSkill,
-    refresh_skill: refreshSkill,
-    merge_agent_route: mergeAgentRoute,
-    summary: summarizeInstallPlan(enrichedActions),
-    actions: enrichedActions
-  };
-}
-
-function uninstallActionReason(action, kind) {
-  if (action === "delete") return `Existing OpenNori ${kind} will be removed.`;
-  if (action === "delete-tree") return `Existing OpenNori ${kind} and its contents will be removed.`;
-  if (action === "absent") return `OpenNori ${kind} is already absent.`;
-  if (action === "preserve") return `OpenNori ${kind} is preserved by default.`;
-  return `OpenNori ${kind} action: ${action}.`;
 }
 
 function plannedDelete(root, relativePath, kind, { recursive = false, reason = undefined } = {}) {
@@ -160,93 +107,9 @@ function plannedPreserve(root, relativePath, kind, reason) {
   };
 }
 
-function enrichUninstallAction(root, action, { dryRun = false } = {}) {
-  const wouldWrite = WRITING_UNINSTALL_ACTIONS.has(action.action);
-  return {
-    path: relativeTo(root, action.path),
-    kind: action.kind || "file",
-    action: action.action,
-    managed: action.managed !== false,
-    would_write: wouldWrite,
-    will_write: wouldWrite && !dryRun,
-    destructive: wouldWrite,
-    recursive: Boolean(action.recursive),
-    reason: action.reason || uninstallActionReason(action.action, action.kind || "file")
-  };
-}
-
-function summarizeUninstallPlan(actions) {
-  const byAction = {};
-  for (const action of actions) {
-    byAction[action.action] = (byAction[action.action] || 0) + 1;
-  }
-  return {
-    total: actions.length,
-    by_action: byAction,
-    would_write: actions.filter((action) => action.would_write).length,
-    will_write: actions.filter((action) => action.will_write).length,
-    destructive: actions.filter((action) => action.destructive).length,
-    preserved: actions.filter((action) => action.action === "preserve").length,
-    managed: actions.filter((action) => action.managed).length
-  };
-}
-
-function upgradeActionReason(action, kind) {
-  if (action === "current") return `OpenNori ${kind} is already current.`;
-  if (action === "update") return `OpenNori ${kind} will be refreshed to the current CLI version.`;
-  if (action === "overwrite") return `OpenNori ${kind} will be overwritten to refresh generated OpenNori assets.`;
-  if (action === "merge") return `OpenNori ${kind} section will be merged without replacing existing project content.`;
-  if (action === "missing") return `OpenNori ${kind} is missing; run install before upgrade.`;
-  return `OpenNori ${kind} action: ${action}.`;
-}
-
-function enrichUpgradeAction(root, action, { dryRun = false } = {}) {
-  const wouldWrite = WRITING_UPGRADE_ACTIONS.has(action.action);
-  return {
-    path: relativeTo(root, action.path),
-    kind: action.kind || "file",
-    action: action.action,
-    managed: action.managed !== false,
-    would_write: wouldWrite,
-    will_write: wouldWrite && !dryRun,
-    destructive: action.action === "overwrite",
-    from_version: action.from_version,
-    to_version: action.to_version,
-    reason: action.reason || upgradeActionReason(action.action, action.kind || "file")
-  };
-}
-
-function summarizeUpgradePlan(actions) {
-  const byAction = {};
-  for (const action of actions) {
-    byAction[action.action] = (byAction[action.action] || 0) + 1;
-  }
-  return {
-    total: actions.length,
-    by_action: byAction,
-    would_write: actions.filter((action) => action.would_write).length,
-    will_write: actions.filter((action) => action.will_write).length,
-    destructive: actions.filter((action) => action.destructive).length,
-    managed: actions.filter((action) => action.managed).length
-  };
-}
-
-export function buildUpgradePlan(root, actions, { dryRun = false, requestedSkill = false, mergeAgentRoute = false } = {}) {
-  const enrichedActions = actions.map((action) => enrichUpgradeAction(root, action, { dryRun }));
-  return {
-    schema_version: "opennori/upgrade-plan-v1",
-    root,
-    dry_run: dryRun,
-    requested_skill: requestedSkill,
-    merge_agent_route: mergeAgentRoute,
-    summary: summarizeUpgradePlan(enrichedActions),
-    actions: enrichedActions
-  };
-}
-
 export function applyUpgradeActions(actions) {
   for (const action of actions) {
-    if (WRITING_UPGRADE_ACTIONS.has(action.action) && action.write) action.write();
+    if (isWritingUpgradeAction(action.action) && action.write) action.write();
   }
 }
 
@@ -308,18 +171,6 @@ export function buildUninstallActions(root, { includeState = false } = {}) {
     plannedPreserve(root, ".opennori/brainstorms", "brainstorms", "Brainstorms are preserved unless --include-state is provided.")
   );
   return actions;
-}
-
-export function buildUninstallPlan(root, actions, { dryRun = false, includeState = false } = {}) {
-  const enrichedActions = actions.map((action) => enrichUninstallAction(root, action, { dryRun }));
-  return {
-    schema_version: "opennori/uninstall-plan-v1",
-    root,
-    dry_run: dryRun,
-    include_state: includeState,
-    summary: summarizeUninstallPlan(enrichedActions),
-    actions: enrichedActions
-  };
 }
 
 export function applyUninstallActions(actions) {
@@ -483,7 +334,7 @@ export function upgradeActions(root, { requestedSkill = false, mergeAgentRoute =
   }
 
   const manifestAction = actions.find((action) => action.kind === "manifest");
-  const refreshesManagedAssets = actions.some((action) => action.kind !== "manifest" && WRITING_UPGRADE_ACTIONS.has(action.action));
+  const refreshesManagedAssets = actions.some((action) => action.kind !== "manifest" && isWritingUpgradeAction(action.action));
   if (manifestAction && manifestAction.action === "current" && refreshesManagedAssets) {
     manifestAction.action = "update";
     manifestAction.reason = "OpenNori manifest will be refreshed after managed assets are upgraded.";
