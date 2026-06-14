@@ -1,6 +1,6 @@
 {
   "name": "opennori",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "OpenNori is an agent capability bundle for human-reviewable acceptance contracts, evidence, and reports.",
   "author": {
     "name": "okbexx",

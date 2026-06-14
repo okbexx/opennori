@@ -1,9 +1,9 @@
 {
   "schema_version": "opennori/manifest-v1",
   "protocol_version": "opennori/v1",
-  "opennori_version": "0.1.8",
+  "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-14T09:18:33.306Z",
+  "updated_at": "2026-06-14T10:05:40.509Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -145,7 +145,7 @@
   "plugin": {
     "schema_version": "opennori/plugin-v1",
     "name": "opennori",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "manifest_path": "plugins/opennori/.codex-plugin/plugin.json",
     "marketplace_path": ".agents/plugins/marketplace.json",
     "marketplace_name": "opennori",
