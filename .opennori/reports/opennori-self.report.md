@@ -8,7 +8,7 @@ Confidence: confident
 Review risks: none
 Current gap: None. All required acceptance criteria have passing or waived evidence.
 User intervention: No user intervention is currently required.
-Recommended next action: This OpenNori goal is complete. If the user has asked to continue, start the next acceptance loop without waiting for another next-step prompt.
+Recommended next action: This OpenNori goal is complete. If the user has asked to continue, choose or refine a candidate goal and start the next acceptance loop without waiting for another next-step prompt.
 Workflow status: complete
 
 ## Goal
@@ -18,7 +18,7 @@ Workflow status: complete
 ## Acceptance Basis
 
 Status: approved
-Summary: User revised AC-P-12 to define acceptance review as soft agent/user discussion input.
+Summary: User refined AC-Z-14 to require next-loop candidate goals, not only a generic next action.
 
 ## Nori Profile
 
@@ -62,7 +62,7 @@ Summary: User revised AC-P-12 to define acceptance review as soft agent/user dis
 | AC-Z-11 | productization | 作为用户，我卸载 OpenNori 前，能预览将移除什么，并确认默认卸载不会丢失 active goals、证据、报告或归档。 | passing | verified | review-result: uninstall previews removals, preserves .opennori state by default, and requires explicit --include-state plus --confirm before removing OpenNori state. | tool-observation | type=command, label=npm run check, command=npm run check; type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root . --json; type=artifact, label=test/core.test.js, path=test/core.test.js; type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md | Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and generated report. | This is local repository evidence for the current worktree; npm publishing and public site deployment are separate release steps. |
 | AC-Z-12 | productization | 作为用户，我安装或获取 OpenNori 后，agent 能获得一组职责清晰的 OpenNori Plugin Skills 来处理验收、证据、能力偏好、架构、项目健康和报告，而我不需要记住这些 Skill 名。 | passing | high | review-result: OpenNori Plugin now bundles the full Skill set under plugins/opennori/skills and installs through Codex as opennori@opennori. Doctor reports plugin_manifest, plugin_marketplace, plugin_skills, and manifest_plugin_state passing; npm run check passes 73 tests; plugin-creator validation passes for plugins/opennori. | tool-observation | type=command, label=npm run check, command=npm run check; type=command, label=python3 /Users/jarl/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py /Users/jarl/code/jarlone/opennori/plugins/opennori, command=python3 /Users/jarl/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py /Users/jarl/code/jarlone/opennori/plugins/opennori; type=command, label=node ./bin/opennori.js doctor --root . --json, command=node ./bin/opennori.js doctor --root . --json; type=command, label=codex plugin add opennori@opennori, command=codex plugin add opennori@opennori; type=artifact, label=plugins/opennori/skills, path=plugins/opennori/skills; type=artifact, label=test/core.test.js, path=test/core.test.js | Run check, doctor, plugin validation, and Codex plugin install; inspect the Skill directory and package tests for nested plugin asset assertions. | The current thread cannot hot-load newly installed Skills; OpenAI guidance requires opening a new Codex session after plugin install. |
 | AC-Z-13 | productization | 作为用户，我运行 opennori doctor 后，如果项目状态不健康，能直接看到一组可执行恢复动作。 | passing | verified | review-result: Doctor provides actionable recovery for unhealthy OpenNori state: tests cover missing manifest, stale manifest, invalid manifest, missing baseline routes, broken active goals, and Plugin asset health; current doctor output reports ready with no recovery actions. | tool-observation | type=command, label=node ./bin/opennori.js doctor --root . --json, command=node ./bin/opennori.js doctor --root . --json; type=artifact, label=test/core.test.js, path=test/core.test.js; type=artifact, label=src/lifecycle/doctor.ts, path=src/lifecycle/doctor.ts; type=artifact, label=src/lifecycle/doctor/plugin-health.ts, path=src/lifecycle/doctor/plugin-health.ts; type=artifact, label=src/lifecycle/doctor/active-goals.ts, path=src/lifecycle/doctor/active-goals.ts | Run doctor and inspect doctor tests for unhealthy fixtures and recovery_actions assertions. | Current repo is healthy, so broken-state behavior is verified through test fixtures rather than by damaging this checkout. |
-| AC-Z-14 | productization | 作为用户，我让 agent 继续 OpenNori 工作时，不需要每轮都追问下一步是什么。 | passing | verified | review-result: resume/status/next/report/context export include next_recommendation and next_actions so agents can keep moving without asking the user for every next step. | tool-observation | type=command, label=npm run check, command=npm run check; type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root . --json; type=artifact, label=test/core.test.js, path=test/core.test.js; type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md | Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and generated report. | This is local repository evidence for the current worktree; npm publishing and public site deployment are separate release steps. |
+| AC-Z-14 | productization | 作为用户，我让 agent 继续一个已经完成的 OpenNori goal 时，不需要每轮都追问下一步是什么；agent 能看到少量可开启下一份 Nori Contract 的人类目标候选。 | passing | verified | review-result: Complete OpenNori goals now expose next_recommendation.candidate_goals in resume/status/next/report/context export. Candidate goals include goal, user_value, acceptance_directions, risks, and source; reports render them as starts for the next Nori Contract, not phases, task lists, approved AC, or evidence. | tool-observation | type=command, label=npm run check, command=npm run check; type=command, label=npx vitest run test/cli-commands.test.js -t 'next command module returns\|next-loop candidates', command=npx vitest run test/cli-commands.test.js -t 'next command module returns\|next-loop candidates'; type=command, label=node ./bin/opennori.js resume --root . --goal opennori-self --json, command=node ./bin/opennori.js resume --root . --goal opennori-self --json; type=artifact, label=src/core/report.ts, path=src/core/report.ts; type=artifact, label=src/types.ts, path=src/types.ts; type=artifact, label=src/cli/commands/acceptance/runtime-status.ts, path=src/cli/commands/acceptance/runtime-status.ts; type=artifact, label=test/core.test.js, path=test/core.test.js; type=artifact, label=test/cli-commands.test.js, path=test/cli-commands.test.js; type=artifact, label=plugins/opennori/skills/nori/SKILL.md, path=plugins/opennori/skills/nori/SKILL.md; type=artifact, label=plugins/opennori/skills/nori-reporting/SKILL.md, path=plugins/opennori/skills/nori-reporting/SKILL.md | Run npm run check, then run resume/status/next/report/context export on a complete goal and inspect next_recommendation.candidate_goals plus the Candidate Next Goals report section. | Candidates are heuristic suggestions for the next Nori Contract; the agent or user must still choose or refine one and run acceptance discovery or draft before it becomes an approved contract. |
 | AC-Z-15 | productization | 作为用户，我让 agent 记录验收证据时，不需要 agent 为常见来源手写复杂结构。 | passing | verified | review-result: evidence add accepts source, source-command, source-path, and source-url flags so agents can record common sources without hand-writing complex JSON. | tool-observation | type=command, label=npm run check, command=npm run check; type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root . --json; type=artifact, label=test/core.test.js, path=test/core.test.js; type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md | Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and generated report. | This is local repository evidence for the current worktree; npm publishing and public site deployment are separate release steps. |
 | AC-Z-16 | productization | 作为用户，我通过 npm 获取 OpenNori 后，能用 opennori 或 npx opennori 这个短入口开始，而不需要理解 install、root、dry-run、confirm 或内部 Skill 参数。 | passing | verified | review-result: The package exposes only the opennori bin, README shows short opennori and npx opennori entries, and bootstrap/install preview project-state writes before confirmed setup. | tool-observation | type=command, label=node ./bin/opennori.js --help, command=node ./bin/opennori.js --help; type=command, label=node ./bin/opennori.js bootstrap --root /tmp/opennori-bootstrap-smoke --json, command=node ./bin/opennori.js bootstrap --root /tmp/opennori-bootstrap-smoke --json; type=artifact, label=package.json, path=package.json; type=artifact, label=README.md, path=README.md; type=artifact, label=src/cli/bootstrap.ts, path=src/cli/bootstrap.ts; type=artifact, label=test/core.test.js, path=test/core.test.js | Inspect package.json bin and README quickstart, then run help/bootstrap preview and bootstrap tests. | npx behavior depends on npm registry propagation after publish; local CLI behavior is verified here. |
 | AC-Z-17 | productization | 作为用户，我第一次打开 README 或官网 Quick Start 时，能看到短到可以直接复制的 npx opennori 入口，而不是一串内部安装参数。 | passing | verified | review-result: README and website quickstart lead with short commands: try once with npx opennori, pin with npm install -D opennori, then use opennori as the project-local entry. | tool-observation | type=command, label=rg -n 'npx opennori\|npm install -D opennori\|opennori' README.md /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro, command=rg -n 'npx opennori\|npm install -D opennori\|opennori' README.md /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro; type=artifact, label=README.md, path=README.md; type=artifact, label=/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro, path=/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro | Open README and website source, or run the rg command, to verify the visible quickstart copy. | This verifies local website source; public site deployment is a separate release step. |
@@ -94,6 +94,58 @@ Summary: Latest evidence is reviewable enough for the current contract.
 ## User Intervention
 
 No user intervention is currently required.
+
+## Candidate Next Goals
+
+These are not approved acceptance criteria, implementation phases, or completion evidence. They are candidate starts for the next Nori Contract.
+
+### opennori-adoption-dogfood
+
+Goal: Run OpenNori through a non-OpenNori project and capture the adoption friction.
+User value: Users can judge whether OpenNori works outside its own repository, from natural-language goal through report.
+Acceptance directions:
+- As a user, I can start OpenNori in a non-OpenNori project from natural language and see a draft Nori Contract.
+- As a user, I can review the final report and understand goal status, current gap, evidence, and any review risks.
+- As a user, I can identify the first point where the OpenNori loop felt unclear, repetitive, or too CLI-heavy.
+Risks:
+- Dogfood may become a broad product audit; keep the next contract focused on the user-visible adoption result.
+- Do not treat OpenNori's own passing report as evidence for external project adoption.
+
+### failure-and-boundary-coverage
+
+Goal: Make the failure and boundary behavior around "让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收..." reviewable.
+User value: Users can trust the completed result when inputs, permissions, persistence, or external conditions do not follow the happy path.
+Acceptance directions:
+- As a user, I can trigger or review the important failure case and see the intended message or recovery behavior.
+- As a user, I can tell what inputs, roles, or states are supported and what is intentionally out of scope.
+- As a user, I can see evidence for the failure or boundary behavior instead of only a passing happy-path summary.
+Risks:
+- Failure coverage can expand endlessly; ask which failures matter to user acceptance.
+- Do not turn internal exception types or test names into Product AC.
+
+### architecture-adherence
+
+Goal: Review whether "让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收..." still follows the confirmed architecture baseline.
+User value: Users can trust that the completed result followed the agreed architecture unless the agent raises a reviewable challenge.
+Acceptance directions:
+- As a user, I can see which architecture baseline applies to the completed result.
+- As a user, I can see build-vs-buy evidence for any new infrastructure introduced by the work.
+- As a user, I can see an Architecture Challenge if project evidence conflicts with the confirmed baseline.
+Risks:
+- Architecture guidance can become an implementation checklist; keep it separate from Product AC and completion gaps.
+- Do not make a specific external tool or review surface drive the OpenNori loop.
+
+### next-loop-usability
+
+Goal: Choose the next human-facing outcome after "让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收...".
+User value: Users can continue from a completed contract into the next acceptance loop without inventing the next prompt from scratch.
+Acceptance directions:
+- As a user, I can review a small set of candidate next goals after confident completion.
+- As a user, I can ask the agent to use, combine, or revise a candidate before it becomes a new Nori Contract.
+- As a user, I can tell the candidates are not phases, task lists, or completion evidence.
+Risks:
+- Candidate goals are suggestions for the next contract, not approved acceptance criteria.
+- If the user explicitly asked to continue, the agent may select the best candidate and draft a new contract, then ask for acceptance approval.
 
 ## Conclusion
 

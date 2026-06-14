@@ -19,6 +19,7 @@ At the start of each OpenNori turn, run `opennori bootstrap --root <repo> --json
 If bootstrap returns `needs_confirm`, show the preview briefly and ask the user before rerunning with `--confirm`.
 For non-trivial goals, make sure an Architecture Baseline exists before implementation. Use `nori-architecture-brainstorm` to establish it and `nori-architecture-apply` before each implementation loop.
 Use `next_recommendation` and top-level `next_actions` to continue the OpenNori loop; do not make the user repeatedly ask what the next step is.
+When a complete goal returns `next_recommendation.candidate_goals`, use those candidates to start the next acceptance loop if the user has asked to continue. Choose or refine one human-facing goal, then route to `nori-acceptance` for discovery or draft. Do not present candidate goals as phases, task lists, approved AC, or evidence.
 If `opennori` is not on PATH, use the installed package binary such as `node ./node_modules/opennori/bin/opennori.js` or this repository's `node ./bin/opennori.js` with the same arguments.
 
 ## Rule

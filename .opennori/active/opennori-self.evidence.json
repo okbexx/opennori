@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User revised AC-P-12 to define acceptance review as soft agent/user discussion input.",
-      "approved_at": "2026-06-14T00:58:10.102Z"
+      "summary": "User refined AC-Z-14 to require next-loop candidate goals, not only a generic next action.",
+      "approved_at": "2026-06-14T01:51:01.794Z"
     },
     "criteria": [
       {
@@ -319,9 +319,9 @@
       {
         "id": "AC-Z-14",
         "layer": "productization",
-        "user_story": "作为用户，我让 agent 继续 OpenNori 工作时，不需要每轮都追问下一步是什么。",
-        "measurement": "运行 opennori resume、opennori status、opennori next 和 opennori report，分别查看未完成、阻塞和已完成 goal 的输出。",
-        "threshold": "输出包含 next_recommendation 或顶部推荐动作；未完成时指向当前验收缺口，阻塞时指向需要用户介入的事项，完成时提示 agent 可进入下一轮 OpenNori loop。",
+        "user_story": "作为用户，我让 agent 继续一个已经完成的 OpenNori goal 时，不需要每轮都追问下一步是什么；agent 能看到少量可开启下一份 Nori Contract 的人类目标候选。",
+        "measurement": "运行 opennori resume、opennori status、opennori next、opennori report 和 context export，查看 complete goal 的 next_recommendation。",
+        "threshold": "已完成且无 review risk 的 goal 输出 ready-for-next-loop，并包含 candidate_goals；每个候选包含 goal、user_value、acceptance_directions 和 risks，帮助 agent 进入下一轮 AC discovery，但不呈现为 phase、plan 或 task list。",
         "required": true,
         "risk": "high"
       },
@@ -448,7 +448,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-14T01:36:38.293Z",
+    "updated_at": "2026-06-14T02:01:34.843Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -3247,56 +3247,8 @@
         "evidence": [
           {
             "kind": "review-result",
-            "basis": "protocol-check",
-            "summary": "AC-Z-14 is covered by the OpenNori 0.1.3 single-bin CLI implementation, self contract refresh, tests, and reviewable artifacts.",
-            "result": "passing",
-            "confidence": "verified",
-            "sources": [
-              {
-                "type": "command",
-                "label": "npm run check",
-                "command": "npm run check"
-              },
-              {
-                "type": "command",
-                "label": "npm pack --dry-run --json",
-                "command": "npm pack --dry-run --json"
-              },
-              {
-                "type": "command",
-                "label": "node ./bin/opennori.js",
-                "command": "node ./bin/opennori.js"
-              },
-              {
-                "type": "artifact",
-                "label": "bin/opennori.js",
-                "path": "bin/opennori.js"
-              },
-              {
-                "type": "artifact",
-                "label": "package.json",
-                "path": "package.json"
-              },
-              {
-                "type": "artifact",
-                "label": "examples/opennori-self.json",
-                "path": "examples/opennori-self.json"
-              },
-              {
-                "type": "url",
-                "label": "https://opennori.okbexx.com",
-                "url": "https://opennori.okbexx.com"
-              }
-            ],
-            "reviewability": "Run npm run check, inspect package.json bin.opennori, run node ./bin/opennori.js in a fresh directory, inspect README and the public site quick start.",
-            "limitations": "This verifies local implementation and staged site content; public npm and public site require publish/deploy before external users get this exact version.",
-            "gate": "accepted",
-            "created_at": "2026-06-11T09:51:30.913Z"
-          },
-          {
-            "kind": "review-result",
             "basis": "tool-observation",
-            "summary": "resume/status/next/report/context export include next_recommendation and next_actions so agents can keep moving without asking the user for every next step.",
+            "summary": "Complete OpenNori goals now expose next_recommendation.candidate_goals in resume/status/next/report/context export. Candidate goals include goal, user_value, acceptance_directions, risks, and source; reports render them as starts for the next Nori Contract, not phases, task lists, approved AC, or evidence.",
             "result": "passing",
             "confidence": "verified",
             "sources": [
@@ -3307,8 +3259,28 @@
               },
               {
                 "type": "command",
-                "label": "node ./bin/opennori.js check --root . --json",
-                "command": "node ./bin/opennori.js check --root . --json"
+                "label": "npx vitest run test/cli-commands.test.js -t 'next command module returns|next-loop candidates'",
+                "command": "npx vitest run test/cli-commands.test.js -t 'next command module returns|next-loop candidates'"
+              },
+              {
+                "type": "command",
+                "label": "node ./bin/opennori.js resume --root . --goal opennori-self --json",
+                "command": "node ./bin/opennori.js resume --root . --goal opennori-self --json"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/report.ts",
+                "path": "src/core/report.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/types.ts",
+                "path": "src/types.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/runtime-status.ts",
+                "path": "src/cli/commands/acceptance/runtime-status.ts"
               },
               {
                 "type": "artifact",
@@ -3317,14 +3289,24 @@
               },
               {
                 "type": "artifact",
-                "label": ".opennori/protocol.md",
-                "path": ".opennori/protocol.md"
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+                "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
               }
             ],
-            "reviewability": "Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and generated report.",
-            "limitations": "This is local repository evidence for the current worktree; npm publishing and public site deployment are separate release steps.",
+            "reviewability": "Run npm run check, then run resume/status/next/report/context export on a complete goal and inspect next_recommendation.candidate_goals plus the Candidate Next Goals report section.",
+            "limitations": "Candidates are heuristic suggestions for the next Nori Contract; the agent or user must still choose or refine one and run acceptance discovery or draft before it becomes an approved contract.",
             "gate": "accepted",
-            "created_at": "2026-06-12T03:14:16.680Z"
+            "created_at": "2026-06-14T02:01:34.843Z"
           }
         ]
       },

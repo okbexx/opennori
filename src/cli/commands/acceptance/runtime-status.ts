@@ -27,9 +27,10 @@ export const nextCommand = defineCommand({
     json: jsonArg
   },
   run({ args, data }) {
-    const { contract, ledger, root } = data.loadPair(args);
+    const { contract, ledger, root = process.cwd() } = data.loadPair(args);
+    const architecture = architectureState(root, contract.goal_id);
     const gap = currentGap(contract, ledger);
-    const recommendation = nextRecommendation(contract, ledger, { root });
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok({
       goal_id: contract.goal_id,
       current_gap: gap,

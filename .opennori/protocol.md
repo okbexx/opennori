@@ -294,6 +294,13 @@ The user-facing completion answer is not confidently complete while `evidence_he
 findings, `profile_review` is unresolved, `architecture_review` remains, or `build_vs_buy` is
 unhealthy, even if the ledger status is already `complete`.
 
+When a goal is confidently complete, `next_recommendation` may include `candidate_goals`.
+These candidates help the agent continue when the user has asked to keep going. Each candidate
+names a possible next human-facing goal, the user value, acceptance directions, and risks.
+Candidates are not phases, task lists, approved acceptance criteria, or completion evidence. The
+agent must turn a selected or revised candidate into a new draft Nori Contract before using it for
+completion judgment.
+
 ## Risk Gate
 
 OpenNori separates acceptance status from evidence strength.
@@ -364,8 +371,9 @@ On every turn:
 17. Run `opennori resume --root <repo>` or `opennori next --root <repo>` to recover the active goal and current acceptance gap from repository files.
 18. Work only to produce evidence for that gap under the confirmed Architecture Baseline.
 19. Add acceptance evidence with `opennori evidence add`; choose any suitable verification method, but record basis, sources, reviewability, confidence, and limitations. If existing evidence is invalid or obsolete, run `opennori evidence prune` first so stale proof does not occupy active context. Add profile compliance evidence with `opennori profile evidence` when profile items exist.
-15. Run `opennori evaluate`.
-16. Report acceptance state, profile compliance, and evidence, not implementation steps.
+20. Run `opennori evaluate`.
+21. Report acceptance state, profile compliance, and evidence, not implementation steps.
+22. If the goal is complete and the user asked to continue, review `next_recommendation.candidate_goals`, choose or refine the strongest human-facing next goal, then run discovery or draft for a new Nori Contract. Do not treat candidate goals as approved AC, phases, task lists, or evidence.
 
 Useful commands:
 

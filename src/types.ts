@@ -216,6 +216,15 @@ export type CompletionAnswer = {
   answer: string;
 };
 
+export type NextGoalCandidate = {
+  id: string;
+  goal: string;
+  user_value: string;
+  acceptance_directions: string[];
+  risks: string[];
+  source: "completion-context" | string;
+};
+
 export type NextRecommendation = {
   status:
     | "user-intervention-required"
@@ -229,6 +238,7 @@ export type NextRecommendation = {
   focus: string | null;
   summary: string;
   actions: string[];
+  candidate_goals?: NextGoalCandidate[];
 };
 
 export type EvidenceView = {

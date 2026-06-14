@@ -168,6 +168,17 @@ confirmation, waivers, or other reviewable sources. OpenNori keeps evidence
 flexible, but high-risk completion should not rely only on an agent's
 self-summary.
 
+### Next Loop Candidates
+
+When a goal is confidently complete, `resume`, `status`, `next`, `report`, and
+context export include `next_recommendation.candidate_goals`. These are small
+candidate starts for the next Nori Contract: each candidate names the goal, user
+value, acceptance directions, and risks.
+
+Candidate goals are not phases, task lists, approved acceptance checks, or
+completion evidence. They help the agent continue after the user says
+"continue" without making the user invent the next prompt from scratch.
+
 ### Nori Profile
 
 Nori Profile records execution preferences such as required Skills, preferred
@@ -285,6 +296,9 @@ opennori report --root .
 - Context export can give review tools the current goal, checks, profile,
   Architecture Baseline, evidence, and report, but review tools do not take over
   the agent loop.
+- Complete goals can expose `candidate_goals` for the next acceptance loop; the
+  agent still turns the chosen candidate into a new draft Nori Contract before
+  completion judgment begins.
 
 ## Development
 

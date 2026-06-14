@@ -17,6 +17,7 @@ Use when the user asks whether work is complete, what remains, what they need to
 ## Rules
 Lead with completion state, current gap, architecture decision, evidence health, evidence basis, and required human intervention.
 After reporting, follow `next_recommendation` / `next_actions` when the user has asked to continue, instead of asking the user what the next step is.
+If `next_recommendation.status` is `ready-for-next-loop`, inspect `next_recommendation.candidate_goals`. Present the strongest candidate briefly or choose one when the user already asked to continue, then route to acceptance discovery or draft. Treat candidate goals as starts for the next Nori Contract, not as approved AC, task lists, phases, or evidence.
 Summarize implementation details only as supporting evidence.
 Report Product decision and Architecture decision separately.
 Never report confidently complete unless all required ACs and blocking Nori Profile items are passing or waived, `profile_review` is clear or accepted by the user, `evidence_health` is clear, `architecture_review` is clear or accepted by the user, and `build_vs_buy` is healthy or accepted as a review risk.

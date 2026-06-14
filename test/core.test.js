@@ -566,6 +566,9 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.match(text, /Current gap: None\. All required acceptance criteria/);
   assert.match(text, /User intervention: No user intervention is currently required\./);
   assert.match(text, /Recommended next action: This OpenNori goal is complete/);
+  assert.match(text, /## Candidate Next Goals/);
+  assert.match(text, /not approved acceptance criteria, implementation phases, or completion evidence/);
+  assert.match(text, /opennori-adoption-dogfood/);
   assert.match(text, /Current status: complete/);
   assert.match(text, /AC-Z-5/);
   assert.match(text, /None\. All required acceptance criteria/);
@@ -578,8 +581,32 @@ test("evidence can drive the workflow to complete and render a human report", ()
     "--json"
   ]);
   assert.equal(resume.data.next_recommendation.status, "ready-for-next-loop");
+  assert.equal(resume.data.next_recommendation.candidate_goals.length, 4);
+  assert.equal(resume.data.next_recommendation.candidate_goals[0].id, "opennori-adoption-dogfood");
+  assert.equal(resume.data.next_recommendation.candidate_goals[0].acceptance_directions.length > 0, true);
+  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => candidate.goal && candidate.user_value), true);
   assert.equal(resume.data.evidence_health.status, "clear");
-  assert.equal(resume.next_actions.some((action) => /next human-facing project goal/.test(action)), true);
+  assert.equal(resume.next_actions.some((action) => /candidate_goals/.test(action)), true);
+
+  const next = run([
+    "next",
+    "--acceptance", init.data.acceptance_path,
+    "--evidence", init.data.evidence_path,
+    "--root", root,
+    "--json"
+  ]);
+  assert.equal(next.data.next_recommendation.status, "ready-for-next-loop");
+  assert.equal(next.data.next_recommendation.candidate_goals.length, 4);
+
+  const exported = run([
+    "context", "export",
+    "--acceptance", init.data.acceptance_path,
+    "--evidence", init.data.evidence_path,
+    "--root", root,
+    "--json"
+  ]);
+  assert.equal(exported.data.next_recommendation.status, "ready-for-next-loop");
+  assert.equal(exported.data.next_recommendation.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), true);
 });
 
 test("blocked criteria produce a concrete intervention answer", () => {

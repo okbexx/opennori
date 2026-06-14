@@ -7,7 +7,7 @@
 ## Acceptance Basis
 
 Status: approved
-Summary: User revised AC-P-12 to define acceptance review as soft agent/user discussion input.
+Summary: User refined AC-Z-14 to require next-loop candidate goals, not only a generic next action.
 
 ## Nori Profile
 
@@ -51,7 +51,7 @@ Summary: User revised AC-P-12 to define acceptance review as soft agent/user dis
 | AC-Z-11 | productization | 作为用户，我卸载 OpenNori 前，能预览将移除什么，并确认默认卸载不会丢失 active goals、证据、报告或归档。 | 在已安装且有 active goal 的项目中运行 opennori uninstall --dry-run、未确认 uninstall、确认 uninstall 和 include-state uninstall。 | 默认 uninstall plan 标明 entry assets 会被移除、验收状态会被 preserve；未确认真实卸载会失败；确认后只移除入口资产；只有显式 --include-state --confirm 才会删除 .opennori 状态目录。 | passing |
 | AC-Z-12 | productization | 作为用户，我安装或获取 OpenNori 后，agent 能获得一组职责清晰的 OpenNori Plugin Skills 来处理验收、证据、能力偏好、架构、项目健康和报告，而我不需要记住这些 Skill 名。 | 查看 .codex-plugin/plugin.json、skills/nori*/SKILL.md、opennori install 输出、.opennori/manifest.json 和 opennori doctor 结果。 | OpenNori Plugin 包含总入口和 acceptance、evidence、capability-profile、architecture、build-vs-buy、project-health、reporting 子 Skill；install 不把 Skills 复制进用户项目；manifest 记录 plugin；doctor 能发现 packaged Plugin Skills 是否缺失或 manifest plugin state 是否 stale。 | passing |
 | AC-Z-13 | productization | 作为用户，我运行 opennori doctor 后，如果项目状态不健康，能直接看到一组可执行恢复动作。 | 分别制造缺失 manifest、stale manifest、缺失 package Plugin assets 和损坏 active goal 的项目，然后运行 opennori doctor。 | doctor 输出 status、失败 check、active_goal_issues、Plugin asset health 和 recovery_actions；recovery_actions 说明要运行的 OpenNori 命令或要检查的 .opennori/active 文件位置。 | passing |
-| AC-Z-14 | productization | 作为用户，我让 agent 继续 OpenNori 工作时，不需要每轮都追问下一步是什么。 | 运行 opennori resume、opennori status、opennori next 和 opennori report，分别查看未完成、阻塞和已完成 goal 的输出。 | 输出包含 next_recommendation 或顶部推荐动作；未完成时指向当前验收缺口，阻塞时指向需要用户介入的事项，完成时提示 agent 可进入下一轮 OpenNori loop。 | passing |
+| AC-Z-14 | productization | 作为用户，我让 agent 继续一个已经完成的 OpenNori goal 时，不需要每轮都追问下一步是什么；agent 能看到少量可开启下一份 Nori Contract 的人类目标候选。 | 运行 opennori resume、opennori status、opennori next、opennori report 和 context export，查看 complete goal 的 next_recommendation。 | 已完成且无 review risk 的 goal 输出 ready-for-next-loop，并包含 candidate_goals；每个候选包含 goal、user_value、acceptance_directions 和 risks，帮助 agent 进入下一轮 AC discovery，但不呈现为 phase、plan 或 task list。 | passing |
 | AC-Z-15 | productization | 作为用户，我让 agent 记录验收证据时，不需要 agent 为常见来源手写复杂结构。 | 运行 opennori evidence add，分别使用 --source-command、--source-path、--source-url 和自由 --source 记录证据，再查看 status/report。 | 证据来源能显示为 command、artifact、url 或自由 reference；report/status 中仍保留 basis、reviewability、limitations 和 confidence。 | passing |
 | AC-Z-16 | productization | 作为用户，我通过 npm 获取 OpenNori 后，能用 opennori 或 npx opennori 这个短入口开始，而不需要理解 install、root、dry-run、confirm 或内部 Skill 参数。 | 在全新临时项目中运行 opennori 或 npx opennori 等价入口，再确认 bootstrap 后运行 opennori doctor。 | npm 包只提供 opennori 这个 bin；短入口默认展示首次接入 preview 且不写入项目；显式确认后只创建 .opennori 状态；不会向项目写入 package Skill assets；doctor 为 ready。 | passing |
 | AC-Z-17 | productization | 作为用户，我第一次打开 README 或官网 Quick Start 时，能看到短到可以直接复制的 npx opennori 入口，而不是一串内部安装参数。 | 阅读 README Try It 和官网首屏 Quick Start / Start 区域。 | README 和官网第一眼 Quick Start 展示 npx opennori；更详细的 opennori bootstrap、install、dry-run、confirm 只作为 agent 或高级用户的底层安全路径出现。 | passing |

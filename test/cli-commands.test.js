@@ -18,7 +18,7 @@ import { runProfileAddCommand, runProfileEvidenceCommand, runProfileShowCommand 
 import { runArchiveCommand, runReportCommand } from "../src/cli/commands/reporting.ts";
 import { runUninstallCommand } from "../src/cli/commands/uninstall.ts";
 import { runUpgradeCommand } from "../src/cli/commands/upgrade.ts";
-import { buildArchitectureBaseline, writeArchitectureBaseline } from "../src/architecture.ts";
+import { buildArchitectureBaseline, renderAgentGuideMarkdown, writeArchitectureBaseline } from "../src/architecture.ts";
 import { loadPair } from "../src/cli/runtime.ts";
 import { addEvidence, buildEvidenceLedger, writeJson } from "../src/core.ts";
 
@@ -566,6 +566,38 @@ test("resume command module includes completion, health, architecture, and next 
   assert.equal(resume.data.next_recommendation.status, "completion-review-required");
   assert.equal(resume.data.acceptance_path, acceptancePath);
   assert.equal(resume.next_actions.some((action) => /architecture_check/.test(action)), true);
+});
+
+test("resume command module suggests next-loop candidates for confidently complete goals", async () => {
+  const root = tempRoot();
+  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const contract = {
+    goal_id: "module-goal",
+    goal: "Ship a settings page with profile editing, validation, persistence, failed-save recovery, reviewable screenshots, and release-ready report copy",
+    criteria: [],
+    acceptance_basis: { status: "approved" }
+  };
+  const ledger = { status: "complete", criteria: {}, capability_profile: { items: [], evidence: [] } };
+  writeArchitectureBaseline(root, buildArchitectureBaseline(root, {
+    goal: contract.goal,
+    goalId: contract.goal_id,
+    accepted: true
+  }));
+  fs.writeFileSync(path.join(root, ".opennori", "agent-guide.md"), renderAgentGuideMarkdown());
+
+  const resume = await runResumeCommand(["--json"], {
+    loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root })
+  });
+
+  assert.equal(resume.ok, true);
+  assert.equal(resume.data.completion.confidence, "confident");
+  assert.equal(resume.data.next_recommendation.status, "ready-for-next-loop");
+  assert.equal(resume.data.next_recommendation.candidate_goals.length, 4);
+  assert.equal(resume.data.next_recommendation.candidate_goals[0].id, "real-user-validation");
+  assert.equal(resume.data.next_recommendation.candidate_goals[0].goal.length < 140, true);
+  assert.equal(resume.data.next_recommendation.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), false);
+  assert.equal(resume.next_actions.some((action) => /candidate_goals/.test(action)), true);
 });
 
 test("status command module includes criteria and completion state", async () => {

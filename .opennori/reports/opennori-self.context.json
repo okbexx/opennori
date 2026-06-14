@@ -1,13 +1,13 @@
 {
   "schema_version": "opennori/context-export-v1",
-  "exported_at": "2026-06-14T01:36:51.695Z",
+  "exported_at": "2026-06-14T02:05:44.562Z",
   "root": "/Users/jarl/code/jarlone/opennori",
   "goal_id": "opennori-self",
   "goal": "让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收驱动产品；用户不仅能判断产品目标是否完成，也能判断交付物是否按确认过的优秀技术架构完成。",
   "acceptance_basis": {
     "status": "approved",
-    "summary": "User revised AC-P-12 to define acceptance review as soft agent/user discussion input.",
-    "approved_at": "2026-06-14T00:58:10.102Z"
+    "summary": "User refined AC-Z-14 to require next-loop candidate goals, not only a generic next action.",
+    "approved_at": "2026-06-14T01:51:01.794Z"
   },
   "workflow_status": "complete",
   "current_gap": null,
@@ -36,10 +36,73 @@
   "next_recommendation": {
     "status": "ready-for-next-loop",
     "focus": null,
-    "summary": "This OpenNori goal is complete. If the user has asked to continue, start the next acceptance loop without waiting for another next-step prompt.",
+    "summary": "This OpenNori goal is complete. If the user has asked to continue, choose or refine a candidate goal and start the next acceptance loop without waiting for another next-step prompt.",
     "actions": [
       "Report the completion evidence briefly.",
-      "Select the next human-facing project goal from the current context, draft acceptance criteria, and continue the OpenNori loop."
+      "Review candidate_goals and choose the strongest next human-facing goal from the current context.",
+      "Run acceptance discovery or draft a new Nori Contract for that candidate; do not treat the candidate as approved AC or evidence."
+    ],
+    "candidate_goals": [
+      {
+        "id": "opennori-adoption-dogfood",
+        "goal": "Run OpenNori through a non-OpenNori project and capture the adoption friction.",
+        "user_value": "Users can judge whether OpenNori works outside its own repository, from natural-language goal through report.",
+        "acceptance_directions": [
+          "As a user, I can start OpenNori in a non-OpenNori project from natural language and see a draft Nori Contract.",
+          "As a user, I can review the final report and understand goal status, current gap, evidence, and any review risks.",
+          "As a user, I can identify the first point where the OpenNori loop felt unclear, repetitive, or too CLI-heavy."
+        ],
+        "risks": [
+          "Dogfood may become a broad product audit; keep the next contract focused on the user-visible adoption result.",
+          "Do not treat OpenNori's own passing report as evidence for external project adoption."
+        ],
+        "source": "completion-context"
+      },
+      {
+        "id": "failure-and-boundary-coverage",
+        "goal": "Make the failure and boundary behavior around \"让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收...\" reviewable.",
+        "user_value": "Users can trust the completed result when inputs, permissions, persistence, or external conditions do not follow the happy path.",
+        "acceptance_directions": [
+          "As a user, I can trigger or review the important failure case and see the intended message or recovery behavior.",
+          "As a user, I can tell what inputs, roles, or states are supported and what is intentionally out of scope.",
+          "As a user, I can see evidence for the failure or boundary behavior instead of only a passing happy-path summary."
+        ],
+        "risks": [
+          "Failure coverage can expand endlessly; ask which failures matter to user acceptance.",
+          "Do not turn internal exception types or test names into Product AC."
+        ],
+        "source": "completion-context"
+      },
+      {
+        "id": "architecture-adherence",
+        "goal": "Review whether \"让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收...\" still follows the confirmed architecture baseline.",
+        "user_value": "Users can trust that the completed result followed the agreed architecture unless the agent raises a reviewable challenge.",
+        "acceptance_directions": [
+          "As a user, I can see which architecture baseline applies to the completed result.",
+          "As a user, I can see build-vs-buy evidence for any new infrastructure introduced by the work.",
+          "As a user, I can see an Architecture Challenge if project evidence conflicts with the confirmed baseline."
+        ],
+        "risks": [
+          "Architecture guidance can become an implementation checklist; keep it separate from Product AC and completion gaps.",
+          "Do not make a specific external tool or review surface drive the OpenNori loop."
+        ],
+        "source": "completion-context"
+      },
+      {
+        "id": "next-loop-usability",
+        "goal": "Choose the next human-facing outcome after \"让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收...\".",
+        "user_value": "Users can continue from a completed contract into the next acceptance loop without inventing the next prompt from scratch.",
+        "acceptance_directions": [
+          "As a user, I can review a small set of candidate next goals after confident completion.",
+          "As a user, I can ask the agent to use, combine, or revise a candidate before it becomes a new Nori Contract.",
+          "As a user, I can tell the candidates are not phases, task lists, or completion evidence."
+        ],
+        "risks": [
+          "Candidate goals are suggestions for the next contract, not approved acceptance criteria.",
+          "If the user explicitly asked to continue, the agent may select the best candidate and draft a new contract, then ask for acceptance approval."
+        ],
+        "source": "completion-context"
+      }
     ]
   },
   "criteria": [
@@ -1436,13 +1499,13 @@
     {
       "id": "AC-Z-14",
       "layer": "productization",
-      "user_story": "作为用户，我让 agent 继续 OpenNori 工作时，不需要每轮都追问下一步是什么。",
+      "user_story": "作为用户，我让 agent 继续一个已经完成的 OpenNori goal 时，不需要每轮都追问下一步是什么；agent 能看到少量可开启下一份 Nori Contract 的人类目标候选。",
       "status": "passing",
       "confidence": "verified",
       "latest_evidence": {
         "kind": "review-result",
         "basis": "tool-observation",
-        "summary": "resume/status/next/report/context export include next_recommendation and next_actions so agents can keep moving without asking the user for every next step.",
+        "summary": "Complete OpenNori goals now expose next_recommendation.candidate_goals in resume/status/next/report/context export. Candidate goals include goal, user_value, acceptance_directions, risks, and source; reports render them as starts for the next Nori Contract, not phases, task lists, approved AC, or evidence.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
@@ -1453,8 +1516,28 @@
           },
           {
             "type": "command",
-            "label": "node ./bin/opennori.js check --root . --json",
-            "command": "node ./bin/opennori.js check --root . --json"
+            "label": "npx vitest run test/cli-commands.test.js -t 'next command module returns|next-loop candidates'",
+            "command": "npx vitest run test/cli-commands.test.js -t 'next command module returns|next-loop candidates'"
+          },
+          {
+            "type": "command",
+            "label": "node ./bin/opennori.js resume --root . --goal opennori-self --json",
+            "command": "node ./bin/opennori.js resume --root . --goal opennori-self --json"
+          },
+          {
+            "type": "artifact",
+            "label": "src/core/report.ts",
+            "path": "src/core/report.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/types.ts",
+            "path": "src/types.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/cli/commands/acceptance/runtime-status.ts",
+            "path": "src/cli/commands/acceptance/runtime-status.ts"
           },
           {
             "type": "artifact",
@@ -1463,14 +1546,24 @@
           },
           {
             "type": "artifact",
-            "label": ".opennori/protocol.md",
-            "path": ".opennori/protocol.md"
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori/SKILL.md",
+            "path": "plugins/opennori/skills/nori/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+            "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
           }
         ],
-        "reviewability": "Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and generated report.",
-        "limitations": "This is local repository evidence for the current worktree; npm publishing and public site deployment are separate release steps.",
+        "reviewability": "Run npm run check, then run resume/status/next/report/context export on a complete goal and inspect next_recommendation.candidate_goals plus the Candidate Next Goals report section.",
+        "limitations": "Candidates are heuristic suggestions for the next Nori Contract; the agent or user must still choose or refine one and run acceptance discovery or draft before it becomes an approved contract.",
         "gate": "accepted",
-        "created_at": "2026-06-12T03:14:16.680Z"
+        "created_at": "2026-06-14T02:01:34.843Z"
       }
     },
     {
@@ -2343,7 +2436,7 @@
     "protocol_version": "opennori/v1",
     "opennori_version": "0.1.8",
     "created_at": "2026-06-10T09:12:16.646Z",
-    "updated_at": "2026-06-14T01:36:51.555Z",
+    "updated_at": "2026-06-14T02:05:44.305Z",
     "capabilities": [
       "acceptance-contract",
       "evidence-ledger",
