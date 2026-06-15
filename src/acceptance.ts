@@ -76,6 +76,12 @@ export const DEFAULT_CRITERIA: AcceptanceCriterion[] = [
 
 const DISCOVERY_GAPS: AcceptanceDiscoveryGap[] = [
   {
+    id: "missing-user-entry",
+    patterns: ["设置", "资料", "个人资料", "profile", "settings", "字段", "field", "使用", "打开", "查看", "进入", "run", "open", "view", "use", "entry"],
+    question: "用户从哪个入口开始操作，最终在哪里查看结果？",
+    why: "没有用户入口，AC 容易变成内部状态而不是可执行验收。"
+  },
+  {
     id: "missing-field-scope",
     patterns: ["设置", "资料", "个人资料", "profile", "settings", "字段", "field"],
     question: "本轮用户可以修改或查看哪些具体字段？哪些字段明确不在范围内？",
@@ -112,14 +118,8 @@ const DISCOVERY_GAPS: AcceptanceDiscoveryGap[] = [
     why: "没有范围边界，agent 可能扩大实现，也可能漏掉用户真正期待的部分。"
   },
   {
-    id: "missing-user-entry",
-    patterns: ["使用", "打开", "查看", "进入", "run", "open", "view", "use", "entry"],
-    question: "用户从哪个入口开始操作，最终在哪里查看结果？",
-    why: "没有用户入口，AC 容易变成内部状态而不是可执行验收。"
-  },
-  {
     id: "missing-review-method",
-    patterns: ["判断", "验收", "完成", "review", "accept", "done", "complete"],
+    patterns: ["设置", "资料", "个人资料", "profile", "settings", "字段", "field", "判断", "验收", "完成", "review", "accept", "done", "complete"],
     question: "用户或评审者应该用什么可复查方式判断这条 AC 通过？",
     why: "没有复查方式，完成判断会退化成 agent 自我总结。"
   }
@@ -256,6 +256,7 @@ const IMPLEMENTATION_ONLY_PHRASES = [
 ];
 
 const NEGATION_TERMS = ["不能", "不应", "不是", "不得", "避免", "cannot", "must not", "should not", "reject"];
+const GENERIC_DRAFT_SUMMARY = "Draft generated from generic acceptance discovery. User must answer the open acceptance questions before approval.";
 
 function sentenceHasSpecifics(text: unknown, terms: string[]): boolean {
   const value = String(text || "").toLowerCase();
@@ -276,20 +277,42 @@ function looksImplementationOnly(text: unknown): boolean {
 
 export function discoverAcceptanceGaps(text: string, { fallback = false, allowedIds = null as Set<string> | null } = {}): AcceptanceDiscoveryGap[] {
   const lowered = text.toLowerCase();
+  const profileEditGoal = sentenceHasSpecifics(text, ["设置", "资料", "个人资料", "profile", "settings"]);
+  const isMissing = (gapId: string): boolean => {
+    if (gapId === "missing-field-scope") return !sentenceHasSpecifics(text, ["昵称", "头像", "简介", "邮箱", "手机号", "字段范围", "field scope", "name", "avatar", "bio", "email", "phone"]);
+    if (gapId === "missing-validation-rule") return !sentenceHasSpecifics(text, ["长度", "必填", "格式", "大小", "类型", "字符", "校验规则", "validation", "required", "format", "length", "size", "type"]);
+    if (gapId === "missing-success-signal") return !sentenceHasSpecifics(text, ["成功", "保存成功", "成功反馈", "result", "success"]);
+    if (gapId === "missing-persistence-scope") return !sentenceHasSpecifics(text, ["刷新", "重新打开", "重新登录", "跨设备", "refresh", "reload", "reopen", "login"]);
+    if (gapId === "missing-failure-case") return !sentenceHasSpecifics(text, ["网络", "权限", "无效", "错误码", "保留原", "失败场景", "network", "permission", "invalid"]);
+    if (gapId === "missing-out-of-scope-boundary") return !sentenceHasSpecifics(text, ["不在范围", "不包含", "本轮不", "范围边界", "out of scope", "exclude"]);
+    if (gapId === "missing-user-entry") return !sentenceHasSpecifics(text, ["导航", "菜单", "账户设置", "个人资料页", "report", "dashboard", "navigation", "menu", "account settings"]);
+    if (gapId === "missing-review-method") return !sentenceHasSpecifics(text, ["截图", "浏览器", "报告", "测试", "review", "screenshot", "browser", "report"]);
+    return true;
+  };
   const gaps = DISCOVERY_GAPS
     .filter((gap) => !allowedIds || allowedIds.has(gap.id))
     .filter((gap) => (gap.patterns || []).some((pattern) => lowered.includes(pattern.toLowerCase())))
-    .filter((gap) => {
-      if (gap.id === "missing-field-scope") return !sentenceHasSpecifics(text, ["昵称", "头像", "简介", "邮箱", "手机号", "字段范围", "field scope", "name", "avatar", "bio", "email", "phone"]);
-      if (gap.id === "missing-validation-rule") return !sentenceHasSpecifics(text, ["长度", "必填", "格式", "大小", "类型", "字符", "校验规则", "validation", "required", "format", "length", "size", "type"]);
-      if (gap.id === "missing-success-signal") return !sentenceHasSpecifics(text, ["成功", "保存成功", "成功反馈", "result", "success"]);
-      if (gap.id === "missing-persistence-scope") return !sentenceHasSpecifics(text, ["刷新", "重新打开", "重新登录", "跨设备", "refresh", "reload", "reopen", "login"]);
-      if (gap.id === "missing-failure-case") return !sentenceHasSpecifics(text, ["网络", "权限", "无效", "错误码", "保留原", "失败场景", "network", "permission", "invalid"]);
-      if (gap.id === "missing-out-of-scope-boundary") return !sentenceHasSpecifics(text, ["不在范围", "不包含", "本轮不", "范围边界", "out of scope", "exclude"]);
-      if (gap.id === "missing-user-entry") return !sentenceHasSpecifics(text, ["设置页", "登录页", "report", "dashboard", "页面", "page"]);
-      if (gap.id === "missing-review-method") return !sentenceHasSpecifics(text, ["截图", "浏览器", "报告", "测试", "review", "screenshot", "browser", "report"]);
-      return true;
-    });
+    .filter((gap) => isMissing(gap.id));
+
+  if (profileEditGoal) {
+    const expected = new Set([
+      "missing-user-entry",
+      "missing-field-scope",
+      "missing-validation-rule",
+      "missing-success-signal",
+      "missing-persistence-scope",
+      "missing-failure-case",
+      "missing-out-of-scope-boundary",
+      "missing-review-method"
+    ]);
+    for (const gap of DISCOVERY_GAPS) {
+      if (!expected.has(gap.id)) continue;
+      if (allowedIds && !allowedIds.has(gap.id)) continue;
+      if (!gaps.some((item) => item.id === gap.id)) {
+        if (isMissing(gap.id)) gaps.push(gap);
+      }
+    }
+  }
 
   if (gaps.length > 0 || !fallback) return gaps;
   return [
@@ -327,6 +350,23 @@ export function discoverAcceptance(goal: string, explicitId: string | undefined 
 
 export function reviewAcceptanceQuality(contract: NoriContract): AcceptanceQualityAudit {
   const findings: AcceptanceQualityFinding[] = [];
+  const genericDraft = contract.acceptance_basis?.status === "draft" && contract.acceptance_basis?.summary === GENERIC_DRAFT_SUMMARY;
+  if (genericDraft) {
+    for (const gap of discoverAcceptanceGaps(contract.goal, { fallback: true })) {
+      findings.push({
+        criterion_id: "ACCEPTANCE-BASIS",
+        path: "acceptance_basis",
+        gap_id: gap.id,
+        question: gap.question,
+        why: gap.why,
+        message: "This draft was generated from a generic goal and still needs user acceptance discovery before approval.",
+        agent_guidance: "Show this question to the user, then revise the Product AC or record an explicit user-approved assumption before implementation.",
+        source: "heuristic",
+        severity: "needs-user-review"
+      });
+    }
+  }
+
   for (const [index, criterion] of (contract.criteria || []).entries()) {
     const triggerText = [
       criterion.user_story,
@@ -551,7 +591,7 @@ export function briefFromGoal(goal: string, goalId: string | undefined = undefin
   return {
     goal_id: goalId || undefined,
     goal,
-    acceptance_basis: { status: "draft", summary: "Draft generated for user approval or revision." },
+    acceptance_basis: { status: "draft", summary: GENERIC_DRAFT_SUMMARY },
     criteria: DEFAULT_CRITERIA
   };
 }

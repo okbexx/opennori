@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T08:02:36.952Z",
+    "updated_at": "2026-06-15T08:20:44.764Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -1518,6 +1518,49 @@
             "limitations": "The review is heuristic by design; domain-specific AC quality remains an agent and user judgment, not a fixed adapter taxonomy.",
             "gate": "accepted",
             "created_at": "2026-06-14T00:58:27.545Z"
+          },
+          {
+            "kind": "acceptance-discovery-dogfood",
+            "basis": "tool-observation",
+            "summary": "Real settings-page dogfood now keeps vague goals from becoming apparently-clear contracts: discover asks for entry, field scope, validation, success feedback, persistence, failure behavior, boundaries, and review method; draft --goal marks generic output as needing acceptance discovery; check surfaces ACCEPTANCE-BASIS findings instead of reporting clear.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "tmp=$(mktemp -d /tmp/opennori-step3-final-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js discover --root \"$tmp\" --goal \"Ship a settings page where users edit profile details\" --json; node ./bin/opennori.js draft --root \"$tmp\" --goal \"Ship a settings page where users edit profile details\" --json; node ./bin/opennori.js check --root \"$tmp\" --json",
+                "command": "tmp=$(mktemp -d /tmp/opennori-step3-final-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js discover --root \"$tmp\" --goal \"Ship a settings page where users edit profile details\" --json; node ./bin/opennori.js draft --root \"$tmp\" --goal \"Ship a settings page where users edit profile details\" --json; node ./bin/opennori.js check --root \"$tmp\" --json"
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/acceptance.ts",
+                "path": "src/acceptance.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Rerun the smoke and confirm discovery_gap_ids include user-entry, field-scope, validation-rule, success-signal, persistence-scope, failure-case, out-of-scope-boundary, and review-method; confirm check reports needs-user-review for ACCEPTANCE-BASIS.",
+            "limitations": "This improves heuristic discovery for settings/profile goals and generic drafts; future domain-specific goal types still need their own discovery coverage.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T08:20:44.679Z"
           }
         ]
       },
@@ -1696,6 +1739,44 @@
             "limitations": "This is local repository evidence for the current worktree; npm publishing and public site deployment are separate release steps.",
             "gate": "accepted",
             "created_at": "2026-06-12T03:14:15.645Z"
+          },
+          {
+            "kind": "acceptance-draft-guard-review",
+            "basis": "tool-observation",
+            "summary": "A natural-language goal no longer becomes a blindly approvable generic Nori Contract: generic draft output carries a discovery-required acceptance basis, and nori-acceptance instructs agents to show ACCEPTANCE-BASIS questions before asking for approval.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
+                "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/acceptance.ts",
+                "path": "src/acceptance.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Inspect the nori-acceptance Skill and run tests covering generic draft review findings.",
+            "limitations": "This does not generate a fully specific final contract by itself; it prevents premature approval and routes the agent back to discovery questions.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T08:20:44.764Z"
           }
         ]
       },

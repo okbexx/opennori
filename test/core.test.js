@@ -1008,6 +1008,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   const acceptanceAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-acceptance", "SKILL.md"), "utf8");
   assert.match(acceptanceAsset, /already stated a goal/);
   assert.match(acceptanceAsset, /ask for the goal only when it is missing/);
+  assert.match(acceptanceAsset, /ACCEPTANCE-BASIS/);
+  assert.match(acceptanceAsset, /generic starting point/);
 
   const evidenceAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-evidence", "SKILL.md"), "utf8");
   assert.match(evidenceAsset, /Do not force evidence into a fixed adapter taxonomy/);
@@ -2139,6 +2141,26 @@ test("check reviews weak measurement and threshold semantics without hard failur
   const goodPayload = run(["draft", "--brief", goodBrief, "--root", goodRoot, "--json"]);
   assert.equal(goodPayload.ok, true);
   assert.equal(goodPayload.data.current_gap.id, "ACCEPTANCE-BASIS");
+});
+
+test("drafted generic goals keep acceptance discovery questions visible", () => {
+  const root = tempRoot();
+  const draft = run(["draft", "--goal", "Ship a settings page where users edit profile details", "--root", root, "--json"]);
+  assert.equal(draft.ok, true);
+  assert.match(draft.data.acceptance_basis.summary, /generic acceptance discovery/);
+
+  const check = run(["check", "--root", root, "--json"]);
+  assert.equal(check.ok, true);
+  assert.equal(check.data.acceptance_review.status, "needs-user-review");
+  const gapIds = check.data.acceptance_review.findings.map((finding) => finding.gap_id);
+  assert.equal(gapIds.includes("missing-user-entry"), true);
+  assert.equal(gapIds.includes("missing-field-scope"), true);
+  assert.equal(gapIds.includes("missing-validation-rule"), true);
+  assert.equal(gapIds.includes("missing-success-signal"), true);
+  assert.equal(gapIds.includes("missing-failure-case"), true);
+  assert.equal(gapIds.includes("missing-out-of-scope-boundary"), true);
+  assert.equal(gapIds.includes("missing-review-method"), true);
+  assert.equal(check.warnings.some((warning) => warning.type === "acceptance_review" && warning.criterion_id === "ACCEPTANCE-BASIS"), true);
 });
 
 test("check audits existing active contracts for underspecified acceptance quality without rewriting history", () => {

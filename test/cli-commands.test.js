@@ -354,8 +354,14 @@ test("discover command module finds acceptance gaps without creating an active g
   assert.equal(fs.existsSync(discovery.data.markdown_path), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "active")), false);
   const gapIds = discovery.data.gaps.map((gap) => gap.id);
+  assert.equal(gapIds.includes("missing-user-entry"), true);
   assert.equal(gapIds.includes("missing-field-scope"), true);
   assert.equal(gapIds.includes("missing-validation-rule"), true);
+  assert.equal(gapIds.includes("missing-success-signal"), true);
+  assert.equal(gapIds.includes("missing-failure-case"), true);
+  assert.equal(gapIds.includes("missing-out-of-scope-boundary"), true);
+  assert.equal(gapIds.includes("missing-review-method"), true);
+  assert.equal(gapIds.includes("missing-persistence-scope"), false);
   assert.equal(discovery.artifacts.some((artifact) => artifact.kind === "acceptance_discovery"), true);
   assert.match(fs.readFileSync(discovery.data.markdown_path, "utf8"), /not a Nori Contract/);
 });
@@ -371,6 +377,7 @@ test("draft command module creates active Nori Contracts from goals and brainsto
   assert.equal(draft.ok, true);
   assert.equal(draft.data.goal_id, "module-goal");
   assert.equal(draft.data.acceptance_basis.status, "draft");
+  assert.match(draft.data.acceptance_basis.summary, /generic acceptance discovery/);
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
   assert.equal(fs.existsSync(draft.data.acceptance_path), true);
   assert.equal(fs.existsSync(draft.data.evidence_path), true);

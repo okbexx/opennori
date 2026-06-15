@@ -18,7 +18,8 @@ When the root `nori` Skill or CLI JSON reports `data.agent_next.state: initializ
 3. If the user is still exploring an idea, create brainstorm candidates before drafting a contract.
 4. If the user has a goal but the completion surface is vague, run discovery before draft.
 5. If a draft or active contract exists, inspect `acceptance_review` before claiming the AC is good enough.
-6. If the user has approved or revised AC, persist that decision before implementation continues.
+6. If `acceptance_review` reports `criterion_id: ACCEPTANCE-BASIS`, show those discovery questions before asking for approval; the draft is still a generic starting point.
+7. If the user has approved or revised AC, persist that decision before implementation continues.
 
 Useful state commands:
 
@@ -37,6 +38,7 @@ Useful state commands:
 - "Approve these AC" -> write approval and make the contract the source of truth for the loop.
 - "Change AC-2 to mean..." -> update that criterion and treat older evidence for it as stale.
 - Complete goal with `candidate_goals` -> use the chosen candidate as a draft source, not as approved AC.
+- Generic `draft --goal` output with `acceptance_review` findings -> show the missing acceptance questions first; do not ask for blind approval.
 
 ## Discovery Questions
 
