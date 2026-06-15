@@ -21,6 +21,7 @@ When the root `nori` Skill or CLI JSON reports `data.agent_next.state: initializ
 6. If `acceptance_review` reports `criterion_id: ACCEPTANCE-BASIS`, show those discovery questions before asking for approval; the draft is still a generic starting point.
 7. If the user has approved or revised AC, persist that decision before implementation continues.
 8. After `opennori approve`, read the returned `data.agent_next`. If it says `architecture_needs_review`, hand off to `nori-architecture-brainstorm` before implementation or evidence work.
+9. If `agent_next.state` is `ready_for_next_loop` and the user asked to continue, select or refine one `next_recommendation.candidate_goals` item, then create a draft from it; do not ask the user to invent the next prompt from scratch.
 
 Useful state commands:
 
@@ -29,6 +30,7 @@ Useful state commands:
 - `opennori draft --from-discovery <id> --answers <answers.json> --root <repo> --json`
 - `opennori draft --goal "<goal>" --root <repo> --json`
 - `opennori draft --from-brainstorm <id> --candidate <candidate> --root <repo> --json`
+- `opennori draft --from-next-candidate <candidate-id> --source-goal <completed-goal-id> --root <repo> --json`
 - `opennori approve --root <repo> --summary "<approval>" --json`
 - `opennori criterion update --root <repo> --criterion <id> --user-story "..." --measurement "..." --threshold "..." --json`
 
@@ -40,7 +42,7 @@ Useful state commands:
 - User answers discovery questions -> summarize the answers into a JSON object keyed by discovery gap id, run `draft --from-discovery`, then show the concrete Product AC for approval.
 - "Approve these AC" -> write approval, read `agent_next`, and route to architecture review, evidence, or reporting from that returned state.
 - "Change AC-2 to mean..." -> update that criterion and treat older evidence for it as stale.
-- Complete goal with `candidate_goals` -> use the chosen candidate as a draft source, not as approved AC.
+- Complete goal with `candidate_goals` -> choose or refine the strongest human-facing candidate, run `draft --from-next-candidate`, then show the draft for user approval.
 - Generic `draft --goal` output with `acceptance_review` findings -> show the missing acceptance questions first; do not ask for blind approval.
 
 Discovery answer shape for agent-created temporary files:
@@ -107,4 +109,5 @@ Ask for approval or specific revision. Do not include implementation steps unles
 - Do not accept generic criteria such as "modify fields" or "show an error" until field scope, validation, success, persistence, failure, and review method are clear enough for the user to judge.
 - Do not make tests, modules, files, commands, Skills, libraries, architecture, or build-vs-buy decisions into Product AC.
 - Do not treat brainstorm output, discovery questions, candidate goals, or agent assumptions as a Nori Contract.
+- Do not use `draft --from-next-candidate` unless the source goal is already `ready-for-next-loop`; if the command returns completion or evidence review risk, handle that risk before continuing.
 - Do not claim completion from AC quality alone; completion still requires reviewable evidence.

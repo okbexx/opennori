@@ -666,6 +666,26 @@ test("evidence can drive the workflow to complete and render a human report", ()
   ]);
   assert.equal(exported.data.next_recommendation.status, "ready-for-next-loop");
   assert.equal(exported.data.next_recommendation.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), true);
+
+  const nextDraft = run([
+    "draft",
+    "--from-next-candidate", "next-loop-usability",
+    "--source-goal", init.data.goal_id,
+    "--goal-id", "next-loop-usability-contract",
+    "--root", root,
+    "--json"
+  ]);
+  assert.equal(nextDraft.data.goal_id, "next-loop-usability-contract");
+  assert.equal(nextDraft.data.acceptance_basis.status, "draft");
+  assert.match(nextDraft.data.acceptance_basis.summary, /completed goal candidate/);
+  assert.equal(nextDraft.data.acceptance_basis.source_goal_id, init.data.goal_id);
+  assert.equal(nextDraft.data.acceptance_basis.candidate_id, "next-loop-usability");
+  assert.match(nextDraft.data.acceptance_basis.rule, /not approved acceptance criteria/);
+  assert.equal(nextDraft.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(nextDraft.data.criteria.some((criterion) => /candidate/.test(criterion.user_story.toLowerCase())), true);
+  const nextDraftLedger = JSON.parse(fs.readFileSync(nextDraft.data.evidence_path, "utf8"));
+  assert.equal(nextDraftLedger.ledger.status, "active");
+  assert.equal(nextDraftLedger.ledger.criteria["AC-1"].status, "unknown");
 });
 
 test("blocked criteria produce a concrete intervention answer", () => {

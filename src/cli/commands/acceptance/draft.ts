@@ -1,7 +1,8 @@
 import { defineCommand } from "citty";
 import fs from "node:fs";
 import path from "node:path";
-import { briefFromBrainstorm, briefFromDiscoveryAnswers, briefFromGoal } from "../../../acceptance.ts";
+import { briefFromBrainstorm, briefFromDiscoveryAnswers, briefFromGoal, briefFromNextGoalCandidate } from "../../../acceptance.ts";
+import { architectureState } from "../../../architecture.ts";
 import {
   buildContractFromBrief,
   buildEvidenceLedger,
@@ -11,12 +12,13 @@ import {
   pathsForGoal,
   readJson,
   renderAcceptanceMarkdown,
+  nextRecommendation,
   validateContract,
   writeJson
 } from "../../../core.ts";
 import { bootstrap, refreshManifest } from "../../../lifecycle.ts";
-import { runJsonCommand } from "../../runtime.ts";
-import type { AcceptanceDiscovery, AcceptanceDiscoveryAnswers, Brainstorm, NoriBrief } from "../../../types.ts";
+import { loadPair, runJsonCommand } from "../../runtime.ts";
+import type { AcceptanceDiscovery, AcceptanceDiscoveryAnswers, Brainstorm, NoriBrief, NextGoalCandidate } from "../../../types.ts";
 import { brainstormPaths, discoveryPaths, jsonArg, resolveRoot, rootArg } from "./shared.ts";
 
 const briefFromBrainstormForCommand = briefFromBrainstorm as unknown as (brainstorm: Brainstorm, candidateId: string) => NoriBrief;
@@ -25,6 +27,10 @@ const briefFromDiscoveryAnswersForCommand = briefFromDiscoveryAnswers as (
   discovery: AcceptanceDiscovery,
   answers: AcceptanceDiscoveryAnswers,
   goalId?: string
+) => NoriBrief;
+const briefFromNextGoalCandidateForCommand = briefFromNextGoalCandidate as (
+  candidate: NextGoalCandidate,
+  options?: { sourceGoalId?: string; goalId?: string }
 ) => NoriBrief;
 
 export const draftCommand = defineCommand({
@@ -54,6 +60,22 @@ export const draftCommand = defineCommand({
       type: "string",
       description: "Acceptance Discovery id to draft from after user answers."
     },
+    fromNextCandidate: {
+      type: "string",
+      description: "Completed goal candidate id to draft from."
+    },
+    sourceGoal: {
+      type: "string",
+      description: "Completed source goal id for --from-next-candidate."
+    },
+    acceptance: {
+      type: "string",
+      description: "Explicit source acceptance markdown path for --from-next-candidate."
+    },
+    evidence: {
+      type: "string",
+      description: "Explicit source evidence JSON path for --from-next-candidate."
+    },
     answers: {
       type: "string",
       description: "JSON file with user answers keyed by discovery gap id."
@@ -68,6 +90,7 @@ export const draftCommand = defineCommand({
     const root = resolveRoot(args.root);
     const brainstormId = args.fromBrainstorm;
     const discoveryId = args.fromDiscovery;
+    const nextCandidateId = args.fromNextCandidate;
     let brief;
     if (args.brief) {
       brief = readJson<NoriBrief>(path.resolve(String(args.brief)));
@@ -82,6 +105,35 @@ export const draftCommand = defineCommand({
         readJson<AcceptanceDiscoveryAnswers>(path.resolve(String(args.answers))),
         args.goalId
       );
+    } else if (nextCandidateId) {
+      const sourcePair = loadPair({
+        root,
+        goal: args.sourceGoal,
+        acceptance: args.acceptance,
+        evidence: args.evidence
+      });
+      const { contract, ledger } = sourcePair;
+      const architecture = architectureState(sourcePair.root, contract.goal_id);
+      const recommendation = nextRecommendation(contract, ledger, { root: sourcePair.root, architecture });
+      if (recommendation.status !== "ready-for-next-loop") {
+        return fail(
+          "next_candidate_unavailable",
+          `Source goal is not ready for next loop: ${recommendation.status}`,
+          recommendation.actions[0] || "Finish or review the current OpenNori goal before drafting from candidate goals."
+        );
+      }
+      const candidate = (recommendation.candidate_goals || []).find((item) => item.id === String(nextCandidateId));
+      if (!candidate) {
+        return fail(
+          "next_candidate_not_found",
+          `Next goal candidate not found: ${nextCandidateId}`,
+          `Choose one of: ${(recommendation.candidate_goals || []).map((item) => item.id).join(", ")}`
+        );
+      }
+      brief = briefFromNextGoalCandidateForCommand(candidate, {
+        sourceGoalId: contract.goal_id,
+        goalId: args.goalId
+      });
     } else {
       const goal = String(args.goal || "").trim();
       if (!goal) throw new Error("--goal is required");

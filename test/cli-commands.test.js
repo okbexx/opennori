@@ -439,6 +439,86 @@ test("draft command module creates active Nori Contracts from goals and brainsto
   assert.equal(fromBrainstorm.data.criteria.every((criterion) => criterion.user_story.startsWith("作为用户")), true);
 });
 
+test("draft command module creates draft contracts from completed goal candidates", async () => {
+  const root = tempRoot();
+  const contract = {
+    schema_version: "opennori/contract-v1",
+    protocol_version: "opennori/v1",
+    goal_id: "module-goal",
+    goal: "Ship a reviewable user outcome",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "As a user, I can review the shipped outcome from the normal report entry.",
+        measurement: "Open the report entry and review the outcome status.",
+        threshold: "The report shows the expected result and lets me decide whether the outcome is acceptable."
+      }
+    ],
+    acceptance_basis: { status: "approved" }
+  };
+  const ledger = buildEvidenceLedger(contract);
+  const reportPath = path.join(root, ".opennori", "reports", "module-goal.report.md");
+  fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+  fs.writeFileSync(reportPath, "# Module goal report\n\nComplete with reviewable evidence.\n");
+  addEvidence(contract, ledger, "AC-1", {
+    kind: "test-summary",
+    summary: "AC-1 passes with a reviewable report source.",
+    result: "passing",
+    sources: [
+      { type: "command", command: "opennori report --root . --json", label: "review command" },
+      { type: "artifact", path: ".opennori/reports/module-goal.report.md", label: "review report" }
+    ],
+    reviewability: "Run the command and inspect the report artifact.",
+    limitations: "This module test proves candidate drafting behavior, not an end-to-end user project."
+  });
+  const activeDir = path.join(root, ".opennori", "active");
+  fs.mkdirSync(activeDir, { recursive: true });
+  writeJson(path.join(activeDir, "module-goal.evidence.json"), { contract, ledger });
+  fs.writeFileSync(path.join(activeDir, "module-goal.acceptance.md"), "# Module goal\n");
+  writeArchitectureBaseline(root, buildArchitectureBaseline(root, {
+    goal: contract.goal,
+    goalId: contract.goal_id,
+    accepted: true
+  }));
+  fs.writeFileSync(path.join(root, ".opennori", "agent-guide.md"), renderAgentGuideMarkdown());
+
+  const drafted = await runDraftCommand([
+    "--root", root,
+    "--source-goal", "module-goal",
+    "--from-next-candidate", "real-user-validation",
+    "--goal-id", "candidate-module-goal",
+    "--json"
+  ]);
+
+  assert.equal(drafted.ok, true);
+  assert.equal(drafted.data.goal_id, "candidate-module-goal");
+  assert.equal(drafted.data.acceptance_basis.status, "draft");
+  assert.equal(drafted.data.acceptance_basis.source_goal_id, "module-goal");
+  assert.equal(drafted.data.acceptance_basis.candidate_id, "real-user-validation");
+  assert.match(drafted.data.acceptance_basis.summary, /completed goal candidate/);
+  assert.match(drafted.data.acceptance_basis.rule, /not approved acceptance criteria/);
+  assert.equal(drafted.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(drafted.data.criteria.every((criterion) => /^As a user/.test(criterion.user_story)), true);
+
+  const notReady = await runDraftCommand([
+    "--root", root,
+    "--source-goal", "candidate-module-goal",
+    "--from-next-candidate", "real-user-validation",
+    "--json"
+  ]);
+  assert.equal(notReady.ok, false);
+  assert.equal(notReady.error.type, "next_candidate_unavailable");
+
+  const missing = await runDraftCommand([
+    "--root", root,
+    "--source-goal", "module-goal",
+    "--from-next-candidate", "missing-candidate",
+    "--json"
+  ]);
+  assert.equal(missing.ok, false);
+  assert.equal(missing.error.type, "next_candidate_not_found");
+});
+
 test("init command module initializes project state with preview safety", async () => {
   const root = tempRoot();
   const preview = await runInitCommand(["--root", root, "--json"]);

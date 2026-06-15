@@ -9,7 +9,8 @@ import type {
   Brainstorm,
   BrainstormCandidate,
   NoriBrief,
-  NoriContract
+  NoriContract,
+  NextGoalCandidate
 } from "./types.ts";
 
 const BRAINSTORM_CANDIDATES: BrainstormCandidate[] = [
@@ -259,6 +260,7 @@ const IMPLEMENTATION_ONLY_PHRASES = [
 const NEGATION_TERMS = ["不能", "不应", "不是", "不得", "避免", "cannot", "must not", "should not", "reject"];
 const GENERIC_DRAFT_SUMMARY = "Draft generated from generic acceptance discovery. User must answer the open acceptance questions before approval.";
 const DISCOVERY_ANSWER_DRAFT_SUMMARY = "Draft generated from reviewed Acceptance Discovery answers. User still needs to approve or revise the Nori Contract before implementation.";
+const NEXT_CANDIDATE_DRAFT_SUMMARY = "Draft generated from a completed goal candidate. User must approve or revise it before it becomes the next Nori Contract.";
 
 function sentenceHasSpecifics(text: unknown, terms: string[]): boolean {
   const value = String(text || "").toLowerCase();
@@ -718,6 +720,50 @@ export function briefFromBrainstorm(brainstorm: Brainstorm, candidateId: string)
       measurement: "用户查看 OpenNori draft、报告或目标结果后作出判断。",
       threshold: "用户能直接判断是否满足，不需要阅读实现步骤。",
       risk: index === 0 ? "medium" : "low"
+    }))
+  };
+}
+
+export function briefFromNextGoalCandidate(
+  candidate: NextGoalCandidate,
+  {
+    sourceGoalId,
+    goalId
+  }: {
+    sourceGoalId?: string;
+    goalId?: string;
+  } = {}
+): NoriBrief {
+  const candidateId = String(candidate.id || "").trim();
+  if (!candidateId) throw new Error("Candidate id is required");
+  const goal = String(candidate.goal || "").trim();
+  if (!goal) throw new Error("Candidate goal is required");
+  const directions = (candidate.acceptance_directions || [])
+    .map((direction) => String(direction || "").trim())
+    .filter(Boolean);
+  if (directions.length === 0) {
+    throw new Error(`Candidate has no acceptance directions: ${candidateId}`);
+  }
+
+  return {
+    goal_id: goalId || slugify([sourceGoalId, candidateId].filter(Boolean).join("-") || candidateId),
+    goal,
+    acceptance_basis: {
+      status: "draft",
+      summary: NEXT_CANDIDATE_DRAFT_SUMMARY,
+      source_goal_id: sourceGoalId,
+      candidate_id: candidateId,
+      candidate_source: candidate.source,
+      user_value: candidate.user_value,
+      risks: candidate.risks || [],
+      rule: "Candidate goals are draft sources only. They are not approved acceptance criteria, implementation phases, or completion evidence."
+    },
+    criteria: directions.map((direction, index) => ({
+      id: `AC-${index + 1}`,
+      user_story: direction,
+      measurement: "用户或评审者按这条候选方向检查新的目标结果、状态或报告。",
+      threshold: "用户能直接判断这条方向是否满足；任何候选风险都需要在 approval 前确认、修订或接受。",
+      risk: index === directions.length - 1 ? "medium" : "low"
     }))
   };
 }
