@@ -18,7 +18,7 @@ OpenNori is one capability bundle:
 
 Do not present those pieces as optional standalone product paths.
 
-CLI JSON may include `data.agent_next`. Treat it as the deterministic routing surface from the state layer to Skills. Prefer `agent_next.state`, `agent_next.recommended_skill`, `agent_next.instruction`, and `agent_next.user_visible_next` over guessing from files or command prose.
+CLI JSON may include `data.agent_next`. Treat it as the deterministic routing surface from the state layer to Skills. Prefer `agent_next.state`, `agent_next.recommended_skill`, `agent_next.instruction`, `agent_next.user_visible_next`, and `agent_next.candidate_goals` over guessing from files or command prose.
 
 `.opennori/agent-guide.md` is only a project-local supplementary guide. Do not depend on it for OpenNori discovery, and do not assume a fresh project has an Architecture Baseline or an active Nori Contract just because `.opennori/` directories exist.
 
@@ -33,7 +33,7 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
    - `architecture_needs_review` -> follow `recommended_skill` (`nori-architecture-brainstorm`, `nori-architecture-challenge`, or `nori-build-vs-buy`) before non-trivial implementation continues.
    - `work_on_current_gap` -> work only on the current acceptance gap and hand off to `nori-evidence` after verification.
    - `completion_needs_review`, `evidence_needs_review`, or `acceptance_needs_user` -> use reporting/evidence/acceptance as directed and involve the user when `needs_user` is true.
-   - `ready_for_next_loop` -> if the user asked to continue, choose or refine a candidate next goal and hand off to `nori-acceptance`.
+   - `ready_for_next_loop` -> if the user asked to continue, choose or refine one `agent_next.candidate_goals` item and hand off to `nori-acceptance`.
 4. If the project is already initialized but the command did not expose `agent_next`, run `opennori list --root <repo> --json`, then `opennori resume --root <repo> --goal <goal-id> --json` or `opennori status --root <repo> --goal <goal-id> --json`.
 5. If multiple active goals exist and the user did not identify one, summarize the choices and ask for a target instead of guessing.
 6. If doctor reports missing Plugin discovery, packaged Skills, CLI access, manifest, or project state, route to `nori-project-health`.
@@ -51,7 +51,7 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 - "Decide architecture first", "use a better architecture", "follow the baseline", "challenge the baseline" -> use `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge`.
 - "Before self-building this parser/installer/schema/storage/UI primitive" -> hand off to `nori-build-vs-buy`.
 - "Install", "upgrade", "uninstall", "doctor", "state is broken" -> hand off to `nori-project-health`.
-- A complete goal with `next_recommendation.candidate_goals` and a user asking to continue -> choose or refine one human-facing next goal, then hand off to `nori-acceptance`.
+- A complete goal with `agent_next.candidate_goals` and a user asking to continue -> choose or refine one human-facing next goal, then hand off to `nori-acceptance`.
 
 ## State Writes
 

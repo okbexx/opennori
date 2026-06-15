@@ -999,6 +999,9 @@ test("resume command module suggests next-loop candidates for confidently comple
   assert.equal(resume.data.next_recommendation.status, "ready-for-next-loop");
   assert.equal(resume.data.agent_next.state, "ready_for_next_loop");
   assert.equal(resume.data.agent_next.recommended_skill, "nori-acceptance");
+  assert.equal(resume.data.agent_next.candidate_goals.length, 4);
+  assert.equal(resume.data.agent_next.candidate_goals[0].id, "real-user-validation");
+  assert.match(resume.data.agent_next.candidate_goals[0].draft_command, /opennori draft --from-next-candidate "real-user-validation"/);
   assert.equal(resume.data.next_recommendation.candidate_goals.length, 4);
   assert.equal(resume.data.next_recommendation.candidate_goals[0].id, "real-user-validation");
   assert.equal(resume.data.next_recommendation.candidate_goals[0].goal.length < 140, true);

@@ -20,6 +20,7 @@ type AgentNextInput = {
   needsUser?: boolean;
   safeNextCommand?: string;
   commands?: string[];
+  candidateGoals?: NextRecommendation["candidate_goals"];
 };
 
 function agentNext(input: AgentNextInput): AgentNext {
@@ -36,6 +37,7 @@ function agentNext(input: AgentNextInput): AgentNext {
   if (input.needsUser !== undefined) next.needs_user = input.needsUser;
   if (input.safeNextCommand) next.safe_next_command = input.safeNextCommand;
   if (input.commands?.length) next.commands = input.commands;
+  if (input.candidateGoals?.length) next.candidate_goals = input.candidateGoals;
   return next;
 }
 
@@ -236,11 +238,12 @@ export function agentNextForRecommendation(
       state: "ready_for_next_loop",
       recommendedSkill: "nori-acceptance",
       summary: recommendation.summary,
-      instruction: "If the user asked to continue, choose or refine one candidate next human-facing goal and start acceptance discovery; do not treat candidates as approved AC.",
+      instruction: "If the user asked to continue, choose or refine one candidate next human-facing goal from candidate_goals, then create a draft Nori Contract using the candidate draft metadata when present. Do not treat candidates as approved AC.",
       userVisibleNext: "Choose or refine the next OpenNori goal.",
       goalId,
       currentGapId: null,
-      needsUser: false
+      needsUser: false,
+      candidateGoals: recommendation.candidate_goals
     });
   }
 

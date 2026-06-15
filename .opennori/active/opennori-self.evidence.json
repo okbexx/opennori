@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T12:04:52.280Z",
+    "updated_at": "2026-06-15T12:14:59.454Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -3759,6 +3759,64 @@
             "limitations": "This improves agent routing metadata for generated candidates; the user or agent must still select or revise a candidate and approve the resulting draft before any next-loop implementation counts.",
             "gate": "accepted",
             "created_at": "2026-06-15T12:04:52.280Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "agent_next now carries candidate_goals for ready_for_next_loop, including draft_args, draft_command, and draft_rule, so Skills can continue from the deterministic routing surface without reconstructing flags or treating candidates as approved AC.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run typecheck",
+                "command": "npm run typecheck"
+              },
+              {
+                "type": "command",
+                "label": "npm test -- --run test/cli-commands.test.js test/core.test.js",
+                "command": "npm test -- --run test/cli-commands.test.js test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/types.ts",
+                "path": "src/types.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+                "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+              }
+            ],
+            "reviewability": "Rerun the listed checks and inspect resume/status JSON for data.agent_next.state=ready_for_next_loop with candidate_goals and draft metadata.",
+            "limitations": "This exposes deterministic routing data for Skills; selecting, refining, and approving the next draft remains an agent/user judgment and candidates are not completion evidence.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T12:14:59.454Z"
           }
         ]
       },

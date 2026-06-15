@@ -283,6 +283,7 @@ export type AgentNext = {
   needs_user?: boolean;
   safe_next_command?: string;
   commands?: string[];
+  candidate_goals?: NextGoalCandidate[];
 };
 
 export type EvidenceView = {

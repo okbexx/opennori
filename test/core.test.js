@@ -642,6 +642,9 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.equal(resume.data.next_recommendation.status, "ready-for-next-loop");
   assert.equal(resume.data.agent_next.state, "ready_for_next_loop");
   assert.equal(resume.data.agent_next.recommended_skill, "nori-acceptance");
+  assert.equal(resume.data.agent_next.candidate_goals.length, 4);
+  assert.equal(resume.data.agent_next.candidate_goals[0].id, "opennori-adoption-dogfood");
+  assert.equal(resume.data.agent_next.candidate_goals.every((candidate) => candidate.draft_args?.includes("--from-next-candidate")), true);
   assert.equal(resume.data.next_recommendation.candidate_goals.length, 4);
   assert.equal(resume.data.next_recommendation.candidate_goals[0].id, "opennori-adoption-dogfood");
   assert.equal(resume.data.next_recommendation.candidate_goals[0].acceptance_directions.length > 0, true);

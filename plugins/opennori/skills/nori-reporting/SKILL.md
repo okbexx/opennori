@@ -13,8 +13,8 @@ Reporting is not an implementation diary.
 
 1. Run the narrowest status command that answers the user.
 2. Prefer resume/status for current state, report for a durable human report, changes for diff grouping, and context export when another tool needs review context.
-3. Read completion, current_gap, acceptance_review, evidence_health, profile_review, architecture decision, build_vs_buy health, and next_recommendation.
-4. If the user asked to continue, follow next_recommendation instead of stopping at a status dump.
+3. Read completion, current_gap, acceptance_review, evidence_health, profile_review, architecture decision, build_vs_buy health, agent_next, and next_recommendation.
+4. If the user asked to continue, follow `agent_next` routing and its `candidate_goals` instead of stopping at a status dump.
 
 Useful state commands:
 
@@ -33,7 +33,7 @@ Useful state commands:
 - "What do I need to do" -> report user intervention only, not implementation chores.
 - "What changed" -> group OpenNori acceptance artifacts separately from implementation files.
 - "Generate report" -> create/read the OpenNori report and summarize the decision.
-- "Continue" after a complete goal -> inspect `candidate_goals`, choose or refine the strongest human-facing next goal, then hand off to `nori-acceptance`.
+- "Continue" after a complete goal -> inspect `agent_next.candidate_goals`, choose or refine the strongest human-facing next goal, then hand off to `nori-acceptance`.
 - "Export for review" -> use context export and state what the reviewer can inspect.
 
 ## State Writes
