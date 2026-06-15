@@ -366,6 +366,44 @@ test("discover command module finds acceptance gaps without creating an active g
   assert.match(fs.readFileSync(discovery.data.markdown_path, "utf8"), /not a Nori Contract/);
 });
 
+test("draft command module creates concrete contracts from discovery answers", async () => {
+  const root = tempRoot();
+  const discovery = await runDiscoverCommand([
+    "--root", root,
+    "--goal", "Ship a settings page where users edit profile details",
+    "--id", "module-settings-profile",
+    "--json"
+  ]);
+  const answersPath = path.join(root, "answers.json");
+  writeJson(answersPath, {
+    "missing-user-entry": "用户从顶部导航打开 Account Settings，再进入 Profile 标签页查看结果。",
+    "missing-field-scope": "本轮可编辑昵称、头像和简介；邮箱、手机号和密码不在范围内。",
+    "missing-validation-rule": "昵称必填且 2-30 个字符；简介最多 160 个字符；头像只允许 PNG/JPEG 且不超过 2MB。",
+    "missing-success-signal": "保存成功后显示成功提示，并在 Profile 标签页立即看到更新后的昵称、头像和简介。",
+    "missing-persistence-scope": "刷新页面、关闭后重新打开项目时，昵称、头像和简介仍然保持保存后的值。",
+    "missing-failure-case": "网络失败时显示网络错误提示，保留表单中的用户输入，不覆盖旧资料。",
+    "missing-out-of-scope-boundary": "本轮不支持修改邮箱、手机号、密码、通知偏好或隐私设置。",
+    "missing-review-method": "评审者用浏览器打开设置页，执行成功保存、刷新持久化和网络失败场景，并保存截图或报告作为证据。"
+  });
+
+  const draft = await runDraftCommand([
+    "--root", root,
+    "--from-discovery", discovery.data.discovery_id,
+    "--answers", answersPath,
+    "--goal-id", "module-settings-contract",
+    "--json"
+  ]);
+
+  assert.equal(draft.ok, true);
+  assert.equal(draft.data.goal_id, "module-settings-contract");
+  assert.equal(draft.data.acceptance_basis.status, "draft");
+  assert.match(draft.data.acceptance_basis.summary, /Discovery answers/);
+  assert.equal(draft.data.criteria.length, 6);
+  assert.equal(draft.data.criteria.some((criterion) => /Account Settings/.test(criterion.user_story)), true);
+  assert.equal(draft.data.criteria.some((criterion) => /2-30 个字符/.test(`${criterion.user_story} ${criterion.measurement}`)), true);
+  assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
+});
+
 test("draft command module creates active Nori Contracts from goals and brainstorm candidates", async () => {
   const root = tempRoot();
   const draft = await runDraftCommand([

@@ -396,6 +396,54 @@ test("discover finds underspecified acceptance gaps before draft", () => {
   assert.doesNotMatch(text, /Implementation plan/);
 });
 
+test("discovery answers draft specific user-facing acceptance criteria", () => {
+  const root = tempRoot();
+  const discovery = run([
+    "discover",
+    "--goal", "Ship a settings page where users edit profile details",
+    "--root", root,
+    "--id", "settings-profile",
+    "--json"
+  ]);
+  const answersPath = path.join(root, "answers.json");
+  fs.writeFileSync(answersPath, JSON.stringify({
+    "missing-user-entry": "用户从顶部导航打开 Account Settings，再进入 Profile 标签页查看结果。",
+    "missing-field-scope": "本轮可编辑昵称、头像和简介；邮箱、手机号和密码不在范围内。",
+    "missing-validation-rule": "昵称必填且 2-30 个字符；简介最多 160 个字符；头像只允许 PNG/JPEG 且不超过 2MB。",
+    "missing-success-signal": "保存成功后显示成功提示，并在 Profile 标签页立即看到更新后的昵称、头像和简介。",
+    "missing-persistence-scope": "刷新页面、关闭后重新打开项目时，昵称、头像和简介仍然保持保存后的值。",
+    "missing-failure-case": "网络失败时显示网络错误提示，保留表单中的用户输入，不覆盖旧资料。",
+    "missing-out-of-scope-boundary": "本轮不支持修改邮箱、手机号、密码、通知偏好或隐私设置。",
+    "missing-review-method": "评审者用浏览器打开设置页，执行成功保存、刷新持久化和网络失败场景，并保存截图或报告作为证据。"
+  }));
+
+  const draft = run([
+    "draft",
+    "--root", root,
+    "--from-discovery", discovery.data.discovery_id,
+    "--answers", answersPath,
+    "--json"
+  ]);
+
+  assert.equal(draft.data.acceptance_basis.status, "draft");
+  assert.match(draft.data.acceptance_basis.summary, /Discovery answers/);
+  assert.equal(draft.data.criteria.length, 6);
+  const joined = draft.data.criteria.map((criterion) => `${criterion.user_story}\n${criterion.measurement}\n${criterion.threshold}`).join("\n");
+  assert.match(joined, /Account Settings/);
+  assert.match(joined, /Profile/);
+  assert.match(joined, /昵称、头像和简介/);
+  assert.match(joined, /邮箱、手机号和密码不在范围/);
+  assert.match(joined, /2-30 个字符/);
+  assert.match(joined, /PNG\/JPEG/);
+  assert.match(joined, /刷新页面/);
+  assert.match(joined, /网络失败/);
+  assert.match(joined, /保留表单中的用户输入/);
+
+  const check = run(["check", "--root", root, "--json"]);
+  assert.equal(check.data.acceptance_review.status, "clear");
+  assert.equal(check.warnings.some((warning) => warning.type === "acceptance_review"), false);
+});
+
 test("Nori Profile records required skills and blocks completion until satisfied", () => {
   const root = tempRoot();
   const init = run(["draft", "--goal", "Build a frontend page", "--root", root, "--json"]);

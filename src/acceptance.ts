@@ -2,6 +2,7 @@ import { slugify } from "./core/shared.ts";
 import type {
   AcceptanceCriterion,
   AcceptanceDiscovery,
+  AcceptanceDiscoveryAnswers,
   AcceptanceDiscoveryGap,
   AcceptanceQualityAudit,
   AcceptanceQualityFinding,
@@ -257,6 +258,7 @@ const IMPLEMENTATION_ONLY_PHRASES = [
 
 const NEGATION_TERMS = ["不能", "不应", "不是", "不得", "避免", "cannot", "must not", "should not", "reject"];
 const GENERIC_DRAFT_SUMMARY = "Draft generated from generic acceptance discovery. User must answer the open acceptance questions before approval.";
+const DISCOVERY_ANSWER_DRAFT_SUMMARY = "Draft generated from reviewed Acceptance Discovery answers. User still needs to approve or revise the Nori Contract before implementation.";
 
 function sentenceHasSpecifics(text: unknown, terms: string[]): boolean {
   const value = String(text || "").toLowerCase();
@@ -593,6 +595,98 @@ export function briefFromGoal(goal: string, goalId: string | undefined = undefin
     goal,
     acceptance_basis: { status: "draft", summary: GENERIC_DRAFT_SUMMARY },
     criteria: DEFAULT_CRITERIA
+  };
+}
+
+function normalizeDiscoveryAnswers(input: AcceptanceDiscoveryAnswers): Record<string, string> {
+  const source = input.answers && typeof input.answers === "object" && !Array.isArray(input.answers)
+    ? input.answers
+    : input;
+  const answers: Record<string, string> = {};
+  for (const [key, value] of Object.entries(source)) {
+    if (key === "goal" || key === "answers") continue;
+    if (value === undefined || value === null) continue;
+    const answer = typeof value === "string" ? value.trim() : JSON.stringify(value);
+    if (answer) answers[key] = answer;
+  }
+  return answers;
+}
+
+function answerFor(answers: Record<string, string>, id: string, fallback: string): string {
+  return answers[id] || fallback;
+}
+
+export function briefFromDiscoveryAnswers(
+  discovery: AcceptanceDiscovery,
+  input: AcceptanceDiscoveryAnswers,
+  goalId: string | undefined = undefined
+): NoriBrief {
+  const answers = normalizeDiscoveryAnswers(input);
+  const goal = String(input.goal || discovery.goal || "").trim();
+  if (!goal) throw new Error("Discovery goal is required");
+
+  const entry = answerFor(answers, "missing-user-entry", "用户从目标功能的正常入口开始操作，并在同一用户界面查看结果。");
+  const fieldScope = answerFor(answers, "missing-field-scope", "用户按已确认范围修改本轮包含的字段。");
+  const validation = answerFor(answers, "missing-validation-rule", "输入内容符合用户确认的有效规则。");
+  const success = answerFor(answers, "missing-success-signal", "操作成功后用户看到明确成功反馈和更新后的结果。");
+  const persistence = answerFor(answers, "missing-persistence-scope", "刷新或重新打开后，用户仍能看到保存后的结果。");
+  const failure = answerFor(answers, "missing-failure-case", "失败时用户看到明确提示，并能判断原状态或输入是否被保留。");
+  const boundary = answerFor(answers, "missing-out-of-scope-boundary", "相关但未确认的能力不属于本轮完成范围。");
+  const review = answerFor(answers, "missing-review-method", "评审者通过可复查的操作记录、截图、报告或人工确认判断是否通过。");
+
+  return {
+    goal_id: goalId || undefined,
+    goal,
+    acceptance_basis: {
+      status: "draft",
+      summary: DISCOVERY_ANSWER_DRAFT_SUMMARY,
+      discovery_id: discovery.id,
+      answered_gaps: Object.keys(answers)
+    },
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: `作为用户，我能从已确认入口开始，并只操作本轮确认范围内的内容：${entry}`,
+        measurement: `用户通过确认入口执行本轮目标所需操作；范围：${fieldScope}`,
+        threshold: `入口、可操作范围和不在范围内的边界对用户可见或可判断：${boundary}`,
+        risk: "medium"
+      },
+      {
+        id: "AC-2",
+        user_story: `作为用户，我输入无效内容时，能看到清楚的校验反馈并知道如何修正：${validation}`,
+        measurement: `用户按已确认规则尝试有效和无效输入，并检查校验反馈：${validation}`,
+        threshold: "有效输入被接受且不显示校验错误；无效输入被阻止继续，用户能看到对应提示。",
+        risk: "medium"
+      },
+      {
+        id: "AC-3",
+        user_story: `作为用户，我保存有效修改后，能看到明确成功反馈和更新后的结果：${success}`,
+        measurement: `用户完成有效编辑并触发保存；复查方式：${review}`,
+        threshold: `界面或报告显示保存成功，并展示用户刚刚保存的结果：${success}`,
+        risk: "medium"
+      },
+      {
+        id: "AC-4",
+        user_story: `作为用户，我刷新或重新打开后，仍能看到保存后的结果：${persistence}`,
+        measurement: `用户完成保存后刷新、重新打开或按确认范围恢复页面：${persistence}`,
+        threshold: "用户看到的结果仍与保存成功后的内容一致，不需要阅读实现说明。",
+        risk: "high"
+      },
+      {
+        id: "AC-5",
+        user_story: `作为用户，我遇到必须覆盖的失败情况时，能看到明确提示并知道数据状态：${failure}`,
+        measurement: `用户或评审者触发已确认失败场景；复查方式：${review}`,
+        threshold: `失败反馈和数据保留行为符合用户确认：${failure}`,
+        risk: "high"
+      },
+      {
+        id: "AC-6",
+        user_story: `作为用户或评审者，我能用已确认的复查方式判断本轮目标是否完成：${review}`,
+        measurement: `用户或评审者复查成功结果、持久化或重新检查结果、失败行为和范围边界：${review}`,
+        threshold: "证据能展示成功反馈、后续复查结果、失败提示和范围边界，并且不把实现步骤当作完成依据。",
+        risk: "medium"
+      }
+    ]
   };
 }
 

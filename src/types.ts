@@ -354,6 +354,12 @@ export type AcceptanceDiscovery = {
   next: string;
 };
 
+export type AcceptanceDiscoveryAnswers = {
+  goal?: string;
+  answers?: Record<string, string>;
+  [gapId: string]: unknown;
+};
+
 export type AcceptanceQualityFinding = {
   criterion_id: string;
   path: string;

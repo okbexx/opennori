@@ -1,7 +1,7 @@
 import { defineCommand } from "citty";
 import fs from "node:fs";
 import path from "node:path";
-import { briefFromBrainstorm, briefFromGoal } from "../../../acceptance.ts";
+import { briefFromBrainstorm, briefFromDiscoveryAnswers, briefFromGoal } from "../../../acceptance.ts";
 import {
   buildContractFromBrief,
   buildEvidenceLedger,
@@ -16,11 +16,16 @@ import {
 } from "../../../core.ts";
 import { bootstrap, refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
-import type { Brainstorm, NoriBrief } from "../../../types.ts";
-import { brainstormPaths, jsonArg, resolveRoot, rootArg } from "./shared.ts";
+import type { AcceptanceDiscovery, AcceptanceDiscoveryAnswers, Brainstorm, NoriBrief } from "../../../types.ts";
+import { brainstormPaths, discoveryPaths, jsonArg, resolveRoot, rootArg } from "./shared.ts";
 
 const briefFromBrainstormForCommand = briefFromBrainstorm as unknown as (brainstorm: Brainstorm, candidateId: string) => NoriBrief;
 const briefFromGoalForCommand = briefFromGoal as (goal: string, goalId?: string) => NoriBrief;
+const briefFromDiscoveryAnswersForCommand = briefFromDiscoveryAnswers as (
+  discovery: AcceptanceDiscovery,
+  answers: AcceptanceDiscoveryAnswers,
+  goalId?: string
+) => NoriBrief;
 
 export const draftCommand = defineCommand({
   meta: {
@@ -45,6 +50,14 @@ export const draftCommand = defineCommand({
       type: "string",
       description: "Brainstorm id to draft from."
     },
+    fromDiscovery: {
+      type: "string",
+      description: "Acceptance Discovery id to draft from after user answers."
+    },
+    answers: {
+      type: "string",
+      description: "JSON file with user answers keyed by discovery gap id."
+    },
     candidate: {
       type: "string",
       description: "Brainstorm candidate id."
@@ -54,6 +67,7 @@ export const draftCommand = defineCommand({
   run({ args }) {
     const root = resolveRoot(args.root);
     const brainstormId = args.fromBrainstorm;
+    const discoveryId = args.fromDiscovery;
     let brief;
     if (args.brief) {
       brief = readJson<NoriBrief>(path.resolve(String(args.brief)));
@@ -61,6 +75,13 @@ export const draftCommand = defineCommand({
       const candidateId = args.candidate;
       if (!candidateId) throw new Error("--candidate is required with --from-brainstorm");
       brief = briefFromBrainstormForCommand(readJson<Brainstorm>(brainstormPaths(root, brainstormId).jsonPath), String(candidateId));
+    } else if (discoveryId) {
+      if (!args.answers) throw new Error("--answers is required with --from-discovery");
+      brief = briefFromDiscoveryAnswersForCommand(
+        readJson<AcceptanceDiscovery>(discoveryPaths(root, discoveryId).jsonPath),
+        readJson<AcceptanceDiscoveryAnswers>(path.resolve(String(args.answers))),
+        args.goalId
+      );
     } else {
       const goal = String(args.goal || "").trim();
       if (!goal) throw new Error("--goal is required");

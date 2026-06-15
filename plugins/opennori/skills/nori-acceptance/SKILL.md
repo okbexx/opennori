@@ -25,6 +25,7 @@ Useful state commands:
 
 - `opennori brainstorm --idea "<idea>" --root <repo> --json`
 - `opennori discover --goal "<goal>" --root <repo> --json`
+- `opennori draft --from-discovery <id> --answers <answers.json> --root <repo> --json`
 - `opennori draft --goal "<goal>" --root <repo> --json`
 - `opennori draft --from-brainstorm <id> --candidate <candidate> --root <repo> --json`
 - `opennori approve --root <repo> --summary "<approval>" --json`
@@ -35,10 +36,28 @@ Useful state commands:
 - "I want to build X" -> discover missing acceptance details, then draft Product AC.
 - "Brainstorm this idea" -> produce selectable acceptance directions; ask which direction should become the contract.
 - "This AC is too vague" -> ask only questions that change completion judgment.
+- User answers discovery questions -> summarize the answers into a JSON object keyed by discovery gap id, run `draft --from-discovery`, then show the concrete Product AC for approval.
 - "Approve these AC" -> write approval and make the contract the source of truth for the loop.
 - "Change AC-2 to mean..." -> update that criterion and treat older evidence for it as stale.
 - Complete goal with `candidate_goals` -> use the chosen candidate as a draft source, not as approved AC.
 - Generic `draft --goal` output with `acceptance_review` findings -> show the missing acceptance questions first; do not ask for blind approval.
+
+Discovery answer shape for agent-created temporary files:
+
+```json
+{
+  "missing-user-entry": "...",
+  "missing-field-scope": "...",
+  "missing-validation-rule": "...",
+  "missing-success-signal": "...",
+  "missing-persistence-scope": "...",
+  "missing-failure-case": "...",
+  "missing-out-of-scope-boundary": "...",
+  "missing-review-method": "..."
+}
+```
+
+The user should never need to memorize this structure; the Skill prepares it from the conversation.
 
 ## Discovery Questions
 
