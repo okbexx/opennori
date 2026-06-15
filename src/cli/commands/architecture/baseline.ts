@@ -1,14 +1,17 @@
 import { defineCommand } from "citty";
+import fs from "node:fs";
 import {
   architectureBaselinePaths,
   architectureState,
   buildArchitectureBaseline,
   writeArchitectureBaseline
 } from "../../../architecture.ts";
-import { ok, slugify } from "../../../core.ts";
+import { currentGap, nextRecommendation, ok, pathsForGoal, readJson, slugify } from "../../../core.ts";
+import { agentNextForRecommendation } from "../../../agent-next.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
 import { jsonArg, relativeTo, resolveRoot, rootArg } from "./shared.ts";
+import type { EvidenceLedger, NoriContract } from "../../../types.ts";
 
 export const architectureBaselineCommand = defineCommand({
   meta: {
@@ -60,20 +63,36 @@ export const architectureBaselineCommand = defineCommand({
       writeArchitectureBaseline(root, baseline);
       refreshManifest(root);
     }
+    const architecture = confirmed ? architectureState(root, goalId) : {
+      ...architectureState(root, goalId),
+      preview: {
+        baseline_path: relativeTo(root, paths.jsonPath),
+        markdown_path: relativeTo(root, paths.markdownPath),
+        side_effect: "none"
+      }
+    };
+    let current_gap;
+    let recommendation;
+    let agent_next;
+    if (confirmed) {
+      const activePaths = pathsForGoal(root, goalId);
+      if (fs.existsSync(activePaths.evidencePath)) {
+        const payload = readJson<{ contract: NoriContract; ledger: EvidenceLedger }>(activePaths.evidencePath);
+        current_gap = currentGap(payload.contract, payload.ledger);
+        recommendation = nextRecommendation(payload.contract, payload.ledger, { root, architecture });
+        agent_next = agentNextForRecommendation(payload.contract.goal_id, current_gap, recommendation);
+      }
+    }
     return ok(
       {
         root,
         confirmed,
         baseline,
-        architecture: confirmed ? architectureState(root, goalId) : {
-          ...architectureState(root, goalId),
-          preview: {
-            baseline_path: relativeTo(root, paths.jsonPath),
-            markdown_path: relativeTo(root, paths.markdownPath),
-            side_effect: "none"
-          }
-        },
-        side_effect: confirmed ? "write" : "none"
+        architecture,
+        side_effect: confirmed ? "write" : "none",
+        current_gap,
+        next_recommendation: recommendation,
+        agent_next
       },
       confirmed
         ? [
@@ -83,7 +102,7 @@ export const architectureBaselineCommand = defineCommand({
         : [],
       [],
       confirmed
-        ? ["Implement Product AC under this Architecture Baseline. Raise an Architecture Challenge if project evidence conflicts with it."]
+        ? recommendation?.actions || ["Implement Product AC under this Architecture Baseline. Raise an Architecture Challenge if project evidence conflicts with it."]
         : ["Show this Architecture Baseline to the user and rerun with --confirm only after they accept it."]
     );
   }

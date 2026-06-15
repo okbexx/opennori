@@ -626,6 +626,25 @@ test("architecture profile command module installs and validates project profile
 test("architecture baseline command module previews before confirmed write", async () => {
   const root = tempRoot();
   const baselinePath = path.join(root, ".opennori", "architecture", "baseline.json");
+  const activeDir = path.join(root, ".opennori", "active");
+  const activeAcceptancePath = path.join(activeDir, "module-goal.acceptance.md");
+  const activeEvidencePath = path.join(activeDir, "module-goal.evidence.json");
+  const contract = {
+    schema_version: "opennori/contract-v1",
+    goal_id: "module-goal",
+    goal: "Ship a reviewable CLI architecture",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "As a user, I can verify the current architecture-guided gap."
+      }
+    ],
+    acceptance_basis: { status: "approved" }
+  };
+  const ledger = buildEvidenceLedger(contract);
+  fs.mkdirSync(activeDir, { recursive: true });
+  fs.writeFileSync(activeAcceptancePath, "# Module goal\n");
+  writeJson(activeEvidencePath, { contract, ledger });
 
   const preview = await runArchitectureBaselineCommand([
     "--root", root,
@@ -653,9 +672,14 @@ test("architecture baseline command module previews before confirmed write", asy
   assert.equal(confirmed.data.side_effect, "write");
   assert.equal(confirmed.data.baseline.status, "active");
   assert.equal(confirmed.data.architecture.decision, "valid");
+  assert.equal(confirmed.data.current_gap.id, "AC-1");
+  assert.equal(confirmed.data.next_recommendation.status, "work-on-current-gap");
+  assert.equal(confirmed.data.agent_next.state, "work_on_current_gap");
+  assert.equal(confirmed.data.agent_next.recommended_skill, "nori-architecture-apply");
+  assert.match(confirmed.data.agent_next.instruction, /Architecture Baseline/);
   assert.equal(fs.existsSync(baselinePath), true);
   assert.equal(confirmed.artifacts.some((artifact) => artifact.kind === "architecture_baseline"), true);
-  assert.equal(confirmed.next_actions.some((action) => /Product AC/.test(action)), true);
+  assert.equal(confirmed.next_actions.some((action) => /AC-1/.test(action)), true);
 });
 
 test("context export command module can write a review artifact", async () => {
@@ -743,7 +767,8 @@ test("profile add and evidence modules update compliance and workflow state", as
   assert.equal(JSON.parse(fs.readFileSync(evidencePath, "utf8")).ledger.capability_profile.items.length, 1);
 });
 
-test("next command module returns the current acceptance gap and actions", async () => {
+test("next command module routes approved gaps through architecture review when baseline is missing", async () => {
+  const root = tempRoot();
   const contract = {
     goal_id: "module-goal",
     criteria: [
@@ -757,17 +782,17 @@ test("next command module returns the current acceptance gap and actions", async
   const ledger = { status: "active", criteria: { "AC-1": { status: "unknown", evidence: [] } } };
 
   const next = await runNextCommand(["--json"], {
-    loadPair: () => ({ contract, ledger })
+    loadPair: () => ({ contract, ledger, root })
   });
   assert.equal(next.ok, true);
   assert.equal(next.data.goal_id, "module-goal");
   assert.equal(next.data.current_gap.id, "AC-1");
   assert.equal(next.data.complete, false);
-  assert.equal(next.data.next_recommendation.status, "work-on-current-gap");
-  assert.equal(next.data.agent_next.state, "work_on_current_gap");
-  assert.equal(next.data.agent_next.recommended_skill, "nori-evidence");
+  assert.equal(next.data.next_recommendation.status, "architecture-review-required");
+  assert.equal(next.data.agent_next.state, "architecture_needs_review");
+  assert.equal(next.data.agent_next.recommended_skill, "nori-architecture-brainstorm");
   assert.equal(next.data.agent_next.current_gap_id, "AC-1");
-  assert.equal(next.next_actions.some((action) => /AC-1/.test(action)), true);
+  assert.equal(next.next_actions.some((action) => /Architecture Baseline/.test(action)), true);
 });
 
 test("resume command module includes completion, health, architecture, and next actions", async () => {

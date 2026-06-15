@@ -16,6 +16,7 @@ The baseline answers "what architecture should guide this work", not "what steps
 3. Inspect existing project architecture, dependencies, and user-supplied references.
 4. List available architecture profiles and select the best fit.
 5. Preview the baseline and ask the user to confirm before implementation.
+6. After confirmed baseline write, read the returned `data.agent_next` and route to the recommended next Skill.
 
 Useful state commands:
 
@@ -39,7 +40,7 @@ May write project architecture profiles and confirmed Architecture Baseline file
 
 ## Handoffs
 
-- After baseline confirmation, hand off to `nori-architecture-apply` before implementation.
+- After baseline confirmation, follow returned `agent_next`; if it is `work_on_current_gap`, hand off through `nori-architecture-apply` before implementation or evidence recording.
 - If profile preferences need to be recorded first, hand off to `nori-capability-profile`.
 - If the baseline requires custom infrastructure, hand off to `nori-build-vs-buy`.
 - If project evidence contradicts an existing baseline, hand off to `nori-architecture-challenge`.

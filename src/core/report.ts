@@ -316,14 +316,21 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
       };
     }
 
+    const hasConfirmedArchitecture = Boolean(architecture?.required_for_goal && architecture.decision === "valid");
     return {
       status: "work-on-current-gap",
       focus: gap.id,
+      recommended_skill: hasConfirmedArchitecture ? "nori-architecture-apply" : "nori-evidence",
       summary: `Continue with ${gap.id}: ${gap.user_story}`,
-      actions: [
-        `Create or collect reviewable evidence for ${gap.id}.`,
-        `Record the result for ${gap.id}, then rerun OpenNori status.`
-      ]
+      actions: hasConfirmedArchitecture
+        ? [
+            `Apply the confirmed Architecture Baseline while working on ${gap.id}.`,
+            `After implementation or verification, record reviewable evidence for ${gap.id} and rerun OpenNori status.`
+          ]
+        : [
+            `Create or collect reviewable evidence for ${gap.id}.`,
+            `Record the result for ${gap.id}, then rerun OpenNori status.`
+          ]
     };
   }
 

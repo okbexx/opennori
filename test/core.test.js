@@ -269,7 +269,8 @@ test("resume and status recover active goal from repository files", () => {
   const afterBaseline = run(["resume", "--root", root, "--json"]);
   assert.equal(afterBaseline.data.next_recommendation.status, "work-on-current-gap");
   assert.equal(afterBaseline.data.agent_next.state, "work_on_current_gap");
-  assert.equal(afterBaseline.data.agent_next.recommended_skill, "nori-evidence");
+  assert.equal(afterBaseline.data.agent_next.recommended_skill, "nori-architecture-apply");
+  assert.match(afterBaseline.data.agent_next.instruction, /Architecture Baseline/);
   assert.equal(afterBaseline.next_actions.some((action) => /AC-P-1/.test(action)), true);
 
   run([

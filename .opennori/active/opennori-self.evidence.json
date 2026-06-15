@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T09:25:18.332Z",
+    "updated_at": "2026-06-15T09:33:59.058Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -4086,6 +4086,64 @@
             "limitations": "This validates the current built-in/project profile model; richer external registries would need a new build-vs-buy decision.",
             "gate": "accepted",
             "created_at": "2026-06-13T15:03:35.283Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "Architecture Baseline confirmation now returns agent_next for the active goal. In the settings-page smoke, confirming the baseline routes the agent to nori-architecture-apply with the current AC gap before implementation/evidence, preserving the confirmed architecture instead of jumping directly to evidence.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js -t 'resume and status recover active goal'",
+                "command": "npx vitest run test/core.test.js -t 'resume and status recover active goal'"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js -t 'architecture baseline command module previews|next command module routes'",
+                "command": "npx vitest run test/cli-commands.test.js -t 'architecture baseline command module previews|next command module routes'"
+              },
+              {
+                "type": "command",
+                "label": "baseline confirm smoke returns recommended_skill=nori-architecture-apply",
+                "command": "baseline confirm smoke returns recommended_skill=nori-architecture-apply"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/report.ts",
+                "path": "src/core/report.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/architecture/baseline.ts",
+                "path": "src/cli/commands/architecture/baseline.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md",
+                "path": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              }
+            ],
+            "reviewability": "Run the listed tests and smoke path; inspect baseline confirm JSON for data.agent_next.recommended_skill=nori-architecture-apply.",
+            "limitations": "This verifies routing after baseline confirmation; actual implementation still requires the agent to apply the Skill and record evidence.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T09:33:59.058Z"
           }
         ]
       },

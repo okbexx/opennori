@@ -177,11 +177,14 @@ export function agentNextForRecommendation(
   }
 
   if (recommendation.status === "work-on-current-gap") {
+    const recommendedSkill = recommendation.recommended_skill ?? "nori-evidence";
     return agentNext({
       state: "work_on_current_gap",
-      recommendedSkill: "nori-evidence",
+      recommendedSkill,
       summary: recommendation.summary,
-      instruction: "Work only against the current acceptance gap, then record reviewable evidence with sources, basis, confidence, and limitations.",
+      instruction: recommendedSkill === "nori-architecture-apply"
+        ? "Apply the confirmed Architecture Baseline while working only against the current acceptance gap, then record reviewable evidence with sources, basis, confidence, and limitations."
+        : "Work only against the current acceptance gap, then record reviewable evidence with sources, basis, confidence, and limitations.",
       userVisibleNext: recommendation.actions[0] ?? "Verify the current acceptance gap and attach evidence.",
       goalId,
       currentGapId: gap?.id ?? recommendation.focus,
