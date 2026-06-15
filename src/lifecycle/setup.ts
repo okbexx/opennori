@@ -69,7 +69,7 @@ function defaultRunner(command: string, args: string[]): SetupCommandResult {
 }
 
 function commandDisplay(command: string[]): string {
-  return command.map((part) => (/^[a-zA-Z0-9_./@:-]+$/.test(part) ? part : JSON.stringify(part))).join(" ");
+  return command.map((part) => (/^[a-zA-Z0-9_./@:=,-]+$/.test(part) ? part : JSON.stringify(part))).join(" ");
 }
 
 function commandAction(
@@ -123,8 +123,9 @@ function includesMarketplace(stdout: string): boolean {
   return /^opennori\s/m.test(stdout);
 }
 
-function includesInstalledPlugin(stdout: string): boolean {
-  return /opennori@opennori\s+installed,\s+enabled/.test(stdout);
+function installedPluginVersion(stdout: string): string | null {
+  const match = stdout.match(/^opennori@opennori\s+installed,\s+enabled\s+(\S+)/m);
+  return match?.[1] || null;
 }
 
 function globalPackageVersion(stdout: string): string | null {
@@ -156,14 +157,15 @@ function packagedSkillsAction(): SetupPlanAction {
 function inspectExternalActions(runner: SetupCommandRunner, confirmed: boolean): SetupPlanAction[] {
   const marketplaceCommand = ["codex", "plugin", "marketplace", "add", "okbexx/opennori", "--ref", "main"];
   const pluginCommand = ["codex", "plugin", "add", "opennori@opennori"];
-  const globalCliCommand = ["npm", "install", "-g", `opennori@${PACKAGE_JSON.version}`];
+  const globalCliCommand = ["npm", "install", "-g", `opennori@${PACKAGE_JSON.version}`, "--min-release-age=0"];
 
   const marketplaceList = runner("codex", ["plugin", "marketplace", "list"]);
   const codexAvailable = marketplaceList.status === 0;
   const marketplaceExists = codexAvailable && includesMarketplace(marketplaceList.stdout);
 
   const pluginList = codexAvailable ? runner("codex", ["plugin", "list"]) : { status: null, stdout: "", stderr: "", error: marketplaceList.error };
-  const pluginExists = pluginList.status === 0 && includesInstalledPlugin(pluginList.stdout);
+  const installedPlugin = pluginList.status === 0 ? installedPluginVersion(pluginList.stdout) : null;
+  const pluginExists = installedPlugin === PACKAGE_JSON.version;
 
   const globalList = runner("npm", ["ls", "-g", "opennori", "--depth=0", "--json"]);
   const npmAvailable = globalList.error === undefined && globalList.status !== null;
@@ -190,8 +192,10 @@ function inspectExternalActions(runner: SetupCommandRunner, confirmed: boolean):
       "codex-plugin",
       pluginCommand,
       pluginExists
-        ? "OpenNori Codex Plugin is already installed and enabled."
-        : "Install the OpenNori Codex Plugin so Codex can discover packaged Skills.",
+        ? `OpenNori Codex Plugin ${installedPlugin} is already installed and enabled.`
+        : installedPlugin
+          ? `Upgrade the OpenNori Codex Plugin from ${installedPlugin} to ${PACKAGE_JSON.version} so Codex can discover current packaged Skills.`
+          : "Install the OpenNori Codex Plugin so Codex can discover packaged Skills.",
       {
         exists: pluginExists,
         available: codexAvailable,
@@ -206,7 +210,7 @@ function inspectExternalActions(runner: SetupCommandRunner, confirmed: boolean):
       globalCliCommand,
       globalCliExists
         ? `Global opennori CLI ${installedVersion} is already installed.`
-        : "Install the opennori CLI globally so projects can be initialized with opennori init.",
+        : "Install the opennori CLI globally so projects can be initialized with opennori init. The command-local npm release-age override only applies to this OpenNori install.",
       {
         exists: globalCliExists,
         available: npmAvailable,

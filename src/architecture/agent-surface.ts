@@ -11,15 +11,21 @@ export function renderAgentGuideMarkdown(): string {
   return [
     "# OpenNori Agent Guide",
     "",
-    "Before implementing a non-trivial OpenNori acceptance gap, read:",
+    "This project uses OpenNori state under `.opennori/`.",
+    "Empty state directories are normal immediately after `opennori init`; they mean no Nori Contract has been started yet.",
     "",
-    "- `.opennori/active/*.acceptance.md`",
-    "- `.opennori/architecture/baseline.md`",
-    "- `.opennori/architecture/baseline.json` when structured data is needed",
+    "When the user gives a goal:",
     "",
-    "Follow the Architecture Baseline while completing Product AC.",
-    "If the baseline conflicts with project evidence, create an Architecture Challenge and ask for confirmation.",
-    "Do not silently replace technology stack, directory boundaries, dependency policy, or state model.",
+    "- If `.opennori/active/*.acceptance.md` is missing, do not implement yet. Use OpenNori to discover and draft a human-centered Nori Contract, then ask the user to confirm the acceptance checks.",
+    "- If an active Nori Contract exists, read `.opennori/active/*.acceptance.md` and the matching evidence JSON, resume the current acceptance gap, and work only toward reviewable evidence for that gap.",
+    "- Answer completion questions from OpenNori status/report: goal, current gap, evidence, user intervention, decision, and next action.",
+    "",
+    "Architecture guidance:",
+    "",
+    "- Read `.opennori/architecture/baseline.md` and `.opennori/architecture/baseline.json` only when they exist or when non-trivial work needs a confirmed Architecture Baseline.",
+    "- If non-trivial implementation has no confirmed baseline, establish one with the user before implementation instead of inventing stack or directory decisions silently.",
+    "- If the baseline conflicts with project evidence, create an Architecture Challenge and ask for confirmation.",
+    "- Do not silently replace technology stack, directory boundaries, dependency policy, or state model.",
     "",
     "Build-vs-buy is required before custom infrastructure work: check current dependencies, standard libraries, official SDKs, mature open-source libraries, and documented reference projects before self-building.",
     ""
@@ -31,13 +37,17 @@ export function renderAgentRouteSectionMarkdown(): string {
     AGENT_ROUTE_START,
     "## OpenNori",
     "",
-    "Before implementing a non-trivial change, read:",
+    "Before implementing with OpenNori, read `.opennori/agent-guide.md`.",
+    "If `.opennori/active/*.acceptance.md` is missing, start by helping the user create and confirm a human-centered Nori Contract; empty OpenNori state directories are not a broken install.",
+    "",
+    "For active work, read:",
     "",
     "- `.opennori/active/*.acceptance.md`",
-    "- `.opennori/architecture/baseline.md`",
-    "- `.opennori/agent-guide.md`",
+    "- the matching `.opennori/active/*.evidence.json`",
+    "- `.opennori/architecture/baseline.md` when it exists or non-trivial work requires a confirmed baseline",
     "",
-    "Follow the Architecture Baseline while completing Product AC.",
+    "Work from the current acceptance gap and record reviewable evidence.",
+    "Follow the Architecture Baseline when one is confirmed.",
     "If the baseline conflicts with project evidence, create an Architecture Challenge instead of silently replacing it.",
     AGENT_ROUTE_END,
     ""
@@ -56,8 +66,13 @@ export function architectureSurfaceState(root: string): ArchitectureSurfaceState
   const guide = agentGuidePath(root);
   const agents = path.join(root, "AGENTS.md");
   const claude = path.join(root, "CLAUDE.md");
-  const containsRoute = (filePath: string) => fs.existsSync(filePath)
-    && fs.readFileSync(filePath, "utf8").includes(".opennori/architecture/baseline.md");
+  const containsRoute = (filePath: string) => {
+    if (!fs.existsSync(filePath)) return false;
+    const content = fs.readFileSync(filePath, "utf8");
+    return content.includes(AGENT_ROUTE_START)
+      || content.includes(".opennori/agent-guide.md")
+      || content.includes(".opennori/active/*.acceptance.md");
+  };
   return {
     guide: {
       path: ".opennori/agent-guide.md",

@@ -76,14 +76,16 @@ export function architectureHealthChecks(architecture: ArchitectureState, baseli
     guideState.installed
       ? (guideState.in_sync ? ".opennori/agent-guide.md is installed and in sync." : ".opennori/agent-guide.md is stale.")
       : ".opennori/agent-guide.md is missing.",
-    "Run opennori init --root <project> --json to preview project initialization, then rerun with --confirm if the planned refresh is acceptable."
+    guideState.installed
+      ? "Run opennori upgrade --root <project> --dry-run --json to preview the managed asset refresh, then rerun with --confirm if the overwrite is acceptable."
+      : "Run opennori init --root <project> --json to preview project initialization, then rerun with --confirm if the planned setup is acceptable."
   ));
   checks.push(doctorCheck(
     "architecture_agent_surface",
     true,
     architecture.agent_surface.agents.references_baseline || architecture.agent_surface.claude.references_baseline
-      ? "At least one optional project agent route references the Architecture Baseline."
-      : "No optional AGENTS.md or CLAUDE.md route references .opennori/architecture/baseline.md; Codex Plugin Skills remain the primary agent surface."
+      ? "At least one optional project agent route references OpenNori state."
+      : "No optional AGENTS.md or CLAUDE.md route references OpenNori state; Codex Plugin Skills remain the primary agent surface."
   ));
   checks.push(doctorCheck(
     "architecture_baseline",

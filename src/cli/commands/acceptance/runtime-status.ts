@@ -1,6 +1,7 @@
 import { defineCommand } from "citty";
 import { reviewAcceptanceQuality } from "../../../acceptance.ts";
 import { architectureState } from "../../../architecture.ts";
+import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
   completionAnswer,
   criterionStatusRows,
@@ -35,7 +36,8 @@ export const nextCommand = defineCommand({
       goal_id: contract.goal_id,
       current_gap: gap,
       complete: gap === null,
-      next_recommendation: recommendation
+      next_recommendation: recommendation,
+      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation)
     }, [], [], recommendation.actions);
   }
 });
@@ -56,17 +58,19 @@ export const resumeCommand = defineCommand({
   run({ args, data }) {
     const { contract, ledger, acceptancePath, evidencePath, root } = data.loadPair(args);
     const architecture = architectureState(root, contract.goal_id);
+    const gap = currentGap(contract, ledger);
     const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok({
       goal_id: contract.goal_id,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger),
+      current_gap: gap,
       completion: completionAnswer(contract, ledger, { root, architecture }),
       intervention: intervention(contract, ledger),
       acceptance_review: reviewAcceptanceQuality(contract),
       evidence_health: evidenceHealth(contract, ledger, { root }),
       architecture,
       next_recommendation: recommendation,
+      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation),
       acceptance_path: acceptancePath,
       evidence_path: evidencePath
     }, [], [], recommendation.actions);
@@ -89,17 +93,19 @@ export const statusCommand = defineCommand({
   run({ args, data }) {
     const { contract, ledger, root } = data.loadPair(args);
     const architecture = architectureState(root, contract.goal_id);
+    const gap = currentGap(contract, ledger);
     const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok({
       goal_id: contract.goal_id,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger),
+      current_gap: gap,
       completion: completionAnswer(contract, ledger, { root, architecture }),
       intervention: intervention(contract, ledger),
       acceptance_review: reviewAcceptanceQuality(contract),
       evidence_health: evidenceHealth(contract, ledger, { root }),
       architecture,
       next_recommendation: recommendation,
+      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation),
       criteria: criterionStatusRows(contract, ledger, { root })
     }, [], [], recommendation.actions);
   }

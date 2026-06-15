@@ -1,5 +1,6 @@
 import { parseArgs } from "citty";
 import { runSetupCommand, setupResult } from "./commands/setup.ts";
+import type { SetupCommandRunner } from "../lifecycle/setup.ts";
 
 type JsonPrinter = (payload: unknown) => void;
 
@@ -13,7 +14,7 @@ type SetupAction = {
 
 type SetupPayload = {
   ok: boolean;
-  data: {
+  data?: {
     root: string;
     status: string;
     next?: string;
@@ -25,12 +26,18 @@ type SetupPayload = {
       };
     };
   };
+  error?: {
+    type: string;
+    message: string;
+    fix?: string;
+  };
 };
 
 type SetupOptions = {
   stdin?: NodeJS.ReadStream;
   stdout?: NodeJS.WriteStream;
   printJson?: JsonPrinter;
+  runner?: SetupCommandRunner;
 };
 
 type SetupCliArgs = {
@@ -85,6 +92,10 @@ async function promptConfirm(stdin: NodeJS.ReadStream, stdout: NodeJS.WriteStrea
 }
 
 function printSetupPreview(stdout: NodeJS.WriteStream, payload: SetupPayload): void {
+  if (!payload.ok || !payload.data) {
+    printSetupFailure(stdout, payload);
+    return;
+  }
   const data = payload.data;
   printText(stdout, "");
   printText(stdout, "OpenNori setup");
@@ -101,6 +112,10 @@ function printSetupPreview(stdout: NodeJS.WriteStream, payload: SetupPayload): v
 }
 
 function printSetupResult(stdout: NodeJS.WriteStream, payload: SetupPayload): void {
+  if (!payload.ok || !payload.data) {
+    printSetupFailure(stdout, payload);
+    return;
+  }
   const data = payload.data;
   printText(stdout, "");
   if (data.status === "ready") {
@@ -111,23 +126,32 @@ function printSetupResult(stdout: NodeJS.WriteStream, payload: SetupPayload): vo
   printText(stdout, data.next || "OpenNori setup finished.");
 }
 
-export async function runSetup(args: string[], { stdin = process.stdin, stdout = process.stdout, printJson }: SetupOptions = {}): Promise<void> {
+function printSetupFailure(stdout: NodeJS.WriteStream, payload: SetupPayload): void {
+  printText(stdout, "");
+  printText(stdout, "OpenNori setup failed.");
+  if (payload.error?.message) printText(stdout, `Problem: ${payload.error.message}`);
+  if (payload.error?.fix) printText(stdout, `Recovery: ${payload.error.fix}`);
+}
+
+export async function runSetup(args: string[], { stdin = process.stdin, stdout = process.stdout, printJson, runner }: SetupOptions = {}): Promise<void> {
   const writeJson = printJson || ((payload) => stdout.write(`${JSON.stringify(payload, null, 2)}\n`));
   const setupArgs = args[0] === "setup" ? args.slice(1) : args;
   const parsed = parseSetupArgs(setupArgs);
 
   if (!isInteractive(args, stdin, stdout)) {
-    writeJson(await runSetupCommand(setupArgs));
+    writeJson(await runSetupCommand(setupArgs, { runner }));
     return;
   }
 
   if (parsed.confirm) {
-    printSetupResult(stdout, asSetupPayload(setupResult({ root: parsed.root, dryRun: false, confirmed: true })));
+    printSetupResult(stdout, asSetupPayload(setupResult({ root: parsed.root, dryRun: false, confirmed: true, runner })));
     return;
   }
 
-  const preview = asSetupPayload(setupResult({ root: parsed.root, dryRun: true, confirmed: false }));
+  const preview = asSetupPayload(setupResult({ root: parsed.root, dryRun: true, confirmed: false, runner }));
   printSetupPreview(stdout, preview);
+  if (!preview.ok || !preview.data) return;
+
   const shouldInstall = await promptConfirm(stdin, stdout, "Install OpenNori capability bundle?");
   if (!shouldInstall) {
     printText(stdout, "");
@@ -135,5 +159,5 @@ export async function runSetup(args: string[], { stdin = process.stdin, stdout =
     return;
   }
 
-  printSetupResult(stdout, asSetupPayload(setupResult({ root: preview.data.root, dryRun: false, confirmed: true })));
+  printSetupResult(stdout, asSetupPayload(setupResult({ root: preview.data.root, dryRun: false, confirmed: true, runner })));
 }

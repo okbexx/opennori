@@ -1,4 +1,5 @@
 import { architectureState } from "../architecture.ts";
+import { agentNextForDoctor } from "../agent-next.ts";
 import type {
   DoctorCheck,
   DoctorState
@@ -28,7 +29,7 @@ export function doctor(root: string): DoctorState {
   const plugin = inspectPluginHealth(manifest.manifest, manifest.manifestReadable);
   checks.push(...plugin.checks);
 
-  return {
+  const state: DoctorState = {
     status: doctorStatus(checks),
     checks,
     recovery_actions: doctorRecoveryActions(checks, active.issues),
@@ -38,4 +39,6 @@ export function doctor(root: string): DoctorState {
     plugin: plugin.plugin,
     architecture
   };
+  state.agent_next = agentNextForDoctor(root, state);
+  return state;
 }

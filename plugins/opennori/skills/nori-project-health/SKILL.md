@@ -11,14 +11,19 @@ Health work protects `.opennori/` integrity, manifest freshness, packaged Plugin
 
 Treat OpenNori readiness as bundle readiness. Plugin discovery, packaged Skills, CLI access, and `.opennori` state are coupled product parts; if one is missing, recover it instead of telling the user to use the remaining pieces as a separate workflow.
 
+When CLI JSON includes `data.agent_next`, use it as the state-layer routing instruction. Health work should not guess whether to draft, recover, or resume when `agent_next.state` already says `initialized_no_active_contract`, `health_needs_recovery`, `setup_preview_needs_confirmation`, or `ready_with_active_goals`.
+
+A fresh `opennori init` normally creates empty `.opennori/active`, `.opennori/reports`, `.opennori/brainstorms`, and architecture subdirectories. Empty directories are not broken state; they mean no active Nori Contract exists yet. Route `initialized_no_active_contract` to `nori-acceptance` instead of trying to repair files.
+
 ## Start Here
 
 1. Run `opennori doctor --root <repo> --json` when the project may already use OpenNori.
 2. Run `opennori init --root <repo> --json` when the machine already has OpenNori and only project `.opennori` state is missing.
 3. Run `npx opennori setup` for first-time machine setup, missing global CLI, missing Codex Plugin discovery, missing packaged Skills, or unclear bundle readiness.
-4. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, or active state, present the missing bundle part and the recovery action.
-5. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, or deletes state.
-6. After upgrade or repair, run `opennori check --root <repo> --json` and route soft review findings to the relevant Skill.
+4. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, or damaged active state, present the missing bundle part and the recovery action.
+5. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no active contract, then hand off to `nori-acceptance`.
+6. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, or deletes state.
+7. After upgrade or repair, run `opennori check --root <repo> --json` and route soft review findings to the relevant Skill.
 
 Useful state commands:
 
@@ -42,6 +47,7 @@ Useful state commands:
 - "Initialize OpenNori in this project" -> init preview, then confirm only after the user approves.
 - "Is OpenNori healthy" -> doctor and summarize ready, needs-action, or broken with recovery actions.
 - "The CLI works but Plugin/Skills are missing" or "Plugin is installed but .opennori is missing" -> diagnose bundle readiness and recover the missing part instead of treating the remainder as a separate user path.
+- "I ran init and .opennori directories are empty" -> explain that this is normal until a Nori Contract is drafted; route to acceptance discovery.
 - "Upgrade this project" -> upgrade dry run, confirm if approved, then check.
 - "Remove OpenNori" -> uninstall dry run; preserve `.opennori` state unless the user explicitly asks to delete it.
 - "State is broken" -> doctor, identify hard integrity failures, and propose recovery actions.
@@ -79,6 +85,7 @@ For previews, list create/skip/update/overwrite/remove and whether the action is
 - Do not copy OpenNori Skills into the user project; packaged Plugin Skills are the agent discovery surface.
 - Do not present Plugin, Skills, CLI, or `.opennori` state as separate install choices; recover bundle readiness.
 - Do not continue in a half-installed state without surfacing the missing bundle part and a recovery action.
+- Do not treat empty `.opennori/active` as broken after fresh init; no active contract is an acceptance-start state, not a repair state.
 - Do not perform destructive lifecycle writes without preview and explicit confirmation.
 - Do not treat soft review findings as hard protocol rejection.
 - Do not reopen Product AC just because architecture, build-vs-buy, evidence health, or profile review needs user attention.

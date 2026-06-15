@@ -1,7 +1,8 @@
 import { defineCommand } from "citty";
 import { reviewAcceptanceQuality } from "../../acceptance.ts";
 import { architectureState } from "../../architecture.ts";
-import { currentGap, evidenceHealth, fail, ok, profileCompliance, validateContract } from "../../core.ts";
+import { agentNextForRecommendation } from "../../agent-next.ts";
+import { currentGap, evidenceHealth, fail, nextRecommendation, ok, profileCompliance, validateContract } from "../../core.ts";
 import type { JsonObject } from "../../types.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
 
@@ -113,10 +114,12 @@ export const checkCommand = defineCommand({
     if (profile.review.length > 0) {
       nextActions.push("Review profile_review warnings before treating this goal as confidently complete.");
     }
+    const gap = currentGap(contract, ledger);
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok({
       goal_id: contract.goal_id,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger),
+      current_gap: gap,
       statuses: Object.fromEntries(Object.entries(ledger.criteria).map(([id, state]) => [id, (state as any).status])),
       acceptance_review: acceptanceReview,
       capability_compliance: profile,
@@ -126,7 +129,9 @@ export const checkCommand = defineCommand({
         warnings: architectureWarnings,
         architecture
       },
-      evidence_health: health
+      evidence_health: health,
+      next_recommendation: recommendation,
+      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation)
     }, [], combinedWarnings, nextActions);
   }
 });

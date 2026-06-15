@@ -4,7 +4,7 @@
   "description": "OpenNori: human-centered Nori Contracts and evidence records for coding agents.",
   "type": "module",
   "bin": {
-    "opennori": "dist/bin/opennori.js"
+    "opennori": "bin/opennori.js"
   },
   "files": [
     ".agents/plugins/",

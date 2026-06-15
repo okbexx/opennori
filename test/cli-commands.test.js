@@ -17,6 +17,7 @@ import { runListCommand } from "../src/cli/commands/list.ts";
 import { runProfileAddCommand, runProfileEvidenceCommand, runProfileShowCommand } from "../src/cli/commands/profile.ts";
 import { runArchiveCommand, runReportCommand } from "../src/cli/commands/reporting.ts";
 import { runSetupCommand } from "../src/cli/commands/setup.ts";
+import { runSetup } from "../src/cli/setup.ts";
 import { runUninstallCommand } from "../src/cli/commands/uninstall.ts";
 import { runUpgradeCommand } from "../src/cli/commands/upgrade.ts";
 import { buildArchitectureBaseline, renderAgentGuideMarkdown, writeArchitectureBaseline } from "../src/architecture.ts";
@@ -50,7 +51,11 @@ function writeActiveGoal(root) {
   writeJson(path.join(paths, "module-goal.evidence.json"), { contract, ledger });
 }
 
-function setupRunner({ marketplace = false, plugin = false, globalVersion = null, failCommand = "" } = {}) {
+function packageVersion() {
+  return JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version;
+}
+
+function setupRunner({ marketplace = false, plugin = false, pluginVersion = packageVersion(), globalVersion = null, failCommand = "" } = {}) {
   const calls = [];
   const runner = (command, args) => {
     calls.push([command, ...args]);
@@ -68,7 +73,7 @@ function setupRunner({ marketplace = false, plugin = false, globalVersion = null
     if (display === "codex plugin list") {
       return {
         status: 0,
-        stdout: plugin ? "PLUGIN STATUS VERSION PATH\nopennori@opennori installed, enabled 0.1.8 /tmp/opennori\n" : "PLUGIN STATUS VERSION PATH\n",
+        stdout: plugin ? `PLUGIN STATUS VERSION PATH\nopennori@opennori installed, enabled ${pluginVersion} /tmp/opennori\n` : "PLUGIN STATUS VERSION PATH\n",
         stderr: ""
       };
     }
@@ -94,6 +99,7 @@ test("citty command modules preserve agent-readable JSON payloads", async () => 
   assert.equal(doctor.ok, true);
   assert.equal(doctor.data.name, "opennori");
   assert.equal(doctor.data.side_effect, "none");
+  assert.equal(doctor.data.agent_next.schema_version, "opennori/agent-next-v1");
 });
 
 test("bootstrap command module previews before confirmed setup", async () => {
@@ -102,6 +108,8 @@ test("bootstrap command module previews before confirmed setup", async () => {
   assert.equal(preview.ok, true);
   assert.equal(preview.data.status, "needs_confirm");
   assert.equal(preview.data.confirmed, false);
+  assert.equal(preview.data.agent_next.state, "setup_preview_needs_confirmation");
+  assert.equal(preview.data.agent_next.recommended_skill, "nori-project-health");
   assert.equal(preview.data.install_plan.dry_run, true);
   assert.equal(preview.data.install_plan.summary.will_write, 0);
   assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
@@ -110,6 +118,8 @@ test("bootstrap command module previews before confirmed setup", async () => {
   assert.equal(confirmed.ok, true);
   assert.equal(confirmed.data.status, "installed");
   assert.equal(confirmed.data.confirmed, true);
+  assert.equal(confirmed.data.agent_next.state, "initialized_no_active_contract");
+  assert.equal(confirmed.data.agent_next.recommended_skill, "nori-acceptance");
   assert.equal(confirmed.data.install_plan.dry_run, false);
   assert.equal(confirmed.data.install_plan.summary.will_write > 0, true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "manifest.json")), true);
@@ -129,7 +139,7 @@ test("setup command previews one complete capability bundle without writing", as
   assert.equal(preview.data.setup_plan.actions.some((action) => action.command_display === "codex plugin marketplace add okbexx/opennori --ref main"), true);
   assert.equal(preview.data.setup_plan.actions.some((action) => action.command_display === "codex plugin add opennori@opennori"), true);
   assert.equal(preview.data.setup_plan.actions.some((action) => action.id === "packaged_skills" && action.action === "exists"), true);
-  assert.equal(preview.data.setup_plan.actions.some((action) => /^npm install -g opennori@/.test(action.command_display)), true);
+  assert.equal(preview.data.setup_plan.actions.some((action) => /^npm install -g opennori@.* --min-release-age=0$/.test(action.command_display)), true);
   assert.equal(preview.data.setup_plan.actions.some((action) => action.command_display === "opennori init"), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
   assert.equal(calls.some((call) => call.join(" ") === "codex plugin marketplace add okbexx/opennori --ref main"), false);
@@ -144,18 +154,17 @@ test("setup command confirm applies external commands through official CLIs and 
   assert.equal(confirmed.data.confirmed, true);
   assert.equal(calls.some((call) => call.join(" ") === "codex plugin marketplace add okbexx/opennori --ref main"), true);
   assert.equal(calls.some((call) => call.join(" ") === "codex plugin add opennori@opennori"), true);
-  assert.equal(calls.some((call) => /^npm install -g opennori@/.test(call.join(" "))), true);
+  assert.equal(calls.some((call) => /^npm install -g opennori@.* --min-release-age=0$/.test(call.join(" "))), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "manifest.json")), true);
   assert.equal(fs.existsSync(path.join(root, ".agents", "skills", "nori", "SKILL.md")), false);
 });
 
 test("setup command does not rerun already installed bundle parts", async () => {
   const root = tempRoot();
-  const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
   const { calls, runner } = setupRunner({
     marketplace: true,
     plugin: true,
-    globalVersion: packageJson.version
+    globalVersion: packageVersion()
   });
   const confirmed = await runSetupCommand(["--root", root, "--confirm", "--json"], { runner });
 
@@ -164,6 +173,55 @@ test("setup command does not rerun already installed bundle parts", async () => 
   assert.equal(calls.some((call) => call.join(" ") === "codex plugin add opennori@opennori"), false);
   assert.equal(calls.some((call) => /^npm install -g opennori@/.test(call.join(" "))), false);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "manifest.json")), true);
+});
+
+test("setup command upgrades stale installed Codex Plugin versions", async () => {
+  const root = tempRoot();
+  const { calls, runner } = setupRunner({
+    marketplace: true,
+    plugin: true,
+    pluginVersion: "0.1.8",
+    globalVersion: packageVersion()
+  });
+  const preview = await runSetupCommand(["--root", root, "--json"], { runner });
+  const pluginAction = preview.data.setup_plan.actions.find((action) => action.id === "codex_plugin");
+
+  assert.equal(pluginAction.action, "will-run");
+  assert.match(pluginAction.reason, /Upgrade the OpenNori Codex Plugin from 0\.1\.8/);
+
+  const confirmed = await runSetupCommand(["--root", root, "--confirm", "--json"], { runner });
+
+  assert.equal(confirmed.ok, true);
+  assert.equal(calls.some((call) => call.join(" ") === "codex plugin add opennori@opennori"), true);
+});
+
+test("interactive setup reports underlying setup failure instead of throwing on missing data", async () => {
+  const root = tempRoot();
+  const { runner } = setupRunner({
+    failCommand: "npm install -g opennori"
+  });
+  let output = "";
+  const stdout = {
+    isTTY: true,
+    write(chunk) {
+      output += String(chunk);
+      return true;
+    }
+  };
+  const stdin = {
+    isTTY: true,
+    setEncoding() {},
+    once(_event, callback) {
+      callback("y\n");
+    },
+    pause() {}
+  };
+
+  await runSetup(["setup", "--root", root], { stdin, stdout, runner });
+
+  assert.match(output, /OpenNori setup failed/);
+  assert.match(output, /OpenNori setup failed while running npm install -g opennori@/);
+  assert.match(output, /failed npm install -g opennori@/);
 });
 
 test("install command module preserves preview and confirm safety", async () => {
@@ -329,13 +387,24 @@ test("init command module initializes project state with preview safety", async 
   const preview = await runInitCommand(["--root", root, "--json"]);
   assert.equal(preview.ok, true);
   assert.equal(preview.data.status, "needs_confirm");
+  assert.equal(preview.data.agent_next.state, "setup_preview_needs_confirmation");
+  assert.equal(preview.data.agent_next.needs_user, true);
   assert.equal(preview.data.install_plan.summary.will_write, 0);
   assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
 
   const initialized = await runInitCommand(["--root", root, "--confirm", "--json"]);
   assert.equal(initialized.ok, true);
   assert.equal(initialized.data.status, "installed");
+  assert.equal(initialized.data.agent_next.state, "initialized_no_active_contract");
+  assert.equal(initialized.data.agent_next.recommended_skill, "nori-acceptance");
+  assert.match(initialized.data.agent_next.instruction, /Ask for the user's natural-language goal/);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "manifest.json")), true);
+
+  const doctor = await runDoctorCommand(["--root", root, "--json"]);
+  assert.equal(doctor.ok, true);
+  assert.equal(doctor.data.status, "ready");
+  assert.equal(doctor.data.active_goals.length, 0);
+  assert.equal(doctor.data.agent_next.state, "initialized_no_active_contract");
 });
 
 test("draft command module creates active Nori Contracts from brief files", async () => {
@@ -636,6 +705,9 @@ test("next command module returns the current acceptance gap and actions", async
   assert.equal(next.data.current_gap.id, "AC-1");
   assert.equal(next.data.complete, false);
   assert.equal(next.data.next_recommendation.status, "work-on-current-gap");
+  assert.equal(next.data.agent_next.state, "work_on_current_gap");
+  assert.equal(next.data.agent_next.recommended_skill, "nori-evidence");
+  assert.equal(next.data.agent_next.current_gap_id, "AC-1");
   assert.equal(next.next_actions.some((action) => /AC-1/.test(action)), true);
 });
 
@@ -663,6 +735,8 @@ test("resume command module includes completion, health, architecture, and next 
   assert.equal(resume.data.evidence_health.status, "clear");
   assert.equal(resume.data.architecture.decision, "missing");
   assert.equal(resume.data.next_recommendation.status, "completion-review-required");
+  assert.equal(resume.data.agent_next.state, "completion_needs_review");
+  assert.equal(resume.data.agent_next.recommended_skill, "nori-reporting");
   assert.equal(resume.data.acceptance_path, acceptancePath);
   assert.equal(resume.next_actions.some((action) => /architecture_check/.test(action)), true);
 });
@@ -692,6 +766,8 @@ test("resume command module suggests next-loop candidates for confidently comple
   assert.equal(resume.ok, true);
   assert.equal(resume.data.completion.confidence, "confident");
   assert.equal(resume.data.next_recommendation.status, "ready-for-next-loop");
+  assert.equal(resume.data.agent_next.state, "ready_for_next_loop");
+  assert.equal(resume.data.agent_next.recommended_skill, "nori-acceptance");
   assert.equal(resume.data.next_recommendation.candidate_goals.length, 4);
   assert.equal(resume.data.next_recommendation.candidate_goals[0].id, "real-user-validation");
   assert.equal(resume.data.next_recommendation.candidate_goals[0].goal.length < 140, true);
@@ -724,6 +800,8 @@ test("status command module includes criteria and completion state", async () =>
   assert.equal(status.data.acceptance_review.status, "clear");
   assert.equal(status.data.evidence_health.status, "clear");
   assert.equal(status.data.architecture.decision, "missing");
+  assert.equal(status.data.agent_next.state, "work_on_current_gap");
+  assert.equal(status.data.agent_next.current_gap_id, "AC-1");
   assert.equal(status.data.criteria.length, 1);
   assert.equal(status.data.criteria[0].id, "AC-1");
   assert.equal(status.next_actions.some((action) => /AC-1/.test(action)), true);

@@ -18,15 +18,26 @@ OpenNori is one capability bundle:
 
 Do not present those pieces as optional standalone product paths.
 
+CLI JSON may include `data.agent_next`. Treat it as the deterministic routing surface from the state layer to Skills. Prefer `agent_next.state`, `agent_next.recommended_skill`, `agent_next.instruction`, and `agent_next.user_visible_next` over guessing from files or command prose.
+
+`.opennori/agent-guide.md` is only a project-local supplementary guide. Do not depend on it for OpenNori discovery, and do not assume a fresh project has an Architecture Baseline or an active Nori Contract just because `.opennori/` directories exist.
+
 ## Start Here
 
 1. Identify the project root from the current workspace or the user's explicit path.
 2. If readiness is unknown, run `opennori doctor --root <repo> --json`.
-3. If the project is already initialized, run `opennori list --root <repo> --json`, then `opennori resume --root <repo> --goal <goal-id> --json` or `opennori status --root <repo> --goal <goal-id> --json`.
-4. If multiple active goals exist and the user did not identify one, summarize the choices and ask for a target instead of guessing.
-5. If doctor reports missing Plugin discovery, packaged Skills, CLI access, manifest, or project state, route to `nori-project-health`.
-6. For first-time machine setup, `nori-project-health` should use `npx opennori setup` preview/confirm; for an installed machine and a new project, use `opennori init` preview/confirm.
-7. If `opennori` is not on PATH, route to `nori-project-health` instead of continuing in a half-installed mode. Only use `node ./bin/opennori.js` while developing the OpenNori source checkout itself.
+3. If the JSON has `data.agent_next`, follow it:
+   - `health_needs_recovery` or `setup_preview_needs_confirmation` -> hand off to `nori-project-health`.
+   - `initialized_no_active_contract` -> ask for the natural-language goal and hand off to `nori-acceptance`.
+   - `ready_with_active_goals` -> run list/resume/status as directed.
+   - `work_on_current_gap` -> work only on the current acceptance gap and hand off to `nori-evidence` after verification.
+   - `completion_needs_review`, `evidence_needs_review`, or `acceptance_needs_user` -> use reporting/evidence/acceptance as directed and involve the user when `needs_user` is true.
+   - `ready_for_next_loop` -> if the user asked to continue, choose or refine a candidate next goal and hand off to `nori-acceptance`.
+4. If the project is already initialized but the command did not expose `agent_next`, run `opennori list --root <repo> --json`, then `opennori resume --root <repo> --goal <goal-id> --json` or `opennori status --root <repo> --goal <goal-id> --json`.
+5. If multiple active goals exist and the user did not identify one, summarize the choices and ask for a target instead of guessing.
+6. If doctor reports missing Plugin discovery, packaged Skills, CLI access, manifest, or project state, route to `nori-project-health`.
+7. For first-time machine setup, `nori-project-health` should use `npx opennori setup` preview/confirm; for an installed machine and a new project, use `opennori init` preview/confirm.
+8. If `opennori` is not on PATH, route to `nori-project-health` instead of continuing in a half-installed mode. Only use `node ./bin/opennori.js` while developing the OpenNori source checkout itself.
 
 ## Natural-Language Mapping
 

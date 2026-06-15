@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-14T09:18:09.079Z",
+    "updated_at": "2026-06-15T06:40:40.116Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -3139,7 +3139,7 @@
       },
       "AC-Z-12": {
         "status": "passing",
-        "confidence": "high",
+        "confidence": "verified",
         "required": true,
         "risk": "high",
         "evidence": [
@@ -3200,6 +3200,69 @@
             "limitations": "This validates packaged Skill content, local package health, and website/README copy. A newly opened Codex session is still the correct way to observe live plugin-trigger behavior after installation.",
             "gate": "accepted",
             "created_at": "2026-06-14T07:50:48.355Z"
+          },
+          {
+            "kind": "agent-routing-contract",
+            "basis": "tool-observation",
+            "summary": "OpenNori CLI now exposes data.agent_next for init/bootstrap/doctor/check/next/resume/status so packaged Skills route from deterministic state instead of guessing from .opennori/agent-guide.md. Package nori, nori-project-health, and nori-acceptance Skills now prefer agent_next and treat fresh initialized empty state as no active Nori Contract, not broken state.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
+                "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
+              },
+              {
+                "type": "command",
+                "label": "node ./bin/opennori.js init --root <temp> --confirm --json && node ./bin/opennori.js doctor --root <temp> --json",
+                "command": "node ./bin/opennori.js init --root <temp> --confirm --json && node ./bin/opennori.js doctor --root <temp> --json"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/lifecycle/bootstrap.ts",
+                "path": "src/lifecycle/bootstrap.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/lifecycle/doctor.ts",
+                "path": "src/lifecycle/doctor.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/runtime-status.ts",
+                "path": "src/cli/commands/acceptance/runtime-status.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/check.ts",
+                "path": "src/cli/commands/check.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+                "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              }
+            ],
+            "reviewability": "Inspect agent_next payloads in the listed CLI outputs and Skill routing language; rerun the Vitest command and temporary-project init/doctor smoke.",
+            "limitations": "This verifies CLI-to-Skill routing in source and local CLI output; published package users need a new release/plugin install to receive the updated Skills.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T06:40:09.040Z"
           }
         ]
       },
@@ -3411,7 +3474,7 @@
       },
       "AC-Z-16": {
         "status": "passing",
-        "confidence": "verified",
+        "confidence": "high",
         "required": true,
         "risk": "high",
         "evidence": [
@@ -3457,6 +3520,44 @@
             "limitations": "npx behavior depends on npm registry propagation after publish; local CLI behavior is verified here.",
             "gate": "accepted",
             "created_at": "2026-06-13T15:02:53.058Z"
+          },
+          {
+            "kind": "local-global-bin-link-fix",
+            "basis": "tool-observation",
+            "summary": "Dogfood found npm link created a global opennori command pointing at dist/bin/opennori.js, but the compiled dist file was not executable, so zsh reported permission denied. OpenNori package bin now points to the executable bin/opennori.js wrapper, which supports source checkouts and published packages; npm link now creates a PATH command that runs opennori init preview correctly.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "command",
+                "label": "opennori init --json in a temporary directory",
+                "command": "opennori init --json in a temporary directory"
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "package.json",
+                "path": "package.json"
+              },
+              {
+                "type": "artifact",
+                "label": "package-lock.json",
+                "path": "package-lock.json"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Inspect package bin metadata and the refreshed npm link symlink; rerun opennori init --json from any temporary project to confirm preview works without writing.",
+            "limitations": "This verifies the local npm link development path on the current Node v22.19.0 environment; published npm behavior will be covered when the next package version is packed or published.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T06:05:06.857Z"
           }
         ]
       },
@@ -4315,6 +4416,178 @@
             "limitations": "Tests mock confirmed external Codex/npm setup writes; the temp smoke verifies preview and project init without mutating global Codex/npm state. A real first-time user will still need to approve setup in their own environment.",
             "gate": "accepted",
             "created_at": "2026-06-14T09:18:09.079Z"
+          },
+          {
+            "kind": "setup-min-release-age-fix",
+            "basis": "tool-observation",
+            "summary": "User reproduced npx opennori setup failing after confirmation because setup's internal global npm install did not inherit the command-local npm min-release-age exemption. OpenNori now runs npm install -g opennori@<version> --min-release-age=0 for its own CLI install, detects stale Codex Plugin versions instead of treating any enabled plugin as ready, and prints a readable setup_failed recovery message instead of throwing on missing data.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm install -g opennori@0.1.9 --dry-run",
+                "command": "npm install -g opennori@0.1.9 --dry-run"
+              },
+              {
+                "type": "command",
+                "label": "npm install -g opennori@0.1.9 --dry-run --min-release-age=0",
+                "command": "npm install -g opennori@0.1.9 --dry-run --min-release-age=0"
+              },
+              {
+                "type": "command",
+                "label": "npm exec -- vitest run test/cli-commands.test.js -t 'setup command|interactive setup'",
+                "command": "npm exec -- vitest run test/cli-commands.test.js -t 'setup command|interactive setup'"
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/lifecycle/setup.ts",
+                "path": "src/lifecycle/setup.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/setup.ts",
+                "path": "src/cli/setup.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              }
+            ],
+            "reviewability": "Review the changed setup plan generation and interactive setup error rendering; rerun npm dry-run commands to see min-release-age behavior; rerun npm run check for full coverage.",
+            "limitations": "This records source-level and local verification. Published npm users need a new OpenNori release before npx opennori setup includes the fix.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T03:12:50.778Z"
+          },
+          {
+            "kind": "init-agent-guide-clarity",
+            "basis": "tool-observation",
+            "summary": "Dogfood found opennori init produced empty .opennori state directories plus an agent-guide that assumed an existing Architecture Baseline, confusing users in a newly initialized project. The generated agent guide now states empty directories are normal, tells agents not to implement before a Nori Contract exists, and only asks them to read Architecture Baseline files when they exist or non-trivial work requires one. Init/bootstrap user-facing messages also explain that no active Nori Contract exists yet.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "command",
+                "label": "opennori init --root <temp> --confirm --json",
+                "command": "opennori init --root <temp> --confirm --json"
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/architecture/agent-surface.ts",
+                "path": "src/architecture/agent-surface.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/init.ts",
+                "path": "src/cli/init.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/bootstrap.ts",
+                "path": "src/cli/bootstrap.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/lifecycle/doctor/project-health.ts",
+                "path": "src/lifecycle/doctor/project-health.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Initialize a temporary project and inspect .opennori/agent-guide.md; verify doctor remains ready after managed asset upgrade; rerun npm run check.",
+            "limitations": "Existing projects with the old generated guide need opennori upgrade --dry-run and --confirm to refresh the managed guide.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T06:18:27.747Z"
+          },
+          {
+            "kind": "fresh-init-agent-next-smoke",
+            "basis": "tool-observation",
+            "summary": "Temporary project smoke confirms opennori init --confirm creates .opennori state and returns agent_next.state initialized_no_active_contract; subsequent doctor is ready with zero active goals and routes to nori-acceptance. This makes empty .opennori directories understandable to agents and users without relying on agent-guide discovery.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "tmp=/tmp/opennori-agent-next-3oNmf6; node ./bin/opennori.js init --root \"\" --confirm --json; node ./bin/opennori.js doctor --root \"\" --json",
+                "command": "tmp=/tmp/opennori-agent-next-3oNmf6; node ./bin/opennori.js init --root \"\" --confirm --json; node ./bin/opennori.js doctor --root \"\" --json"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+                "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              }
+            ],
+            "reviewability": "Rerun the temporary-project command and confirm agent_next.state is initialized_no_active_contract with recommended_skill nori-acceptance.",
+            "limitations": "The smoke uses local source checkout; npm users require the next published package to get the same behavior.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T06:40:21.412Z"
+          },
+          {
+            "kind": "fresh-init-agent-next-smoke",
+            "basis": "tool-observation",
+            "summary": "Temporary project smoke confirms opennori init --confirm creates .opennori state and returns agent_next.state initialized_no_active_contract; subsequent doctor is ready with zero active goals and routes to nori-acceptance. This makes empty .opennori directories understandable to agents and users without relying on agent-guide discovery.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "tmp=$(mktemp -d /tmp/opennori-agent-next-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json",
+                "command": "tmp=$(mktemp -d /tmp/opennori-agent-next-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+                "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              }
+            ],
+            "reviewability": "Rerun the temporary-project command and confirm agent_next.state is initialized_no_active_contract with recommended_skill nori-acceptance.",
+            "limitations": "The smoke uses local source checkout; npm users require the next published package to get the same behavior.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T06:40:40.116Z"
           }
         ]
       }

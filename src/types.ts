@@ -241,6 +241,37 @@ export type NextRecommendation = {
   candidate_goals?: NextGoalCandidate[];
 };
 
+export type AgentNext = {
+  schema_version: "opennori/agent-next-v1";
+  state:
+    | "setup_preview_needs_confirmation"
+    | "initialized_no_active_contract"
+    | "ready_with_active_goals"
+    | "health_needs_recovery"
+    | "work_on_current_gap"
+    | "acceptance_needs_user"
+    | "evidence_needs_review"
+    | "completion_needs_review"
+    | "ready_for_next_loop"
+    | "state_needs_reconcile"
+    | "unknown";
+  recommended_skill:
+    | "nori"
+    | "nori-acceptance"
+    | "nori-architecture-apply"
+    | "nori-evidence"
+    | "nori-project-health"
+    | "nori-reporting"
+    | null;
+  summary: string;
+  instruction: string;
+  user_visible_next: string;
+  goal_id?: string;
+  current_gap_id?: string | null;
+  needs_user?: boolean;
+  commands?: string[];
+};
+
 export type EvidenceView = {
   kind: string;
   basis: EvidenceBasis;
@@ -732,6 +763,7 @@ export type DoctorState = {
   manifest_path: string;
   plugin: PluginState;
   architecture: ArchitectureState;
+  agent_next?: AgentNext;
 };
 
 export type BootstrapData = {
@@ -744,6 +776,7 @@ export type BootstrapData = {
   actions?: LifecyclePlanAction[];
   doctor: DoctorState;
   next: string;
+  agent_next?: AgentNext;
 };
 
 export type ContextExport = {

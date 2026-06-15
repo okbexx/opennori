@@ -83,7 +83,7 @@ test("command help is side-effect free", () => {
 
 test("published package uses built dist bin while local source bin remains available", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
-  assert.equal(packageJson.bin.opennori, "dist/bin/opennori.js");
+  assert.equal(packageJson.bin.opennori, "bin/opennori.js");
   assert.equal(packageJson.files.includes(".agents/plugins/"), true);
   assert.equal(packageJson.files.includes(".codex-plugin/"), false);
   assert.equal(packageJson.files.includes("skills/"), false);
@@ -252,6 +252,8 @@ test("resume and status recover active goal from repository files", () => {
   assert.equal(resume.data.current_gap.id, "AC-P-1");
   assert.equal(resume.data.completion.complete, false);
   assert.equal(resume.data.next_recommendation.status, "work-on-current-gap");
+  assert.equal(resume.data.agent_next.state, "work_on_current_gap");
+  assert.equal(resume.data.agent_next.recommended_skill, "nori-evidence");
   assert.equal(resume.data.next_recommendation.focus, "AC-P-1");
   assert.equal(resume.next_actions.some((action) => /AC-P-1/.test(action)), true);
 
@@ -572,6 +574,8 @@ test("evidence can drive the workflow to complete and render a human report", ()
     "--json"
   ]);
   assert.equal(resume.data.next_recommendation.status, "ready-for-next-loop");
+  assert.equal(resume.data.agent_next.state, "ready_for_next_loop");
+  assert.equal(resume.data.agent_next.recommended_skill, "nori-acceptance");
   assert.equal(resume.data.next_recommendation.candidate_goals.length, 4);
   assert.equal(resume.data.next_recommendation.candidate_goals[0].id, "opennori-adoption-dogfood");
   assert.equal(resume.data.next_recommendation.candidate_goals[0].acceptance_directions.length > 0, true);
@@ -1138,6 +1142,10 @@ test("install creates project assets and skips existing user content by default"
   assert.equal(fs.existsSync(path.join(root, ".opennori", "architecture", "challenges")), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "architecture", "decisions")), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "agent-guide.md")), true);
+  const agentGuide = fs.readFileSync(path.join(root, ".opennori", "agent-guide.md"), "utf8");
+  assert.match(agentGuide, /Empty state directories are normal immediately after `opennori init`/);
+  assert.match(agentGuide, /If `.opennori\/active\/\*\.acceptance\.md` is missing, do not implement yet/);
+  assert.match(agentGuide, /Read `.opennori\/architecture\/baseline\.md` and `.opennori\/architecture\/baseline\.json` only when they exist/);
   assert.equal(fs.existsSync(path.join(root, "AGENTS.md")), false);
   assert.equal(fs.existsSync(path.join(root, "CLAUDE.md")), false);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "manifest.json")), true);
