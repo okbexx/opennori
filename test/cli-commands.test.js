@@ -102,6 +102,18 @@ test("citty command modules preserve agent-readable JSON payloads", async () => 
   assert.equal(doctor.data.agent_next.schema_version, "opennori/agent-next-v1");
 });
 
+test("doctor routes fresh projects to init preview instead of repeated recovery actions", async () => {
+  const root = tempRoot();
+  const doctor = await runDoctorCommand(["--root", root, "--json"]);
+
+  assert.equal(doctor.ok, true);
+  assert.equal(doctor.data.status, "needs-action");
+  assert.equal(doctor.data.agent_next.state, "health_needs_recovery");
+  assert.equal(doctor.data.agent_next.recommended_skill, "nori-project-health");
+  assert.equal(doctor.data.agent_next.safe_next_command, `opennori init --root ${root} --json`);
+  assert.match(doctor.data.agent_next.instruction, /Run the init preview/);
+});
+
 test("bootstrap command module previews before confirmed setup", async () => {
   const root = tempRoot();
   const preview = await runBootstrapCommand(["--root", root, "--json"]);

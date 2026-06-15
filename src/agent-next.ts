@@ -18,6 +18,7 @@ type AgentNextInput = {
   goalId?: string;
   currentGapId?: string | null;
   needsUser?: boolean;
+  safeNextCommand?: string;
   commands?: string[];
 };
 
@@ -33,6 +34,7 @@ function agentNext(input: AgentNextInput): AgentNext {
   if (input.goalId) next.goal_id = input.goalId;
   if (input.currentGapId !== undefined) next.current_gap_id = input.currentGapId;
   if (input.needsUser !== undefined) next.needs_user = input.needsUser;
+  if (input.safeNextCommand) next.safe_next_command = input.safeNextCommand;
   if (input.commands?.length) next.commands = input.commands;
   return next;
 }
@@ -92,13 +94,21 @@ export function agentNextForBootstrap(data: Pick<BootstrapData, "status" | "root
 
 export function agentNextForDoctor(root: string, doctor: DoctorState): AgentNext {
   if (doctor.status !== "ready") {
+    const missingProjectState = doctor.checks.some((check) => check.name === "opennori_directory" && !check.ok);
     return agentNext({
       state: "health_needs_recovery",
       recommendedSkill: "nori-project-health",
-      summary: `OpenNori health is ${doctor.status}.`,
-      instruction: "Summarize failed checks and recovery actions; preview any lifecycle write before asking the user to confirm.",
-      userVisibleNext: "Recover OpenNori bundle readiness before continuing the acceptance loop.",
+      summary: missingProjectState
+        ? "This project has no .opennori state yet."
+        : `OpenNori health is ${doctor.status}.`,
+      instruction: missingProjectState
+        ? "Run the init preview, summarize the planned .opennori writes in human terms, and ask for confirmation before writing."
+        : "Summarize failed checks and recovery actions; preview any lifecycle write before asking the user to confirm.",
+      userVisibleNext: missingProjectState
+        ? "Preview OpenNori project initialization, then ask for confirmation."
+        : "Recover OpenNori bundle readiness before continuing the acceptance loop.",
       needsUser: doctor.recovery_actions.length > 0,
+      safeNextCommand: missingProjectState ? `opennori init --root ${root} --json` : undefined,
       commands: [`opennori doctor --root ${root} --json`]
     });
   }

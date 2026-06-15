@@ -269,6 +269,7 @@ export type AgentNext = {
   goal_id?: string;
   current_gap_id?: string | null;
   needs_user?: boolean;
+  safe_next_command?: string;
   commands?: string[];
 };
 

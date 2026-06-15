@@ -1008,6 +1008,11 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(evidenceAsset, /Do not force evidence into a fixed adapter taxonomy/);
   assert.match(evidenceAsset, /basis, sources, reviewability, confidence, and limitations/);
 
+  const healthAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-project-health", "SKILL.md"), "utf8");
+  assert.match(healthAsset, /safe_next_command/);
+  assert.match(healthAsset, /Do not paste raw doctor\/setup\/init JSON to the user/);
+  assert.match(healthAsset, /Confirm initialization/);
+
   const behaviorProtocolSections = [
     "## Mission",
     "## Start Here",

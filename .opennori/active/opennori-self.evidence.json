@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T06:40:40.116Z",
+    "updated_at": "2026-06-15T07:50:36.655Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -3263,6 +3263,49 @@
             "limitations": "This verifies CLI-to-Skill routing in source and local CLI output; published package users need a new release/plugin install to receive the updated Skills.",
             "gate": "accepted",
             "created_at": "2026-06-15T06:40:09.040Z"
+          },
+          {
+            "kind": "skill-routing-review",
+            "basis": "tool-observation",
+            "summary": "The project-health Skill now consumes agent_next.safe_next_command for fresh projects, runs the safe preview before asking for confirmation, and forbids pasting raw doctor/setup/init JSON or repeated recovery_actions to users. This keeps natural-language OpenNori use routed through Skills while CLI JSON remains the agent state layer.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
+                "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+                "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Inspect the Skill reply-shape and misuse guards, then rerun the targeted tests checking safe_next_command and package Skill asset text.",
+            "limitations": "This covers project-health handoff behavior; broader AC discovery remains the next dogfood step.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T07:50:36.655Z"
           }
         ]
       },
@@ -4588,6 +4631,54 @@
             "limitations": "The smoke uses local source checkout; npm users require the next published package to get the same behavior.",
             "gate": "accepted",
             "created_at": "2026-06-15T06:40:40.116Z"
+          },
+          {
+            "kind": "fresh-project-routing-smoke",
+            "basis": "tool-observation",
+            "summary": "Fresh-project doctor now routes agents to a safe init preview instead of repeated raw recovery actions: agent_next reports missing .opennori state, recommends nori-project-health, provides safe_next_command for opennori init preview, and the init preview does not create .opennori until confirmation.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "tmp=$(mktemp -d /tmp/opennori-step1-fix-XXXXXX); node ./bin/opennori.js doctor --root \"$tmp\" --json; node ./bin/opennori.js init --root \"$tmp\" --json",
+                "command": "tmp=$(mktemp -d /tmp/opennori-step1-fix-XXXXXX); node ./bin/opennori.js doctor --root \"$tmp\" --json; node ./bin/opennori.js init --root \"$tmp\" --json"
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/types.ts",
+                "path": "src/types.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+                "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Rerun the temporary-project smoke and confirm doctor.data.agent_next.safe_next_command points to opennori init --root <tmp> --json; confirm init preview leaves .opennori absent until --confirm; inspect nori-project-health Skill for concise human summary guidance.",
+            "limitations": "This validates installed-machine/new-project routing in local source checkout; published npm users need a later package release to receive it.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T07:50:36.476Z"
           }
         ]
       }

@@ -13,6 +13,8 @@ Treat OpenNori readiness as bundle readiness. Plugin discovery, packaged Skills,
 
 When CLI JSON includes `data.agent_next`, use it as the state-layer routing instruction. Health work should not guess whether to draft, recover, or resume when `agent_next.state` already says `initialized_no_active_contract`, `health_needs_recovery`, `setup_preview_needs_confirmation`, or `ready_with_active_goals`.
 
+If `agent_next.safe_next_command` is present, the agent may run that preview command before asking the user for confirmation. Use it to turn a noisy doctor result into a concrete preview such as project initialization. Never ask the user to choose from raw recovery actions when a safe preview command is available.
+
 A fresh `opennori init` normally creates empty `.opennori/active`, `.opennori/reports`, `.opennori/brainstorms`, and architecture subdirectories. Empty directories are not broken state; they mean no active Nori Contract exists yet. Route `initialized_no_active_contract` to `nori-acceptance` instead of trying to repair files.
 
 ## Start Here
@@ -20,7 +22,7 @@ A fresh `opennori init` normally creates empty `.opennori/active`, `.opennori/re
 1. Run `opennori doctor --root <repo> --json` when the project may already use OpenNori.
 2. Run `opennori init --root <repo> --json` when the machine already has OpenNori and only project `.opennori` state is missing.
 3. Run `npx opennori setup` for first-time machine setup, missing global CLI, missing Codex Plugin discovery, missing packaged Skills, or unclear bundle readiness.
-4. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, or damaged active state, present the missing bundle part and the recovery action.
+4. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, or damaged active state, present the missing bundle part and the recovery action. When safe_next_command exists, run that preview first.
 5. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no active contract, then hand off to `nori-acceptance`.
 6. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, or deletes state.
 7. After upgrade or repair, run `opennori check --root <repo> --json` and route soft review findings to the relevant Skill.
@@ -80,6 +82,24 @@ Next: ...
 
 For previews, list create/skip/update/overwrite/remove and whether the action is destructive.
 
+Do not paste raw doctor/setup/init JSON to the user. Compress it into a short human summary:
+
+```text
+Status: ...
+Problem: ...
+Preview: create/update/skip/remove counts, destructive yes/no
+Writes needed: none / needs confirmation
+Next: ...
+```
+
+For a fresh project, the ideal response is:
+
+```text
+This project has not been initialized for OpenNori yet.
+Preview: OpenNori will create .opennori state for contracts, evidence, reports, brainstorms, and architecture. No existing files will be overwritten, and there are no destructive actions.
+Confirm initialization?
+```
+
 ## Misuse Guards
 
 - Do not copy OpenNori Skills into the user project; packaged Plugin Skills are the agent discovery surface.
@@ -87,6 +107,7 @@ For previews, list create/skip/update/overwrite/remove and whether the action is
 - Do not continue in a half-installed state without surfacing the missing bundle part and a recovery action.
 - Do not treat empty `.opennori/active` as broken after fresh init; no active contract is an acceptance-start state, not a repair state.
 - Do not perform destructive lifecycle writes without preview and explicit confirmation.
+- Do not show repeated recovery_actions or full JSON unless the user explicitly asks for diagnostic detail.
 - Do not treat soft review findings as hard protocol rejection.
 - Do not reopen Product AC just because architecture, build-vs-buy, evidence health, or profile review needs user attention.
 - Do not use health commands as a substitute for acceptance evidence.
