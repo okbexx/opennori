@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T12:22:55.433Z",
+    "updated_at": "2026-06-15T12:28:26.739Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -5163,6 +5163,54 @@
             "limitations": "This proves source, packaged assets, tests, and local website source. Live Codex plugin behavior still depends on installing the updated package/plugin in a new session after publish.",
             "gate": "accepted",
             "created_at": "2026-06-14T08:29:10.361Z"
+          },
+          {
+            "kind": "artifact-review",
+            "basis": "tool-observation",
+            "summary": "README now explains that agent_next.candidate_goals is the Skill routing surface for completed-goal continuation, while next_recommendation.candidate_goals remains the fuller report/context explanation surface.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "command",
+                "label": "rg -n 'agent_next.candidate_goals|next_recommendation.candidate_goals|Context export|上下文导出' README.md .opennori/protocol.md plugins/opennori/skills",
+                "command": "rg -n 'agent_next.candidate_goals|next_recommendation.candidate_goals|Context export|上下文导出' README.md .opennori/protocol.md plugins/opennori/skills"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/protocol.md",
+                "path": ".opennori/protocol.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+                "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+              }
+            ],
+            "reviewability": "Rerun npm run check and inspect README/protocol/Skills for the agent_next routing language.",
+            "limitations": "This is documentation alignment for the current source package; public website or npm publication are separate release steps.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T12:28:26.739Z"
           }
         ]
       },
