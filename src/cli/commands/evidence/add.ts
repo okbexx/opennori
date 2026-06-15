@@ -1,8 +1,11 @@
 import { defineCommand } from "citty";
+import { architectureState } from "../../../architecture.ts";
+import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
   addEvidence,
   criterionStatusRows,
   currentGap,
+  nextRecommendation,
   ok,
   pruneInvalidEvidence,
   syncAcceptanceMarkdown,
@@ -107,6 +110,9 @@ export const evidenceAddCommand = defineCommand({
     writeJson(evidencePath, { contract, ledger });
     syncAcceptanceMarkdown(acceptancePath, contract, ledger);
     refreshManifest(root);
+    const architecture = architectureState(root, contract.goal_id);
+    const gap = currentGap(contract, ledger);
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok({
       goal_id: contract.goal_id,
       criterion: criterionId,
@@ -115,8 +121,10 @@ export const evidenceAddCommand = defineCommand({
       latest_evidence: criterionStatusRows(contract, ledger, { root }).find((row) => row.id === criterionId)?.latest_evidence,
       gate: ledger.criteria[criterionId].evidence.at(-1)?.gate,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger)
-    });
+      current_gap: gap,
+      next_recommendation: recommendation,
+      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation)
+    }, [], [], recommendation.actions);
   }
 });
 

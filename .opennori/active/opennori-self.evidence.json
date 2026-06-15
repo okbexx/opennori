@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T10:15:02.446Z",
+    "updated_at": "2026-06-15T10:20:29.878Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -4088,6 +4088,54 @@
             "limitations": "This verifies deterministic routing after architecture apply; Product AC evidence still needs user-visible verification.",
             "gate": "accepted",
             "created_at": "2026-06-15T10:15:02.445Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "Evidence add now returns next_recommendation and agent_next, so agents can route after recording evidence instead of guessing whether to continue a gap, review architecture, report completion risk, or start the next loop.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js -t 'high-risk criteria require strong evidence before passing'",
+                "command": "npx vitest run test/core.test.js -t 'high-risk criteria require strong evidence before passing'"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js -t 'evidence add command module records flexible reviewable sources'",
+                "command": "npx vitest run test/cli-commands.test.js -t 'evidence add command module records flexible reviewable sources'"
+              },
+              {
+                "type": "command",
+                "label": "npx tsc --noEmit",
+                "command": "npx tsc --noEmit"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/evidence/add.ts",
+                "path": "src/cli/commands/evidence/add.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-evidence/SKILL.md",
+                "path": "plugins/opennori/skills/nori-evidence/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              }
+            ],
+            "reviewability": "Run the listed tests and inspect evidence add JSON for next_recommendation and data.agent_next after evidence writes.",
+            "limitations": "This verifies deterministic routing in the evidence command; downstream agents still need to follow the returned Skill.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T10:20:29.878Z"
           }
         ]
       },

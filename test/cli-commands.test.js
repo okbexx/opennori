@@ -1331,6 +1331,11 @@ test("evidence add command module records flexible reviewable sources", async ()
   });
   assert.equal(added.ok, true);
   assert.equal(added.data.criterion_status, "passing");
+  assert.equal(added.data.workflow_status, "complete");
+  assert.equal(added.data.current_gap, null);
+  assert.equal(added.data.next_recommendation.status, "completion-review-required");
+  assert.equal(added.data.agent_next.state, "completion_needs_review");
+  assert.equal(added.data.agent_next.recommended_skill, "nori-reporting");
   assert.equal(added.data.latest_evidence.sources.length, 5);
   const architectureSource = added.data.latest_evidence.sources.find((source) => source.type === "architecture-apply");
   assert.equal(architectureSource.role, "context");

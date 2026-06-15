@@ -707,6 +707,10 @@ test("high-risk criteria require strong evidence before passing", () => {
   assert.equal(weak.data.criterion_status, "failing");
   assert.equal(weak.data.confidence, "strong-evidence-required");
   assert.equal(weak.data.gate, "downgraded_high_risk_requires_strong_evidence");
+  assert.equal(weak.data.workflow_status, "active");
+  assert.equal(weak.data.current_gap.id, "AC-P-4");
+  assert.equal(weak.data.next_recommendation.status, "architecture-review-required");
+  assert.equal(weak.data.agent_next.state, "architecture_needs_review");
 
   const strong = run([
     "evidence", "add",

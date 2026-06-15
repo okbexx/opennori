@@ -15,7 +15,7 @@ Evidence should let a human understand what was checked, where to inspect it, wh
 2. If existing evidence no longer proves the current AC, prune it before relying on status/report/context.
 3. Choose a verification method that fits the AC and risk: command output, test, browser check, screenshot, diff, report, artifact, URL, log, human confirmation, waiver, or another reviewable signal.
 4. Record basis, sources, reviewability, confidence, and limitations.
-5. Rerun status/report when the evidence affects completion.
+5. Read the returned `data.agent_next` after evidence writes and route to the recommended Skill. Do not guess whether to continue, report completion, or request user review.
 
 Useful state commands:
 
@@ -33,6 +33,9 @@ Useful state commands:
 - "Use the architecture apply record as context" -> attach it with `--architecture-apply`, but still record a user-visible verification source for passing evidence.
 - "This evidence is stale" -> prune stale evidence and make the AC eligible to become the current gap again.
 - "Why is AC-2 passing" -> summarize latest supporting evidence, basis, sources, confidence, and limitations.
+- `agent_next.state: architecture_needs_review` after evidence -> hand off to `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge` as recommended.
+- `agent_next.state: completion_needs_review` after evidence -> hand off to `nori-reporting`.
+- `agent_next.state: ready_for_next_loop` after evidence -> do not invent more evidence; report completion and use candidate goals only if the user asked to continue.
 
 ## Evidence Quality
 
