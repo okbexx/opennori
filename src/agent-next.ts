@@ -189,6 +189,19 @@ export function agentNextForRecommendation(
     });
   }
 
+  if (recommendation.status === "architecture-review-required") {
+    return agentNext({
+      state: "architecture_needs_review",
+      recommendedSkill: recommendation.recommended_skill ?? "nori-architecture-brainstorm",
+      summary: recommendation.summary,
+      instruction: "Keep Product AC separate from architecture. Resolve the Architecture Baseline, challenge, or build-vs-buy review before non-trivial implementation continues, unless the user explicitly waives it.",
+      userVisibleNext: recommendation.actions[0] ?? "Confirm or resolve the Architecture Baseline before implementation.",
+      goalId,
+      currentGapId: gap?.id ?? recommendation.focus,
+      needsUser: true
+    });
+  }
+
   if (recommendation.status === "evidence-review-required") {
     return agentNext({
       state: "evidence_needs_review",

@@ -821,11 +821,13 @@ test("status command module includes criteria and completion state", async () =>
   assert.equal(status.data.acceptance_review.status, "clear");
   assert.equal(status.data.evidence_health.status, "clear");
   assert.equal(status.data.architecture.decision, "missing");
-  assert.equal(status.data.agent_next.state, "work_on_current_gap");
+  assert.equal(status.data.next_recommendation.status, "architecture-review-required");
+  assert.equal(status.data.agent_next.state, "architecture_needs_review");
+  assert.equal(status.data.agent_next.recommended_skill, "nori-architecture-brainstorm");
   assert.equal(status.data.agent_next.current_gap_id, "AC-1");
   assert.equal(status.data.criteria.length, 1);
   assert.equal(status.data.criteria[0].id, "AC-1");
-  assert.equal(status.next_actions.some((action) => /AC-1/.test(action)), true);
+  assert.equal(status.next_actions.some((action) => /Architecture Baseline/.test(action)), true);
 });
 
 test("report command module renders a report artifact", async () => {

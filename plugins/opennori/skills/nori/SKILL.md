@@ -30,6 +30,7 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
    - `health_needs_recovery` or `setup_preview_needs_confirmation` -> hand off to `nori-project-health`.
    - `initialized_no_active_contract` -> use the user's already stated goal if the current conversation includes one; otherwise ask for the natural-language goal; then hand off to `nori-acceptance`.
    - `ready_with_active_goals` -> run list/resume/status as directed.
+   - `architecture_needs_review` -> follow `recommended_skill` (`nori-architecture-brainstorm`, `nori-architecture-challenge`, or `nori-build-vs-buy`) before non-trivial implementation continues.
    - `work_on_current_gap` -> work only on the current acceptance gap and hand off to `nori-evidence` after verification.
    - `completion_needs_review`, `evidence_needs_review`, or `acceptance_needs_user` -> use reporting/evidence/acceptance as directed and involve the user when `needs_user` is true.
    - `ready_for_next_loop` -> if the user asked to continue, choose or refine a candidate next goal and hand off to `nori-acceptance`.

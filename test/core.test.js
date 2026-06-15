@@ -251,11 +251,26 @@ test("resume and status recover active goal from repository files", () => {
   assert.equal(resume.data.goal_id, "opennori-self");
   assert.equal(resume.data.current_gap.id, "AC-P-1");
   assert.equal(resume.data.completion.complete, false);
-  assert.equal(resume.data.next_recommendation.status, "work-on-current-gap");
-  assert.equal(resume.data.agent_next.state, "work_on_current_gap");
-  assert.equal(resume.data.agent_next.recommended_skill, "nori-evidence");
+  assert.equal(resume.data.next_recommendation.status, "architecture-review-required");
+  assert.equal(resume.data.agent_next.state, "architecture_needs_review");
+  assert.equal(resume.data.agent_next.recommended_skill, "nori-architecture-brainstorm");
   assert.equal(resume.data.next_recommendation.focus, "AC-P-1");
-  assert.equal(resume.next_actions.some((action) => /AC-P-1/.test(action)), true);
+  assert.equal(resume.next_actions.some((action) => /Architecture Baseline/.test(action)), true);
+
+  run([
+    "architecture", "baseline",
+    "--root", root,
+    "--goal", "OpenNori accepts goals as contracts and reports completion through reviewable evidence.",
+    "--goal-id", "opennori-self",
+    "--confirm",
+    "--json"
+  ]);
+
+  const afterBaseline = run(["resume", "--root", root, "--json"]);
+  assert.equal(afterBaseline.data.next_recommendation.status, "work-on-current-gap");
+  assert.equal(afterBaseline.data.agent_next.state, "work_on_current_gap");
+  assert.equal(afterBaseline.data.agent_next.recommended_skill, "nori-evidence");
+  assert.equal(afterBaseline.next_actions.some((action) => /AC-P-1/.test(action)), true);
 
   run([
     "evidence", "add",

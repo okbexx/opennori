@@ -225,10 +225,23 @@ export type NextGoalCandidate = {
   source: "completion-context" | string;
 };
 
+export type AgentSkill =
+  | "nori"
+  | "nori-acceptance"
+  | "nori-architecture-apply"
+  | "nori-architecture-brainstorm"
+  | "nori-architecture-challenge"
+  | "nori-build-vs-buy"
+  | "nori-capability-profile"
+  | "nori-evidence"
+  | "nori-project-health"
+  | "nori-reporting";
+
 export type NextRecommendation = {
   status:
     | "user-intervention-required"
     | "acceptance-approval-required"
+    | "architecture-review-required"
     | "work-on-current-gap"
     | "evidence-review-required"
     | "completion-review-required"
@@ -239,6 +252,7 @@ export type NextRecommendation = {
   summary: string;
   actions: string[];
   candidate_goals?: NextGoalCandidate[];
+  recommended_skill?: AgentSkill;
 };
 
 export type AgentNext = {
@@ -250,19 +264,13 @@ export type AgentNext = {
     | "health_needs_recovery"
     | "work_on_current_gap"
     | "acceptance_needs_user"
+    | "architecture_needs_review"
     | "evidence_needs_review"
     | "completion_needs_review"
     | "ready_for_next_loop"
     | "state_needs_reconcile"
     | "unknown";
-  recommended_skill:
-    | "nori"
-    | "nori-acceptance"
-    | "nori-architecture-apply"
-    | "nori-evidence"
-    | "nori-project-health"
-    | "nori-reporting"
-    | null;
+  recommended_skill: AgentSkill | null;
   summary: string;
   instruction: string;
   user_visible_next: string;

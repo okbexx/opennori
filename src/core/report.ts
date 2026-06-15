@@ -1,6 +1,7 @@
 import type {
   AcceptanceQualityAudit,
   ArchitectureState,
+  AgentSkill,
   CompletionAnswer,
   EvidenceLedger,
   EvidenceRecord,
@@ -44,6 +45,49 @@ function architectureReviewRisks(architecture: ArchitectureState | undefined): s
     risks.push("build_vs_buy");
   }
   return [...new Set(risks)];
+}
+
+function architectureReviewSkill(architecture: ArchitectureState): AgentSkill {
+  if (architecture.decision === "challenged") return "nori-architecture-challenge";
+  if (architecture.build_vs_buy.status !== "clear") return "nori-build-vs-buy";
+  if (architecture.decision === "valid") return "nori-architecture-apply";
+  return "nori-architecture-brainstorm";
+}
+
+function architectureReviewActions(architecture: ArchitectureState): string[] {
+  if (architecture.decision === "missing") {
+    return [
+      "Preview an Architecture Baseline from the active goal, Product AC, Nori Profile, project evidence, and available profiles.",
+      "Ask the user to confirm the baseline or explicitly waive architecture review before non-trivial implementation continues."
+    ];
+  }
+  if (architecture.decision === "draft") {
+    return [
+      "Show the draft Architecture Baseline to the user.",
+      "Ask the user to confirm, revise, or waive the baseline before non-trivial implementation continues."
+    ];
+  }
+  if (architecture.decision === "challenged") {
+    return [
+      "Review the open Architecture Challenge with the user.",
+      "Resolve, revise, or waive the challenge before treating the architecture as complete."
+    ];
+  }
+  if (architecture.decision === "invalid") {
+    return [
+      "Repair the invalid Architecture Baseline state before implementation continues.",
+      "Run OpenNori check or doctor again after the baseline is recoverable."
+    ];
+  }
+  if (architecture.build_vs_buy.status !== "clear") {
+    return [
+      "Review build_vs_buy findings before custom infrastructure work continues.",
+      "Record reusable alternatives or the reason self-build is justified."
+    ];
+  }
+  return [
+    "Apply the confirmed Architecture Baseline while working on the current acceptance gap."
+  ];
 }
 
 function goalLabel(goal: string): string {
@@ -239,6 +283,24 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
         needed.action,
         "After the decision or external condition is available, record evidence and rerun OpenNori status."
       ]
+    };
+  }
+
+  const architectureRisks = architectureReviewRisks(architecture);
+  if (
+    gap
+    && gap.id !== "ACCEPTANCE-BASIS"
+    && architecture
+    && architecture.required_for_goal
+    && (architecture.decision !== "valid" || architecture.build_vs_buy.status !== "clear")
+  ) {
+    const skill = architectureReviewSkill(architecture);
+    return {
+      status: "architecture-review-required",
+      focus: gap.id,
+      recommended_skill: skill,
+      summary: `Product AC is ready, but architecture needs review before non-trivial implementation continues: ${architectureRisks.join(", ")}.`,
+      actions: architectureReviewActions(architecture)
     };
   }
 

@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T08:20:44.764Z",
+    "updated_at": "2026-06-15T09:02:54.484Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -3845,6 +3845,59 @@
             "limitations": "The source code is still mostly JavaScript with allowJs; this slice only moves the publish/runtime entry toward built output and keeps the later citty command-module migration separate.",
             "gate": "accepted",
             "created_at": "2026-06-12T08:14:59.965Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "OpenNori now routes agents to architecture review before non-trivial implementation when Product AC is ready but the Architecture Baseline is missing; after baseline confirmation, agent_next returns to the current Product AC evidence gap.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js test/cli-commands.test.js",
+                "command": "npx vitest run test/core.test.js test/cli-commands.test.js"
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/report.ts",
+                "path": "src/core/report.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/types.ts",
+                "path": "src/types.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              }
+            ],
+            "reviewability": "Run the targeted tests and inspect status/resume JSON for agent_next.state architecture_needs_review before baseline confirmation and work_on_current_gap after baseline confirmation.",
+            "limitations": "This verifies deterministic OpenNori state-layer routing; agent/user still decide whether a concrete task is trivial enough to waive architecture review.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T09:02:54.484Z"
           }
         ]
       },
