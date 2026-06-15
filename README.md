@@ -184,6 +184,11 @@ confirmation, waivers, or other reviewable sources. OpenNori keeps evidence
 flexible, but high-risk completion should not rely only on an agent's
 self-summary.
 
+Architecture apply records can be attached to evidence as context, so a report
+can show that the proof was produced under the confirmed baseline. They do not
+prove Product AC by themselves; passing evidence still needs a user-visible
+verification source.
+
 ### Next Loop Candidates
 
 When a goal is confidently complete, `resume`, `status`, `next`, `report`, and
@@ -311,6 +316,8 @@ opennori report --root .
 - Evidence stays flexible: tests, screenshots, URLs, artifacts, logs, human
   confirmation, waivers, or other reviewable sources can support an acceptance
   check.
+- Architecture apply records may be attached as evidence context, but they do
+  not count as Product AC proof without a user-visible verification source.
 - Context export can give review tools the current goal, checks, profile,
   Architecture Baseline, evidence, and report, but review tools do not take over
   the agent loop.

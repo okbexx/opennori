@@ -1763,6 +1763,73 @@ test("architecture apply records do not count as Product AC evidence", () => {
   assert.match(reportText, /AC-1: aligned/);
 });
 
+test("product evidence can reference architecture apply context without treating it as proof", () => {
+  const root = tempRoot();
+  const draft = run(["draft", "--goal", "Ship architecture-context evidence", "--root", root, "--json"]);
+  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  run([
+    "architecture", "baseline",
+    "--root", root,
+    "--goal", "Ship architecture-context evidence",
+    "--goal-id", draft.data.goal_id,
+    "--confirm",
+    "--json"
+  ]);
+  const applied = run([
+    "architecture", "apply",
+    "--root", root,
+    "--id", "ac-1-context",
+    "--goal", draft.data.goal_id,
+    "--criterion", "AC-1",
+    "--summary", "AC-1 will follow the confirmed baseline.",
+    "--fit", "The intended work keeps the confirmed CLI and state boundaries.",
+    "--implementation-focus", "Work only on AC-1.",
+    "--json"
+  ]);
+
+  const contextOnly = run([
+    "evidence", "add",
+    "--root", root,
+    "--criterion", "AC-1",
+    "--kind", "agent-observation",
+    "--summary", "Only the architecture alignment context has been attached so far.",
+    "--architecture-apply", "ac-1-context",
+    "--reviewability", "Open the architecture apply record.",
+    "--limitations", "This does not prove the user-visible behavior.",
+    "--result", "passing",
+    "--json"
+  ]);
+  assert.equal(contextOnly.data.criterion_status, "failing");
+  assert.equal(contextOnly.data.gate, "downgraded_context_only_requires_product_evidence");
+  assert.equal(contextOnly.data.latest_evidence.sources[0].type, "architecture-apply");
+  assert.equal(contextOnly.data.latest_evidence.sources[0].role, "context");
+  assert.equal(contextOnly.data.latest_evidence.sources[0].path, ".opennori/architecture/evidence/ac-1-context.json");
+
+  const verified = run([
+    "evidence", "add",
+    "--root", root,
+    "--criterion", "AC-1",
+    "--kind", "review-result",
+    "--basis", "tool-observation",
+    "--summary", "The user-visible AC-1 behavior was verified and kept within the architecture baseline.",
+    "--architecture-apply", applied.data.apply_record.id,
+    "--source-command", "npm run check",
+    "--reviewability", "Rerun the command and inspect the architecture apply record for baseline context.",
+    "--limitations", "This fixture proves evidence semantics, not a real browser flow.",
+    "--result", "passing",
+    "--json"
+  ]);
+  assert.equal(verified.data.criterion_status, "passing");
+  assert.equal(verified.data.latest_evidence.sources.some((source) => source.type === "architecture-apply"), true);
+  assert.equal(verified.data.latest_evidence.sources.some((source) => source.type === "command"), true);
+
+  const report = run(["report", "--root", root, "--json"]);
+  const reportText = fs.readFileSync(report.data.report_path, "utf8");
+  assert.match(reportText, /type=architecture-apply/);
+  assert.match(reportText, /role=context/);
+  assert.match(reportText, /command=npm run check/);
+});
+
 test("project architecture profiles can be added and used for baselines", () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);

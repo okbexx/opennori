@@ -67,6 +67,10 @@ export const evidenceAddCommand = defineCommand({
       type: "string",
       description: "URL source, repeatable."
     },
+    architectureApply: {
+      type: "string",
+      description: "Architecture apply record id or path to attach as context, repeatable."
+    },
     reviewability: {
       type: "string",
       description: "How a user can review this evidence."

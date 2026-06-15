@@ -21,6 +21,7 @@ Useful state commands:
 
 - `opennori evidence add --root <repo> --criterion <id> --kind <kind> --summary "..." --result <passing|failing|blocked|waived> --basis <basis> --reviewability "..." --limitations "..." --json`
 - Add sources with `--source-command "<command>"`, `--source-path "<path>"`, `--source-url "<url>"`, or `--source "<label or JSON>"`.
+- When Product AC evidence was produced under a confirmed Architecture Baseline, attach the architecture context with `--architecture-apply "<apply-id-or-path>"`. This is context, not Product AC proof by itself.
 - `opennori evidence prune --root <repo> --criterion <id> --reason "..." --json`
 
 ## Natural-Language Mapping
@@ -29,6 +30,7 @@ Useful state commands:
 - "Use this screenshot/report" -> record artifact evidence with a path or URL and review instructions.
 - "I confirmed it works" -> record human confirmation, including what the human confirmed.
 - "Waive this AC" -> record waiver evidence with the user's stated reason and limitation.
+- "Use the architecture apply record as context" -> attach it with `--architecture-apply`, but still record a user-visible verification source for passing evidence.
 - "This evidence is stale" -> prune stale evidence and make the AC eligible to become the current gap again.
 - "Why is AC-2 passing" -> summarize latest supporting evidence, basis, sources, confidence, and limitations.
 
@@ -37,6 +39,7 @@ Useful state commands:
 - High-risk passing evidence should not rely only on agent self-summary.
 - Weak evidence may still be useful, but report it as lower confidence or review risk.
 - Multiple sources can support one AC; combine them when they describe the same user-facing result.
+- Architecture apply records can explain that Product AC evidence followed the baseline, but they do not prove the user-visible AC. Pair them with command, artifact, URL, screenshot, report, human confirmation, or another reviewable Product AC source.
 - Obsolete evidence should not occupy active report or context just to preserve history.
 
 ## State Writes

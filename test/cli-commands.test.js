@@ -1262,6 +1262,21 @@ test("evidence add command module records flexible reviewable sources", async ()
   const ledger = buildEvidenceLedger(contract);
   fs.mkdirSync(path.dirname(acceptancePath), { recursive: true });
   fs.writeFileSync(acceptancePath, "# Module goal\n");
+  const architectureApplyPath = path.join(root, ".opennori", "architecture", "evidence", "module-ac-1-apply.json");
+  fs.mkdirSync(path.dirname(architectureApplyPath), { recursive: true });
+  writeJson(architectureApplyPath, {
+    schema_version: "opennori/architecture-apply-v1",
+    id: "module-ac-1-apply",
+    goal_id: "module-goal",
+    criterion_id: "AC-1",
+    status: "aligned",
+    baseline: { profile: "typescript-agent-state-cli", accepted_at: "2026-06-15T00:00:00.000Z" },
+    summary: "AC-1 follows the module architecture baseline.",
+    fit: "The evidence command stays inside the confirmed boundary.",
+    implementation_focus: "Record evidence for AC-1.",
+    created_at: "2026-06-15T00:00:00.000Z",
+    next: "Use this apply record as architecture context when recording Product AC evidence."
+  });
   writeJson(evidencePath, { contract, ledger });
 
   const added = await runEvidenceAddCommand([
@@ -1269,6 +1284,7 @@ test("evidence add command module records flexible reviewable sources", async ()
     "--kind", "agent-observation",
     "--basis", "tool-observation",
     "--summary", "The user-visible workflow can be reviewed.",
+    "--architecture-apply", "module-ac-1-apply",
     "--source", "{\"type\":\"command\",\"label\":\"npm run check\",\"command\":\"npm run check\",\"outcome\":\"passed\"}",
     "--source", "screenshots/reviewable-flow.png",
     "--source-command", "npm run check",
@@ -1284,11 +1300,13 @@ test("evidence add command module records flexible reviewable sources", async ()
   });
   assert.equal(added.ok, true);
   assert.equal(added.data.criterion_status, "passing");
-  assert.equal(added.data.latest_evidence.sources.length, 4);
-  assert.equal(added.data.latest_evidence.sources[0].command, "npm run check");
-  assert.equal(added.data.latest_evidence.sources[1].label, "screenshots/reviewable-flow.png");
-  assert.equal(added.data.latest_evidence.sources[2].type, "command");
-  assert.equal(added.data.latest_evidence.sources[3].type, "url");
+  assert.equal(added.data.latest_evidence.sources.length, 5);
+  const architectureSource = added.data.latest_evidence.sources.find((source) => source.type === "architecture-apply");
+  assert.equal(architectureSource.role, "context");
+  assert.equal(architectureSource.path, ".opennori/architecture/evidence/module-ac-1-apply.json");
+  assert.equal(added.data.latest_evidence.sources.some((source) => source.command === "npm run check"), true);
+  assert.equal(added.data.latest_evidence.sources.some((source) => source.label === "screenshots/reviewable-flow.png"), true);
+  assert.equal(added.data.latest_evidence.sources.some((source) => source.type === "url"), true);
   assert.equal(JSON.parse(fs.readFileSync(evidencePath, "utf8")).ledger.criteria["AC-1"].status, "passing");
 });
 

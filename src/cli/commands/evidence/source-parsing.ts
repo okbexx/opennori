@@ -44,10 +44,30 @@ function repeatableArgValues(args: CliArgs, rawArgs: string[], name: string, fal
   return arrayValue(args[fallbackName]);
 }
 
+function architectureApplySource(value: unknown): EvidenceSource | null {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  const path = raw.includes("/") || raw.endsWith(".json")
+    ? raw
+    : `.opennori/architecture/evidence/${raw}.json`;
+  const id = path.replace(/\.json$/, "").split("/").pop() || raw;
+  return {
+    type: "architecture-apply",
+    label: id,
+    path,
+    role: "context",
+    summary: "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+  };
+}
+
 export function evidenceSourcesFromArgs(args: CliArgs, rawArgs: string[]): EvidenceSource[] {
   const sources: EvidenceSource[] = repeatableArgValues(args, rawArgs, "--source", "source")
     .map((source) => parseEvidenceSource(source))
     .filter((source): source is EvidenceSource => Boolean(source));
+  for (const rawApply of repeatableArgValues(args, rawArgs, "--architecture-apply", "architectureApply")) {
+    const source = architectureApplySource(rawApply);
+    if (source) sources.push(source);
+  }
   for (const rawCommand of repeatableArgValues(args, rawArgs, "--source-command", "sourceCommand")) {
     const command = String(rawCommand);
     sources.push({ type: "command", label: command, command });

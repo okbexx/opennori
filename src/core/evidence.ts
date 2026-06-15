@@ -34,7 +34,8 @@ export const STRONG_EVIDENCE_KINDS = new Set([
 export const STRONG_CONFIDENCE = new Set(["verified", "reviewed", "human-confirmed"]);
 
 const STRONG_EVIDENCE_BASIS = new Set(["human-confirmation", "tool-observation", "artifact-review", "protocol-check"]);
-const REVIEWABLE_SOURCE_TYPES = new Set(["command", "artifact", "url"]);
+const PRODUCT_EVIDENCE_SOURCE_TYPES = new Set(["command", "artifact", "url"]);
+const CONTEXT_SOURCE_TYPES = new Set(["architecture-apply"]);
 const EVIDENCE_HEALTH_STALE_DAYS = 14;
 const BULK_EVIDENCE_PATTERNS = [
   /is covered by the OpenNori .*implementation/i,
@@ -91,6 +92,19 @@ function normalizeEvidence(evidence: EvidenceInput): NormalizedEvidence {
   };
 }
 
+function sourceIsContext(source: EvidenceSource): boolean {
+  return source.role === "context" || CONTEXT_SOURCE_TYPES.has(source.type || "");
+}
+
+function sourceIsProductEvidence(source: EvidenceSource): boolean {
+  if (sourceIsContext(source)) return false;
+  return PRODUCT_EVIDENCE_SOURCE_TYPES.has(source.type || "");
+}
+
+function sourceIsInspectable(source: EvidenceSource): boolean {
+  return sourceIsProductEvidence(source) || sourceIsContext(source);
+}
+
 export function addEvidence(contract: NoriContract, ledger: EvidenceLedger, criterionId: string, evidence: EvidenceInput): EvidenceLedger {
   const criterion = contract.criteria.find((item) => item.id === criterionId);
   if (!criterion) {
@@ -127,12 +141,26 @@ export function addEvidence(contract: NoriContract, ledger: EvidenceLedger, crit
 export function applyRiskGate(criterion: AcceptanceCriterion, evidence: NormalizedEvidence): RiskGateResult {
   const requestedResult = evidence.result;
   const confidence = evidence.confidence || confidenceForEvidence(criterion.risk, requestedResult);
+  const contextOnly = evidence.sources.length > 0
+    && evidence.sources.every((source) => sourceIsContext(source));
+  if (
+    requestedResult === "passing"
+    && contextOnly
+    && evidence.kind !== "human-confirmation"
+    && evidence.basis !== "human-confirmation"
+  ) {
+    return {
+      result: "failing",
+      confidence: "product-evidence-required",
+      gate: "downgraded_context_only_requires_product_evidence"
+    };
+  }
   if (requestedResult !== "passing" || criterion.risk !== "high") {
     return { result: requestedResult, confidence, gate: "accepted" };
   }
 
   const hasReviewableSource = Array.isArray(evidence.sources)
-    && evidence.sources.some((source) => REVIEWABLE_SOURCE_TYPES.has(source.type || ""));
+    && evidence.sources.some((source) => sourceIsProductEvidence(source));
   const hasStrongEvidence = STRONG_EVIDENCE_KINDS.has(evidence.kind)
     || STRONG_EVIDENCE_BASIS.has(evidence.basis)
     || (evidence.confidence ? STRONG_CONFIDENCE.has(evidence.confidence) : false)
@@ -337,7 +365,7 @@ function evidenceAgeDays(evidence: EvidenceRecord | null | undefined, now = Date
 
 function evidenceHasReviewableSource(evidence: EvidenceRecord | null | undefined): boolean {
   const sources = Array.isArray(evidence?.sources) ? evidence.sources : [];
-  return sources.some((source) => REVIEWABLE_SOURCE_TYPES.has(source.type || "")) || Boolean(evidence?.path);
+  return sources.some((source) => sourceIsProductEvidence(source)) || Boolean(evidence?.path);
 }
 
 function isLocalEvidencePath(sourcePath: string): boolean {
@@ -366,8 +394,8 @@ function prunedEvidenceView(evidence: EvidenceRecord | null | undefined, root: s
   const sources = originalSources.filter((source) => sourceIsStillReviewable(source, root));
   const evidencePath = evidence.path && evidencePathExists(root, evidence.path) ? evidence.path : undefined;
   const hadLocalPath = Boolean(evidence.path) || originalSources.some((source) => Boolean(source.path));
-  const hasReviewableAfterPrune = sources.some((source) => REVIEWABLE_SOURCE_TYPES.has(source.type || "")) || Boolean(evidencePath);
-  if (hadLocalPath && !hasReviewableAfterPrune) return null;
+  const hasInspectableAfterPrune = sources.some((source) => sourceIsInspectable(source)) || Boolean(evidencePath);
+  if (hadLocalPath && !hasInspectableAfterPrune) return null;
 
   const kind = evidence.kind || "manual";
   const basis = evidence.basis || basisForEvidenceKind(kind) || "agent-observation";
