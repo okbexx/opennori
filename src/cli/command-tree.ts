@@ -1,7 +1,7 @@
 import type { CommandDef, SubCommandsDef } from "citty";
 import { defineCommand, runCommand } from "citty";
 import { approveCommand, brainstormCommand, criterionAddCommand, criterionUpdateCommand, discoverCommand, draftCommand, evaluateCommand, initCommand, nextCommand, resumeCommand, statusCommand } from "./commands/acceptance.ts";
-import { architectureBaselineCommand, architectureBuildVsBuyCommand, architectureChallengeCommand, architectureProfileCommand, architectureProfilesCommand, architectureShowCommand } from "./commands/architecture.ts";
+import { architectureApplyCommand, architectureBaselineCommand, architectureBuildVsBuyCommand, architectureChallengeCommand, architectureProfileCommand, architectureProfilesCommand, architectureShowCommand } from "./commands/architecture.ts";
 import { bootstrapCommand } from "./commands/bootstrap.ts";
 import { changesCommand } from "./commands/changes.ts";
 import { checkCommand } from "./commands/check.ts";
@@ -68,6 +68,7 @@ const architectureCommand = groupCommand("architecture", "Review and manage Open
   profiles: asCommand(architectureProfilesCommand),
   profile: withPolicy(asCommand(architectureProfileCommand), { commandResult: true }),
   baseline: asCommand(architectureBaselineCommand),
+  apply: asCommand(architectureApplyCommand),
   show: asCommand(architectureShowCommand),
   challenge: asCommand(architectureChallengeCommand),
   "build-vs-buy": asCommand(architectureBuildVsBuyCommand)

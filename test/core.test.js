@@ -1165,16 +1165,29 @@ test("public JSON Schemas validate persisted OpenNori state and separate structu
     "--open-source", "Ajv is the selected JSON Schema validator.",
     "--json"
   ]);
+  run([
+    "architecture", "apply",
+    "--root", root,
+    "--goal", "ship-schema-backed-opennori-state",
+    "--criterion", "AC-1",
+    "--summary", "AC-1 follows the confirmed schema-backed architecture.",
+    "--fit", "The architecture apply record uses public schema-backed state.",
+    "--implementation-focus", "Keep schema validation as structural protocol validation.",
+    "--evidence", "Reviewed baseline and schema files.",
+    "--json"
+  ]);
 
   const manifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "manifest.json"), "utf8"));
   const evidence = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "active", "ship-schema-backed-opennori-state.evidence.json"), "utf8"));
   const baseline = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.json"), "utf8"));
   const decision = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "decisions", "schema-validation.json"), "utf8"));
+  const applyRecord = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "evidence", "ship-schema-backed-opennori-state-ac-1-aligned.json"), "utf8"));
 
   assert.equal(validateSchema("manifest", manifest).valid, true);
   assert.equal(validateSchema("evidence-payload", evidence).valid, true);
   assert.equal(validateSchema("architecture-baseline", baseline).valid, true);
   assert.equal(validateSchema("build-vs-buy", decision).valid, true);
+  assert.equal(validateSchema("architecture-apply", applyRecord).valid, true);
 
   const invalidShape = validateSchema("evidence-payload", { contract: { goal: "missing required fields" }, ledger: {} });
   assert.equal(invalidShape.valid, false);
@@ -1708,6 +1721,46 @@ test("missing architecture baseline is a completion review risk, not a product A
 
   const report = run(["report", "--root", root, "--json"]);
   assert.match(fs.readFileSync(report.data.report_path, "utf8"), /Review risks: architecture_review/);
+});
+
+test("architecture apply records do not count as Product AC evidence", () => {
+  const root = tempRoot();
+  const draft = run(["draft", "--goal", "Ship an architecture-guided user outcome", "--root", root, "--json"]);
+  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  run([
+    "architecture", "baseline",
+    "--root", root,
+    "--goal", "Ship an architecture-guided user outcome",
+    "--goal-id", draft.data.goal_id,
+    "--confirm",
+    "--json"
+  ]);
+
+  const applied = run([
+    "architecture", "apply",
+    "--root", root,
+    "--goal", draft.data.goal_id,
+    "--criterion", "AC-1",
+    "--summary", "AC-1 will follow the confirmed architecture baseline.",
+    "--fit", "The intended change keeps the confirmed command and state boundaries.",
+    "--implementation-focus", "Work only on AC-1.",
+    "--evidence", "Reviewed baseline and current gap before implementation.",
+    "--json"
+  ]);
+  assert.equal(applied.data.apply_record.schema_version, "opennori/architecture-apply-v1");
+  assert.equal(applied.data.architecture.apply_records.length, 1);
+
+  const status = run(["status", "--root", root, "--json"]);
+  assert.equal(status.data.architecture.decision, "valid");
+  assert.equal(status.data.architecture.apply_records.length, 1);
+  assert.equal(status.data.current_gap.id, "AC-1");
+  assert.equal(status.data.workflow_status, "active");
+  assert.equal(status.data.criteria.find((criterion) => criterion.id === "AC-1").status, "unknown");
+
+  const report = run(["report", "--root", root, "--json"]);
+  const reportText = fs.readFileSync(report.data.report_path, "utf8");
+  assert.match(reportText, /Architecture apply records: 1/);
+  assert.match(reportText, /AC-1: aligned/);
 });
 
 test("project architecture profiles can be added and used for baselines", () => {

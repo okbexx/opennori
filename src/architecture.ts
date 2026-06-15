@@ -33,6 +33,12 @@ export {
   renderBuildVsBuyMarkdown
 } from "./architecture/build-vs-buy.ts";
 export {
+  architectureApplySummaries,
+  buildArchitectureApplyRecord,
+  renderArchitectureApplyMarkdown,
+  writeArchitectureApplyRecord
+} from "./architecture/apply.ts";
+export {
   architectureState
 } from "./architecture/state.ts";
 export {

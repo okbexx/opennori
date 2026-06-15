@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opennori.dev/schemas/architecture-apply.schema.json",
+  "title": "OpenNori Architecture Apply Record",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "goal_id",
+    "criterion_id",
+    "status",
+    "baseline",
+    "summary",
+    "fit",
+    "implementation_focus",
+    "created_at",
+    "next"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "const": "opennori/architecture-apply-v1" },
+    "id": { "type": "string", "minLength": 1 },
+    "goal_id": { "type": "string", "minLength": 1 },
+    "criterion_id": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["aligned", "needs-challenge", "waived"]
+    },
+    "baseline": {
+      "type": "object",
+      "required": ["profile", "accepted_at"],
+      "additionalProperties": true,
+      "properties": {
+        "profile": { "type": "string", "minLength": 1 },
+        "profile_title": { "type": "string" },
+        "accepted_at": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "summary": { "type": "string", "minLength": 1 },
+    "fit": { "type": "string", "minLength": 1 },
+    "implementation_focus": { "type": "string", "minLength": 1 },
+    "evidence": { "type": "string" },
+    "limitations": { "type": "string" },
+    "created_at": { "type": "string", "minLength": 1 },
+    "next": { "type": "string", "minLength": 1 }
+  }
+}

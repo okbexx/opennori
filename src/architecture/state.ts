@@ -6,6 +6,7 @@ import type {
   ValidationIssue
 } from "../types.ts";
 import { architectureSurfaceState } from "./agent-surface.ts";
+import { architectureApplySummaries } from "./apply.ts";
 import { validateArchitectureBaseline } from "./baseline.ts";
 import { buildVsBuyDecisionSummaries, buildVsBuyHealth } from "./build-vs-buy.ts";
 import { architectureChallengeSummaries } from "./challenge.ts";
@@ -18,6 +19,8 @@ export function architectureState(root: string, goalId: string | undefined = und
   const openChallenges = challenges.filter((challenge) => challenge.status !== "resolved");
   const decisions = buildVsBuyDecisionSummaries(root);
   const buildVsBuy = buildVsBuyHealth(decisions);
+  const applyRecords = architectureApplySummaries(root)
+    .filter((record) => !goalId || record.goal_id === goalId);
 
   let baseline: ArchitectureBaseline | null = null;
   let issues: ValidationIssue[] = [];
@@ -51,6 +54,7 @@ export function architectureState(root: string, goalId: string | undefined = und
     } : null,
     issues,
     open_challenges: openChallenges,
+    apply_records: applyRecords,
     build_vs_buy_decisions: decisions,
     build_vs_buy: buildVsBuy,
     agent_surface: surface,

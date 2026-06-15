@@ -566,6 +566,7 @@ export type ArchitectureState = {
   } | null;
   issues: ValidationIssue[];
   open_challenges: ArchitectureChallengeSummary[];
+  apply_records?: ArchitectureApplySummary[];
   build_vs_buy_decisions: BuildVsBuyDecisionSummary[];
   build_vs_buy: BuildVsBuyHealth;
   agent_surface: ArchitectureSurfaceState;
@@ -585,6 +586,40 @@ export type ArchitectureChallenge = {
   evidence?: string;
   recommendation?: string;
   [key: string]: unknown;
+};
+
+export type ArchitectureApplyRecord = {
+  schema_version: "opennori/architecture-apply-v1";
+  id: string;
+  goal_id: string;
+  criterion_id: string;
+  status: "aligned" | "needs-challenge" | "waived" | string;
+  baseline: {
+    profile: string;
+    profile_title?: string;
+    accepted_at: string | null;
+  };
+  summary: string;
+  fit: string;
+  implementation_focus: string;
+  evidence?: string;
+  limitations?: string;
+  created_at: string;
+  next: string;
+  [key: string]: unknown;
+};
+
+export type ArchitectureApplySummary = {
+  id: string;
+  goal_id: string;
+  criterion_id: string;
+  status: string;
+  summary: string;
+  baseline_profile: string;
+  path: string;
+  schema_valid?: boolean;
+  schema_errors?: SchemaValidationError[];
+  error?: string;
 };
 
 export type NoriArtifact = {

@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "vitest";
 import { runApproveCommand, runBrainstormCommand, runCriterionAddCommand, runCriterionUpdateCommand, runDiscoverCommand, runDraftCommand, runEvaluateCommand, runInitCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../src/cli/commands/acceptance.ts";
-import { runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand } from "../src/cli/commands/architecture.ts";
+import { runArchitectureApplyCommand, runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand } from "../src/cli/commands/architecture.ts";
 import { runCheckCommand } from "../src/cli/commands/check.ts";
 import { runChangesCommand } from "../src/cli/commands/changes.ts";
 import { runContextExportCommand } from "../src/cli/commands/context.ts";
@@ -583,6 +583,42 @@ test("architecture challenge command module records baseline challenges", async 
   assert.equal(fs.existsSync(challenge.data.markdown_path), true);
   assert.equal(challenge.artifacts.some((artifact) => artifact.kind === "architecture_challenge"), true);
   assert.match(fs.readFileSync(challenge.data.markdown_path, "utf8"), /Do not silently replace/);
+});
+
+test("architecture apply command module records baseline alignment without Product AC evidence", async () => {
+  const root = tempRoot();
+  writeArchitectureBaseline(root, buildArchitectureBaseline(root, {
+    goal: "Keep architecture aligned",
+    goalId: "module-goal",
+    accepted: true
+  }));
+
+  const applied = await runArchitectureApplyCommand([
+    "--root", root,
+    "--id", "module-ac-1-apply",
+    "--goal", "module-goal",
+    "--criterion", "AC-1",
+    "--summary", "AC-1 will use the confirmed command-module boundary.",
+    "--fit", "The change stays inside the command layer and does not replace the baseline stack.",
+    "--implementation-focus", "Implement only the current AC-1 behavior.",
+    "--evidence", "Reviewed baseline.json and the current command module.",
+    "--json"
+  ]);
+
+  assert.equal(applied.ok, true);
+  assert.equal(applied.data.apply_record.schema_version, "opennori/architecture-apply-v1");
+  assert.equal(applied.data.apply_record.goal_id, "module-goal");
+  assert.equal(applied.data.apply_record.criterion_id, "AC-1");
+  assert.equal(applied.data.apply_record.status, "aligned");
+  assert.equal(applied.data.apply_record.baseline.profile, "typescript-agent-state-cli");
+  assert.equal(applied.data.apply_path, path.join(root, ".opennori", "architecture", "evidence", "module-ac-1-apply.json"));
+  assert.equal(fs.existsSync(applied.data.apply_path), true);
+  assert.equal(fs.existsSync(applied.data.markdown_path), true);
+  assert.equal(applied.data.architecture.apply_records.length, 1);
+  assert.equal(applied.data.architecture.apply_records[0].criterion_id, "AC-1");
+  assert.equal(applied.artifacts.some((artifact) => artifact.kind === "architecture_apply"), true);
+  assert.equal(applied.next_actions.some((action) => /Product AC evidence/.test(action)), true);
+  assert.match(fs.readFileSync(applied.data.markdown_path, "utf8"), /not Product AC evidence/);
 });
 
 test("architecture profile command module installs and validates project profiles", async () => {
