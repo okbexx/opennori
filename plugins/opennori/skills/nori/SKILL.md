@@ -28,7 +28,7 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 2. If readiness is unknown, run `opennori doctor --root <repo> --json`.
 3. If the JSON has `data.agent_next`, follow it:
    - `health_needs_recovery` or `setup_preview_needs_confirmation` -> hand off to `nori-project-health`.
-   - `initialized_no_active_contract` -> ask for the natural-language goal and hand off to `nori-acceptance`.
+   - `initialized_no_active_contract` -> use the user's already stated goal if the current conversation includes one; otherwise ask for the natural-language goal; then hand off to `nori-acceptance`.
    - `ready_with_active_goals` -> run list/resume/status as directed.
    - `work_on_current_gap` -> work only on the current acceptance gap and hand off to `nori-evidence` after verification.
    - `completion_needs_review`, `evidence_needs_review`, or `acceptance_needs_user` -> use reporting/evidence/acceptance as directed and involve the user when `needs_user` is true.
@@ -42,6 +42,7 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 ## Natural-Language Mapping
 
 - "Use OpenNori for this goal", "turn this into AC", "the AC is wrong", "brainstorm first" -> hand off to `nori-acceptance`.
+- If the user already stated the goal before initialization, do not ask them to repeat it after `opennori init`; continue acceptance discovery for that stated goal.
 - "Continue OpenNori", "what is next", "what is the current gap" -> run resume/status, then hand off to `nori-reporting` unless the next action clearly requires another child Skill.
 - "Is it complete", "can I accept this", "what do I need to do" -> use `nori-reporting` and answer from required AC, evidence, profile, architecture, and review risks.
 - "Record this verification", "use this screenshot/report/test as evidence", "that evidence is stale", "waive this" -> hand off to `nori-evidence`.

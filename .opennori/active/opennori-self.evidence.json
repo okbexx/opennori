@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T07:50:36.655Z",
+    "updated_at": "2026-06-15T08:02:36.952Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -3306,6 +3306,59 @@
             "limitations": "This covers project-health handoff behavior; broader AC discovery remains the next dogfood step.",
             "gate": "accepted",
             "created_at": "2026-06-15T07:50:36.655Z"
+          },
+          {
+            "kind": "post-init-routing-review",
+            "basis": "tool-observation",
+            "summary": "After confirmed initialization in a fresh project, agent_next now routes initialized_no_active_contract to nori-acceptance with instructions to reuse the user's already stated goal when present, ask only if the goal is missing, and run acceptance discovery before implementation. Packaged nori and nori-acceptance Skills carry the same behavior so users are not asked to repeat a goal they already provided.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "tmp=$(mktemp -d /tmp/opennori-step2-fix-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json",
+                "command": "tmp=$(mktemp -d /tmp/opennori-step2-fix-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
+                "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Rerun the temporary-project init/doctor smoke and inspect agent_next.instruction plus packaged Skill text for the already-stated-goal rule.",
+            "limitations": "This proves routing semantics after project initialization; the next dogfood step should evaluate the actual acceptance discovery questions and draft quality.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T08:02:36.902Z"
           }
         ]
       },
@@ -4679,6 +4732,49 @@
             "limitations": "This validates installed-machine/new-project routing in local source checkout; published npm users need a later package release to receive it.",
             "gate": "accepted",
             "created_at": "2026-06-15T07:50:36.476Z"
+          },
+          {
+            "kind": "confirmed-init-routing-smoke",
+            "basis": "tool-observation",
+            "summary": "Confirmed opennori init on a fresh project creates .opennori state, leaves active goals empty, and returns initialized_no_active_contract with next guidance to turn the stated goal into human-centered AC rather than inspect empty directories or repeat setup.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "tmp=$(mktemp -d /tmp/opennori-step2-fix-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json",
+                "command": "tmp=$(mktemp -d /tmp/opennori-step2-fix-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json"
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+                "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              }
+            ],
+            "reviewability": "Rerun the smoke and confirm .opennori/active is empty but agent_next.state is initialized_no_active_contract with recommended_skill nori-acceptance.",
+            "limitations": "This validates local source behavior; published users need the next npm/plugin release to receive the updated routing text.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T08:02:36.952Z"
           }
         ]
       }

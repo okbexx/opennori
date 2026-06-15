@@ -9,12 +9,12 @@ Help the agent and user define what "done" means from the human user's point of 
 
 Good AC says what entry the user uses, what operation or judgment they perform, what result they see, and how they can decide it is acceptable. It does not describe the agent's implementation path.
 
-When the root `nori` Skill or CLI JSON reports `data.agent_next.state: initialized_no_active_contract`, treat that as the normal starting point for this Skill. The project is ready; it needs a human-centered Nori Contract, not lifecycle repair.
+When the root `nori` Skill or CLI JSON reports `data.agent_next.state: initialized_no_active_contract`, treat that as the normal starting point for this Skill. The project is ready; it needs a human-centered Nori Contract, not lifecycle repair. If the user already stated a goal earlier in the same conversation, use that goal instead of asking them to repeat it.
 
 ## Start Here
 
 1. Read current OpenNori state with doctor/list/resume/status when a goal may already exist, and follow `data.agent_next` when present.
-2. If `agent_next.state` is `initialized_no_active_contract`, ask for or use the user's natural-language goal and begin discovery/draft.
+2. If `agent_next.state` is `initialized_no_active_contract`, use the user's natural-language goal from the current conversation when present; ask for the goal only when it is missing; then begin discovery/draft.
 3. If the user is still exploring an idea, create brainstorm candidates before drafting a contract.
 4. If the user has a goal but the completion surface is vague, run discovery before draft.
 5. If a draft or active contract exists, inspect `acceptance_review` before claiming the AC is good enough.

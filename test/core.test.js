@@ -1001,8 +1001,13 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /nori-build-vs-buy/);
   assert.match(noriAsset, /opennori resume/);
   assert.match(noriAsset, /opennori status/);
+  assert.match(noriAsset, /already stated goal/);
   assert.doesNotMatch(noriAsset, /skill export/);
   assert.doesNotMatch(noriAsset, /process steps/);
+
+  const acceptanceAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-acceptance", "SKILL.md"), "utf8");
+  assert.match(acceptanceAsset, /already stated a goal/);
+  assert.match(acceptanceAsset, /ask for the goal only when it is missing/);
 
   const evidenceAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-evidence", "SKILL.md"), "utf8");
   assert.match(evidenceAsset, /Do not force evidence into a fixed adapter taxonomy/);

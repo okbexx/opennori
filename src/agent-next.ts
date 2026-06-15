@@ -69,8 +69,8 @@ export function agentNextForBootstrap(data: Pick<BootstrapData, "status" | "root
       state: "initialized_no_active_contract",
       recommendedSkill: "nori-acceptance",
       summary: "OpenNori is initialized, and no active Nori Contract exists yet.",
-      instruction: "Ask for the user's natural-language goal and draft human-centered acceptance criteria before implementation.",
-      userVisibleNext: "Tell me the goal you want OpenNori to make reviewable.",
+      instruction: "Use the user's already stated natural-language goal if the current conversation includes one; otherwise ask for the goal. Then run acceptance discovery or draft human-centered acceptance criteria before implementation.",
+      userVisibleNext: "Continue with acceptance discovery for the stated goal, or ask for the goal if it was not provided.",
       needsUser: true,
       commands: [`opennori doctor --root ${data.root} --json`]
     });
@@ -118,8 +118,8 @@ export function agentNextForDoctor(root: string, doctor: DoctorState): AgentNext
       state: "initialized_no_active_contract",
       recommendedSkill: "nori-acceptance",
       summary: "OpenNori is ready, and no active Nori Contract exists yet.",
-      instruction: "Do not implement yet. Ask for the user's goal and run acceptance discovery or draft a Nori Contract.",
-      userVisibleNext: "Share the goal to turn into human-centered acceptance criteria.",
+      instruction: "Do not implement yet. Use the user's already stated goal if available; otherwise ask for the goal. Run acceptance discovery or draft a Nori Contract before implementation.",
+      userVisibleNext: "Turn the stated goal into human-centered acceptance criteria, or ask for the goal if it was not provided.",
       needsUser: true,
       commands: [`opennori doctor --root ${root} --json`]
     });

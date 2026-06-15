@@ -409,7 +409,8 @@ test("init command module initializes project state with preview safety", async 
   assert.equal(initialized.data.status, "installed");
   assert.equal(initialized.data.agent_next.state, "initialized_no_active_contract");
   assert.equal(initialized.data.agent_next.recommended_skill, "nori-acceptance");
-  assert.match(initialized.data.agent_next.instruction, /Ask for the user's natural-language goal/);
+  assert.match(initialized.data.agent_next.instruction, /already stated natural-language goal/);
+  assert.match(initialized.data.agent_next.user_visible_next, /stated goal/);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "manifest.json")), true);
 
   const doctor = await runDoctorCommand(["--root", root, "--json"]);
@@ -417,6 +418,7 @@ test("init command module initializes project state with preview safety", async 
   assert.equal(doctor.data.status, "ready");
   assert.equal(doctor.data.active_goals.length, 0);
   assert.equal(doctor.data.agent_next.state, "initialized_no_active_contract");
+  assert.match(doctor.data.agent_next.instruction, /already stated goal/);
 });
 
 test("draft command module creates active Nori Contracts from brief files", async () => {
