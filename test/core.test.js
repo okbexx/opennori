@@ -617,6 +617,8 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.equal(report.data.evidence_health.status, "clear");
   assert.ok(report.data.architecture);
   assert.equal(report.data.architecture.decision, "valid");
+  assert.equal(report.data.agent_next.state, "ready_for_next_loop");
+  assert.equal(report.data.agent_next.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), true);
   assert.match(text, /## Decision Summary/);
   assert.ok(text.indexOf("## Decision Summary") < text.indexOf("## Acceptance Status"));
   assert.match(text, /Completion: Complete: all required acceptance criteria have passing or waived evidence\./);
@@ -673,6 +675,8 @@ test("evidence can drive the workflow to complete and render a human report", ()
     "--json"
   ]);
   assert.equal(exported.data.next_recommendation.status, "ready-for-next-loop");
+  assert.equal(exported.data.agent_next.state, "ready_for_next_loop");
+  assert.equal(exported.data.agent_next.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), true);
   assert.equal(exported.data.next_recommendation.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), true);
   assert.equal(exported.data.next_recommendation.candidate_goals.some((candidate) => candidate.draft_command?.includes("--source-goal")), true);
 
@@ -2098,6 +2102,8 @@ test("context export exposes goal AC profile evidence and report paths for revie
   assert.equal(exported.data.capability_profile.items.some((item) => item.name === "profile-stays-out-of-acs"), true);
   assert.equal(exported.data.architecture.decision, "valid");
   assert.equal(exported.data.architecture.baseline.profile, "typescript-agent-state-cli");
+  assert.equal(exported.data.agent_next.schema_version, "opennori/agent-next-v1");
+  assert.equal(exported.data.agent_next.goal_id, "ship-a-reviewable-workflow");
   assert.equal(exported.data.paths.acceptance, ".opennori/active/ship-a-reviewable-workflow.acceptance.md");
   assert.equal(exported.data.paths.report_exists, true);
   assert.equal(exported.data.manifest.capabilities.includes("context-export"), true);

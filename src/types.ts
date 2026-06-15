@@ -848,6 +848,7 @@ export type ContextExport = {
   acceptance_review: AcceptanceQualityAudit;
   evidence_health: EvidenceHealth;
   next_recommendation: NextRecommendation;
+  agent_next: AgentNext;
   criteria: CriterionStatusRow[];
   capability_profile: CapabilityProfile;
   capability_compliance: ProfileCompliance;

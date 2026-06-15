@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { reviewAcceptanceQuality } from "../acceptance.ts";
+import { agentNextForRecommendation } from "../agent-next.ts";
 import {
   completionAnswer,
   criterionStatusRows,
@@ -22,6 +23,7 @@ export function buildContextExport(root: string, pair: { acceptancePath: string;
   const ledger = payload.ledger;
   const reportPath = pathsForGoal(root, contract.goal_id).reportPath;
   const architecture = architectureState(root, contract.goal_id);
+  const gap = currentGap(contract, ledger);
   const recommendation = nextRecommendation(contract, ledger, { root, architecture });
   return {
     schema_version: "opennori/context-export-v1",
@@ -31,12 +33,13 @@ export function buildContextExport(root: string, pair: { acceptancePath: string;
     goal: contract.goal,
     acceptance_basis: contract.acceptance_basis || { status: "draft" },
     workflow_status: ledger.status,
-    current_gap: currentGap(contract, ledger),
+    current_gap: gap,
     completion: completionAnswer(contract, ledger, { root, architecture }),
     intervention: intervention(contract, ledger),
     acceptance_review: reviewAcceptanceQuality(contract),
     evidence_health: evidenceHealth(contract, ledger, { root }),
     next_recommendation: recommendation,
+    agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation),
     criteria: criterionStatusRows(contract, ledger, { root }),
     capability_profile: ledger.capability_profile || { items: [], evidence: [] },
     capability_compliance: profileCompliance(ledger),

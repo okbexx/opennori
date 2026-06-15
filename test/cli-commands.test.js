@@ -1071,6 +1071,8 @@ test("report command module renders a report artifact", async () => {
   assert.equal(report.data.evidence_health.status, "clear");
   assert.equal(report.data.architecture.decision, "missing");
   assert.equal(report.data.next_recommendation.status, "completion-review-required");
+  assert.equal(report.data.agent_next.state, "completion_needs_review");
+  assert.equal(report.data.agent_next.recommended_skill, "nori-reporting");
   assert.equal(report.artifacts[0].kind, "acceptance_report");
   assert.match(fs.readFileSync(outputPath, "utf8"), /## Decision Summary/);
 });

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { defineCommand } from "citty";
 import { reviewAcceptanceQuality } from "../../acceptance.ts";
+import { agentNextForRecommendation } from "../../agent-next.ts";
 import { completionAnswer, currentGap, evidenceHealth, fail, intervention, nextRecommendation, ok, pathsForGoal, recomputeWorkflowStatus, syncAcceptanceMarkdown, writeJson } from "../../core.ts";
 import { architectureState, renderReportWithArchitecture } from "../../architecture.ts";
 import { refreshManifest } from "../../lifecycle.ts";
@@ -31,19 +32,21 @@ export const reportCommand = defineCommand({
     fs.mkdirSync(path.dirname(output), { recursive: true });
     fs.writeFileSync(output, renderReportWithArchitecture(root, contract, ledger));
     refreshManifest(root);
+    const gap = currentGap(contract, ledger);
     const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok(
       {
         goal_id: contract.goal_id,
         report_path: output,
         workflow_status: ledger.status,
-        current_gap: currentGap(contract, ledger),
+        current_gap: gap,
         completion: completionAnswer(contract, ledger, { root, architecture }),
         intervention: intervention(contract, ledger),
         acceptance_review: reviewAcceptanceQuality(contract),
         evidence_health: evidenceHealth(contract, ledger, { root }),
         architecture,
-        next_recommendation: recommendation
+        next_recommendation: recommendation,
+        agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation)
       },
       [{ kind: "acceptance_report", path: output }],
       [],
