@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T09:15:21.817Z",
+    "updated_at": "2026-06-15T09:25:18.332Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -3498,6 +3498,44 @@
             "limitations": "The conversion is a focused OpenNori acceptance-domain mapper for common discovery gaps, not a general natural-language form engine.",
             "gate": "accepted",
             "created_at": "2026-06-15T09:15:21.817Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "OpenNori approve now returns next_recommendation and agent_next immediately after user AC approval. In the real settings-page smoke, approved concrete Product AC routed to architecture_needs_review with nori-architecture-brainstorm before implementation/evidence work, so the agent does not need an extra resume step or guess the next phase.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js -t 'approve command module'",
+                "command": "npx vitest run test/cli-commands.test.js -t 'approve command module'"
+              },
+              {
+                "type": "command",
+                "label": "approve smoke: discover -> draft --from-discovery -> approve returns architecture_needs_review",
+                "command": "approve smoke: discover -> draft --from-discovery -> approve returns architecture_needs_review"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/approval.ts",
+                "path": "src/cli/commands/acceptance/approval.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              }
+            ],
+            "reviewability": "Run the targeted approve tests and the smoke flow; inspect approve JSON for data.agent_next.state=architecture_needs_review.",
+            "limitations": "This verifies immediate post-approval routing; actual baseline quality is handled by nori-architecture-brainstorm and user confirmation.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T09:25:18.332Z"
           }
         ]
       },

@@ -1045,7 +1045,47 @@ test("approve command module marks acceptance basis approved and recomputes stat
   assert.equal(approved.data.acceptance_basis.summary, "User approved module criteria.");
   assert.equal(approved.data.workflow_status, "complete");
   assert.equal(approved.data.current_gap, null);
+  assert.equal(approved.data.architecture.decision, "missing");
+  assert.equal(approved.data.next_recommendation.status, "completion-review-required");
+  assert.equal(approved.data.agent_next.state, "completion_needs_review");
+  assert.equal(approved.data.agent_next.recommended_skill, "nori-reporting");
+  assert.equal(approved.next_actions.some((action) => /architecture_check/.test(action)), true);
   assert.match(fs.readFileSync(acceptancePath, "utf8"), /Status: approved/);
+});
+
+test("approve command module routes approved non-trivial gaps to architecture review before implementation", async () => {
+  const root = tempRoot();
+  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const contract = {
+    schema_version: "opennori/contract-v1",
+    goal_id: "module-goal",
+    goal: "Ship a settings page where users edit profile details",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "As a user, I can edit profile details from Account Settings."
+      }
+    ],
+    acceptance_basis: { status: "draft" }
+  };
+  const ledger = buildEvidenceLedger(contract);
+  fs.mkdirSync(path.dirname(acceptancePath), { recursive: true });
+  fs.writeFileSync(acceptancePath, "# Module goal\n");
+  writeJson(evidencePath, { contract, ledger });
+
+  const approved = await runApproveCommand(["--summary", "User approved module criteria.", "--json"], {
+    loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root })
+  });
+
+  assert.equal(approved.ok, true);
+  assert.equal(approved.data.current_gap.id, "AC-1");
+  assert.equal(approved.data.architecture.decision, "missing");
+  assert.equal(approved.data.next_recommendation.status, "architecture-review-required");
+  assert.equal(approved.data.agent_next.state, "architecture_needs_review");
+  assert.equal(approved.data.agent_next.recommended_skill, "nori-architecture-brainstorm");
+  assert.equal(approved.data.agent_next.current_gap_id, "AC-1");
+  assert.equal(approved.next_actions.some((action) => /Architecture Baseline/.test(action)), true);
 });
 
 test("criterion update command module clears stale evidence after a user revision", async () => {

@@ -1,6 +1,9 @@
 import { defineCommand } from "citty";
+import { architectureState } from "../../../architecture.ts";
+import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
   currentGap,
+  nextRecommendation,
   ok,
   recomputeWorkflowStatus,
   syncAcceptanceMarkdown,
@@ -35,12 +38,18 @@ export const approveCommand = defineCommand({
     writeJson(evidencePath, { contract, ledger });
     syncAcceptanceMarkdown(acceptancePath, contract, ledger);
     refreshManifest(root);
+    const architecture = architectureState(root, contract.goal_id);
+    const gap = currentGap(contract, ledger);
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok({
       goal_id: contract.goal_id,
       acceptance_basis: contract.acceptance_basis,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger)
-    });
+      current_gap: gap,
+      architecture,
+      next_recommendation: recommendation,
+      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation)
+    }, [], [], recommendation.actions);
   }
 });
 

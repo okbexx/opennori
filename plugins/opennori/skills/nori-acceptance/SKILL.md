@@ -20,6 +20,7 @@ When the root `nori` Skill or CLI JSON reports `data.agent_next.state: initializ
 5. If a draft or active contract exists, inspect `acceptance_review` before claiming the AC is good enough.
 6. If `acceptance_review` reports `criterion_id: ACCEPTANCE-BASIS`, show those discovery questions before asking for approval; the draft is still a generic starting point.
 7. If the user has approved or revised AC, persist that decision before implementation continues.
+8. After `opennori approve`, read the returned `data.agent_next`. If it says `architecture_needs_review`, hand off to `nori-architecture-brainstorm` before implementation or evidence work.
 
 Useful state commands:
 
@@ -37,7 +38,7 @@ Useful state commands:
 - "Brainstorm this idea" -> produce selectable acceptance directions; ask which direction should become the contract.
 - "This AC is too vague" -> ask only questions that change completion judgment.
 - User answers discovery questions -> summarize the answers into a JSON object keyed by discovery gap id, run `draft --from-discovery`, then show the concrete Product AC for approval.
-- "Approve these AC" -> write approval and make the contract the source of truth for the loop.
+- "Approve these AC" -> write approval, read `agent_next`, and route to architecture review, evidence, or reporting from that returned state.
 - "Change AC-2 to mean..." -> update that criterion and treat older evidence for it as stale.
 - Complete goal with `candidate_goals` -> use the chosen candidate as a draft source, not as approved AC.
 - Generic `draft --goal` output with `acceptance_review` findings -> show the missing acceptance questions first; do not ask for blind approval.
