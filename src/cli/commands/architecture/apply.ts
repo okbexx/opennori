@@ -1,4 +1,5 @@
 import { defineCommand } from "citty";
+import { agentNextForArchitectureApply } from "../../../agent-next.ts";
 import {
   architectureState,
   buildArchitectureApplyRecord,
@@ -100,6 +101,13 @@ export const architectureApplyCommand = defineCommand({
         apply_path: paths.jsonPath,
         markdown_path: paths.markdownPath,
         architecture: architectureState(root, goalId),
+        agent_next: agentNextForArchitectureApply({
+          goalId,
+          criterionId,
+          applyId: record.id,
+          applyPath: paths.jsonPath,
+          status: record.status
+        }),
         side_effect: "write"
       },
       [

@@ -265,6 +265,7 @@ export type AgentNext = {
     | "work_on_current_gap"
     | "acceptance_needs_user"
     | "architecture_needs_review"
+    | "evidence_ready_for_recording"
     | "evidence_needs_review"
     | "completion_needs_review"
     | "ready_for_next_loop"

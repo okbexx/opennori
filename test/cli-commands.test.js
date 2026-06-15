@@ -616,9 +616,40 @@ test("architecture apply command module records baseline alignment without Produ
   assert.equal(fs.existsSync(applied.data.markdown_path), true);
   assert.equal(applied.data.architecture.apply_records.length, 1);
   assert.equal(applied.data.architecture.apply_records[0].criterion_id, "AC-1");
+  assert.equal(applied.data.agent_next.state, "evidence_ready_for_recording");
+  assert.equal(applied.data.agent_next.recommended_skill, "nori-evidence");
+  assert.equal(applied.data.agent_next.current_gap_id, "AC-1");
+  assert.match(applied.data.agent_next.instruction, /--architecture-apply/);
   assert.equal(applied.artifacts.some((artifact) => artifact.kind === "architecture_apply"), true);
   assert.equal(applied.next_actions.some((action) => /Product AC evidence/.test(action)), true);
   assert.match(fs.readFileSync(applied.data.markdown_path, "utf8"), /not Product AC evidence/);
+});
+
+test("architecture apply routes conflicts to architecture challenge", async () => {
+  const root = tempRoot();
+  writeArchitectureBaseline(root, buildArchitectureBaseline(root, {
+    goal: "Keep architecture aligned",
+    goalId: "module-goal",
+    accepted: true
+  }));
+
+  const applied = await runArchitectureApplyCommand([
+    "--root", root,
+    "--goal", "module-goal",
+    "--criterion", "AC-1",
+    "--status", "needs-challenge",
+    "--summary", "AC-1 conflicts with the confirmed command-module boundary.",
+    "--fit", "The intended work would replace the confirmed stack.",
+    "--implementation-focus", "Stop before implementation.",
+    "--json"
+  ]);
+
+  assert.equal(applied.ok, true);
+  assert.equal(applied.data.apply_record.status, "needs-challenge");
+  assert.equal(applied.data.agent_next.state, "architecture_needs_review");
+  assert.equal(applied.data.agent_next.recommended_skill, "nori-architecture-challenge");
+  assert.equal(applied.data.agent_next.needs_user, true);
+  assert.equal(applied.next_actions.some((action) => /Architecture Challenge/.test(action)), true);
 });
 
 test("architecture profile command module installs and validates project profiles", async () => {

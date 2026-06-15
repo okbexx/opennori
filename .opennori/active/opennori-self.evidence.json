@@ -466,7 +466,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T10:10:01.782Z",
+    "updated_at": "2026-06-15T10:15:02.446Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -4035,6 +4035,59 @@
             "limitations": "This proves repo-local and package asset discoverability; it does not prove a fresh external Codex Plugin install until plugin installation is tested after publish.",
             "gate": "accepted",
             "created_at": "2026-06-13T10:26:03.551Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "Architecture apply now returns agent_next so new agent sessions do not have to infer the next step after recording baseline alignment. Aligned apply routes to nori-evidence with the apply record context; needs-challenge routes to nori-architecture-challenge.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js -t 'architecture apply command module|architecture apply routes conflicts'",
+                "command": "npx vitest run test/cli-commands.test.js -t 'architecture apply command module|architecture apply routes conflicts'"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js -t 'architecture apply records do not count'",
+                "command": "npx vitest run test/core.test.js -t 'architecture apply records do not count'"
+              },
+              {
+                "type": "command",
+                "label": "npx tsc --noEmit",
+                "command": "npx tsc --noEmit"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/architecture/apply.ts",
+                "path": "src/cli/commands/architecture/apply.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-architecture-apply/SKILL.md",
+                "path": "plugins/opennori/skills/nori-architecture-apply/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Run the listed tests and inspect architecture apply JSON for data.agent_next.state evidence_ready_for_recording or architecture_needs_review.",
+            "limitations": "This verifies deterministic routing after architecture apply; Product AC evidence still needs user-visible verification.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T10:15:02.445Z"
           }
         ]
       },

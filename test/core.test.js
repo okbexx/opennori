@@ -1749,6 +1749,9 @@ test("architecture apply records do not count as Product AC evidence", () => {
   ]);
   assert.equal(applied.data.apply_record.schema_version, "opennori/architecture-apply-v1");
   assert.equal(applied.data.architecture.apply_records.length, 1);
+  assert.equal(applied.data.agent_next.state, "evidence_ready_for_recording");
+  assert.equal(applied.data.agent_next.recommended_skill, "nori-evidence");
+  assert.match(applied.data.agent_next.instruction, /Product AC evidence/);
 
   const status = run(["status", "--root", root, "--json"]);
   assert.equal(status.data.architecture.decision, "valid");

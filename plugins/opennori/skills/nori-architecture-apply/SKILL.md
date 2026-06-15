@@ -14,8 +14,9 @@ This Skill is for agent behavior during implementation. It is not an architectur
 1. Run `opennori status --root <repo> --json` and identify current Product AC gap.
 2. Run `opennori architecture show --root <repo> --json` or read `.opennori/architecture/baseline.md`.
 3. Compare the intended code change with baseline principles, directory boundaries, dependency policy, preferred libraries, avoid rules, and build-vs-buy policy.
-4. If the change fits, record an architecture apply record for the current AC gap, then implement only that gap.
+4. If the change fits, record an architecture apply record for the current AC gap, then read the returned `data.agent_next`.
 5. If it conflicts, stop implementation and create an Architecture Challenge.
+6. When `agent_next.state` is `evidence_ready_for_recording`, hand off to `nori-evidence` and attach the apply record as architecture context.
 
 Useful state commands:
 
@@ -40,7 +41,7 @@ May write architecture apply records under `.opennori/architecture/evidence/`. T
 - Missing baseline for non-trivial work -> `nori-architecture-brainstorm`.
 - Baseline conflict -> `nori-architecture-challenge`.
 - Custom infrastructure or dependency decision -> `nori-build-vs-buy`.
-- After architecture apply and implementation/verification -> `nori-evidence`.
+- After architecture apply returns `agent_next.recommended_skill: nori-evidence` -> `nori-evidence`.
 - Completion answer -> `nori-reporting`.
 
 ## User Reply Shape
