@@ -696,9 +696,27 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.match(nextDraft.data.acceptance_basis.rule, /not approved acceptance criteria/);
   assert.equal(nextDraft.data.current_gap.id, "ACCEPTANCE-BASIS");
   assert.equal(nextDraft.data.criteria.some((criterion) => /candidate/.test(criterion.user_story.toLowerCase())), true);
+  assert.equal(nextDraft.data.criteria.some((criterion) => /resume、status、next 或 context export/.test(criterion.measurement)), true);
+  assert.equal(nextDraft.data.criteria.some((criterion) => /phase、task list 或 completion evidence/.test(criterion.threshold)), true);
+  assert.equal(nextDraft.data.criteria.some((criterion) => /按这条候选方向检查新的目标结果/.test(criterion.measurement)), false);
   const nextDraftLedger = JSON.parse(fs.readFileSync(nextDraft.data.evidence_path, "utf8"));
   assert.equal(nextDraftLedger.ledger.status, "active");
   assert.equal(nextDraftLedger.ledger.criteria["AC-1"].status, "unknown");
+
+  const dogfoodDraft = run([
+    "draft",
+    "--from-next-candidate", "opennori-adoption-dogfood",
+    "--source-goal", init.data.goal_id,
+    "--goal-id", "opennori-adoption-dogfood-contract",
+    "--root", root,
+    "--json"
+  ]);
+  assert.equal(dogfoodDraft.data.goal_id, "opennori-adoption-dogfood-contract");
+  const dogfoodDraftText = dogfoodDraft.data.criteria.map((criterion) => `${criterion.measurement}\n${criterion.threshold}`).join("\n");
+  assert.match(dogfoodDraftText, /非 OpenNori 仓库/);
+  assert.match(dogfoodDraftText, /首次卡住、重复、CLI 过重或半安装/);
+  assert.match(dogfoodDraftText, /不会把 OpenNori 自身通过状态当作外部采用证明/);
+  assert.doesNotMatch(dogfoodDraftText, /按这条候选方向检查新的目标结果/);
 });
 
 test("blocked criteria produce a concrete intervention answer", () => {
@@ -1694,13 +1712,36 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   assert.equal(manifest.architecture.required_for_goal, true);
   assert.equal(manifest.architecture.baseline.goal_id, "refactor-opennori-into-a-typescript-agent-state-cli-product");
 
-  const report = run(["report", "--root", root, "--json"]);
+  const secondDraft = run([
+    "draft",
+    "--root", root,
+    "--goal", "Capture follow-up adoption friction",
+    "--goal-id", "adoption-follow-up",
+    "--json"
+  ]);
+  assert.equal(secondDraft.data.goal_id, "adoption-follow-up");
+  const multiGoalManifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "manifest.json"), "utf8"));
+  assert.equal(multiGoalManifest.active_goals.length, 2);
+  assert.equal(multiGoalManifest.architecture.required_for_goal, true);
+  assert.equal(multiGoalManifest.architecture.baseline.goal_id, "refactor-opennori-into-a-typescript-agent-state-cli-product");
+
+  const report = run([
+    "report",
+    "--root", root,
+    "--goal", "refactor-opennori-into-a-typescript-agent-state-cli-product",
+    "--json"
+  ]);
   const reportText = fs.readFileSync(report.data.report_path, "utf8");
   assert.match(reportText, /## Architecture Baseline/);
   assert.match(reportText, /Architecture decision: valid/);
   assert.match(reportText, /Build-vs-buy: clear \(1 decisions\)/);
 
-  const exported = run(["context", "export", "--root", root, "--json"]);
+  const exported = run([
+    "context", "export",
+    "--root", root,
+    "--goal", "refactor-opennori-into-a-typescript-agent-state-cli-product",
+    "--json"
+  ]);
   assert.equal(exported.data.architecture.decision, "valid");
   assert.equal(exported.data.architecture.baseline.profile, "typescript-agent-state-cli");
 
@@ -1717,7 +1758,12 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   assert.equal(challenge.data.architecture.open_challenges.length, 1);
   assert.match(fs.readFileSync(challenge.data.markdown_path, "utf8"), /Do not silently replace/);
 
-  const challengedStatus = run(["status", "--root", root, "--json"]);
+  const challengedStatus = run([
+    "status",
+    "--root", root,
+    "--goal", "refactor-opennori-into-a-typescript-agent-state-cli-product",
+    "--json"
+  ]);
   assert.equal(challengedStatus.data.architecture.decision, "challenged");
 
   assert.equal(fs.existsSync(draft.data.acceptance_path), true);

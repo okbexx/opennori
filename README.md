@@ -201,6 +201,9 @@ draft metadata when available.
 Candidate goals are not phases, task lists, approved acceptance checks, or
 completion evidence. They help the agent continue after the user says
 "continue" without making the user invent the next prompt from scratch.
+When a candidate becomes a draft, the draft should already say how the user can
+measure and judge the next outcome; it still remains unapproved until the user
+accepts or revises the Nori Contract.
 
 ### Nori Profile
 
@@ -487,6 +490,8 @@ Nori 倡导对于“修改字段”或“抛出错误提示”等含糊不清的
 当一个目标被确信完成后，CLI 里的 `resume`、`status`、`next`、`report` 等命令和上下文导出数据中都会包含给 Skill 路由用的 `agent_next.candidate_goals`，并在 `next_recommendation.candidate_goals` 中保留同一批候选作为报告解释面。这是自动生成的一组小型后续卡片，为下一个 Nori 契约提供合理的起点：每一个候选提案均明确指出了建议的目标、用户价值、验收方向、偏离风险，以及可用时的 draft 元数据。
 
 接力候选并不是繁重的迭代阶段或必须完成的任务列表。它们的作用是当用户说“继续”时，AI 代理能立刻接力推进，而不需要用户每次都费尽心思去构思全新的 Prompt。
+
+候选转成 draft 后，draft 应该已经说明用户如何操作、复查和判断通过；但在用户 approve 或 revise 之前，它仍然不是已批准的 Nori Contract。
 
 ### Nori 项目画像 (Nori Profile)
 

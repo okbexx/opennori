@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { REQUIRED_ARCHITECTURE_DIRS, architectureState } from "../architecture.ts";
+import { REQUIRED_ARCHITECTURE_DIRS, architectureState, readArchitectureBaseline } from "../architecture.ts";
 import {
   PROTOCOL_VERSION,
   currentGap,
@@ -83,7 +83,9 @@ export function safeReadManifest(root: string): Manifest | null {
 export function buildManifest(root: string, options: { assumeManifestExists?: boolean } = {}): Manifest {
   const existing = safeReadManifest(root);
   const activeGoals = activeGoalSummaries(root);
-  const architectureGoalId = activeGoals.length === 1 ? activeGoals[0]?.goal_id : undefined;
+  const architectureGoalId = activeGoals.length === 1
+    ? activeGoals[0]?.goal_id
+    : readArchitectureBaseline(root)?.goal_id;
   const architecture = architectureState(root, architectureGoalId);
   const now = new Date().toISOString();
   return {

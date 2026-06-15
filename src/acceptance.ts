@@ -262,6 +262,94 @@ const GENERIC_DRAFT_SUMMARY = "Draft generated from generic acceptance discovery
 const DISCOVERY_ANSWER_DRAFT_SUMMARY = "Draft generated from reviewed Acceptance Discovery answers. User still needs to approve or revise the Nori Contract before implementation.";
 const NEXT_CANDIDATE_DRAFT_SUMMARY = "Draft generated from a completed goal candidate. User must approve or revise it before it becomes the next Nori Contract.";
 
+const NEXT_CANDIDATE_DRAFT_DETAILS: Record<string, Array<Pick<AcceptanceCriterion, "measurement" | "threshold" | "risk">>> = {
+  "opennori-adoption-dogfood": [
+    {
+      measurement: "用户在一个非 OpenNori 仓库中用自然语言要求 agent 使用 OpenNori，然后查看 agent 展示的 draft Nori Contract。",
+      threshold: "draft 包含该项目目标、人类视角 AC、acceptance basis 和当前 approval 缺口；用户不需要记住 --from-next-candidate、--root 或内部 Skill 名。",
+      risk: "medium"
+    },
+    {
+      measurement: "用户让 agent 在该非 OpenNori 项目推进到 status/report，并阅读报告顶部的完成判断、当前缺口、证据和风险。",
+      threshold: "报告清楚显示 goal、decision、current gap、evidence、review risks 和是否需要用户介入；用户能判断是否完成或该补什么。",
+      risk: "medium"
+    },
+    {
+      measurement: "用户或评审者记录本次外部项目使用中首次卡住、重复、CLI 过重或半安装的点，并在证据或报告中复查。",
+      threshold: "证据或报告明确列出至少一个真实摩擦点，或说明未发现明显摩擦；不会把 OpenNori 自身通过状态当作外部采用证明。",
+      risk: "medium"
+    }
+  ],
+  "real-user-validation": [
+    {
+      measurement: "用户从目标产品或工具的正常用户入口进入已完成流程，并记录入口路径或可复查证据。",
+      threshold: "用户能在不阅读实现说明的情况下到达该流程；入口、前置条件和范围限制在 draft、status 或证据中清楚说明。",
+      risk: "medium"
+    },
+    {
+      measurement: "用户按核心操作执行一次完整路径并观察结果、反馈或报告。",
+      threshold: "结果符合用户期望；如果依赖外部数据、权限或环境，限制被清楚记录。",
+      risk: "medium"
+    },
+    {
+      measurement: "用户或评审者打开最终报告或证据来源，复查真实用户路径如何被检查以及未覆盖什么。",
+      threshold: "报告或证据说明检查入口、操作、结果、证据来源和限制；不会只说本地实现或测试已完成。",
+      risk: "medium"
+    }
+  ],
+  "failure-and-boundary-coverage": [
+    {
+      measurement: "用户或评审者触发一个已确认的重要失败场景，并查看用户可见提示、恢复方式或保留状态。",
+      threshold: "失败反馈与用户确认的预期一致；用户知道能否重试、如何恢复，以及哪些数据被保留。",
+      risk: "high"
+    },
+    {
+      measurement: "用户或评审者复查支持的输入、角色、状态和明确不在范围内的边界。",
+      threshold: "报告或界面说明支持范围和排除范围；用户不会把未覆盖边界误认为已完成。",
+      risk: "medium"
+    },
+    {
+      measurement: "用户或评审者打开失败/边界证据，而不是只看 happy path 通过摘要。",
+      threshold: "证据能复查失败触发方式、用户可见结果、边界说明和限制。",
+      risk: "medium"
+    }
+  ],
+  "architecture-adherence": [
+    {
+      measurement: "用户查看当前 goal 适用的 Architecture Baseline、profile 和状态。",
+      threshold: "报告或 status 清楚显示 baseline 是否有效、是否有 open challenge，以及 Product decision 与 Architecture decision 分开呈现。",
+      risk: "medium"
+    },
+    {
+      measurement: "用户查看新增或变更基础设施对应的 build-vs-buy 记录。",
+      threshold: "记录说明已检查项目现有依赖、标准库、官方 SDK 或成熟开源方案；自研理由可复查。",
+      risk: "medium"
+    },
+    {
+      measurement: "当实现证据与 baseline 冲突时，用户查看 Architecture Challenge。",
+      threshold: "challenge 说明冲突证据、建议改变、风险和需要用户确认的决策；agent 没有静默替换架构。",
+      risk: "medium"
+    }
+  ],
+  "next-loop-usability": [
+    {
+      measurement: "用户在完成报告、resume、status、next 或 context export 中查看下一轮 candidate_goals。",
+      threshold: "候选数量少且每个都有 goal、user_value、acceptance_directions、risks 和 draft metadata；用户能判断哪个值得继续。",
+      risk: "low"
+    },
+    {
+      measurement: "用户要求 agent 使用、组合或改写一个 candidate，并查看生成的新 draft Nori Contract。",
+      threshold: "新 draft 带有 acceptance basis 和 approval 缺口；用户确认前 candidate 不会被当成已批准 AC 或证据。",
+      risk: "medium"
+    },
+    {
+      measurement: "用户复查 candidate 和 draft 的文字呈现。",
+      threshold: "candidate 被标明不是 phase、task list 或 completion evidence；agent 不把它们当过程计划执行。",
+      risk: "medium"
+    }
+  ]
+};
+
 function sentenceHasSpecifics(text: unknown, terms: string[]): boolean {
   const value = String(text || "").toLowerCase();
   return terms.some((term) => value.includes(term.toLowerCase()));
@@ -724,6 +812,23 @@ export function briefFromBrainstorm(brainstorm: Brainstorm, candidateId: string)
   };
 }
 
+function nextCandidateDraftDetail(candidateId: string, index: number, total: number): Pick<AcceptanceCriterion, "measurement" | "threshold" | "risk"> {
+  const detail = NEXT_CANDIDATE_DRAFT_DETAILS[candidateId]?.[index];
+  if (detail) return detail;
+  if (index === total - 1) {
+    return {
+      measurement: "用户或评审者打开新 draft、状态或报告，复查本候选方向的结果、证据和限制。",
+      threshold: "输出说明用户入口、可观察结果、证据来源和未覆盖范围；不会把候选本身当作已批准 AC 或完成证据。",
+      risk: "medium"
+    };
+  }
+  return {
+    measurement: "用户或评审者按这个候选方向执行可观察操作，并查看结果、状态或报告。",
+    threshold: "用户能看到可判断的结果和限制；任何候选风险都需要在 approval 前确认、修订或接受。",
+    risk: "low"
+  };
+}
+
 export function briefFromNextGoalCandidate(
   candidate: NextGoalCandidate,
   {
@@ -761,9 +866,7 @@ export function briefFromNextGoalCandidate(
     criteria: directions.map((direction, index) => ({
       id: `AC-${index + 1}`,
       user_story: direction,
-      measurement: "用户或评审者按这条候选方向检查新的目标结果、状态或报告。",
-      threshold: "用户能直接判断这条方向是否满足；任何候选风险都需要在 approval 前确认、修订或接受。",
-      risk: index === directions.length - 1 ? "medium" : "low"
+      ...nextCandidateDraftDetail(candidateId, index, directions.length)
     }))
   };
 }

@@ -7,7 +7,7 @@
 ## Acceptance Basis
 
 Status: approved
-Summary: Clarify AC-Z-19 as a first-time user installation criterion.
+Summary: User added next-candidate draft quality criterion.
 
 ## Nori Profile
 
@@ -67,6 +67,7 @@ Summary: Clarify AC-Z-19 as a first-time user installation criterion.
 | AC-A-10 | architecture | 作为用户，我能在一个非 OpenNori 核心仓库里，按新的 Plugin-first 边界完整跑通自然语言目标、Product AC、Architecture Baseline、执行、证据、报告和完成判断。 | 选择一个非 OpenNori 核心仓库，使用当前 OpenNori 从目标到报告跑完；过程中只通过 Plugin Skills 和 .opennori 状态驱动 OpenNori 能力。 | 报告同时呈现产品完成状态、架构健康状态、Plugin package 能力、证据、未解决风险和是否需要用户确认；用户不需要记住 CLI 参数；doctor/check 不依赖项目内 Skill 资产副本。 | passing |
 | AC-Z-18 | productization | 作为用户，我第一次阅读 OpenNori 的 README、官网或 Plugin 说明时，理解 OpenNori 是一个 agent capability bundle：Codex Plugin 负责分发发现，packaged Skills 负责 agent 行为协议，opennori CLI 负责确定性状态读写，.opennori 负责项目状态；我不会被引导把 Plugin、Skills 或 CLI 当成三种可拆开的独立产品路径。 | 阅读 README Install/Quick Start、官网 Start 区域、Plugin longDescription、nori/nori-project-health Skills、protocol，并检查测试对主路径文案和 Skill 边界的断言。 | 用户主路径表达为安装和使用 OpenNori capability bundle；CLI 被说明为 Skills 使用的 deterministic state layer 和高级/CI 入口，而不是与 Plugin 并列的替代使用方式；文档和 Skill 明确不要继续使用半残模式，缺 Plugin/Skills/CLI/state 任一关键能力时应通过 doctor/health 引导补齐；测试防止重新出现 Choose one path、Try CLI once、Pin CLI to this project 这类拆分心智。 | passing |
 | AC-Z-19 | productization | 作为用户，我第一次安装 OpenNori 时，只需要运行一个明确的 OpenNori setup 入口，就能预览并确认安装完整 capability bundle：Codex Plugin、packaged Skills、全局 opennori CLI 和当前项目 .opennori 状态；安装后我可以用 opennori init 初始化任意项目，而不需要分别理解插件安装、npm 全局安装和项目状态参数。 | 在临时项目中运行 opennori setup 的 preview/confirm 路径，查看 README、官网 Start 区域、nori-project-health Skill 和 doctor 输出。 | setup 默认先展示将执行的 Codex Plugin 注册、packaged Skills 检查、全局 CLI 安装、项目初始化和 doctor 检查；未确认不写入；确认后使用官方 codex plugin CLI 注册 Plugin、使用 npm 全局安装 opennori、创建 .opennori 状态并跑 doctor；README/官网把 npx opennori setup 作为首次安装主路径，把手动 codex/npm 命令放在高级或恢复说明中。 | passing |
+| AC-Z-20 | productization | 作为用户，我让 agent 从已完成目标的 candidate_goals 继续生成下一份 Nori Contract 草案时，看到的不是空泛候选包装，而是能指导我怎么验收的用户动作、结果和通过标准。 | 运行 opennori draft --from-next-candidate 生成 opennori-adoption-dogfood、real-user-validation 或 next-loop-usability 草案，并阅读每条 AC 的 measurement 和 threshold。 | 草案仍保持 draft/ACCEPTANCE-BASIS 待用户批准；每条 AC 的 measurement/threshold 说明用户入口、操作、报告/证据复查或摩擦点判断方式；不再出现“按这条候选方向检查新的目标结果、状态或报告”这类空泛模板。 | passing |
 
 ## Rule
 

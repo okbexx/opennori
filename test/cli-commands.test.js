@@ -499,6 +499,11 @@ test("draft command module creates draft contracts from completed goal candidate
   assert.match(drafted.data.acceptance_basis.rule, /not approved acceptance criteria/);
   assert.equal(drafted.data.current_gap.id, "ACCEPTANCE-BASIS");
   assert.equal(drafted.data.criteria.every((criterion) => /^As a user/.test(criterion.user_story)), true);
+  const draftedText = drafted.data.criteria.map((criterion) => `${criterion.measurement}\n${criterion.threshold}`).join("\n");
+  assert.match(draftedText, /正常用户入口/);
+  assert.match(draftedText, /核心操作/);
+  assert.match(draftedText, /证据来源和限制/);
+  assert.doesNotMatch(draftedText, /按这条候选方向检查新的目标结果/);
 
   const notReady = await runDraftCommand([
     "--root", root,

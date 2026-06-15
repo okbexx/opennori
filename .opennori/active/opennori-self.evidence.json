@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "Clarify AC-Z-19 as a first-time user installation criterion.",
-      "approved_at": "2026-06-14T09:17:47.678Z"
+      "summary": "User added next-candidate draft quality criterion.",
+      "approved_at": "2026-06-15T12:41:53.760Z"
     },
     "criteria": [
       {
@@ -459,6 +459,15 @@
         "threshold": "setup 默认先展示将执行的 Codex Plugin 注册、packaged Skills 检查、全局 CLI 安装、项目初始化和 doctor 检查；未确认不写入；确认后使用官方 codex plugin CLI 注册 Plugin、使用 npm 全局安装 opennori、创建 .opennori 状态并跑 doctor；README/官网把 npx opennori setup 作为首次安装主路径，把手动 codex/npm 命令放在高级或恢复说明中。",
         "required": true,
         "risk": "medium"
+      },
+      {
+        "id": "AC-Z-20",
+        "layer": "productization",
+        "user_story": "作为用户，我让 agent 从已完成目标的 candidate_goals 继续生成下一份 Nori Contract 草案时，看到的不是空泛候选包装，而是能指导我怎么验收的用户动作、结果和通过标准。",
+        "measurement": "运行 opennori draft --from-next-candidate 生成 opennori-adoption-dogfood、real-user-validation 或 next-loop-usability 草案，并阅读每条 AC 的 measurement 和 threshold。",
+        "threshold": "草案仍保持 draft/ACCEPTANCE-BASIS 待用户批准；每条 AC 的 measurement/threshold 说明用户入口、操作、报告/证据复查或摩擦点判断方式；不再出现“按这条候选方向检查新的目标结果、状态或报告”这类空泛模板。",
+        "required": true,
+        "risk": "medium"
       }
     ]
   },
@@ -466,7 +475,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T12:28:26.739Z",
+    "updated_at": "2026-06-15T12:42:25.760Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -5545,6 +5554,62 @@
             "limitations": "This validates local source behavior; published users need the next npm/plugin release to receive the updated routing text.",
             "gate": "accepted",
             "created_at": "2026-06-15T08:02:36.952Z"
+          }
+        ]
+      },
+      "AC-Z-20": {
+        "status": "passing",
+        "confidence": "verified",
+        "required": true,
+        "risk": "medium",
+        "evidence": [
+          {
+            "kind": "next-candidate-draft-quality",
+            "basis": "tool-observation",
+            "summary": "draft --from-next-candidate now turns completed-goal candidates into reviewable draft AC with concrete measurement and threshold text. The generated opennori-adoption-dogfood draft keeps ACCEPTANCE-BASIS pending approval while telling the user how to judge non-OpenNori adoption friction, and tests prevent the old generic candidate-direction template from returning.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js -t 'evidence can drive the workflow'",
+                "command": "npx vitest run test/core.test.js -t 'evidence can drive the workflow'"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js -t 'draft command module creates draft contracts from completed goal candidates'",
+                "command": "npx vitest run test/cli-commands.test.js -t 'draft command module creates draft contracts from completed goal candidates'"
+              },
+              {
+                "type": "command",
+                "label": "node ./bin/opennori.js draft --from-next-candidate opennori-adoption-dogfood --source-goal opennori-self --root . --json",
+                "command": "node ./bin/opennori.js draft --from-next-candidate opennori-adoption-dogfood --source-goal opennori-self --root . --json"
+              },
+              {
+                "type": "artifact",
+                "label": "src/acceptance.ts",
+                "path": "src/acceptance.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/active/opennori-self-opennori-adoption-dogfood.acceptance.md",
+                "path": ".opennori/active/opennori-self-opennori-adoption-dogfood.acceptance.md"
+              }
+            ],
+            "reviewability": "Rerun the two targeted tests and the draft command, then inspect the generated draft criteria for concrete user action, report/evidence review, friction judgment, and ACCEPTANCE-BASIS pending approval.",
+            "limitations": "This proves candidate-to-draft quality for built-in next-loop candidates; the new dogfood draft is still unapproved and does not prove external project adoption by itself.",
+            "gate": "accepted",
+            "created_at": "2026-06-15T12:42:25.760Z"
           }
         ]
       }
