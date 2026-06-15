@@ -625,6 +625,8 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.match(text, /Recommended next action: This OpenNori goal is complete/);
   assert.match(text, /## Candidate Next Goals/);
   assert.match(text, /not approved acceptance criteria, implementation phases, or completion evidence/);
+  assert.match(text, /Draft command: opennori draft --from-next-candidate/);
+  assert.match(text, /Draft rule: This command creates a draft Nori Contract only/);
   assert.match(text, /opennori-adoption-dogfood/);
   assert.match(text, /Current status: complete/);
   assert.match(text, /AC-Z-5/);
@@ -644,6 +646,9 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.equal(resume.data.next_recommendation.candidate_goals[0].id, "opennori-adoption-dogfood");
   assert.equal(resume.data.next_recommendation.candidate_goals[0].acceptance_directions.length > 0, true);
   assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => candidate.goal && candidate.user_value), true);
+  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => candidate.draft_args?.includes("--from-next-candidate")), true);
+  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => /opennori draft --from-next-candidate/.test(candidate.draft_command)), true);
+  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => /draft Nori Contract only/.test(candidate.draft_rule)), true);
   assert.equal(resume.data.evidence_health.status, "clear");
   assert.equal(resume.next_actions.some((action) => /candidate_goals/.test(action)), true);
 
@@ -666,6 +671,7 @@ test("evidence can drive the workflow to complete and render a human report", ()
   ]);
   assert.equal(exported.data.next_recommendation.status, "ready-for-next-loop");
   assert.equal(exported.data.next_recommendation.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), true);
+  assert.equal(exported.data.next_recommendation.candidate_goals.some((candidate) => candidate.draft_command?.includes("--source-goal")), true);
 
   const nextDraft = run([
     "draft",

@@ -96,6 +96,29 @@ function goalLabel(goal: string): string {
   return `${normalized.slice(0, 93)}...`;
 }
 
+function quoteCommandValue(value: string): string {
+  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+function withDraftCommand(candidate: NextGoalCandidate, sourceGoalId: string): NextGoalCandidate {
+  const draftArgs = [
+    "draft",
+    "--from-next-candidate",
+    candidate.id,
+    "--source-goal",
+    sourceGoalId,
+    "--root",
+    ".",
+    "--json"
+  ];
+  return {
+    ...candidate,
+    draft_args: draftArgs,
+    draft_command: `opennori draft --from-next-candidate ${quoteCommandValue(candidate.id)} --source-goal ${quoteCommandValue(sourceGoalId)} --root . --json`,
+    draft_rule: "This command creates a draft Nori Contract only. The user must approve or revise the draft before implementation or evidence can complete the next loop."
+  };
+}
+
 function completedGoalCandidates(contract: NoriContract, architecture: ArchitectureState | undefined): NextGoalCandidate[] {
   const goal = String(contract.goal || "the completed goal").trim();
   const shortGoal = goalLabel(goal || "the completed goal");
@@ -170,8 +193,7 @@ function completedGoalCandidates(contract: NoriContract, architecture: Architect
       source: "completion-context"
     }
   ];
-  if (!isOpenNoriGoal) return generic;
-  return [
+  const candidates = !isOpenNoriGoal ? generic : [
     {
       id: "opennori-adoption-dogfood",
       goal: "Run OpenNori through a non-OpenNori project and capture the adoption friction.",
@@ -189,6 +211,7 @@ function completedGoalCandidates(contract: NoriContract, architecture: Architect
     },
     ...generic.slice(1)
   ];
+  return candidates.map((candidate) => withDraftCommand(candidate, contract.goal_id));
 }
 
 export function intervention(contract: NoriContract, ledger: EvidenceLedger): UserIntervention {
@@ -516,6 +539,12 @@ export function renderReport(contract: NoriContract, ledger: EvidenceLedger, { r
       lines.push("", `### ${candidate.id}`, "");
       lines.push(`Goal: ${candidate.goal}`);
       lines.push(`User value: ${candidate.user_value}`);
+      if (candidate.draft_command) {
+        lines.push(`Draft command: ${candidate.draft_command}`);
+      }
+      if (candidate.draft_rule) {
+        lines.push(`Draft rule: ${candidate.draft_rule}`);
+      }
       lines.push("Acceptance directions:");
       for (const direction of candidate.acceptance_directions) {
         lines.push(`- ${direction}`);

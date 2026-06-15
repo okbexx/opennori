@@ -21,7 +21,7 @@ When the root `nori` Skill or CLI JSON reports `data.agent_next.state: initializ
 6. If `acceptance_review` reports `criterion_id: ACCEPTANCE-BASIS`, show those discovery questions before asking for approval; the draft is still a generic starting point.
 7. If the user has approved or revised AC, persist that decision before implementation continues.
 8. After `opennori approve`, read the returned `data.agent_next`. If it says `architecture_needs_review`, hand off to `nori-architecture-brainstorm` before implementation or evidence work.
-9. If `agent_next.state` is `ready_for_next_loop` and the user asked to continue, select or refine one `next_recommendation.candidate_goals` item, then create a draft from it; do not ask the user to invent the next prompt from scratch.
+9. If `agent_next.state` is `ready_for_next_loop` and the user asked to continue, select or refine one `next_recommendation.candidate_goals` item, then create a draft from it; prefer the candidate's `draft_args` or `draft_command` when present instead of reconstructing CLI flags. Do not ask the user to invent the next prompt from scratch.
 
 Useful state commands:
 
@@ -42,7 +42,7 @@ Useful state commands:
 - User answers discovery questions -> summarize the answers into a JSON object keyed by discovery gap id, run `draft --from-discovery`, then show the concrete Product AC for approval.
 - "Approve these AC" -> write approval, read `agent_next`, and route to architecture review, evidence, or reporting from that returned state.
 - "Change AC-2 to mean..." -> update that criterion and treat older evidence for it as stale.
-- Complete goal with `candidate_goals` -> choose or refine the strongest human-facing candidate, run `draft --from-next-candidate`, then show the draft for user approval.
+- Complete goal with `candidate_goals` -> choose or refine the strongest human-facing candidate, use its `draft_args` or `draft_command` when present, then show the draft for user approval.
 - Generic `draft --goal` output with `acceptance_review` findings -> show the missing acceptance questions first; do not ask for blind approval.
 
 Discovery answer shape for agent-created temporary files:

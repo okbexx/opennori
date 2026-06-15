@@ -223,6 +223,9 @@ export type NextGoalCandidate = {
   acceptance_directions: string[];
   risks: string[];
   source: "completion-context" | string;
+  draft_args?: string[];
+  draft_command?: string;
+  draft_rule?: string;
 };
 
 export type AgentSkill =
