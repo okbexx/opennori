@@ -1259,6 +1259,28 @@ test("activity start refuses ambiguous active goals instead of attaching dashboa
   assert.equal(explicit.data.target.inferred, false);
 });
 
+test("dashboard snapshot follows explicit live activity target when multiple active goals exist", async () => {
+  const root = tempRoot();
+  writeActiveGoalWithId(root, "first-goal");
+  writeActiveGoalWithId(root, "second-goal");
+
+  const started = await runActivityStartCommand([
+    "--root", root,
+    "--goal", "second-goal",
+    "--skill", "nori-evidence",
+    "--state", "verifying",
+    "--summary", "Verifying the second goal gap.",
+    "--json"
+  ]);
+
+  assert.equal(started.ok, true);
+  const snapshot = refreshSnapshot(root);
+  assert.equal(snapshot.goal.id, "second-goal");
+  assert.equal(snapshot.agent.skill, "nori-evidence");
+  assert.equal(snapshot.agent.state, "verifying");
+  assert.equal(snapshot.current_gap.id, "AC-1");
+});
+
 test("dashboard command can start the local kernel without opening a browser", async () => {
   const root = tempRoot();
   const dashboard = await runDashboardCommand(["--root", root, "--port", "0", "--no-open", "--once", "--json"]);

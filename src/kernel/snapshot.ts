@@ -19,9 +19,13 @@ export function snapshotPath(root: string): string {
   return path.join(snapshotsDir(root), "current.json");
 }
 
-function chooseActivePair(root: string, goalId?: string) {
+function chooseActivePair(root: string, goalId?: string, activityGoalId?: string) {
   const pairs = findActivePairs(root);
   if (goalId) return pairs.find((pair) => pair.goalId === goalId) || null;
+  if (activityGoalId) {
+    const activityPair = pairs.find((pair) => pair.goalId === activityGoalId);
+    if (activityPair) return activityPair;
+  }
   if (pairs.length === 1) return pairs[0] || null;
   const activeWithGaps = pairs.filter((pair) => {
     try {
@@ -43,8 +47,8 @@ function latestEvidenceSummary(ledger: EvidenceLedger, gapId?: string): string {
 }
 
 export function buildSnapshot(root: string, options: { goalId?: string } = {}): NoriSnapshot {
-  const pair = chooseActivePair(root, options.goalId);
   const activity = readActivity(root);
+  const pair = chooseActivePair(root, options.goalId, activity?.expired ? undefined : activity?.goal_id);
   const event = latestEvent(root);
   if (!pair) {
     return {

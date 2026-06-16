@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   CircleDot,
+  Clock3,
   Eye,
   GitBranch,
   Info,
@@ -69,6 +70,21 @@ function relativeTime(value: string | undefined): string {
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.round(minutes / 60);
   return `${hours}h ago`;
+}
+
+function secondsRemaining(value: string | undefined): number | null {
+  if (!value) return null;
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) return null;
+  return Math.round((timestamp - Date.now()) / 1000);
+}
+
+function activityFreshness(snapshot: NoriSnapshot | null): { label: string; tone: Tone; stale: boolean } {
+  if (!snapshot?.agent.last_seen_at) return { label: "no activity", tone: "neutral", stale: true };
+  if (snapshot.agent.expired) return { label: "stale", tone: "warn", stale: true };
+  const remaining = secondsRemaining(snapshot.agent.expires_at);
+  if (remaining !== null && remaining < 0) return { label: "stale", tone: "warn", stale: true };
+  return { label: relativeTime(snapshot.agent.last_seen_at), tone: "good", stale: false };
 }
 
 function toneClasses(tone: Tone): string {
@@ -144,6 +160,82 @@ function MetricPanel({
       <strong className="block min-w-0 break-words text-xl font-semibold leading-tight text-[#f7f0e2] [overflow-wrap:anywhere]">{value}</strong>
       {detail ? <span className="mt-2 block min-w-0 break-words text-sm leading-snug text-[#bfc7ba] [overflow-wrap:anywhere]">{detail}</span> : null}
     </article>
+  );
+}
+
+function ActivityPresence({
+  snapshot,
+  agentActive,
+  agentState,
+  currentGap
+}: {
+  snapshot: NoriSnapshot | null;
+  agentActive: boolean;
+  agentState: ActivityState;
+  currentGap: string;
+}) {
+  const freshness = activityFreshness(snapshot);
+  const stale = freshness.stale || !agentActive;
+  const freshnessTone: Tone = stale ? snapshot?.agent.expired ? "warn" : "neutral" : freshness.tone;
+  const summary = shortText(snapshot?.agent.summary, 156, stale ? "No live OpenNori agent activity." : "OpenNori agent is active.");
+  const skill = shortText(snapshot?.agent.skill, 34, "no Skill");
+  const agentName = shortText(snapshot?.agent.name, 28, "Agent");
+  const state = agentLabel(agentState);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      className={`relative overflow-hidden rounded-lg border p-4 ${stale ? "border-[#f5f0e6]/12 bg-[#f5f0e6]/6" : "border-[#57c7ff]/34 bg-[#122032]/70 shadow-[0_0_42px_rgba(87,199,255,0.13)]"}`}
+    >
+      {!stale ? (
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 top-0 h-[2px] w-1/2 bg-gradient-to-r from-transparent via-[#57c7ff]/80 to-transparent"
+          animate={{ x: ["-110%", "220%"] }}
+          transition={{ duration: 2.8, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        />
+      ) : null}
+      <div className="relative z-10 grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+        <div className={`grid h-16 w-16 place-items-center rounded-lg border ${stale ? "border-[#f5f0e6]/12 bg-black/20 text-[#aeb8aa]" : "border-[#57c7ff]/40 bg-[#57c7ff]/12 text-[#d5f2ff]"}`}>
+          <motion.div
+            animate={!stale ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+            transition={{ duration: 1.6, repeat: !stale ? Number.POSITIVE_INFINITY : 0, ease: "easeInOut" }}
+          >
+            <Activity size={28} />
+          </motion.div>
+        </div>
+
+        <div className="min-w-0">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <StatusPill tone={stale ? "neutral" : "good"}>
+              <span className={`h-2.5 w-2.5 rounded-full ${stale ? "bg-[#6f776b]" : "animate-pulse bg-[#74d58a]"}`} />
+              {agentName} / {state}
+            </StatusPill>
+            <StatusPill tone="accent">
+              <Activity size={15} />
+              {skill}
+            </StatusPill>
+            <StatusPill tone={freshnessTone}>
+              <Clock3 size={15} />
+              {freshness.label}
+            </StatusPill>
+          </div>
+          <strong className="block min-w-0 break-words text-lg font-semibold leading-snug text-[#f7f0e2] [overflow-wrap:anywhere]">
+            {summary}
+          </strong>
+          <span className="mt-2 block min-w-0 break-words text-sm leading-snug text-[#bfc7ba] [overflow-wrap:anywhere]">
+            Gap: {currentGap}
+          </span>
+        </div>
+
+        <div className="rounded-md border border-[#f5f0e6]/12 bg-black/22 px-3 py-2 text-left sm:text-right">
+          <span className="block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">activity</span>
+          <strong className="block text-sm font-semibold text-[#f7f0e2]">{stale ? "idle" : "live"}</strong>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -292,21 +384,9 @@ export default function App() {
           </header>
 
           <section className="grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
-            <section className="grid min-h-[520px] min-w-0 grid-rows-[auto_1fr] gap-4 rounded-lg border border-[#f5f0e6]/14 bg-[#11130f]/72 p-4 shadow-2xl backdrop-blur sm:p-5">
+            <section className="grid min-h-[520px] min-w-0 grid-rows-[auto_auto_1fr] gap-4 rounded-lg border border-[#f5f0e6]/14 bg-[#11130f]/72 p-4 shadow-2xl backdrop-blur sm:p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <div className="mb-3 flex flex-wrap items-center gap-2">
-                    <StatusPill tone={agentActive ? "good" : "neutral"}>
-                      <span className={`h-2.5 w-2.5 rounded-full ${agentActive ? "animate-pulse bg-[#74d58a]" : "bg-[#6f776b]"}`} />
-                      {shortText(snapshot?.agent.name, 28, "Agent")} / {agentLabel(agentState)}
-                    </StatusPill>
-                    {snapshot?.agent.skill ? (
-                      <StatusPill tone="accent">
-                        <Activity size={15} />
-                        {snapshot.agent.skill}
-                      </StatusPill>
-                    ) : null}
-                  </div>
                   <AnimatePresence mode="wait">
                     <motion.h2
                       key={goalLabel}
@@ -321,10 +401,12 @@ export default function App() {
                   </AnimatePresence>
                 </div>
                 <div className="rounded-lg border border-[#f5f0e6]/12 bg-black/20 px-3 py-2 text-right">
-                  <span className="block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">last seen</span>
-                  <strong className="block text-sm font-semibold text-[#f7f0e2]">{relativeTime(snapshot?.agent.last_seen_at || snapshot?.generated_at)}</strong>
+                  <span className="block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">decision</span>
+                  <strong className="block text-sm font-semibold text-[#f7f0e2]">{decisionLabel(snapshot)}</strong>
                 </div>
               </div>
+
+              <ActivityPresence snapshot={snapshot} agentActive={agentActive} agentState={agentState} currentGap={gapLabel} />
 
               <AcceptanceLoop
                 loop={snapshot?.loop}
