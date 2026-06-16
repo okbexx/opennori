@@ -19,12 +19,14 @@ Nori Profile answers "how should the agent work" and "what constraints affect co
    - `avoid`: violation blocks completion unless waived.
 4. Record install policy when the user mentions whether new dependencies or Skills may be installed.
 5. Record compliance evidence before confident completion.
+6. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live profile activity while recording or checking preferences. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-capability-profile --state working --summary "..." --json`.
 
 Useful state commands:
 
 - `opennori profile show --root <repo> --json`
 - `opennori profile add --root <repo> --type <skill|stack|constraint> --name "<name>" --strength <must|prefer|avoid> --purpose "<why>" --install-policy <existing_only|ask_before_install|allowed> --json`
 - `opennori profile evidence --root <repo> --item <item-id> --result <satisfied|violated|waived> --summary "<evidence>" --json`
+- `opennori activity start|heartbeat|finish --root <repo> --skill nori-capability-profile --state working --summary "..." --json` (optional dashboard signal)
 
 ## Natural-Language Mapping
 
@@ -38,6 +40,8 @@ Useful state commands:
 ## State Writes
 
 May write Nori Profile items and profile compliance evidence. Do not write Product AC, evidence for acceptance criteria, Architecture Baseline, or reports directly.
+
+May write live dashboard activity for profile work. Activity is not profile compliance evidence and is not Product AC evidence.
 
 ## Handoffs
 
@@ -63,3 +67,4 @@ Evidence needed: ...
 - Do not report confident completion with unsatisfied `must`, violated `avoid`, or unaccepted `prefer` review risk.
 - Do not install or suggest installing tools when the profile says `existing_only` or `ask_before_install` without user approval.
 - Do not treat availability of a Skill as evidence that the product behavior is complete.
+- Do not treat dashboard activity, events, or snapshots as proof that a profile item was satisfied.

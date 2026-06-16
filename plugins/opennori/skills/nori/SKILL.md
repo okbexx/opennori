@@ -19,7 +19,7 @@ OpenNori is one capability bundle:
 
 Do not present those pieces as optional standalone product paths.
 
-CLI JSON may include `data.agent_next`. Treat it as the deterministic routing surface from the state layer to Skills. Prefer `agent_next.state`, `agent_next.recommended_skill`, `agent_next.instruction`, `agent_next.user_visible_next`, and `agent_next.candidate_goals` over guessing from files or command prose.
+CLI JSON may include `data.agent_next`. Treat it as the deterministic routing surface from the state layer to Skills. Prefer `agent_next.state`, `agent_next.recommended_skill`, `agent_next.instruction`, `agent_next.user_visible_next`, `agent_next.dashboard_activity`, and `agent_next.candidate_goals` over guessing from files or command prose.
 
 `.opennori/agent-guide.md` is only a project-local supplementary guide. Do not depend on it for OpenNori discovery, and do not assume a fresh project has an Architecture Baseline or an active Nori Contract just because `.opennori/` directories exist.
 
@@ -59,10 +59,7 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 
 This root Skill should avoid direct writes except for safe readiness checks and setup/init previews. Let child Skills mutate `.opennori/active`, `.opennori/architecture`, `.opennori/reports`, `.opennori/brainstorms`, `.opennori/completed`, `.opennori/blocked`, or `.opennori/manifest.json`.
 
-If a dashboard is open and the agent is materially working on an OpenNori loop,
-the active child Skill may publish activity with `opennori activity
-start|heartbeat|finish`. This is only a live signal for the user; it must not be
-used as Product AC evidence or completion proof.
+If a dashboard is open, the user asked to watch progress, or `agent_next.dashboard_activity` is present, the active child Skill may publish `opennori activity start|heartbeat|finish`. Prefer the command templates from `agent_next.dashboard_activity`; otherwise use the low-parameter form with `--skill`, `--state`, and `--summary` and let the CLI infer the unique current goal/gap. If multiple active goals are ambiguous, stop and ask which Nori Contract to observe instead of guessing. Activity is only a live signal for the user; it must not be used as Product AC evidence or completion proof.
 
 ## Handoffs
 

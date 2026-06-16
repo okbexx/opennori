@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User approved dashboard web experience as the next OpenNori self acceptance gap.",
-      "approved_at": "2026-06-16T06:20:22.432Z"
+      "summary": "User approved dashboard activity workflow as the next OpenNori self acceptance gap.",
+      "approved_at": "2026-06-16T07:27:14.701Z"
     },
     "criteria": [
       {
@@ -477,6 +477,15 @@
         "threshold": "页面以视觉化 acceptance loop 和少量状态面板展示 agent activity、goal、current gap、need user、architecture decision、completion decision 和 latest event；有活动动效但不呈现聊天记录、过程任务列表、证据账本或完成权威入口；状态变化来自 /api/snapshot 与 /api/events。",
         "required": true,
         "risk": "high"
+      },
+      {
+        "id": "AC-D-2",
+        "layer": "acceptance",
+        "user_story": "作为用户，我打开 OpenNori dashboard 观察 agent 工作时，agent 使用 OpenNori Skill 推进当前验收缺口后，我能看到 live activity 显示 agent、Skill、目标、当前 gap、状态和摘要；如果有多个 active goals，agent 不会把活动误绑定到错误目标。",
+        "measurement": "在包含单个和多个 active goals 的项目中运行 activity start/heartbeat/finish，并查看 activity show、dashboard snapshot 和 agent_next.dashboard_activity。",
+        "threshold": "Skill 可从 agent_next.dashboard_activity 或低参数 activity 命令发布 start/heartbeat/finish；唯一当前 gap 可自动绑定 goal/gap，多目标歧义返回明确恢复动作；activity 只进入 .opennori/activity/events/snapshots，不改变 evidence/report completion。",
+        "required": true,
+        "risk": "medium"
       }
     ]
   },
@@ -484,7 +493,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-16T06:46:56.158Z",
+    "updated_at": "2026-06-16T07:58:26.468Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -5675,6 +5684,77 @@
             "limitations": "Dashboard is a read-only observation surface over /api/snapshot and /api/events; it does not replace status/report, evidence ledger, or completion authority. The visual check covered desktop 1440x980 and mobile 390x860.",
             "gate": "accepted",
             "created_at": "2026-06-16T06:46:56.158Z"
+          }
+        ]
+      },
+      "AC-D-2": {
+        "status": "passing",
+        "confidence": "verified",
+        "required": true,
+        "risk": "medium",
+        "evidence": [
+          {
+            "kind": "dashboard-activity-workflow",
+            "basis": "tool-observation",
+            "summary": "OpenNori now gives Skills a dashboard_activity routing surface, lets activity start/heartbeat/finish infer the unique current goal/gap, refuses ambiguous multi-goal activity, and keeps activity out of evidence/completion state.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "command",
+                "label": "node ./bin/opennori.js status --root . --goal opennori-self --json",
+                "command": "node ./bin/opennori.js status --root . --goal opennori-self --json"
+              },
+              {
+                "type": "command",
+                "label": "tmp=$(mktemp -d /tmp/opennori-activity-smoke-XXXXXX); node ./bin/opennori.js draft --root \"$tmp\" --goal \"Ship dashboard activity\" --json >/dev/null; node ./bin/opennori.js approve --root \"$tmp\" --summary \"Approved\" --json >/dev/null; node ./bin/opennori.js activity start --root \"$tmp\" --skill nori-evidence --state verifying --summary \"Verifying the current gap\" --json",
+                "command": "tmp=$(mktemp -d /tmp/opennori-activity-smoke-XXXXXX); node ./bin/opennori.js draft --root \"$tmp\" --goal \"Ship dashboard activity\" --json >/dev/null; node ./bin/opennori.js approve --root \"$tmp\" --summary \"Approved\" --json >/dev/null; node ./bin/opennori.js activity start --root \"$tmp\" --skill nori-evidence --state verifying --summary \"Verifying the current gap\" --json"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/kernel/activity.ts",
+                "path": "src/kernel/activity.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/activity.ts",
+                "path": "src/cli/commands/activity.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/kernel/snapshot.ts",
+                "path": "src/kernel/snapshot.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/protocol.md",
+                "path": ".opennori/protocol.md"
+              }
+            ],
+            "reviewability": "Rerun npm run check, inspect status agent_next.dashboard_activity for an explicit goal, run the temporary activity smoke to see inferred goal/gap in snapshot, and inspect tests that prove ambiguous multi-goal activity fails closed without writing evidence.",
+            "limitations": "This verifies the local CLI/Skill protocol and dashboard projection behavior. It does not prove a human watched a real long-running external project through the dashboard; that remains a broader dogfood scenario.",
+            "gate": "accepted",
+            "created_at": "2026-06-16T07:58:26.468Z"
           }
         ]
       }

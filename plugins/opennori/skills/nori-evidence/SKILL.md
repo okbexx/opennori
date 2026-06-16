@@ -12,12 +12,12 @@ Evidence should let a human understand what was checked, where to inspect it, wh
 ## Start Here
 
 1. Read resume/status to identify the current criterion and latest evidence.
-2. If a dashboard is open or the user asked to watch progress, publish activity such as `opennori activity start --root <repo> --skill nori-evidence --state verifying --summary "..." --json`.
+2. If a dashboard is open, the user asked to watch progress, or `agent_next.dashboard_activity` is present, publish live activity. Prefer the returned activity command template; otherwise use `opennori activity start --root <repo> --skill nori-evidence --state verifying --summary "..." --json` and let the CLI infer the unique current goal/gap.
 3. If existing evidence no longer proves the current AC, prune it before relying on status/report/context.
 4. Choose a verification method that fits the AC and risk: command output, test, browser check, screenshot, diff, report, artifact, URL, log, human confirmation, waiver, or another reviewable signal.
 5. Record basis, sources, reviewability, confidence, and limitations.
 6. Read the returned `data.agent_next` after evidence writes and route to the recommended Skill. Do not guess whether to continue, report completion, or request user review.
-7. Finish live activity with `opennori activity finish --root <repo> --skill nori-evidence --summary "..." --json` when the evidence turn is complete.
+7. Heartbeat during longer verification, and finish live activity with `opennori activity finish --root <repo> --skill nori-evidence --summary "..." --json` when the evidence turn is complete.
 
 Useful state commands:
 
@@ -25,7 +25,7 @@ Useful state commands:
 - Add sources with `--source-command "<command>"`, `--source-path "<path>"`, `--source-url "<url>"`, or `--source "<label or JSON>"`.
 - When Product AC evidence was produced under a confirmed Architecture Baseline, attach the architecture context with `--architecture-apply "<apply-id-or-path>"`. This is context, not Product AC proof by itself.
 - `opennori evidence prune --root <repo> --criterion <id> --reason "..." --json`
-- `opennori activity start|heartbeat|finish --root <repo> --skill nori-evidence --state verifying --summary "..." --json`
+- `opennori activity start|heartbeat|finish --root <repo> --skill nori-evidence --state verifying --summary "..." --json` (optional dashboard signal; goal/gap can be inferred when unique)
 
 ## Natural-Language Mapping
 
@@ -52,7 +52,7 @@ Useful state commands:
 
 May write or prune evidence records for active criteria. Do not rewrite Product AC, Architecture Baseline, Nori Profile, or reports directly.
 
-May write live activity state when a dashboard is being observed. Activity is not evidence and must not be cited as proof of Product AC.
+May write live activity state when a dashboard is being observed. Prefer `agent_next.dashboard_activity` command templates when present. Activity is not evidence and must not be cited as proof of Product AC.
 
 ## Handoffs
 

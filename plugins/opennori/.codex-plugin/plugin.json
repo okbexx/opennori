@@ -33,7 +33,8 @@
       "Set up OpenNori for this project.",
       "Use OpenNori to turn this goal into acceptance criteria.",
       "Continue the current OpenNori goal.",
-      "Is this OpenNori goal complete yet?"
+      "Is this OpenNori goal complete yet?",
+      "Open the OpenNori dashboard and show live agent activity."
     ],
     "brandColor": "#19A974"
   }

@@ -16,10 +16,15 @@ A challenge is a review artifact. It does not authorize implementation drift by 
 3. Decide whether the conflict is real architecture drift or just implementation detail.
 4. Record a challenge with summary, evidence, recommendation, risk, and whether user input is needed.
 5. Stop architecture-changing work until the user confirms, revises, or waives.
+6. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live activity while preparing the challenge. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-challenge --state thinking --summary "..." --json`.
 
 Useful state command:
 
 `opennori architecture challenge --root <repo> --summary "<conflict>" --evidence "<project evidence>" --recommendation "<suggested baseline change>" --json`
+
+Optional dashboard signal:
+
+`opennori activity start|heartbeat|finish --root <repo> --skill nori-architecture-challenge --state thinking --summary "..." --json`
 
 ## Natural-Language Mapping
 
@@ -31,6 +36,8 @@ Useful state command:
 ## State Writes
 
 May write `.opennori/architecture/challenges/*` artifacts. Do not rewrite the baseline, Product AC, evidence, or profile directly.
+
+May write live dashboard activity for challenge preparation. Activity is not challenge evidence and does not authorize architecture drift.
 
 ## Handoffs
 
@@ -57,3 +64,4 @@ Need user: yes/no
 - Do not create task lists or phases.
 - Do not challenge just because another approach is personally preferred.
 - Do not hide architecture risk inside implementation notes.
+- Do not treat dashboard activity, events, or snapshots as proof that a challenge is resolved.

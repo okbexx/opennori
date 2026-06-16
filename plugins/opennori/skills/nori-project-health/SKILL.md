@@ -26,6 +26,7 @@ A fresh `opennori init` normally creates empty `.opennori/active`, `.opennori/re
 5. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no active contract, then hand off to `nori-acceptance`.
 6. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, or deletes state.
 7. After upgrade or repair, run `opennori check --root <repo> --json` and route soft review findings to the relevant Skill.
+8. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live health activity while diagnosing or recovering bundle readiness. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-project-health --state working --summary "..." --json`.
 
 Useful state commands:
 
@@ -42,6 +43,7 @@ Useful state commands:
 - `opennori uninstall --root <repo> --include-state --confirm --json`
 - `opennori doctor --root <repo> --json`
 - `opennori check --root <repo> --json`
+- `opennori activity start|heartbeat|finish --root <repo> --skill nori-project-health --state working --summary "..." --json` (optional dashboard signal)
 
 ## Natural-Language Mapping
 
@@ -58,6 +60,8 @@ Useful state commands:
 ## State Writes
 
 May write manifest, protocol, agent guide, lifecycle-managed `.opennori/` assets, and uninstall removals after confirmation. It may not silently rewrite active Product AC, evidence, profile, architecture decisions, or reports as a side effect of health checks.
+
+May write live dashboard activity for health diagnosis or recovery. Activity is not lifecycle confirmation, not recovery evidence, and not Product AC evidence.
 
 ## Handoffs
 
@@ -111,3 +115,4 @@ Confirm initialization?
 - Do not treat soft review findings as hard protocol rejection.
 - Do not reopen Product AC just because architecture, build-vs-buy, evidence health, or profile review needs user attention.
 - Do not use health commands as a substitute for acceptance evidence.
+- Do not treat dashboard activity, events, or snapshots as proof that the bundle is healthy.

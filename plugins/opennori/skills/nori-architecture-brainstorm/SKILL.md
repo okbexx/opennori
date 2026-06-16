@@ -17,6 +17,7 @@ The baseline answers "what architecture should guide this work", not "what steps
 4. List available architecture profiles and select the best fit.
 5. Preview the baseline and ask the user to confirm before implementation.
 6. After confirmed baseline write, read the returned `data.agent_next` and route to the recommended next Skill.
+7. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish architecture activity while reviewing or confirming the baseline. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-brainstorm --state thinking --summary "..." --json`.
 
 Useful state commands:
 
@@ -25,6 +26,7 @@ Useful state commands:
 - `opennori architecture baseline --root <repo> --goal "<goal>" --profile <profile-id> --json`
 - `opennori architecture baseline --root <repo> --goal "<goal>" --goal-id <goal-id> --profile <profile-id> --confirm --json`
 - `opennori architecture show --root <repo> --json`
+- `opennori activity start|heartbeat|finish --root <repo> --skill nori-architecture-brainstorm --state thinking --summary "..." --json` (optional dashboard signal)
 
 ## Natural-Language Mapping
 
@@ -37,6 +39,8 @@ Useful state commands:
 ## State Writes
 
 May write project architecture profiles and confirmed Architecture Baseline files under `.opennori/architecture/`. Do not write Product AC, acceptance evidence, or implementation tasks.
+
+May write live dashboard activity for baseline review. Activity is not baseline confirmation, not build-vs-buy evidence, and not Product AC evidence.
 
 ## Handoffs
 
@@ -66,3 +70,4 @@ Needs confirmation: yes
 - Do not silently replace a confirmed baseline; use an Architecture Challenge.
 - Do not self-build infrastructure before build-vs-buy evidence exists.
 - Do not copy process-centered workflow models into OpenNori architecture decisions.
+- Do not treat dashboard activity, events, or snapshots as proof that a baseline is valid or confirmed.

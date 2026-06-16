@@ -311,6 +311,13 @@ export type NoriActivity = {
   expired?: boolean;
 };
 
+export type NoriActivityTarget = {
+  goal_id: string;
+  gap_id: string | null;
+  gap_summary?: string;
+  inferred: boolean;
+};
+
 export type NoriSnapshot = {
   schema_version: "opennori/snapshot-v1" | (string & {});
   generated_at: string;
@@ -408,6 +415,17 @@ export type AgentNext = {
   needs_user?: boolean;
   safe_next_command?: string;
   commands?: string[];
+  dashboard_activity?: {
+    recommended: boolean;
+    target: {
+      goal_id?: string;
+      gap_id?: string | null;
+    };
+    start_command?: string;
+    heartbeat_command?: string;
+    finish_command?: string;
+    note: string;
+  };
   candidate_goals?: NextGoalCandidate[];
 };
 

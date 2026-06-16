@@ -24,7 +24,7 @@ Do not implement project-local Skill copying, Skill Pack install/sync, or `.agen
 
 For agent routing, prefer CLI JSON `data.agent_next` over project-local prose files. `.opennori/agent-guide.md` may summarize project state, but it is not OpenNori's discovery mechanism and must not carry critical Skill behavior.
 
-`opennori dashboard` is a local visual observation surface over the acceptance loop. It must not become an agent runtime, process log, chat log, or completion authority. `opennori activity` only publishes live agent state for the dashboard; it is not Product AC evidence.
+`opennori dashboard` is a local visual observation surface over the acceptance loop. It must not become an agent runtime, process log, chat log, or completion authority. `opennori activity` only publishes live agent state for the dashboard; it is not Product AC evidence. Skills should prefer `data.agent_next.dashboard_activity` command templates when present, otherwise use low-parameter activity commands and let the CLI infer the unique current goal/gap. If multiple active goals are ambiguous, ask which goal to observe instead of guessing.
 
 Before implementing a non-trivial change, read:
 

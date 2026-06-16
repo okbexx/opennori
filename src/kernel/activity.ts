@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { nowIso, readJson, writeJson } from "../core/shared.ts";
-import type { NoriActivity, NoriActivityInput, NoriActivityState } from "../types.ts";
+import { currentGap } from "../core/evidence.ts";
+import { findActivePairs, nowIso, readJson, writeJson } from "../core/shared.ts";
+import type { NoriActivity, NoriActivityInput, NoriActivityState, NoriActivityTarget, NoriEvidencePayload } from "../types.ts";
 import { appendEvent } from "./events.ts";
 
 export const ACTIVITY_SCHEMA_VERSION = "opennori/activity-v1";
@@ -47,6 +48,83 @@ function normalizeActivity(input: NoriActivityInput, previous?: NoriActivity): N
   };
 }
 
+type TargetCandidate = NoriActivityTarget & {
+  active: boolean;
+};
+
+function readTargetCandidate(pair: ReturnType<typeof findActivePairs>[number]): TargetCandidate | null {
+  try {
+    const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+    const gap = currentGap(payload.contract, payload.ledger);
+    return {
+      goal_id: payload.contract.goal_id || pair.goalId,
+      gap_id: gap?.id ?? null,
+      gap_summary: gap?.user_story,
+      active: payload.ledger.status !== "complete" && gap !== null,
+      inferred: true
+    };
+  } catch {
+    return null;
+  }
+}
+
+function ambiguousTargetMessage(root: string, candidates: NoriActivityTarget[]): string {
+  const choices = candidates
+    .map((candidate) => candidate.gap_id ? `${candidate.goal_id}:${candidate.gap_id}` : candidate.goal_id)
+    .join(", ");
+  return `Multiple active OpenNori goals have current gaps under ${root}: ${choices}. Pass --goal <goal-id> so dashboard activity is not attached to the wrong goal.`;
+}
+
+export function inferActivityTarget(root: string, input: Pick<NoriActivityInput, "goal_id" | "gap_id"> = {}): NoriActivityTarget | null {
+  const pairs = findActivePairs(root);
+  if (input.goal_id) {
+    const pair = pairs.find((item) => item.goalId === input.goal_id);
+    if (!pair) {
+      throw new Error(`No active OpenNori goal found for activity: ${input.goal_id}`);
+    }
+    const candidate = readTargetCandidate(pair);
+    if (!candidate) {
+      throw new Error(`OpenNori activity target is not recoverable: ${input.goal_id}`);
+    }
+    return {
+      ...candidate,
+      gap_id: input.gap_id || candidate.gap_id,
+      inferred: false
+    };
+  }
+
+  const candidates = pairs
+    .map((pair) => readTargetCandidate(pair))
+    .filter((candidate): candidate is TargetCandidate => candidate !== null);
+  if (candidates.length === 0) return null;
+
+  const activeCandidates = candidates.filter((candidate) => candidate.active);
+  if (activeCandidates.length === 1) return activeCandidates[0] || null;
+  if (candidates.length === 1) return candidates[0] || null;
+  if (activeCandidates.length > 1) {
+    throw new Error(ambiguousTargetMessage(root, activeCandidates));
+  }
+  throw new Error(ambiguousTargetMessage(root, candidates));
+}
+
+function resolveInputTarget(root: string, input: NoriActivityInput, previous?: NoriActivity): NoriActivityInput {
+  if (input.goal_id && input.gap_id) return input;
+  if (!input.goal_id && previous?.goal_id) {
+    return {
+      ...input,
+      goal_id: previous.goal_id,
+      gap_id: input.gap_id || previous.gap_id
+    };
+  }
+  const target = inferActivityTarget(root, input);
+  if (!target) return input;
+  return {
+    ...input,
+    goal_id: input.goal_id || target.goal_id,
+    gap_id: input.gap_id || target.gap_id || undefined
+  };
+}
+
 export function readActivity(root: string): NoriActivity | null {
   const filePath = activityPath(root);
   if (!fs.existsSync(filePath)) return null;
@@ -68,7 +146,7 @@ export function readActivity(root: string): NoriActivity | null {
 
 export function writeActivity(root: string, input: NoriActivityInput): NoriActivity {
   const previous = readActivity(root) || undefined;
-  const activity = normalizeActivity(input, previous);
+  const activity = normalizeActivity(resolveInputTarget(root, input, previous), previous);
   fs.mkdirSync(activityDir(root), { recursive: true });
   writeJson(activityPath(root), activity);
   appendEvent(root, {
@@ -87,12 +165,12 @@ export function writeActivity(root: string, input: NoriActivityInput): NoriActiv
 
 export function finishActivity(root: string, input: Partial<NoriActivityInput> = {}): NoriActivity {
   const previous = readActivity(root) || undefined;
-  const activity = normalizeActivity({
+  const activity = normalizeActivity(resolveInputTarget(root, {
     ...input,
     state: input.state || "idle",
     summary: input.summary || "OpenNori agent activity finished.",
     ttl_ms: DEFAULT_TTL_MS
-  }, previous);
+  }, previous), previous);
   writeJson(activityPath(root), activity);
   appendEvent(root, {
     type: "activity.finished",

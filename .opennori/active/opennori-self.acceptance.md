@@ -7,7 +7,7 @@
 ## Acceptance Basis
 
 Status: approved
-Summary: User approved dashboard web experience as the next OpenNori self acceptance gap.
+Summary: User approved dashboard activity workflow as the next OpenNori self acceptance gap.
 
 ## Nori Profile
 
@@ -69,6 +69,7 @@ Summary: User approved dashboard web experience as the next OpenNori self accept
 | AC-Z-19 | productization | 作为用户，我第一次安装 OpenNori 时，只需要运行一个明确的 OpenNori setup 入口，就能预览并确认安装完整 capability bundle：Codex Plugin、packaged Skills、全局 opennori CLI 和当前项目 .opennori 状态；安装后我可以用 opennori init 初始化任意项目，而不需要分别理解插件安装、npm 全局安装和项目状态参数。 | 在临时项目中运行 opennori setup 的 preview/confirm 路径，查看 README、官网 Start 区域、nori-project-health Skill 和 doctor 输出。 | setup 默认先展示将执行的 Codex Plugin 注册、packaged Skills 检查、全局 CLI 安装、项目初始化和 doctor 检查；未确认不写入；确认后使用官方 codex plugin CLI 注册 Plugin、使用 npm 全局安装 opennori、创建 .opennori 状态并跑 doctor；README/官网把 npx opennori setup 作为首次安装主路径，把手动 codex/npm 命令放在高级或恢复说明中。 | passing |
 | AC-Z-20 | productization | 作为用户，我让 agent 从已完成目标的 candidate_goals 继续生成下一份 Nori Contract 草案时，看到的不是空泛候选包装，而是能指导我怎么验收的用户动作、结果和通过标准。 | 运行 opennori draft --from-next-candidate 生成 opennori-adoption-dogfood、real-user-validation 或 next-loop-usability 草案，并阅读每条 AC 的 measurement 和 threshold。 | 草案仍保持 draft/ACCEPTANCE-BASIS 待用户批准；每条 AC 的 measurement/threshold 说明用户入口、操作、报告/证据复查或摩擦点判断方式；不再出现“按这条候选方向检查新的目标结果、状态或报告”这类空泛模板。 | passing |
 | AC-D-1 | acceptance | 作为用户，我运行 opennori dashboard --root . 并打开本地页面后，能不用阅读 CLI 日志就看出当前由哪个 agent/Skill 在推进、目标是什么、当前验收缺口是什么、是否需要我介入、Architecture Baseline 是否有效，以及当前完成判断。 | 启动 dashboard，触发或模拟 agent activity，分别查看桌面与窄屏页面的首屏状态。 | 页面以视觉化 acceptance loop 和少量状态面板展示 agent activity、goal、current gap、need user、architecture decision、completion decision 和 latest event；有活动动效但不呈现聊天记录、过程任务列表、证据账本或完成权威入口；状态变化来自 /api/snapshot 与 /api/events。 | passing |
+| AC-D-2 | acceptance | 作为用户，我打开 OpenNori dashboard 观察 agent 工作时，agent 使用 OpenNori Skill 推进当前验收缺口后，我能看到 live activity 显示 agent、Skill、目标、当前 gap、状态和摘要；如果有多个 active goals，agent 不会把活动误绑定到错误目标。 | 在包含单个和多个 active goals 的项目中运行 activity start/heartbeat/finish，并查看 activity show、dashboard snapshot 和 agent_next.dashboard_activity。 | Skill 可从 agent_next.dashboard_activity 或低参数 activity 命令发布 start/heartbeat/finish；唯一当前 gap 可自动绑定 goal/gap，多目标歧义返回明确恢复动作；activity 只进入 .opennori/activity/events/snapshots，不改变 evidence/report completion。 | passing |
 
 ## Rule
 

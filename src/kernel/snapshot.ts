@@ -23,7 +23,16 @@ function chooseActivePair(root: string, goalId?: string) {
   const pairs = findActivePairs(root);
   if (goalId) return pairs.find((pair) => pair.goalId === goalId) || null;
   if (pairs.length === 1) return pairs[0] || null;
-  return pairs[0] || null;
+  const activeWithGaps = pairs.filter((pair) => {
+    try {
+      const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+      return payload.ledger.status !== "complete" && currentGap(payload.contract, payload.ledger) !== null;
+    } catch {
+      return false;
+    }
+  });
+  if (activeWithGaps.length === 1) return activeWithGaps[0] || null;
+  return activeWithGaps[0] || pairs[0] || null;
 }
 
 function latestEvidenceSummary(ledger: EvidenceLedger, gapId?: string): string {

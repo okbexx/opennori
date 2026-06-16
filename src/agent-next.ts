@@ -23,6 +23,41 @@ type AgentNextInput = {
   candidateGoals?: NextRecommendation["candidate_goals"];
 };
 
+function shellArg(value: string): string {
+  return /^[A-Za-z0-9._:/=@+-]+$/.test(value) ? value : JSON.stringify(value);
+}
+
+function activityStateFor(input: AgentNextInput): string {
+  if (input.needsUser) return "waiting_user";
+  if (input.state === "evidence_ready_for_recording" || input.state === "evidence_needs_review") return "verifying";
+  if (input.state === "architecture_needs_review") return "thinking";
+  if (input.state === "ready_for_next_loop") return "thinking";
+  if (input.state === "state_needs_reconcile" || input.state === "health_needs_recovery") return "blocked";
+  return "working";
+}
+
+function dashboardActivityFor(input: AgentNextInput): AgentNext["dashboard_activity"] {
+  if (!input.goalId && !input.currentGapId) return undefined;
+  const skill = input.recommendedSkill || "nori";
+  const state = activityStateFor(input);
+  const goalPart = input.goalId ? ` --goal ${shellArg(input.goalId)}` : "";
+  const gapPart = input.currentGapId ? ` --gap ${shellArg(input.currentGapId)}` : "";
+  const skillPart = ` --skill ${shellArg(skill)}`;
+  const statePart = ` --state ${shellArg(state)}`;
+  const summary = shellArg(input.summary);
+  return {
+    recommended: !input.needsUser || state === "waiting_user",
+    target: {
+      goal_id: input.goalId,
+      gap_id: input.currentGapId
+    },
+    start_command: `opennori activity start --root <repo>${goalPart}${gapPart}${skillPart}${statePart} --summary ${summary} --json`,
+    heartbeat_command: `opennori activity heartbeat --root <repo>${skillPart}${statePart} --summary ${summary} --json`,
+    finish_command: `opennori activity finish --root <repo>${goalPart}${gapPart}${skillPart} --summary "OpenNori activity finished." --json`,
+    note: "Optional live dashboard signal for Skills. Activity is not Product AC evidence, not a process log, and not completion proof."
+  };
+}
+
 function agentNext(input: AgentNextInput): AgentNext {
   const next: AgentNext = {
     schema_version: VERSION,
@@ -37,6 +72,8 @@ function agentNext(input: AgentNextInput): AgentNext {
   if (input.needsUser !== undefined) next.needs_user = input.needsUser;
   if (input.safeNextCommand) next.safe_next_command = input.safeNextCommand;
   if (input.commands?.length) next.commands = input.commands;
+  const dashboardActivity = dashboardActivityFor(input);
+  if (dashboardActivity) next.dashboard_activity = dashboardActivity;
   if (input.candidateGoals?.length) next.candidate_goals = input.candidateGoals;
   return next;
 }
@@ -47,6 +84,10 @@ function activeGoalCount(doctor: DoctorState | undefined): number {
 
 function firstActiveGoal(doctor: DoctorState | undefined): ActiveGoalSummary | undefined {
   return doctor?.active_goals?.find((goal) => goal.recoverable !== false);
+}
+
+function activeGoals(doctor: DoctorState | undefined): ActiveGoalSummary[] {
+  return doctor?.active_goals?.filter((goal) => goal.recoverable !== false) ?? [];
 }
 
 export function agentNextForBootstrap(data: Pick<BootstrapData, "status" | "root" | "doctor">): AgentNext {
@@ -78,18 +119,23 @@ export function agentNextForBootstrap(data: Pick<BootstrapData, "status" | "root
     });
   }
 
-  const goal = firstActiveGoal(data.doctor);
+  const goals = activeGoals(data.doctor);
+  const goal = goals.length === 1 ? goals[0] : undefined;
   return agentNext({
     state: "ready_with_active_goals",
     recommendedSkill: "nori-reporting",
     summary: "OpenNori is ready and has active Nori Contracts.",
-    instruction: "Resume the active contract and report the current gap, completion decision, and evidence basis.",
-    userVisibleNext: goal?.current_gap
+    instruction: goals.length > 1
+      ? "List active goals and ask the user which Nori Contract to continue before publishing dashboard activity or resuming work."
+      : "Resume the active contract and report the current gap, completion decision, and evidence basis.",
+    userVisibleNext: goals.length > 1
+      ? "Choose which active Nori Contract to continue."
+      : goal?.current_gap
       ? `Continue from current gap ${goal.current_gap.id}.`
       : "Resume the active OpenNori goal.",
     goalId: goal?.goal_id,
     currentGapId: goal?.current_gap?.id ?? null,
-    needsUser: false,
+    needsUser: goals.length > 1,
     commands: goal ? [`opennori resume --root ${data.root} --goal ${goal.goal_id} --json`] : [`opennori list --root ${data.root} --json`]
   });
 }
@@ -127,21 +173,24 @@ export function agentNextForDoctor(root: string, doctor: DoctorState): AgentNext
     });
   }
 
-  const goal = firstActiveGoal(doctor);
+  const goals = activeGoals(doctor);
+  const goal = goals.length === 1 ? goals[0] : undefined;
   return agentNext({
     state: "ready_with_active_goals",
     recommendedSkill: "nori-reporting",
     summary: "OpenNori is ready and has active Nori Contracts.",
-    instruction: "Resume the chosen active goal; if more than one active goal exists, ask the user which goal to continue.",
-    userVisibleNext: doctor.active_goals.length > 1
+    instruction: goals.length > 1
+      ? "List active goals and ask the user which Nori Contract to continue before publishing dashboard activity or resuming work."
+      : "Resume the chosen active goal and report the current gap, completion decision, and evidence basis.",
+    userVisibleNext: goals.length > 1
       ? "Choose which active Nori Contract to continue."
       : goal?.current_gap
         ? `Continue from current gap ${goal.current_gap.id}.`
         : "Review the active Nori Contract status.",
     goalId: goal?.goal_id,
     currentGapId: goal?.current_gap?.id ?? null,
-    needsUser: doctor.active_goals.length > 1,
-    commands: doctor.active_goals.length > 1 || !goal
+    needsUser: goals.length > 1,
+    commands: goals.length > 1 || !goal
       ? [`opennori list --root ${root} --json`]
       : [`opennori resume --root ${root} --goal ${goal.goal_id} --json`]
   });

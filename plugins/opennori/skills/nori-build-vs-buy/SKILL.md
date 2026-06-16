@@ -16,10 +16,15 @@ Build-vs-buy is architecture evidence, not a Product AC.
 3. Compare license, maintenance, security, package size, runtime cost, performance, integration cost, and product boundary.
 4. If self-building, state why reuse options fail.
 5. Record the decision before implementing the infrastructure.
+6. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live activity while comparing options. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-build-vs-buy --state thinking --summary "..." --json`.
 
 Useful state command:
 
 `opennori architecture build-vs-buy --root <repo> --area "<area>" --need "<need>" --recommendation <reuse|buy|self-build> --summary "<decision>" --current-project "<existing deps/patterns>" --standard-library "<stdlib option>" --official-sdk "<sdk option>" --open-source "<libraries checked>" --self-build-reason "<why self-build if chosen>" --json`
+
+Optional dashboard signal:
+
+`opennori activity start|heartbeat|finish --root <repo> --skill nori-build-vs-buy --state thinking --summary "..." --json`
 
 ## Natural-Language Mapping
 
@@ -40,6 +45,8 @@ Useful state command:
 ## State Writes
 
 May write build-vs-buy decision records under `.opennori/architecture/decisions/`. Do not write Product AC, baseline changes, evidence ledger entries, or reports directly.
+
+May write live dashboard activity for option review. Activity is not a build-vs-buy decision and is not Product AC evidence.
 
 ## Handoffs
 
@@ -66,3 +73,4 @@ Risk: ...
 - Do not add a dependency only to avoid a few stable product-domain lines.
 - Do not make build-vs-buy a user-facing Product AC.
 - Do not claim confident architecture completion while required reuse candidates or self-build reasons are missing.
+- Do not treat dashboard activity, events, or snapshots as proof that reuse candidates were checked.

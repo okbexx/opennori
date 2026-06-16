@@ -1083,9 +1083,10 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.equal(plugin.name, "opennori");
   assert.equal(plugin.skills, "./skills/");
   assert.equal(plugin.interface.displayName, "OpenNori");
-  assert.equal(plugin.interface.defaultPrompt.length, 4);
+  assert.equal(plugin.interface.defaultPrompt.length >= 5, true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /Set up OpenNori/.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /acceptance criteria/.test(prompt)), true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /dashboard.*live agent activity/i.test(prompt)), true);
   assert.equal(marketplace.name, "opennori");
   assert.equal(marketplace.interface.displayName, "OpenNori");
   assert.equal(marketplace.plugins.length, 1);

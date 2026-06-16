@@ -22,6 +22,7 @@ When the root `nori` Skill or CLI JSON reports `data.agent_next.state: initializ
 7. If the user has approved or revised AC, persist that decision before implementation continues.
 8. After `opennori approve`, read the returned `data.agent_next`. If it says `architecture_needs_review`, hand off to `nori-architecture-brainstorm` before implementation or evidence work.
 9. If `agent_next.state` is `ready_for_next_loop` and the user asked to continue, select or refine one `agent_next.candidate_goals` item, then create a draft from it; prefer the candidate's `draft_args` or `draft_command` when present instead of reconstructing CLI flags. Do not ask the user to invent the next prompt from scratch. After drafting, show concrete measurement and passing thresholds for approval; do not show a candidate-direction wrapper as if it were enough.
+10. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live acceptance activity while drafting or revising. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-acceptance --state thinking --summary "..." --json` and let the CLI infer the unique current goal/gap.
 
 Useful state commands:
 
@@ -33,6 +34,7 @@ Useful state commands:
 - `opennori draft --from-next-candidate <candidate-id> --source-goal <completed-goal-id> --root <repo> --json`
 - `opennori approve --root <repo> --summary "<approval>" --json`
 - `opennori criterion update --root <repo> --criterion <id> --user-story "..." --measurement "..." --threshold "..." --json`
+- `opennori activity start|heartbeat|finish --root <repo> --skill nori-acceptance --state thinking --summary "..." --json` (optional dashboard signal)
 
 ## Natural-Language Mapping
 
@@ -81,6 +83,8 @@ Do not turn these questions into implementation tasks or evidence.
 
 May write brainstorms, draft contracts, approved acceptance basis, and criterion revisions under `.opennori/`. Do not write evidence, profile, architecture decisions, or reports except through the responsible Skill.
 
+May write live dashboard activity while acceptance work is happening. Activity is not a Nori Contract, not approval, and not completion evidence.
+
 ## Handoffs
 
 - After AC approval for non-trivial work, hand off to `nori-architecture-brainstorm`.
@@ -112,3 +116,4 @@ Ask for approval or specific revision. Do not include implementation steps unles
 - Do not accept a draft from a candidate if its measurement or threshold only says to follow the candidate direction; revise it into user actions, visible results, report/evidence review, or friction judgment before asking for approval.
 - Do not use `draft --from-next-candidate` unless the source goal is already `ready-for-next-loop`; if the command returns completion or evidence review risk, handle that risk before continuing.
 - Do not claim completion from AC quality alone; completion still requires reviewable evidence.
+- Do not treat dashboard activity, events, or snapshots as acceptance approval or evidence.

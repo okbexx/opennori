@@ -55,6 +55,29 @@ function writeActiveGoal(root) {
   writeJson(path.join(paths, "module-goal.evidence.json"), { contract, ledger });
 }
 
+function writeActiveGoalWithId(root, goalId, status = "active") {
+  const contract = {
+    schema_version: "opennori/contract-v1",
+    goal_id: goalId,
+    goal: `Ship ${goalId}`,
+    acceptance_basis: { status: "approved", summary: "Approved for test." },
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: `As a user, I can inspect ${goalId}.`,
+        measurement: "Run OpenNori status.",
+        threshold: "Output identifies the current gap."
+      }
+    ]
+  };
+  const ledger = buildEvidenceLedger(contract);
+  ledger.status = status;
+  const activeDir = path.join(root, ".opennori", "active");
+  fs.mkdirSync(activeDir, { recursive: true });
+  fs.writeFileSync(path.join(activeDir, `${goalId}.acceptance.md`), `# ${goalId}\n`);
+  writeJson(path.join(activeDir, `${goalId}.evidence.json`), { contract, ledger });
+}
+
 function packageVersion() {
   return JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version;
 }
@@ -708,6 +731,10 @@ test("architecture apply command module records baseline alignment without Produ
   assert.equal(applied.data.agent_next.state, "evidence_ready_for_recording");
   assert.equal(applied.data.agent_next.recommended_skill, "nori-evidence");
   assert.equal(applied.data.agent_next.current_gap_id, "AC-1");
+  assert.equal(applied.data.agent_next.dashboard_activity.target.goal_id, "module-goal");
+  assert.equal(applied.data.agent_next.dashboard_activity.target.gap_id, "AC-1");
+  assert.match(applied.data.agent_next.dashboard_activity.start_command, /opennori activity start/);
+  assert.match(applied.data.agent_next.dashboard_activity.note, /not Product AC evidence/);
   assert.match(applied.data.agent_next.instruction, /--architecture-apply/);
   assert.equal(applied.artifacts.some((artifact) => artifact.kind === "architecture_apply"), true);
   assert.equal(applied.next_actions.some((action) => /Product AC evidence/.test(action)), true);
@@ -1136,6 +1163,100 @@ test("kernel events activity and snapshot expose dashboard state without replaci
   assert.equal(snapshot.current_gap.id, "ACCEPTANCE-BASIS");
   assert.equal(fs.existsSync(snapshotPath(root)), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "active", "module-goal.evidence.json")), true);
+});
+
+test("activity commands infer the unique current gap for dashboard publishing only", async () => {
+  const root = tempRoot();
+  writeActiveGoalWithId(root, "module-goal");
+  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const before = fs.readFileSync(evidencePath, "utf8");
+
+  const started = await runActivityStartCommand([
+    "--root", root,
+    "--agent", "Codex",
+    "--skill", "nori-architecture-apply",
+    "--summary", "Applying the baseline to the current gap.",
+    "--json"
+  ]);
+
+  assert.equal(started.ok, true);
+  assert.equal(started.data.activity.goal_id, "module-goal");
+  assert.equal(started.data.activity.gap_id, "AC-1");
+  assert.equal(started.data.target.inferred, true);
+  assert.equal(started.data.snapshot.goal.id, "module-goal");
+  assert.equal(started.data.snapshot.current_gap.id, "AC-1");
+
+  const heartbeat = await runActivityHeartbeatCommand([
+    "--root", root,
+    "--skill", "nori-architecture-apply",
+    "--state", "verifying",
+    "--summary", "Checking user-visible behavior.",
+    "--json"
+  ]);
+
+  assert.equal(heartbeat.ok, true);
+  assert.equal(heartbeat.data.activity.goal_id, "module-goal");
+  assert.equal(heartbeat.data.activity.gap_id, "AC-1");
+  assert.equal(heartbeat.data.activity.state, "verifying");
+
+  const finished = await runActivityFinishCommand([
+    "--root", root,
+    "--skill", "nori-architecture-apply",
+    "--summary", "Activity finished.",
+    "--json"
+  ]);
+
+  assert.equal(finished.ok, true);
+  assert.equal(finished.data.activity.state, "idle");
+  assert.equal(fs.readFileSync(evidencePath, "utf8"), before);
+  assert.equal(readEvents(root).some((event) => event.type === "activity.started"), true);
+  assert.equal(readEvents(root).some((event) => event.type === "evidence.added"), false);
+});
+
+test("activity start refuses ambiguous active goals instead of attaching dashboard state to the wrong target", async () => {
+  const root = tempRoot();
+  await runInitCommand(["--root", root, "--confirm", "--json"]);
+  await runDraftCommand(["--root", root, "--goal", "Ship first goal", "--goal-id", "first-goal", "--json"]);
+  await runDraftCommand(["--root", root, "--goal", "Ship second goal", "--goal-id", "second-goal", "--json"]);
+  await runArchitectureBaselineCommand([
+    "--root", root,
+    "--goal", "Ship first goal",
+    "--goal-id", "first-goal",
+    "--profile", "typescript-agent-state-cli",
+    "--confirm",
+    "--json"
+  ]);
+
+  const doctor = await runDoctorCommand(["--root", root, "--json"]);
+  assert.equal(doctor.ok, true);
+  assert.equal(doctor.data.agent_next.state, "ready_with_active_goals");
+  assert.equal(doctor.data.agent_next.needs_user, true);
+  assert.equal(doctor.data.agent_next.dashboard_activity, undefined);
+  assert.match(doctor.data.agent_next.instruction, /which Nori Contract/);
+
+  const ambiguous = await runActivityStartCommand([
+    "--root", root,
+    "--skill", "nori-evidence",
+    "--summary", "Verifying a gap.",
+    "--json"
+  ]);
+
+  assert.equal(ambiguous.ok, false);
+  assert.equal(ambiguous.error.type, "ambiguous_activity_target");
+  assert.match(ambiguous.error.message, /Pass --goal <goal-id>/);
+
+  const explicit = await runActivityStartCommand([
+    "--root", root,
+    "--goal", "second-goal",
+    "--skill", "nori-evidence",
+    "--summary", "Verifying second goal.",
+    "--json"
+  ]);
+
+  assert.equal(explicit.ok, true);
+  assert.equal(explicit.data.activity.goal_id, "second-goal");
+  assert.equal(explicit.data.activity.gap_id, "ACCEPTANCE-BASIS");
+  assert.equal(explicit.data.target.inferred, false);
 });
 
 test("dashboard command can start the local kernel without opening a browser", async () => {
