@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-16T03:44:22.077Z",
+  "updated_at": "2026-06-16T05:52:20.994Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -332,21 +332,39 @@
         "path": ".opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.json"
       },
       {
+        "id": "dashboard-kernel-hono-transport",
+        "schema_valid": true,
+        "schema_errors": [],
+        "area": "dashboard-kernel",
+        "need": "Provide a local visual dashboard transport that observes OpenNori contract, gap, evidence, architecture, and live agent activity without becoming an agent runtime.",
+        "recommendation": "reuse",
+        "status": "active",
+        "summary": "Use Hono plus @hono/node-server for the local dashboard HTTP/SSE transport while keeping OpenNori's .opennori state, event ledger, activity, and snapshot projection as first-party domain modules.",
+        "current_project": "OpenNori already has TypeScript domain modules, citty CLI commands, dashboard static assets, and separate src/kernel/activity.ts, src/kernel/events.ts, and src/kernel/snapshot.ts modules. The previous hand-written HTTP server was becoming routing, static-file, SSE, and error-response infrastructure rather than OpenNori domain logic.",
+        "standard_library": "Node http, fs, path, url, and child_process can implement the transport, but keeping route matching, response handling, SSE framing, server startup, and error handling as custom code repeats solved infrastructure and makes later dashboard growth more expensive.",
+        "official_sdk": "@hono/node-server is Hono's official Node adapter and runs Hono apps on Node.js using web-standard Request/Response APIs. Hono's streamSSE helper provides a typed SSE response boundary; package-root static asset resolution remains OpenNori-owned because Hono's serve-static root is cwd-relative.",
+        "open_source": "Hono is a lightweight TypeScript web framework already used in mature agent-adjacent stacks such as opencode's TypeScript server layer. Express is older and heavier for this local kernel, while Fastify is better for larger API services but adds plugin/server architecture beyond the current observation surface.",
+        "self_build_reason": "",
+        "superseded_by": "",
+        "superseded_reason": "",
+        "path": ".opennori/architecture/decisions/dashboard-kernel-hono-transport.json"
+      },
+      {
         "id": "dashboard-kernel-http-sse",
         "schema_valid": true,
         "schema_errors": [],
         "area": "dashboard-kernel",
         "need": "Provide a local visual dashboard that observes OpenNori contract, gap, evidence, architecture, and live agent activity without becoming an agent runtime.",
         "recommendation": "self-build",
-        "status": "active",
+        "status": "superseded",
         "summary": "Use Node standard library HTTP plus Server-Sent Events for a local loopback observation kernel. OpenNori keeps .opennori as source of truth, emits a small durable JSONL event ledger, projects current snapshot JSON, and serves a static SVG dashboard. MCP remains a later structured agent tool surface, not the dashboard transport.",
         "current_project": "OpenNori already has TypeScript domain modules, citty CLI commands, JSON .opennori state, manifest-managed lifecycle, and package-local static assets; no existing kernel/dashboard layer is present.",
         "standard_library": "Node http, fs, path, url, and child_process are sufficient for a loopback server, JSON snapshot endpoint, static file serving, and SSE event stream.",
         "official_sdk": "No official OpenNori SDK exists for dashboard transport. MCP is useful later for agent tool calls, but OpenAI/Codex Skills plus CLI already cover current agent state writes; MCP is not required to stream a human dashboard.",
         "open_source": "Express/Fastify/Hono and frontend frameworks were considered, but the first dashboard is local, unauthenticated loopback, static, and has three endpoints; adding a server or SPA framework would increase package surface before routing complexity exists.",
         "self_build_reason": "The self-built portion is intentionally small adapter glue around Node's standard library and OpenNori's own state semantics. External libraries would not replace the product-specific event, activity, and snapshot projection model.",
-        "superseded_by": "",
-        "superseded_reason": "",
+        "superseded_by": "dashboard-kernel-hono-transport",
+        "superseded_reason": "OpenNori's dashboard transport should establish a long-term framework boundary early. Hono provides reusable routing, response, and SSE helpers while OpenNori keeps .opennori state, event ledger, activity, and snapshot projection as first-party domain logic.",
         "path": ".opennori/architecture/decisions/dashboard-kernel-http-sse.json"
       },
       {
@@ -476,8 +494,8 @@
       "status": "clear",
       "summary": "Every recorded build-vs-buy decision includes reviewable reuse candidates and any self-build reason.",
       "decision_count": 13,
-      "total_decision_count": 13,
-      "superseded_decision_count": 0,
+      "total_decision_count": 14,
+      "superseded_decision_count": 1,
       "findings": []
     },
     "agent_surface": {

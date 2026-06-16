@@ -3,9 +3,9 @@
 Area: dashboard-kernel
 Need: Provide a local visual dashboard that observes OpenNori contract, gap, evidence, architecture, and live agent activity without becoming an agent runtime.
 Recommendation: self-build
-Status: active
-
-
+Status: superseded
+Superseded by: dashboard-kernel-hono-transport
+Superseded reason: OpenNori's dashboard transport should establish a long-term framework boundary early. Hono provides reusable routing, response, and SSE helpers while OpenNori keeps .opennori state, event ledger, activity, and snapshot projection as first-party domain logic.
 
 ## Summary
 

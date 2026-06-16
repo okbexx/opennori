@@ -1148,6 +1148,18 @@ test("dashboard command can start the local kernel without opening a browser", a
   assert.equal(readEvents(root).some((event) => event.type === "dashboard.started"), true);
 });
 
+test("dashboard rejects non-GET requests with a deterministic error", async () => {
+  const root = tempRoot();
+  const handle = await startDashboardServer({ root, port: 0, open: false });
+  const response = await fetch(`${handle.url}api/snapshot`, { method: "POST" });
+  const payload = await response.json();
+  handle.server.close();
+
+  assert.equal(response.status, 405);
+  assert.equal(payload.ok, false);
+  assert.equal(payload.error.type, "method_not_allowed");
+});
+
 test("dashboard SSE emits generic and typed event frames", async () => {
   const root = tempRoot();
   const handle = await startDashboardServer({ root, port: 0, open: false });

@@ -5,13 +5,13 @@
   "area": "dashboard-kernel",
   "need": "Provide a local visual dashboard that observes OpenNori contract, gap, evidence, architecture, and live agent activity without becoming an agent runtime.",
   "recommendation": "self-build",
-  "status": "active",
+  "status": "superseded",
   "summary": "Use Node standard library HTTP plus Server-Sent Events for a local loopback observation kernel. OpenNori keeps .opennori as source of truth, emits a small durable JSONL event ledger, projects current snapshot JSON, and serves a static SVG dashboard. MCP remains a later structured agent tool surface, not the dashboard transport.",
   "current_project": "OpenNori already has TypeScript domain modules, citty CLI commands, JSON .opennori state, manifest-managed lifecycle, and package-local static assets; no existing kernel/dashboard layer is present.",
   "standard_library": "Node http, fs, path, url, and child_process are sufficient for a loopback server, JSON snapshot endpoint, static file serving, and SSE event stream.",
   "official_sdk": "No official OpenNori SDK exists for dashboard transport. MCP is useful later for agent tool calls, but OpenAI/Codex Skills plus CLI already cover current agent state writes; MCP is not required to stream a human dashboard.",
   "open_source": "Express/Fastify/Hono and frontend frameworks were considered, but the first dashboard is local, unauthenticated loopback, static, and has three endpoints; adding a server or SPA framework would increase package surface before routing complexity exists.",
   "self_build_reason": "The self-built portion is intentionally small adapter glue around Node's standard library and OpenNori's own state semantics. External libraries would not replace the product-specific event, activity, and snapshot projection model.",
-  "superseded_by": "",
-  "superseded_reason": ""
+  "superseded_by": "dashboard-kernel-hono-transport",
+  "superseded_reason": "OpenNori's dashboard transport should establish a long-term framework boundary early. Hono provides reusable routing, response, and SSE helpers while OpenNori keeps .opennori state, event ledger, activity, and snapshot projection as first-party domain logic."
 }
