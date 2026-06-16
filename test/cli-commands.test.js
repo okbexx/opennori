@@ -1160,6 +1160,28 @@ test("dashboard rejects non-GET requests with a deterministic error", async () =
   assert.equal(payload.error.type, "method_not_allowed");
 });
 
+test("dashboard serves the built React app and assets", async () => {
+  const root = tempRoot();
+  const handle = await startDashboardServer({ root, port: 0, open: false });
+  const page = await fetch(handle.url);
+  const html = await page.text();
+  const assetMatch = html.match(/src="(\/assets\/[^"]+\.js)"/);
+
+  assert.equal(page.status, 200);
+  assert.match(page.headers.get("content-type") || "", /text\/html/);
+  assert.match(html, /OpenNori Dashboard/);
+  assert.match(html, /id="root"/);
+  assert.notEqual(assetMatch, null);
+
+  const script = await fetch(`${handle.url}${assetMatch[1].slice(1)}`);
+  const scriptText = await script.text();
+  handle.server.close();
+
+  assert.equal(script.status, 200);
+  assert.match(script.headers.get("content-type") || "", /text\/javascript/);
+  assert.match(scriptText, /Observation surface|Acceptance Loop/);
+});
+
 test("dashboard SSE emits generic and typed event frames", async () => {
   const root = tempRoot();
   const handle = await startDashboardServer({ root, port: 0, open: false });

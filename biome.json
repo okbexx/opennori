@@ -11,7 +11,11 @@
       "package.json",
       "tsconfig.json",
       "tsconfig.build.json",
+      "tsconfig.dashboard.json",
       "vitest.config.ts",
+      "vite.dashboard.config.ts",
+      "src/dashboard/**/*.ts",
+      "src/dashboard/**/*.tsx",
       "src/architecture.js",
       "src/skills.js",
       "test/core.test.js"

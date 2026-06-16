@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-16T05:52:20.994Z",
+  "updated_at": "2026-06-16T06:47:12.142Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -368,6 +368,24 @@
         "path": ".opennori/architecture/decisions/dashboard-kernel-http-sse.json"
       },
       {
+        "id": "dashboard-web-react-vite-tailwind-radix-motion",
+        "schema_valid": true,
+        "schema_errors": [],
+        "area": "dashboard-web",
+        "need": "Provide a productized local visual dashboard that helps users observe OpenNori agent activity, current acceptance gap, user intervention, architecture health, and completion decision without becoming an agent runtime or process log.",
+        "recommendation": "reuse",
+        "status": "active",
+        "summary": "Use React, Vite, Tailwind CSS v4, Radix primitives, Motion, and Lucide React for the dashboard UI while keeping Hono as the local snapshot/SSE kernel and .opennori as the source of truth.",
+        "current_project": "OpenNori already has a Hono dashboard kernel, /api/snapshot, /api/events, TypeScript modules, and a small vanilla dashboard. The vanilla files prove the transport but are not a long-term UI architecture for live visual state, motion, responsive layout, or accessible overlays.",
+        "standard_library": "Browser DOM, CSS, SVG, and EventSource can render the dashboard, but hand-rolling component state, animation, responsive primitives, accessible dialogs/tooltips/tabs, and build output would repeat solved frontend infrastructure.",
+        "official_sdk": "No official OpenNori UI SDK exists. Vite is the official modern build path for React projects through @vitejs/plugin-react, and @tailwindcss/vite is Tailwind's Vite integration.",
+        "open_source": "React is a mature UI library used broadly in agent UI projects; Vite is a mature ESM build tool; Tailwind CSS v4 provides utility styling and tokens; Radix primitives provide accessible UI behavior without a heavy visual system; Motion provides React animation; Lucide React provides icons. TK references show mature agent UI projects separate daemon/kernel state from frontend UI and often use React/Vite/Tailwind-style stacks.",
+        "self_build_reason": "",
+        "superseded_by": "",
+        "superseded_reason": "",
+        "path": ".opennori/architecture/decisions/dashboard-web-react-vite-tailwind-radix-motion.json"
+      },
+      {
         "id": "editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark",
         "schema_valid": true,
         "schema_errors": [],
@@ -493,8 +511,8 @@
     "build_vs_buy": {
       "status": "clear",
       "summary": "Every recorded build-vs-buy decision includes reviewable reuse candidates and any self-build reason.",
-      "decision_count": 13,
-      "total_decision_count": 14,
+      "decision_count": 14,
+      "total_decision_count": 15,
       "superseded_decision_count": 1,
       "findings": []
     },

@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User added next-candidate draft quality criterion.",
-      "approved_at": "2026-06-15T12:41:53.760Z"
+      "summary": "User approved dashboard web experience as the next OpenNori self acceptance gap.",
+      "approved_at": "2026-06-16T06:20:22.432Z"
     },
     "criteria": [
       {
@@ -468,6 +468,15 @@
         "threshold": "草案仍保持 draft/ACCEPTANCE-BASIS 待用户批准；每条 AC 的 measurement/threshold 说明用户入口、操作、报告/证据复查或摩擦点判断方式；不再出现“按这条候选方向检查新的目标结果、状态或报告”这类空泛模板。",
         "required": true,
         "risk": "medium"
+      },
+      {
+        "id": "AC-D-1",
+        "layer": "acceptance",
+        "user_story": "作为用户，我运行 opennori dashboard --root . 并打开本地页面后，能不用阅读 CLI 日志就看出当前由哪个 agent/Skill 在推进、目标是什么、当前验收缺口是什么、是否需要我介入、Architecture Baseline 是否有效，以及当前完成判断。",
+        "measurement": "启动 dashboard，触发或模拟 agent activity，分别查看桌面与窄屏页面的首屏状态。",
+        "threshold": "页面以视觉化 acceptance loop 和少量状态面板展示 agent activity、goal、current gap、need user、architecture decision、completion decision 和 latest event；有活动动效但不呈现聊天记录、过程任务列表、证据账本或完成权威入口；状态变化来自 /api/snapshot 与 /api/events。",
+        "required": true,
+        "risk": "high"
       }
     ]
   },
@@ -475,7 +484,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-15T12:42:25.760Z",
+    "updated_at": "2026-06-16T06:46:56.158Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -5610,6 +5619,62 @@
             "limitations": "This proves candidate-to-draft quality for built-in next-loop candidates; the new dogfood draft is still unapproved and does not prove external project adoption by itself.",
             "gate": "accepted",
             "created_at": "2026-06-15T12:42:25.760Z"
+          }
+        ]
+      },
+      "AC-D-1": {
+        "status": "passing",
+        "confidence": "high",
+        "required": true,
+        "risk": "high",
+        "evidence": [
+          {
+            "kind": "dashboard-review",
+            "basis": "artifact-review",
+            "summary": "React dashboard now presents OpenNori as a local observation surface: desktop and mobile pages show agent activity, current gap, need user, decision, Architecture Baseline, latest event, evidence health, and completion authority, with no browser console errors.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "command",
+                "label": "node ./bin/opennori.js dashboard --root . --port 0 --no-open --once --json",
+                "command": "node ./bin/opennori.js dashboard --root . --port 0 --no-open --once --json"
+              },
+              {
+                "type": "artifact",
+                "label": "output/playwright/opennori-dashboard-desktop.png",
+                "path": "output/playwright/opennori-dashboard-desktop.png"
+              },
+              {
+                "type": "artifact",
+                "label": "output/playwright/opennori-dashboard-mobile.png",
+                "path": "output/playwright/opennori-dashboard-mobile.png"
+              },
+              {
+                "type": "artifact",
+                "label": "src/dashboard/src/App.tsx",
+                "path": "src/dashboard/src/App.tsx"
+              },
+              {
+                "type": "artifact",
+                "label": "src/dashboard/src/components/AcceptanceLoop.tsx",
+                "path": "src/dashboard/src/components/AcceptanceLoop.tsx"
+              },
+              {
+                "type": "artifact",
+                "label": "vite.dashboard.config.ts",
+                "path": "vite.dashboard.config.ts"
+              }
+            ],
+            "reviewability": "Run npm run check; run node ./bin/opennori.js dashboard --root . --port 0 --no-open --json, open the URL, and compare output/playwright/opennori-dashboard-desktop.png plus output/playwright/opennori-dashboard-mobile.png. Playwright console reported Total messages: 0 (Errors: 0, Warnings: 0).",
+            "limitations": "Dashboard is a read-only observation surface over /api/snapshot and /api/events; it does not replace status/report, evidence ledger, or completion authority. The visual check covered desktop 1440x980 and mobile 390x860.",
+            "gate": "accepted",
+            "created_at": "2026-06-16T06:46:56.158Z"
           }
         ]
       }
