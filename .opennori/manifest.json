@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-16T08:31:41.791Z",
+  "updated_at": "2026-06-16T10:12:41.609Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",

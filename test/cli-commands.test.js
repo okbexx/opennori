@@ -1303,6 +1303,36 @@ test("dashboard rejects non-GET requests with a deterministic error", async () =
   assert.equal(payload.error.type, "method_not_allowed");
 });
 
+test("dashboard exposes observation only and rejects confirmation-style control writes", async () => {
+  const root = tempRoot();
+  const handle = await startDashboardServer({ root, port: 0, open: false });
+  const controlPaths = [
+    "api/confirm",
+    "api/approve",
+    "api/waive",
+    "api/evidence",
+    "api/activity"
+  ];
+
+  for (const controlPath of controlPaths) {
+    const response = await fetch(`${handle.url}${controlPath}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ decision: "confirm" })
+    });
+    const payload = await response.json();
+
+    assert.equal(response.status, 405);
+    assert.equal(payload.ok, false);
+    assert.equal(payload.error.type, "method_not_allowed");
+  }
+
+  const snapshot = await fetch(`${handle.url}api/snapshot`);
+  handle.server.close();
+
+  assert.equal(snapshot.status, 200);
+});
+
 test("dashboard serves the built React app and assets", async () => {
   const root = tempRoot();
   const handle = await startDashboardServer({ root, port: 0, open: false });
@@ -1323,6 +1353,9 @@ test("dashboard serves the built React app and assets", async () => {
   assert.equal(script.status, 200);
   assert.match(script.headers.get("content-type") || "", /text\/javascript/);
   assert.match(scriptText, /Observation surface|Acceptance Loop/);
+  assert.match(scriptText, /reply in agent chat|Agent reply/);
+  assert.doesNotMatch(scriptText, /Confirm/);
+  assert.doesNotMatch(scriptText, /Waive/);
 });
 
 test("dashboard SSE emits generic and typed event frames", async () => {

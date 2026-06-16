@@ -15,7 +15,7 @@ OpenNori is one capability bundle:
 - Skills define agent behavior and natural-language routing.
 - `opennori` is the deterministic state layer.
 - `.opennori/` stores the project contract, evidence, profile, architecture, health, and report state.
-- `opennori dashboard` is an optional local observation surface over that state, not an agent runtime.
+- `opennori dashboard` is an optional local observation surface over that state, not an agent runtime or confirmation/control surface.
 
 Do not present those pieces as optional standalone product paths.
 
@@ -52,7 +52,7 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 - "Decide architecture first", "use a better architecture", "follow the baseline", "challenge the baseline" -> use `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge`.
 - "Before self-building this parser/installer/schema/storage/UI primitive" -> hand off to `nori-build-vs-buy`.
 - "Install", "upgrade", "uninstall", "doctor", "state is broken" -> hand off to `nori-project-health`.
-- "Show me the dashboard", "watch OpenNori run", "I want live status" -> run or suggest `opennori dashboard --root <repo>` and keep completion judgment in status/report.
+- "Show me the dashboard", "watch OpenNori run", "I want live status" -> run or suggest `opennori dashboard --root <repo>` and keep completion judgment plus user confirmations in conversation and status/report.
 - A complete goal with `agent_next.candidate_goals` and a user asking to continue -> choose or refine one human-facing next goal, then hand off to `nori-acceptance`.
 
 ## State Writes
@@ -60,6 +60,8 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 This root Skill should avoid direct writes except for safe readiness checks and setup/init previews. Let child Skills mutate `.opennori/active`, `.opennori/architecture`, `.opennori/reports`, `.opennori/brainstorms`, `.opennori/completed`, `.opennori/blocked`, or `.opennori/manifest.json`.
 
 If a dashboard is open, the user asked to watch progress, or `agent_next.dashboard_activity` is present, the active child Skill may publish `opennori activity start|heartbeat|finish`. Prefer the command templates from `agent_next.dashboard_activity`; otherwise use the low-parameter form with `--skill`, `--state`, and `--summary` and let the CLI infer the unique current goal/gap. If multiple active goals are ambiguous, stop and ask which Nori Contract to observe instead of guessing. Activity is only a live signal for the user; it must not be used as Product AC evidence or completion proof.
+
+The dashboard may show that a user reply is needed, but it must not approve AC, confirm architecture, waive risks, accept reports, or write completion state. Collect those decisions in conversation and record them through the appropriate OpenNori CLI command.
 
 ## Handoffs
 
@@ -95,4 +97,5 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not answer confidently complete while required AC evidence, blocking profile items, architecture challenges, evidence health, or acceptance review risks remain unresolved or unaccepted.
 - Do not turn architecture, profile, build-vs-buy, Plugin, hook, or tool preferences into Product AC.
 - Do not treat dashboard activity, events, or snapshots as acceptance evidence.
+- Do not treat dashboard as a place for confirmation buttons or state-changing controls.
 - Do not suggest copying or syncing OpenNori Skills into the user project; Skills come from the installed OpenNori Plugin, and the CLI only manages `.opennori` state.

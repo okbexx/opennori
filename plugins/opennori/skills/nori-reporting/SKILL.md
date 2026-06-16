@@ -37,13 +37,13 @@ Useful state commands:
 - "Generate report" -> create/read the OpenNori report and summarize the decision.
 - "Continue" after a complete goal -> inspect `agent_next.candidate_goals`, choose or refine the strongest human-facing next goal, then hand off to `nori-acceptance`.
 - "Export for review" -> use context export and state what the reviewer can inspect.
-- "Open dashboard" or "watch it run" -> start the local dashboard and explain that it observes activity, current gap, architecture, and completion decision without certifying completion by itself.
+- "Open dashboard" or "watch it run" -> start the local dashboard and explain that it observes activity, current gap, architecture, user-intervention needs, and completion judgment without certifying completion or hosting confirmation controls.
 
 ## State Writes
 
 May generate reports, changes output, or context exports. Do not mutate Product AC, evidence, profile, architecture, or lifecycle state.
 
-May start the local dashboard as an observation surface. Do not write Product AC or evidence from dashboard state.
+May start the local dashboard as an observation surface. Do not write Product AC or evidence from dashboard state. Do not tell the user to confirm, reject, waive, approve AC, accept reports, or confirm Architecture Baselines inside the dashboard; collect those decisions in the agent conversation and record them through OpenNori CLI.
 
 ## Handoffs
 
@@ -76,3 +76,4 @@ Then add short evidence or risk bullets only when they affect acceptance.
 - Do not treat candidate goals as approved AC, phases, task lists, or evidence.
 - Do not hide review-risk completion behind a simple "done".
 - Do not treat dashboard activity, events, or snapshots as completion evidence.
+- Do not treat dashboard as a control surface. It can show "Need user"; the user decision is still made in conversation and written by CLI.

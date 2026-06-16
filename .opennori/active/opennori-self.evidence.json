@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "Refined AC-D-3 to keep the user story human-facing by replacing JSON wording with detail panel wording.",
-      "approved_at": "2026-06-16T08:31:05.944Z"
+      "summary": "Added dashboard observation boundary AC after user rejected confirmation controls in dashboard.",
+      "approved_at": "2026-06-16T10:04:55.366Z"
     },
     "criteria": [
       {
@@ -495,6 +495,15 @@
         "threshold": "首屏有清晰的 live activity 主视觉：显示 agent/Skill、state、summary、current gap、last seen 或 stale 标记；active/verifying 有明显但不过度的动效，idle/expired 降低视觉权重；不新增聊天记录、过程任务列表、证据账本或完成权威入口。",
         "required": true,
         "risk": "medium"
+      },
+      {
+        "id": "AC-D-4",
+        "layer": "acceptance",
+        "user_story": "作为用户，我在 OpenNori dashboard 看到需要用户介入时，页面只告诉我应该回到 agent 对话里确认、修改或豁免，而不会提供 dashboard 内的确认、拒绝、waive 或写状态按钮。",
+        "measurement": "启动 dashboard，制造 need_user / waiting_user 状态，检查页面首屏和控制区；同时对常见确认型 dashboard API 路径发送 POST。",
+        "threshold": "页面清楚显示 dashboard 是 observation surface / reply in agent chat；可见控件只用于刷新或查看快照；POST /api/confirm、/api/approve、/api/waive、/api/evidence、/api/activity 等控制型请求返回 method_not_allowed；Product AC、evidence、profile、architecture 和 report 状态只能由 agent 对话中的 OpenNori Skill/CLI 路径写入。",
+        "required": true,
+        "risk": "medium"
       }
     ]
   },
@@ -502,7 +511,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-16T08:31:23.288Z",
+    "updated_at": "2026-06-16T10:12:26.489Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -5820,6 +5829,87 @@
             "limitations": "Verified with local Chrome screenshots and API snapshots. The dashboard remains a read-only observation surface; it does not execute agent work, replace evidence, or certify completion. Long-running real project watching is still broader dogfood coverage.",
             "gate": "accepted",
             "created_at": "2026-06-16T08:31:23.288Z"
+          }
+        ]
+      },
+      "AC-D-4": {
+        "status": "passing",
+        "confidence": "verified",
+        "required": true,
+        "risk": "medium",
+        "evidence": [
+          {
+            "kind": "dashboard-observation-boundary",
+            "basis": "tool-observation",
+            "summary": "Dashboard now presents user intervention as an agent-conversation reply boundary, not an in-dashboard confirmation flow. The built React app shows Agent reply / Control boundary / reply in agent chat, packaged Skills and docs forbid dashboard confirmation controls, and dashboard HTTP rejects confirmation-style POST control paths with method_not_allowed.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run typecheck:dashboard && npm run build:dashboard && npx vitest run test/cli-commands.test.js -t \"dashboard rejects non-GET|dashboard exposes observation only|dashboard serves the built React app|dashboard command can start|dashboard SSE emits\"",
+                "command": "npm run typecheck:dashboard && npm run build:dashboard && npx vitest run test/cli-commands.test.js -t \"dashboard rejects non-GET|dashboard exposes observation only|dashboard serves the built React app|dashboard command can start|dashboard SSE emits\""
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/dashboard/src/App.tsx",
+                "path": "src/dashboard/src/App.tsx"
+              },
+              {
+                "type": "artifact",
+                "label": "src/dashboard/src/components/AcceptanceLoop.tsx",
+                "path": "src/dashboard/src/components/AcceptanceLoop.tsx"
+              },
+              {
+                "type": "artifact",
+                "label": "src/kernel/http/app.ts",
+                "path": "src/kernel/http/app.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": "AGENTS.md",
+                "path": "AGENTS.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+                "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+                "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/.codex-plugin/plugin.json",
+                "path": "plugins/opennori/.codex-plugin/plugin.json"
+              }
+            ],
+            "reviewability": "Run npm run check, inspect the dashboard bundle/source for Agent reply and reply in agent chat, and rerun the dashboard control-write tests to confirm POST confirmation endpoints are rejected.",
+            "limitations": "This verifies the current local dashboard and package assets. It does not add a browser screenshot for a forced need_user fixture, and future UI work must keep the same observation-only boundary.",
+            "gate": "accepted",
+            "created_at": "2026-06-16T10:12:26.488Z"
           }
         ]
       }

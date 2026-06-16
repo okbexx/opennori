@@ -59,6 +59,17 @@ function architectureLabel(snapshot: NoriSnapshot | null): string {
   return `${profile} / ${suffix}`;
 }
 
+function userActionText(snapshot: NoriSnapshot | null): string {
+  if (!snapshot) return "Waiting for current acceptance state.";
+  if (!snapshot.need_user) return "No user reply is needed right now.";
+  return shortText(snapshot.user_action, 120, "Reply in the agent conversation before work continues.");
+}
+
+function userReplyDetail(snapshot: NoriSnapshot | null): string {
+  if (!snapshot?.need_user) return "The dashboard is observing. It does not confirm, reject, or waive state.";
+  return "Reply in the agent conversation; the agent records the decision through OpenNori CLI.";
+}
+
 function relativeTime(value: string | undefined): string {
   if (!value) return "not seen";
   const timestamp = Date.parse(value);
@@ -347,7 +358,7 @@ export default function App() {
   const latestEvent = snapshot?.last_event;
   const goalLabel = useMemo(() => primaryGoalText(snapshot?.goal?.label), [snapshot]);
   const gapLabel = shortText(snapshot?.current_gap?.label, 112, snapshot?.status === "no_active_goal" ? "No active Nori Contract" : "No current gap");
-  const userAction = snapshot?.need_user ? shortText(snapshot.user_action, 96, "User decision required") : "No user action required";
+  const userAction = userActionText(snapshot);
 
   return (
     <Tooltip.Provider delayDuration={180}>
@@ -401,7 +412,7 @@ export default function App() {
                   </AnimatePresence>
                 </div>
                 <div className="rounded-lg border border-[#f5f0e6]/12 bg-black/20 px-3 py-2 text-right">
-                  <span className="block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">decision</span>
+                  <span className="block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">judgment</span>
                   <strong className="block text-sm font-semibold text-[#f7f0e2]">{decisionLabel(snapshot)}</strong>
                 </div>
               </div>
@@ -428,14 +439,14 @@ export default function App() {
               />
               <MetricPanel
                 icon={<UserRound size={19} />}
-                label="Need user"
-                value={snapshot?.need_user ? "yes" : "no"}
-                detail={userAction}
+                label="Agent reply"
+                value={snapshot?.need_user ? "needed" : "not needed"}
+                detail={`${userAction} ${userReplyDetail(snapshot)}`}
                 tone={needUserTone}
               />
               <MetricPanel
                 icon={snapshot?.decision === "complete" ? <CheckCircle2 size={19} /> : <AlertTriangle size={19} />}
-                label="Decision"
+                label="Completion"
                 value={decisionLabel(snapshot)}
                 detail={shortText(snapshot?.completion?.answer, 98, "Waiting for current acceptance state.")}
                 tone={decisionTone}
@@ -472,8 +483,8 @@ export default function App() {
             <div className="flex min-h-24 items-center gap-3 rounded-lg border border-[#f5f0e6]/14 bg-[#11130f]/72 p-4">
               <ShieldCheck className="shrink-0 text-[#74d58a]" size={24} />
               <div className="min-w-0">
-                <span className="block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">Completion authority</span>
-                <strong className="block text-base font-semibold text-[#f7f0e2]">status / report</strong>
+                <span className="block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">Control boundary</span>
+                <strong className="block text-base font-semibold text-[#f7f0e2]">reply in agent chat</strong>
               </div>
               {error ? (
                 <Tooltip.Root>

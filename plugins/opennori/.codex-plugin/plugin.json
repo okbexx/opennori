@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "OpenNori",
     "shortDescription": "Agent capability bundle for acceptance contracts and evidence.",
-    "longDescription": "OpenNori is a single agent capability bundle: npx opennori setup installs Plugin discovery, packaged Skills, the global opennori CLI, project .opennori state, and doctor checks with preview and confirmation. The Codex Plugin distributes packaged Skills, the Skills turn natural-language goals into human-centered acceptance contracts, architecture baselines, evidence, health checks, and reports, and the opennori CLI acts as the deterministic state layer for .opennori. Do not treat Plugin, Skills, and CLI as separate user paths.",
+    "longDescription": "OpenNori is a single agent capability bundle: npx opennori setup installs Plugin discovery, packaged Skills, the global opennori CLI, project .opennori state, and doctor checks with preview and confirmation. The Codex Plugin distributes packaged Skills, the Skills turn natural-language goals into human-centered acceptance contracts, architecture baselines, evidence, health checks, and reports, and the opennori CLI acts as the deterministic state layer for .opennori. The dashboard is observation-only: it may show live activity and needed user replies, but confirmations stay in the agent conversation and are recorded through CLI state. Do not treat Plugin, Skills, and CLI as separate user paths.",
     "developerName": "okbexx",
     "category": "Productivity",
     "capabilities": [

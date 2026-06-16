@@ -61,7 +61,7 @@ Useful state commands:
 
 May write manifest, protocol, agent guide, lifecycle-managed `.opennori/` assets, and uninstall removals after confirmation. It may not silently rewrite active Product AC, evidence, profile, architecture decisions, or reports as a side effect of health checks.
 
-May write live dashboard activity for health diagnosis or recovery. Activity is not lifecycle confirmation, not recovery evidence, and not Product AC evidence.
+May write live dashboard activity for health diagnosis or recovery. Activity is not lifecycle confirmation, not recovery evidence, and not Product AC evidence. Do not ask the user to confirm setup, init, upgrade, uninstall, waiver, or recovery actions inside the dashboard; show the preview in conversation and record explicit approval through the CLI path.
 
 ## Handoffs
 

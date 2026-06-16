@@ -177,6 +177,13 @@ publish whether it is thinking, working, verifying, waiting for the user, or
 blocked. Activity can explain what the agent is doing, but it cannot mark an AC
 passing.
 
+Dashboard is an observation surface, not a confirmation surface. It may show
+that a user decision, waiver, Architecture Baseline confirmation, AC approval,
+or report acceptance is needed, but it must direct that decision back to the
+agent conversation. Product AC, evidence, profile, architecture, report, waiver,
+and completion state are written through OpenNori Skills and CLI, not dashboard
+buttons or control endpoints.
+
 CLI JSON `data.agent_next.dashboard_activity` is the preferred Skill-facing
 hint for live dashboard publishing. If a Skill does not have that hint, it may
 call `opennori activity start|heartbeat|finish` with only root, Skill, state,
@@ -430,7 +437,7 @@ On every turn:
 18. Run `opennori resume --root <repo>` or `opennori next --root <repo>` to recover the active goal and current acceptance gap from repository files.
 19. Work only to produce evidence for that gap under the confirmed Architecture Baseline.
 20. Add acceptance evidence with `opennori evidence add`; choose any suitable verification method, but record basis, sources, reviewability, confidence, and limitations. If existing evidence is invalid or obsolete, run `opennori evidence prune` first so stale proof does not occupy active context. Add profile compliance evidence with `opennori profile evidence` when profile items exist.
-21. If a dashboard is useful, publish live activity from `agent_next.dashboard_activity` or `opennori activity start/heartbeat/finish`; do not treat that activity as acceptance evidence. If multiple active goals are ambiguous, ask which goal to observe instead of guessing.
+21. If a dashboard is useful, publish live activity from `agent_next.dashboard_activity` or `opennori activity start/heartbeat/finish`; do not treat that activity as acceptance evidence or use dashboard controls for confirmation. If multiple active goals are ambiguous, ask which goal to observe instead of guessing.
 22. Run `opennori evaluate`.
 23. Report acceptance state, profile compliance, and evidence, not implementation steps.
 24. If the goal is complete and the user asked to continue, review `agent_next.candidate_goals`, choose or refine the strongest human-facing next goal, then run discovery or draft for a new Nori Contract using candidate draft metadata when present. The resulting draft must give concrete measurement and passing thresholds for user approval; do not treat candidate goals as approved AC, phases, task lists, or evidence.

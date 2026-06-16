@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import type { ActivityState, NoriSnapshot } from "../types";
 
-type StageId = "goal" | "contract" | "gap" | "evidence" | "decision";
+type StageId = "goal" | "contract" | "gap" | "evidence" | "judgment";
 
 type Stage = {
   id: StageId;
@@ -17,7 +17,7 @@ const stages: Stage[] = [
   { id: "contract", label: "Contract", sublabel: "AC", x: 310, y: 96, radius: 56 },
   { id: "gap", label: "Gap", sublabel: "now", x: 520, y: 185, radius: 68 },
   { id: "evidence", label: "Evidence", sublabel: "proof", x: 730, y: 274, radius: 56 },
-  { id: "decision", label: "Decision", sublabel: "done?", x: 920, y: 185, radius: 55 }
+  { id: "judgment", label: "Judgment", sublabel: "done?", x: 920, y: 185, radius: 55 }
 ];
 
 const fallbackStage: Stage = stages[0] || { id: "goal", label: "Goal", sublabel: "intent", x: 120, y: 185, radius: 55 };
@@ -37,15 +37,16 @@ function activeStage({
   noActiveGoal: boolean;
 }): StageId {
   if (noActiveGoal) return "goal";
-  if (needUser || agentState === "waiting_user") return "decision";
+  if (needUser || agentState === "waiting_user") return "judgment";
   if (agentState === "verifying") return "evidence";
   if (hasGap) return "gap";
-  if (decision === "complete" || decision === "review_risk") return "decision";
+  if (decision === "complete" || decision === "review_risk") return "judgment";
   return "contract";
 }
 
 function stageState(stage: StageId, current: StageId, loop: NoriSnapshot["loop"] | undefined): string {
-  const value = loop?.[stage];
+  const loopKey: keyof NoriSnapshot["loop"] = stage === "judgment" ? "decision" : stage;
+  const value = loop?.[loopKey];
   if (stage === current) return "active";
   if (value === "ready" || value === "approved" || value === "clear" || value === "decided") return "ready";
   if (value === "missing" || value === "draft" || value === "pending" || value === "needs_evidence") return "pending";
