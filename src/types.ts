@@ -240,6 +240,131 @@ export type AgentSkill =
   | "nori-project-health"
   | "nori-reporting";
 
+export type NoriEventActor = {
+  kind: "agent" | "user" | "system" | (string & {});
+  name: string;
+  skill?: string;
+};
+
+export type NoriEventType =
+  | "goal.created"
+  | "contract.drafted"
+  | "contract.approved"
+  | "gap.changed"
+  | "activity.started"
+  | "activity.heartbeat"
+  | "activity.finished"
+  | "evidence.added"
+  | "decision.changed"
+  | "architecture.changed"
+  | "profile.changed"
+  | "doctor.warning"
+  | "report.generated"
+  | (string & {});
+
+export type NoriEventInput = {
+  type: NoriEventType;
+  goal_id?: string;
+  gap_id?: string;
+  actor?: NoriEventActor;
+  summary?: string;
+  data?: JsonObject;
+  created_at?: string;
+};
+
+export type NoriEvent = {
+  schema_version: "opennori/event-v1" | (string & {});
+  id: string;
+  seq: number;
+  type: NoriEventType;
+  goal_id?: string;
+  gap_id?: string;
+  actor: NoriEventActor;
+  summary: string;
+  data: JsonObject;
+  created_at: string;
+};
+
+export type NoriActivityState = "idle" | "thinking" | "working" | "verifying" | "waiting_user" | "blocked";
+
+export type NoriActivityInput = {
+  agent?: string;
+  skill?: string;
+  state?: NoriActivityState | string;
+  goal_id?: string;
+  gap_id?: string;
+  summary?: string;
+  ttl_ms?: number;
+};
+
+export type NoriActivity = {
+  schema_version: "opennori/activity-v1" | (string & {});
+  agent: string;
+  skill?: string;
+  state: NoriActivityState;
+  goal_id?: string;
+  gap_id?: string;
+  summary: string;
+  started_at: string;
+  last_seen_at: string;
+  expires_at: string;
+  expired?: boolean;
+};
+
+export type NoriSnapshot = {
+  schema_version: "opennori/snapshot-v1" | (string & {});
+  generated_at: string;
+  root: string;
+  status: "active" | "no_active_goal" | (string & {});
+  agent: {
+    name: string;
+    skill?: string;
+    state: NoriActivityState;
+    summary?: string;
+    last_seen_at?: string;
+    expires_at?: string;
+    expired?: boolean;
+  };
+  goal: {
+    id: string;
+    label: string;
+    workflow_status: WorkflowStatus;
+  } | null;
+  current_gap: {
+    id: string;
+    label: string;
+    status: AcceptanceStatus;
+    reason: string;
+    latest_evidence?: string;
+  } | null;
+  need_user: boolean;
+  user_action?: string;
+  decision: "complete" | "not_complete" | "review_risk" | "no_active_goal" | (string & {});
+  completion?: CompletionAnswer;
+  acceptance_review?: {
+    status: string;
+    summary: string;
+  };
+  evidence_health?: {
+    status: string;
+    summary: string;
+  };
+  architecture: {
+    decision: string;
+    profile: string | null;
+    profile_title?: string | null;
+    open_challenges?: number;
+  };
+  loop: {
+    goal: string;
+    contract: string;
+    gap: string;
+    evidence: string;
+    decision: string;
+  };
+  last_event: NoriEvent | null;
+};
+
 export type NextRecommendation = {
   status:
     | "user-intervention-required"

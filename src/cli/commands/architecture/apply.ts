@@ -6,7 +6,7 @@ import {
   readArchitectureBaseline,
   writeArchitectureApplyRecord
 } from "../../../architecture.ts";
-import { ok, slugify } from "../../../core.ts";
+import { appendEvent, ok, refreshSnapshot, slugify } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
 import { jsonArg, resolveRoot, rootArg } from "./shared.ts";
@@ -94,6 +94,15 @@ export const architectureApplyCommand = defineCommand({
     });
     const paths = writeArchitectureApplyRecord(root, record);
     refreshManifest(root);
+    appendEvent(root, {
+      type: "architecture.changed",
+      goal_id: goalId,
+      gap_id: criterionId,
+      actor: { kind: "agent", name: "Agent", skill: "nori-architecture-apply" },
+      summary,
+      data: { apply_id: record.id, status: record.status, path: paths.jsonPath }
+    });
+    refreshSnapshot(root, { goalId });
     return ok(
       {
         root,

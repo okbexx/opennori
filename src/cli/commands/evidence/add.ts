@@ -3,11 +3,13 @@ import { architectureState } from "../../../architecture.ts";
 import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
   addEvidence,
+  appendEvent,
   criterionStatusRows,
   currentGap,
   nextRecommendation,
   ok,
   pruneInvalidEvidence,
+  refreshSnapshot,
   syncAcceptanceMarkdown,
   writeJson
 } from "../../../core.ts";
@@ -113,6 +115,19 @@ export const evidenceAddCommand = defineCommand({
     const architecture = architectureState(root, contract.goal_id);
     const gap = currentGap(contract, ledger);
     const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+    appendEvent(root, {
+      type: "evidence.added",
+      goal_id: contract.goal_id,
+      gap_id: criterionId,
+      actor: { kind: "agent", name: "Agent", skill: "nori-evidence" },
+      summary: evidence.summary,
+      data: {
+        result: ledger.criteria[criterionId].status,
+        confidence: ledger.criteria[criterionId].confidence,
+        gate: ledger.criteria[criterionId].evidence.at(-1)?.gate
+      }
+    });
+    refreshSnapshot(root, { goalId: contract.goal_id });
     return ok({
       goal_id: contract.goal_id,
       criterion: criterionId,

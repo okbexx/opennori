@@ -9,6 +9,7 @@ layers separated by responsibility but coupled as one product:
 - Codex Plugin / Skills: agent discovery and natural-language routing.
 - `opennori` CLI: deterministic state reads/writes and JSON/report output.
 - `.opennori/`: project-local contracts, evidence, profiles, architecture, and reports.
+- `.opennori/events`, `.opennori/activity`, and `.opennori/snapshots`: local dashboard observation state only.
 
 The user-facing install shape is:
 
@@ -22,6 +23,8 @@ advanced recovery, automation, or source-checkout development details.
 Do not implement project-local Skill copying, Skill Pack install/sync, or `.agents/skills` as product behavior. The product goal is for a user agent to get OpenNori through Codex Plugin/Skill discovery, then use the CLI only as the deterministic state layer. If Plugin discovery, packaged Skills, CLI access, or `.opennori` state is missing, route through doctor/project-health and recover the missing bundle part instead of continuing a half-installed workflow.
 
 For agent routing, prefer CLI JSON `data.agent_next` over project-local prose files. `.opennori/agent-guide.md` may summarize project state, but it is not OpenNori's discovery mechanism and must not carry critical Skill behavior.
+
+`opennori dashboard` is a local visual observation surface over the acceptance loop. It must not become an agent runtime, process log, chat log, or completion authority. `opennori activity` only publishes live agent state for the dashboard; it is not Product AC evidence.
 
 Before implementing a non-trivial change, read:
 

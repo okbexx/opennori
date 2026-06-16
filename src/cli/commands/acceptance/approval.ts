@@ -3,8 +3,10 @@ import { architectureState } from "../../../architecture.ts";
 import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
   currentGap,
+  appendEvent,
   nextRecommendation,
   ok,
+  refreshSnapshot,
   recomputeWorkflowStatus,
   syncAcceptanceMarkdown,
   writeJson
@@ -41,6 +43,15 @@ export const approveCommand = defineCommand({
     const architecture = architectureState(root, contract.goal_id);
     const gap = currentGap(contract, ledger);
     const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+    appendEvent(root, {
+      type: "contract.approved",
+      goal_id: contract.goal_id,
+      gap_id: gap?.id,
+      actor: { kind: "agent", name: "Agent", skill: "nori-acceptance" },
+      summary: String(args.summary || "User approved acceptance criteria."),
+      data: { workflow_status: ledger.status }
+    });
+    refreshSnapshot(root, { goalId: contract.goal_id });
     return ok({
       goal_id: contract.goal_id,
       acceptance_basis: contract.acceptance_basis,

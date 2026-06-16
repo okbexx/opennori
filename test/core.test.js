@@ -88,6 +88,7 @@ test("published package uses built dist bin while local source bin remains avail
   assert.equal(packageJson.files.includes(".codex-plugin/"), false);
   assert.equal(packageJson.files.includes("skills/"), false);
   assert.equal(packageJson.files.includes("plugins/opennori/"), true);
+  assert.equal(packageJson.files.includes("dashboard/"), true);
   assert.equal(packageJson.files.includes("bin/opennori.js"), true);
   assert.equal(packageJson.files.includes("bin/"), false);
   assert.equal(fs.existsSync(path.join(ROOT, "bin", "opennori.js")), true);

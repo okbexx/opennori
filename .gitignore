@@ -6,3 +6,7 @@ npm-debug.log*
 .codegraph/
 .adaw/active/*.local.*
 .adaw/evidence/**/local-*
+.opennori/.locks/
+.opennori/activity/
+.opennori/events/
+.opennori/snapshots/

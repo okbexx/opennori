@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-15T12:56:52.540Z",
+  "updated_at": "2026-06-16T03:44:22.077Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -332,6 +332,24 @@
         "path": ".opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.json"
       },
       {
+        "id": "dashboard-kernel-http-sse",
+        "schema_valid": true,
+        "schema_errors": [],
+        "area": "dashboard-kernel",
+        "need": "Provide a local visual dashboard that observes OpenNori contract, gap, evidence, architecture, and live agent activity without becoming an agent runtime.",
+        "recommendation": "self-build",
+        "status": "active",
+        "summary": "Use Node standard library HTTP plus Server-Sent Events for a local loopback observation kernel. OpenNori keeps .opennori as source of truth, emits a small durable JSONL event ledger, projects current snapshot JSON, and serves a static SVG dashboard. MCP remains a later structured agent tool surface, not the dashboard transport.",
+        "current_project": "OpenNori already has TypeScript domain modules, citty CLI commands, JSON .opennori state, manifest-managed lifecycle, and package-local static assets; no existing kernel/dashboard layer is present.",
+        "standard_library": "Node http, fs, path, url, and child_process are sufficient for a loopback server, JSON snapshot endpoint, static file serving, and SSE event stream.",
+        "official_sdk": "No official OpenNori SDK exists for dashboard transport. MCP is useful later for agent tool calls, but OpenAI/Codex Skills plus CLI already cover current agent state writes; MCP is not required to stream a human dashboard.",
+        "open_source": "Express/Fastify/Hono and frontend frameworks were considered, but the first dashboard is local, unauthenticated loopback, static, and has three endpoints; adding a server or SPA framework would increase package surface before routing complexity exists.",
+        "self_build_reason": "The self-built portion is intentionally small adapter glue around Node's standard library and OpenNori's own state semantics. External libraries would not replace the product-specific event, activity, and snapshot projection model.",
+        "superseded_by": "",
+        "superseded_reason": "",
+        "path": ".opennori/architecture/decisions/dashboard-kernel-http-sse.json"
+      },
+      {
         "id": "editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark",
         "schema_valid": true,
         "schema_errors": [],
@@ -457,8 +475,8 @@
     "build_vs_buy": {
       "status": "clear",
       "summary": "Every recorded build-vs-buy decision includes reviewable reuse candidates and any self-build reason.",
-      "decision_count": 12,
-      "total_decision_count": 12,
+      "decision_count": 13,
+      "total_decision_count": 13,
       "superseded_decision_count": 0,
       "findings": []
     },

@@ -15,6 +15,7 @@ Reporting is not an implementation diary.
 2. Prefer resume/status for current state, report for a durable human report, changes for diff grouping, and context export when another tool needs review context.
 3. Read completion, current_gap, acceptance_review, evidence_health, profile_review, architecture decision, build_vs_buy health, agent_next, and next_recommendation.
 4. If the user asked to continue, follow `agent_next` routing and its `candidate_goals` instead of stopping at a status dump.
+5. If the user wants a visual live view, use `opennori dashboard --root <repo>` as an observation surface, but keep the completion answer based on status/report data.
 
 Useful state commands:
 
@@ -25,6 +26,7 @@ Useful state commands:
 - `opennori changes --root <repo> --json`
 - `opennori list --root <repo> --json`
 - `opennori context export --root <repo> --json`
+- `opennori dashboard --root <repo>`
 
 ## Natural-Language Mapping
 
@@ -35,10 +37,13 @@ Useful state commands:
 - "Generate report" -> create/read the OpenNori report and summarize the decision.
 - "Continue" after a complete goal -> inspect `agent_next.candidate_goals`, choose or refine the strongest human-facing next goal, then hand off to `nori-acceptance`.
 - "Export for review" -> use context export and state what the reviewer can inspect.
+- "Open dashboard" or "watch it run" -> start the local dashboard and explain that it observes activity, current gap, architecture, and completion decision without certifying completion by itself.
 
 ## State Writes
 
 May generate reports, changes output, or context exports. Do not mutate Product AC, evidence, profile, architecture, or lifecycle state.
+
+May start the local dashboard as an observation surface. Do not write Product AC or evidence from dashboard state.
 
 ## Handoffs
 
@@ -70,3 +75,4 @@ Then add short evidence or risk bullets only when they affect acceptance.
 - Do not describe implementation details as the main progress signal.
 - Do not treat candidate goals as approved AC, phases, task lists, or evidence.
 - Do not hide review-risk completion behind a simple "done".
+- Do not treat dashboard activity, events, or snapshots as completion evidence.

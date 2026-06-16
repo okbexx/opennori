@@ -6,7 +6,7 @@ import {
   buildArchitectureBaseline,
   writeArchitectureBaseline
 } from "../../../architecture.ts";
-import { currentGap, nextRecommendation, ok, pathsForGoal, readJson, slugify } from "../../../core.ts";
+import { appendEvent, currentGap, nextRecommendation, ok, pathsForGoal, readJson, refreshSnapshot, slugify } from "../../../core.ts";
 import { agentNextForRecommendation } from "../../../agent-next.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
@@ -62,6 +62,13 @@ export const architectureBaselineCommand = defineCommand({
     if (confirmed) {
       writeArchitectureBaseline(root, baseline);
       refreshManifest(root);
+      appendEvent(root, {
+        type: "architecture.changed",
+        goal_id: goalId,
+        actor: { kind: "agent", name: "Agent", skill: "nori-architecture-brainstorm" },
+        summary: `Confirmed Architecture Baseline ${baseline.profile_title || baseline.profile}.`,
+        data: { profile: baseline.profile, status: baseline.status }
+      });
     }
     const architecture = confirmed ? architectureState(root, goalId) : {
       ...architectureState(root, goalId),
@@ -82,6 +89,7 @@ export const architectureBaselineCommand = defineCommand({
         recommendation = nextRecommendation(payload.contract, payload.ledger, { root, architecture });
         agent_next = agentNextForRecommendation(payload.contract.goal_id, current_gap, recommendation);
       }
+      refreshSnapshot(root, { goalId });
     }
     return ok(
       {

@@ -2,10 +2,12 @@ import type { CommandDef, SubCommandsDef } from "citty";
 import { defineCommand, runCommand } from "citty";
 import { approveCommand, brainstormCommand, criterionAddCommand, criterionUpdateCommand, discoverCommand, draftCommand, evaluateCommand, initCommand, nextCommand, resumeCommand, statusCommand } from "./commands/acceptance.ts";
 import { architectureApplyCommand, architectureBaselineCommand, architectureBuildVsBuyCommand, architectureChallengeCommand, architectureProfileCommand, architectureProfilesCommand, architectureShowCommand } from "./commands/architecture.ts";
+import { activityFinishCommand, activityHeartbeatCommand, activityShowCommand, activityStartCommand } from "./commands/activity.ts";
 import { bootstrapCommand } from "./commands/bootstrap.ts";
 import { changesCommand } from "./commands/changes.ts";
 import { checkCommand } from "./commands/check.ts";
 import { contextExportCommand } from "./commands/context.ts";
+import { dashboardCommand } from "./commands/dashboard.ts";
 import { doctorCommand } from "./commands/doctor.ts";
 import { evidenceAddCommand, evidencePruneCommand } from "./commands/evidence.ts";
 import { installCommand } from "./commands/install.ts";
@@ -95,6 +97,13 @@ const contextCommand = groupCommand("context", "Export OpenNori context for revi
   export: withPolicy(asCommand(contextExportCommand), { activeGoal: true })
 });
 
+const activityCommand = groupCommand("activity", "Publish current OpenNori agent activity for the local dashboard.", {
+  start: asCommand(activityStartCommand),
+  heartbeat: asCommand(activityHeartbeatCommand),
+  finish: asCommand(activityFinishCommand),
+  show: asCommand(activityShowCommand)
+});
+
 export const rootCommand = defineCommand({
   meta: {
     name: CLI_NAME,
@@ -108,6 +117,7 @@ export const rootCommand = defineCommand({
     install: withPolicy(asCommand(installCommand), { commandResult: true }),
     uninstall: withPolicy(asCommand(uninstallCommand), { commandResult: true }),
     upgrade: withPolicy(asCommand(upgradeCommand), { commandResult: true }),
+    dashboard: withPolicy(asCommand(dashboardCommand), { commandResult: true }),
     brainstorm: asCommand(brainstormCommand),
     discover: asCommand(discoverCommand),
     draft: withPolicy(asCommand(draftCommand), { commandResult: true }),
@@ -125,7 +135,8 @@ export const rootCommand = defineCommand({
     criterion: criterionCommand,
     profile: profileCommand,
     evidence: evidenceCommand,
-    context: contextCommand
+    context: contextCommand,
+    activity: activityCommand
   }
 }) as AnyCommand;
 

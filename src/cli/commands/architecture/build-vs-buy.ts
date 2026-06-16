@@ -7,7 +7,7 @@ import {
   buildVsBuyPath,
   renderBuildVsBuyMarkdown
 } from "../../../architecture.ts";
-import { ok, slugify, writeJson } from "../../../core.ts";
+import { appendEvent, ok, refreshSnapshot, slugify, writeJson } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
 import type { BuildVsBuyDecision } from "../../../types.ts";
@@ -115,6 +115,13 @@ export const architectureBuildVsBuyCommand = defineCommand({
     fs.mkdirSync(path.dirname(paths.markdownPath), { recursive: true });
     fs.writeFileSync(paths.markdownPath, renderBuildVsBuyMarkdown(decision));
     refreshManifest(root);
+    appendEvent(root, {
+      type: "architecture.changed",
+      actor: { kind: "agent", name: "Agent", skill: "nori-build-vs-buy" },
+      summary: `Recorded build-vs-buy decision ${decision.id}.`,
+      data: { decision_id: decision.id, recommendation: decision.recommendation, path: paths.jsonPath }
+    });
+    refreshSnapshot(root);
     return ok(
       {
         root,

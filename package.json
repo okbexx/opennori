@@ -10,6 +10,7 @@
     ".agents/plugins/",
     ".opennori/protocol.md",
     "bin/opennori.js",
+    "dashboard/",
     "dist/",
     "plugins/opennori/",
     "src/",

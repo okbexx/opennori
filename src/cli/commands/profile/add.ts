@@ -1,9 +1,11 @@
 import { defineCommand } from "citty";
 import {
   addProfileItem,
+  appendEvent,
   currentGap,
   ok,
   profileCompliance,
+  refreshSnapshot,
   recomputeWorkflowStatus
 } from "../../../core.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
@@ -71,6 +73,15 @@ export const profileAddCommand = defineCommand({
     recomputeWorkflowStatus(contract, ledger);
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     data.refreshManifest(root);
+    appendEvent(root, {
+      type: "profile.changed",
+      goal_id: contract.goal_id,
+      gap_id: currentGap(contract, ledger)?.id,
+      actor: { kind: "agent", name: "Agent", skill: "nori-capability-profile" },
+      summary: `Recorded Nori Profile item ${item.name}.`,
+      data: { item_id: item.id, type: item.type, strength: item.strength }
+    });
+    refreshSnapshot(root, { goalId: contract.goal_id });
     return ok({
       goal_id: contract.goal_id,
       profile: ledger.capability_profile,

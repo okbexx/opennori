@@ -3,7 +3,7 @@ import path from "node:path";
 import { defineCommand } from "citty";
 import { reviewAcceptanceQuality } from "../../acceptance.ts";
 import { agentNextForRecommendation } from "../../agent-next.ts";
-import { completionAnswer, currentGap, evidenceHealth, fail, intervention, nextRecommendation, ok, pathsForGoal, recomputeWorkflowStatus, syncAcceptanceMarkdown, writeJson } from "../../core.ts";
+import { appendEvent, completionAnswer, currentGap, evidenceHealth, fail, intervention, nextRecommendation, ok, pathsForGoal, refreshSnapshot, recomputeWorkflowStatus, syncAcceptanceMarkdown, writeJson } from "../../core.ts";
 import { architectureState, renderReportWithArchitecture } from "../../architecture.ts";
 import { refreshManifest } from "../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
@@ -34,6 +34,15 @@ export const reportCommand = defineCommand({
     refreshManifest(root);
     const gap = currentGap(contract, ledger);
     const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+    appendEvent(root, {
+      type: "report.generated",
+      goal_id: contract.goal_id,
+      gap_id: gap?.id,
+      actor: { kind: "agent", name: "Agent", skill: "nori-reporting" },
+      summary: `Generated OpenNori report for ${contract.goal_id}.`,
+      data: { report_path: output, workflow_status: ledger.status }
+    });
+    refreshSnapshot(root, { goalId: contract.goal_id });
     return ok(
       {
         goal_id: contract.goal_id,

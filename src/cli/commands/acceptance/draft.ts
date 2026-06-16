@@ -7,11 +7,13 @@ import {
   buildContractFromBrief,
   buildEvidenceLedger,
   currentGap,
+  appendEvent,
   fail,
   ok,
   pathsForGoal,
   readJson,
   renderAcceptanceMarkdown,
+  refreshSnapshot,
   nextRecommendation,
   validateContract,
   writeJson
@@ -150,6 +152,15 @@ export const draftCommand = defineCommand({
     fs.writeFileSync(paths.acceptancePath, renderAcceptanceMarkdown(contract, ledger));
     writeJson(paths.evidencePath, { contract, ledger });
     refreshManifest(root);
+    appendEvent(root, {
+      type: "contract.drafted",
+      goal_id: contract.goal_id,
+      gap_id: currentGap(contract, ledger)?.id,
+      actor: { kind: "agent", name: "Agent", skill: "nori-acceptance" },
+      summary: `Drafted Nori Contract for ${contract.goal_id}.`,
+      data: { acceptance_path: paths.acceptancePath, evidence_path: paths.evidencePath }
+    });
+    refreshSnapshot(root, { goalId: contract.goal_id });
     return ok(
       {
         goal_id: contract.goal_id,

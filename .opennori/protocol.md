@@ -122,6 +122,12 @@ OpenNori writes its project-local state under `.opennori/`.
   blocked/
   reports/
   brainstorms/
+  events/
+    events.jsonl
+  activity/
+    current.json
+  snapshots/
+    current.json
   architecture/
     baseline.json
     baseline.md
@@ -150,6 +156,26 @@ Each active goal has:
 `opennori install` remains a deterministic project-asset command for agents and automation.
 State-changing OpenNori commands refresh the manifest when
 `.opennori/` already exists.
+
+## Event, Activity, And Dashboard State
+
+OpenNori may maintain a local observation surface for users:
+
+- `.opennori/events/events.jsonl` is an append-only event ledger for important
+  OpenNori state changes and live activity signals.
+- `.opennori/activity/current.json` is the latest agent activity signal.
+- `.opennori/snapshots/current.json` is a projection for the dashboard.
+
+These files are not Product AC, not implementation plans, and not completion
+evidence. They help users observe the acceptance loop while it runs. The source
+of truth for completion remains the active Nori Contract, evidence ledger,
+Nori Profile, Architecture Baseline, and report state.
+
+`opennori dashboard --root <project>` starts a local loopback HTTP/SSE kernel
+and serves a static visual dashboard. `opennori activity ...` lets an agent
+publish whether it is thinking, working, verifying, waiting for the user, or
+blocked. Activity can explain what the agent is doing, but it cannot mark an AC
+passing.
 
 `opennori install --dry-run` returns an install plan. The plan uses deterministic action semantics:
 
@@ -397,9 +423,10 @@ On every turn:
 18. Run `opennori resume --root <repo>` or `opennori next --root <repo>` to recover the active goal and current acceptance gap from repository files.
 19. Work only to produce evidence for that gap under the confirmed Architecture Baseline.
 20. Add acceptance evidence with `opennori evidence add`; choose any suitable verification method, but record basis, sources, reviewability, confidence, and limitations. If existing evidence is invalid or obsolete, run `opennori evidence prune` first so stale proof does not occupy active context. Add profile compliance evidence with `opennori profile evidence` when profile items exist.
-21. Run `opennori evaluate`.
-22. Report acceptance state, profile compliance, and evidence, not implementation steps.
-23. If the goal is complete and the user asked to continue, review `agent_next.candidate_goals`, choose or refine the strongest human-facing next goal, then run discovery or draft for a new Nori Contract using candidate draft metadata when present. The resulting draft must give concrete measurement and passing thresholds for user approval; do not treat candidate goals as approved AC, phases, task lists, or evidence.
+21. If a dashboard is useful, publish live activity with `opennori activity start/heartbeat/finish`; do not treat that activity as acceptance evidence.
+22. Run `opennori evaluate`.
+23. Report acceptance state, profile compliance, and evidence, not implementation steps.
+24. If the goal is complete and the user asked to continue, review `agent_next.candidate_goals`, choose or refine the strongest human-facing next goal, then run discovery or draft for a new Nori Contract using candidate draft metadata when present. The resulting draft must give concrete measurement and passing thresholds for user approval; do not treat candidate goals as approved AC, phases, task lists, or evidence.
 
 Useful commands:
 
@@ -420,6 +447,8 @@ Useful commands:
 - `opennori upgrade --root <repo>`: preview and refresh project-local OpenNori assets without rewriting active contracts or evidence.
 - `opennori doctor --root <repo>`: inspect project OpenNori health and recovery actions.
 - `opennori check --root <repo>`: validate active contract structure, audit active ACs for underspecified acceptance quality, surface Architecture Baseline health for the active goal, and report evidence health.
+- `opennori dashboard --root <repo>`: start a local visual dashboard over OpenNori state.
+- `opennori activity start|heartbeat|finish --root <repo>`: publish live agent activity for the dashboard; this is not evidence.
 - `opennori resume --root <repo>`: recover the active goal, current gap, completion answer, and intervention state.
 - `opennori status --root <repo>`: answer whether the goal is complete and whether the user needs to act.
 - `opennori report --root <repo>`: generate the human acceptance report.

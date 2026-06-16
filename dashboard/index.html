@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OpenNori Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell" data-state="idle">
+      <section class="stage" aria-label="OpenNori live state">
+        <div class="topline">
+          <div>
+            <p class="eyebrow">OpenNori Kernel</p>
+            <h1 id="goal">No active goal</h1>
+          </div>
+          <div class="agent-pill">
+            <span class="agent-dot"></span>
+            <span id="agent">Agent idle</span>
+          </div>
+        </div>
+
+        <div class="loop-wrap">
+          <svg class="loop" viewBox="0 0 980 360" role="img" aria-label="Goal to decision acceptance loop">
+            <defs>
+              <linearGradient id="flowGradient" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stop-color="#00b7a8"></stop>
+                <stop offset="50%" stop-color="#4c7dff"></stop>
+                <stop offset="100%" stop-color="#ff8a3d"></stop>
+              </linearGradient>
+              <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="6" result="blur"></feGaussianBlur>
+                <feMerge>
+                  <feMergeNode in="blur"></feMergeNode>
+                  <feMergeNode in="SourceGraphic"></feMergeNode>
+                </feMerge>
+              </filter>
+            </defs>
+            <path class="track" d="M130 180 C230 52 378 52 490 180 S750 310 850 180"></path>
+            <path class="flow" d="M130 180 C230 52 378 52 490 180 S750 310 850 180"></path>
+            <g class="node node-goal" transform="translate(130 180)">
+              <circle r="54"></circle>
+              <text y="-4">Goal</text>
+              <text class="node-small" y="18">intent</text>
+            </g>
+            <g class="node node-contract" transform="translate(310 104)">
+              <circle r="54"></circle>
+              <text y="-4">Contract</text>
+              <text class="node-small" y="18">AC</text>
+            </g>
+            <g class="node node-gap" transform="translate(490 180)">
+              <circle r="64"></circle>
+              <text y="-4">Gap</text>
+              <text class="node-small" y="20">current</text>
+            </g>
+            <g class="node node-evidence" transform="translate(670 256)">
+              <circle r="54"></circle>
+              <text y="-4">Evidence</text>
+              <text class="node-small" y="18">proof</text>
+            </g>
+            <g class="node node-decision" transform="translate(850 180)">
+              <circle r="54"></circle>
+              <text y="-4">Decision</text>
+              <text class="node-small" y="18">done?</text>
+            </g>
+          </svg>
+        </div>
+
+        <section class="status-grid" aria-label="Current status">
+          <article>
+            <span>Current gap</span>
+            <strong id="gap">Waiting for OpenNori state</strong>
+          </article>
+          <article>
+            <span>Need user</span>
+            <strong id="need-user">no</strong>
+          </article>
+          <article>
+            <span>Decision</span>
+            <strong id="decision">not complete yet</strong>
+          </article>
+          <article>
+            <span>Architecture</span>
+            <strong id="architecture">unknown</strong>
+          </article>
+        </section>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

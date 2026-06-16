@@ -1,14 +1,17 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { test } from "vitest";
 import { runApproveCommand, runBrainstormCommand, runCriterionAddCommand, runCriterionUpdateCommand, runDiscoverCommand, runDraftCommand, runEvaluateCommand, runInitCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../src/cli/commands/acceptance.ts";
 import { runArchitectureApplyCommand, runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand } from "../src/cli/commands/architecture.ts";
+import { runActivityFinishCommand, runActivityHeartbeatCommand, runActivityShowCommand, runActivityStartCommand } from "../src/cli/commands/activity.ts";
 import { runCheckCommand } from "../src/cli/commands/check.ts";
 import { runChangesCommand } from "../src/cli/commands/changes.ts";
 import { runContextExportCommand } from "../src/cli/commands/context.ts";
+import { runDashboardCommand } from "../src/cli/commands/dashboard.ts";
 import { runDoctorCommand } from "../src/cli/commands/doctor.ts";
 import { runEvidenceAddCommand, runEvidencePruneCommand } from "../src/cli/commands/evidence.ts";
 import { runBootstrapCommand } from "../src/cli/commands/bootstrap.ts";
@@ -22,7 +25,8 @@ import { runUninstallCommand } from "../src/cli/commands/uninstall.ts";
 import { runUpgradeCommand } from "../src/cli/commands/upgrade.ts";
 import { buildArchitectureBaseline, renderAgentGuideMarkdown, writeArchitectureBaseline } from "../src/architecture.ts";
 import { loadPair } from "../src/cli/runtime.ts";
-import { addEvidence, buildEvidenceLedger, writeJson } from "../src/core.ts";
+import { addEvidence, appendEvent, buildEvidenceLedger, readEvents, refreshSnapshot, snapshotPath, writeJson } from "../src/core.ts";
+import { startDashboardServer } from "../src/kernel/server.ts";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 
@@ -1080,6 +1084,92 @@ test("report command module renders a report artifact", async () => {
   assert.equal(report.data.agent_next.recommended_skill, "nori-reporting");
   assert.equal(report.artifacts[0].kind, "acceptance_report");
   assert.match(fs.readFileSync(outputPath, "utf8"), /## Decision Summary/);
+});
+
+test("kernel events activity and snapshot expose dashboard state without replacing source files", async () => {
+  const root = tempRoot();
+  writeActiveGoal(root);
+
+  const first = appendEvent(root, {
+    type: "goal.created",
+    goal_id: "module-goal",
+    actor: { kind: "agent", name: "Codex", skill: "nori-acceptance" },
+    summary: "Created a module goal."
+  });
+  const second = appendEvent(root, {
+    type: "gap.changed",
+    goal_id: "module-goal",
+    gap_id: "ACCEPTANCE-BASIS",
+    actor: { kind: "agent", name: "Codex", skill: "nori-reporting" },
+    summary: "Current gap changed."
+  });
+  assert.equal(first.seq, 1);
+  assert.equal(second.seq, 2);
+  assert.equal(readEvents(root).length, 2);
+
+  const started = await runActivityStartCommand([
+    "--root", root,
+    "--agent", "Codex",
+    "--skill", "nori-evidence",
+    "--state", "verifying",
+    "--goal", "module-goal",
+    "--gap", "ACCEPTANCE-BASIS",
+    "--summary", "Verifying the active gap.",
+    "--json"
+  ]);
+  assert.equal(started.ok, true);
+  assert.equal(started.data.activity.agent, "Codex");
+  assert.equal(started.data.snapshot.agent.state, "verifying");
+  assert.equal(started.data.snapshot.current_gap.id, "ACCEPTANCE-BASIS");
+
+  const heartbeat = await runActivityHeartbeatCommand(["--root", root, "--agent", "Codex", "--state", "working", "--json"]);
+  assert.equal(heartbeat.data.activity.state, "working");
+
+  const shown = await runActivityShowCommand(["--root", root, "--json"]);
+  assert.equal(shown.data.activity.state, "working");
+
+  const finished = await runActivityFinishCommand(["--root", root, "--summary", "Done for now.", "--json"]);
+  assert.equal(finished.data.activity.state, "idle");
+
+  const snapshot = refreshSnapshot(root, { goalId: "module-goal" });
+  assert.equal(snapshot.goal.id, "module-goal");
+  assert.equal(snapshot.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(fs.existsSync(snapshotPath(root)), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "active", "module-goal.evidence.json")), true);
+});
+
+test("dashboard command can start the local kernel without opening a browser", async () => {
+  const root = tempRoot();
+  const dashboard = await runDashboardCommand(["--root", root, "--port", "0", "--no-open", "--once", "--json"]);
+
+  assert.equal(dashboard.ok, true);
+  assert.match(dashboard.data.url, /^http:\/\/127\.0\.0\.1:\d+\//);
+  assert.equal(dashboard.data.side_effect, "started-and-closed");
+  assert.equal(readEvents(root).some((event) => event.type === "dashboard.started"), true);
+});
+
+test("dashboard SSE emits generic and typed event frames", async () => {
+  const root = tempRoot();
+  const handle = await startDashboardServer({ root, port: 0, open: false });
+  let responseText = "";
+  const request = http.get(`${handle.url}api/events`, (response) => {
+    response.setEncoding("utf8");
+    response.on("data", (chunk) => {
+      responseText += chunk;
+      if (responseText.includes("event: dashboard.started")) {
+        request.destroy();
+        handle.server.close();
+      }
+    });
+  });
+
+  await new Promise((resolve, reject) => {
+    request.on("close", resolve);
+    request.on("error", reject);
+  });
+
+  assert.match(responseText, /(^|\n)id: 1\ndata: /);
+  assert.match(responseText, /\nevent: dashboard\.started\n/);
 });
 
 test("archive command module moves complete goals and preserves a report", async () => {

@@ -1,8 +1,10 @@
 import { defineCommand } from "citty";
 import {
+  appendEvent,
   currentGap,
   ok,
   profileCompliance,
+  refreshSnapshot,
   recomputeWorkflowStatus
 } from "../../../core.ts";
 import { autoProfileChecks, recordAutoProfileChecks } from "../../../lifecycle.ts";
@@ -33,6 +35,15 @@ export const profileCheckCommand = defineCommand({
       recomputeWorkflowStatus(contract, ledger);
       data.savePair(acceptancePath, evidencePath, contract, ledger);
       data.refreshManifest(root);
+      appendEvent(root, {
+        type: "profile.changed",
+        goal_id: contract.goal_id,
+        gap_id: currentGap(contract, ledger)?.id,
+        actor: { kind: "agent", name: "Agent", skill: "nori-capability-profile" },
+        summary: "Recorded automatic Nori Profile checks.",
+        data: { check_count: checks.length }
+      });
+      refreshSnapshot(root, { goalId: contract.goal_id });
     }
 
     return ok({
