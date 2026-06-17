@@ -31,6 +31,7 @@ export function buildContextExport(root: string, pair: { acceptancePath: string;
     root,
     goal_id: contract.goal_id,
     goal: contract.goal,
+    presentation: contract.presentation,
     acceptance_basis: contract.acceptance_basis || { status: "draft" },
     workflow_status: ledger.status,
     current_gap: gap,

@@ -6,7 +6,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { test } from "vitest";
 import { reviewAcceptanceQuality } from "../src/acceptance.ts";
-import { validateContract } from "../src/core.ts";
+import { buildContractFromBrief, buildEvidenceLedger, renderAcceptanceMarkdown, validateContract } from "../src/core.ts";
 import { validateSchema } from "../src/validation.ts";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
@@ -253,10 +253,85 @@ test("init creates markdown contract and evidence record", () => {
   assert.equal(fs.existsSync(payload.data.evidence_path), true);
 
   const acceptance = fs.readFileSync(payload.data.acceptance_path, "utf8");
-  assert.match(acceptance, /User Acceptance Criteria/);
+  assert.equal(payload.data.presentation.language, "zh-CN");
+  assert.match(acceptance, /用户验收标准/);
+  assert.match(acceptance, /语言: zh-CN/);
   assert.match(acceptance, /\| ID \| Layer \|/);
   assert.match(acceptance, /Codex 对话/);
   assert.doesNotMatch(acceptance, /Step 1/);
+});
+
+test("contract language is inferred for new briefs but not silently changed for legacy contracts", () => {
+  const zhContract = buildContractFromBrief({
+    goal_id: "legacy-language-boundary",
+    goal: "交付设置页",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "作为用户，我能保存设置。",
+        measurement: "打开设置页并保存有效字段。",
+        threshold: "刷新后仍能看到保存后的值。"
+      }
+    ]
+  });
+  assert.equal(zhContract.presentation.language, "zh-CN");
+  assert.match(renderAcceptanceMarkdown(zhContract, buildEvidenceLedger(zhContract)), /## 表达偏好/);
+
+  const legacyContract = {
+    ...zhContract,
+    presentation: undefined
+  };
+  const legacyMarkdown = renderAcceptanceMarkdown(legacyContract, buildEvidenceLedger(legacyContract));
+  assert.match(legacyMarkdown, /## Presentation/);
+  assert.match(legacyMarkdown, /Language: en/);
+  assert.doesNotMatch(legacyMarkdown, /## 表达偏好/);
+});
+
+test("existing contract language changes only through explicit current approval", () => {
+  const root = tempRoot();
+  run([
+    "draft",
+    "--goal", "交付设置页",
+    "--language", "zh-CN",
+    "--goal-id", "legacy-current-language",
+    "--root", root,
+    "--json"
+  ]);
+  run(["approve", "--root", root, "--summary", "User approved Chinese contract.", "--json"]);
+
+  const evidencePath = path.join(root, ".opennori", "current", "legacy-current-language.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "legacy-current-language.acceptance.md");
+  const payload = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  delete payload.contract.presentation;
+  fs.writeFileSync(evidencePath, JSON.stringify(payload, null, 2));
+
+  run([
+    "evidence", "add",
+    "--root", root,
+    "--criterion", "AC-1",
+    "--summary", "Evidence writes must not silently translate legacy contracts.",
+    "--result", "passing",
+    "--confidence", "verified",
+    "--basis", "tool-observation",
+    "--source-command", "opennori evidence add",
+    "--json"
+  ]);
+  const afterEvidence = fs.readFileSync(acceptancePath, "utf8");
+  assert.match(afterEvidence, /## Presentation/);
+  assert.match(afterEvidence, /Language: en/);
+  assert.doesNotMatch(afterEvidence, /语言: zh-CN/);
+
+  const approvedLanguage = run([
+    "approve",
+    "--root", root,
+    "--no-from-draft",
+    "--language", "zh-CN",
+    "--summary", "User explicitly approved Chinese presentation.",
+    "--json"
+  ]);
+  assert.equal(approvedLanguage.data.presentation.language, "zh-CN");
+  assert.match(fs.readFileSync(acceptancePath, "utf8"), /语言: zh-CN/);
+  assert.equal(fs.existsSync(acceptancePath), true);
 });
 
 test("next returns the current acceptance gap, not a process step", () => {
@@ -378,12 +453,13 @@ test("brainstorm creates selectable acceptance directions, not a process plan", 
   assert.equal(brainstorm.data.status, "draft-source");
   assert.equal(brainstorm.data.is_acceptance_contract, false);
   assert.equal(brainstorm.data.candidates.length, 3);
+  assert.equal(brainstorm.data.presentation.language, "zh-CN");
   assert.equal(fs.existsSync(brainstorm.data.brainstorm_path), true);
   assert.equal(fs.existsSync(brainstorm.data.markdown_path), true);
 
   const text = fs.readFileSync(brainstorm.data.markdown_path, "utf8");
-  assert.match(text, /Acceptance directions/);
-  assert.match(text, /not a Nori Contract/);
+  assert.match(text, /验收方向/);
+  assert.match(text, /不是计划、Nori Contract 或完成证据/);
   assert.doesNotMatch(text, /Implementation plan/);
   assert.doesNotMatch(text, /Step 1/);
 
@@ -409,6 +485,7 @@ test("discover finds underspecified acceptance gaps before draft", () => {
   ]);
 
   assert.equal(discovery.data.status, "needs-user-answers");
+  assert.equal(discovery.data.presentation.language, "zh-CN");
   assert.equal(discovery.data.is_acceptance_contract, false);
   assert.equal(fs.existsSync(discovery.data.discovery_path), true);
   assert.equal(fs.existsSync(discovery.data.markdown_path), true);
@@ -425,9 +502,39 @@ test("discover finds underspecified acceptance gaps before draft", () => {
   assert.equal(discovery.data.gaps.some((gap) => /有效规则/.test(gap.question)), true);
 
   const text = fs.readFileSync(discovery.data.markdown_path, "utf8");
-  assert.match(text, /Acceptance Discovery/);
-  assert.match(text, /not a Nori Contract/);
+  assert.match(text, /验收发现/);
+  assert.match(text, /不是 Nori Contract、过程计划或完成证据/);
   assert.doesNotMatch(text, /Implementation plan/);
+});
+
+test("draft preserves explicit contract language preference for human-readable goal and AC", () => {
+  const root = tempRoot();
+  const zhDraft = run([
+    "draft",
+    "--goal", "Ship a settings page",
+    "--language", "zh-CN",
+    "--root", root,
+    "--json"
+  ]);
+  assert.equal(zhDraft.data.presentation.language, "zh-CN");
+  assert.equal(zhDraft.data.criteria.every((criterion) => criterion.user_story.startsWith("作为用户")), true);
+  const zhMarkdown = fs.readFileSync(zhDraft.data.acceptance_path, "utf8");
+  assert.match(zhMarkdown, /## 表达偏好/);
+  assert.match(zhMarkdown, /语言: zh-CN/);
+
+  const enDraft = run([
+    "draft",
+    "--goal", "交付设置页",
+    "--language", "en",
+    "--root", root,
+    "--goal-id", "settings-page-en",
+    "--json"
+  ]);
+  assert.equal(enDraft.data.presentation.language, "en");
+  assert.equal(enDraft.data.criteria.every((criterion) => criterion.user_story.startsWith("As a user")), true);
+  const enMarkdown = fs.readFileSync(enDraft.data.acceptance_path, "utf8");
+  assert.match(enMarkdown, /## Presentation/);
+  assert.match(enMarkdown, /Language: en/);
 });
 
 test("discovery answers draft specific user-facing acceptance criteria", () => {
@@ -456,11 +563,13 @@ test("discovery answers draft specific user-facing acceptance criteria", () => {
     "--root", root,
     "--from-discovery", discovery.data.discovery_id,
     "--answers", answersPath,
+    "--language", "zh-CN",
     "--json"
   ]);
 
   assert.equal(draft.data.acceptance_basis.status, "draft");
-  assert.match(draft.data.acceptance_basis.summary, /Discovery answers/);
+  assert.equal(draft.data.presentation.language, "zh-CN");
+  assert.match(draft.data.acceptance_basis.summary, /验收发现答案/);
   assert.equal(draft.data.criteria.length, 6);
   const joined = draft.data.criteria.map((criterion) => `${criterion.user_story}\n${criterion.measurement}\n${criterion.threshold}`).join("\n");
   assert.match(joined, /Account Settings/);
@@ -672,7 +781,7 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.match(text, /## Candidate Next Goals/);
   assert.match(text, /not approved acceptance criteria, implementation phases, or completion evidence/);
   assert.match(text, /Draft command: opennori draft --from-next-candidate/);
-  assert.match(text, /Draft rule: This command creates a draft Nori Contract only/);
+  assert.match(text, /Draft rule: 这个命令只创建 draft Nori Contract/);
   assert.match(text, /opennori-adoption-dogfood/);
   assert.match(text, /Current status: complete/);
   assert.match(text, /AC-Z-5/);
@@ -697,7 +806,8 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => candidate.goal && candidate.user_value), true);
   assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => candidate.draft_args?.includes("--from-next-candidate")), true);
   assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => /opennori draft --from-next-candidate/.test(candidate.draft_command)), true);
-  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => /draft Nori Contract only/.test(candidate.draft_rule)), true);
+  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => candidate.draft_args?.includes("--language")), true);
+  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => /只创建 draft Nori Contract|draft Nori Contract only/.test(candidate.draft_rule)), true);
   assert.equal(resume.data.evidence_health.status, "clear");
   assert.equal(resume.next_actions.some((action) => /candidate_goals/.test(action)), true);
 
@@ -734,12 +844,12 @@ test("evidence can drive the workflow to complete and render a human report", ()
   ]);
   assert.equal(nextDraft.data.goal_id, "next-loop-usability-contract");
   assert.equal(nextDraft.data.acceptance_basis.status, "draft");
-  assert.match(nextDraft.data.acceptance_basis.summary, /completed goal candidate/);
+  assert.match(nextDraft.data.acceptance_basis.summary, /候选下一轮目标|completed goal candidate/);
   assert.equal(nextDraft.data.acceptance_basis.source_goal_id, init.data.goal_id);
   assert.equal(nextDraft.data.acceptance_basis.candidate_id, "next-loop-usability");
-  assert.match(nextDraft.data.acceptance_basis.rule, /not approved acceptance criteria/);
+  assert.match(nextDraft.data.acceptance_basis.rule, /不是已批准的验收标准|not approved acceptance criteria/);
   assert.equal(nextDraft.data.current_gap.id, "ACCEPTANCE-BASIS");
-  assert.equal(nextDraft.data.criteria.some((criterion) => /candidate/.test(criterion.user_story.toLowerCase())), true);
+  assert.equal(nextDraft.data.criteria.some((criterion) => /候选|candidate/.test(criterion.user_story.toLowerCase())), true);
   assert.equal(nextDraft.data.criteria.some((criterion) => /resume、status、next 或 context export/.test(criterion.measurement)), true);
   assert.equal(nextDraft.data.criteria.some((criterion) => /phase、task list 或 completion evidence/.test(criterion.threshold)), true);
   assert.equal(nextDraft.data.criteria.some((criterion) => /按这条候选方向检查新的目标结果/.test(criterion.measurement)), false);

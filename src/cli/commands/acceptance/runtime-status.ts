@@ -34,6 +34,7 @@ export const nextCommand = defineCommand({
     const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok({
       goal_id: contract.goal_id,
+      presentation: contract.presentation,
       current_gap: gap,
       complete: gap === null,
       next_recommendation: recommendation,
@@ -62,6 +63,7 @@ export const resumeCommand = defineCommand({
     const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok({
       goal_id: contract.goal_id,
+      presentation: contract.presentation,
       workflow_status: ledger.status,
       current_gap: gap,
       completion: completionAnswer(contract, ledger, { root, architecture }),
@@ -97,6 +99,7 @@ export const statusCommand = defineCommand({
     const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok({
       goal_id: contract.goal_id,
+      presentation: contract.presentation,
       workflow_status: ledger.status,
       current_gap: gap,
       completion: completionAnswer(contract, ledger, { root, architecture }),
@@ -132,6 +135,7 @@ export const evaluateCommand = defineCommand({
     refreshManifest(root);
     return ok({
       goal_id: contract.goal_id,
+      presentation: contract.presentation,
       workflow_status: ledger.status,
       current_gap: currentGap(contract, ledger)
     });

@@ -24,6 +24,10 @@ export const brainstormCommand = defineCommand({
       type: "string",
       description: "Natural language idea to explore."
     },
+    language: {
+      type: "string",
+      description: "Human-readable output language for brainstorm content, such as zh-CN or en."
+    },
     id: {
       type: "string",
       description: "Optional stable brainstorm id."
@@ -34,7 +38,7 @@ export const brainstormCommand = defineCommand({
     const root = resolveRoot(args.root);
     const idea = String(args.idea || "").trim();
     if (!idea) throw new Error("--idea is required");
-    const brainstorm = buildBrainstorm(idea, args.id);
+    const brainstorm = buildBrainstorm(idea, args.id, args.language);
     const paths = brainstormPaths(root, brainstorm.id);
     writeJson(paths.jsonPath, brainstorm);
     fs.mkdirSync(path.dirname(paths.markdownPath), { recursive: true });
@@ -45,6 +49,7 @@ export const brainstormCommand = defineCommand({
         brainstorm_id: brainstorm.id,
         status: brainstorm.status,
         idea: brainstorm.idea,
+        presentation: brainstorm.presentation,
         candidates: brainstorm.candidates,
         brainstorm_path: paths.jsonPath,
         markdown_path: paths.markdownPath,
@@ -79,6 +84,10 @@ export const discoverCommand = defineCommand({
       type: "string",
       description: "Alias for --goal."
     },
+    language: {
+      type: "string",
+      description: "Human-readable output language for discovery questions, such as zh-CN or en."
+    },
     id: {
       type: "string",
       description: "Optional stable discovery id."
@@ -89,7 +98,7 @@ export const discoverCommand = defineCommand({
     const root = resolveRoot(args.root);
     const goal = String(args.goal || args.idea || "").trim();
     if (!goal) throw new Error("--goal is required");
-    const discovery: AcceptanceDiscovery = discoverAcceptance(goal, args.id);
+    const discovery: AcceptanceDiscovery = discoverAcceptance(goal, args.id, args.language);
     const paths = discoveryPaths(root, discovery.id);
     writeJson(paths.jsonPath, discovery);
     fs.mkdirSync(path.dirname(paths.markdownPath), { recursive: true });
@@ -100,6 +109,7 @@ export const discoverCommand = defineCommand({
         discovery_id: discovery.id,
         status: discovery.status,
         goal: discovery.goal,
+        presentation: discovery.presentation,
         gaps: discovery.gaps,
         questions: discovery.gaps.map((gap) => gap.question),
         discovery_path: paths.jsonPath,

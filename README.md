@@ -110,6 +110,13 @@ say whether it is complete.
 Users do not need to memorize CLI flags or Skill names. The bundled Skills map
 natural language to the deterministic `opennori` state layer.
 
+OpenNori keeps protocol field names stable in English, but the human-readable
+Contract presentation can be English or Simplified Chinese. By default the
+Skills infer the Contract language from the user's goal and conversation; when
+the user says "write the AC in Chinese" or "keep this contract in English", the
+Skill records that preference in the draft so later status, report, and next
+candidate surfaces can preserve it.
+
 ## What It Creates
 
 OpenNori uses one project-local state directory:
@@ -202,6 +209,30 @@ decide whether the user can accept the result:
 - how persistence is verified after refresh or return
 - what failed-save behavior looks like
 - what is intentionally out of scope
+
+### Contract Language Preference
+
+Contract language is a presentation preference, not a Product AC. OpenNori
+stores it as `presentation.language` on brainstorms, discoveries, and Nori
+Contracts so generated goals, acceptance checks, discovery questions, and next
+loop candidates stay in the language the user expects.
+
+Examples:
+
+```text
+Use OpenNori for this goal. Write the acceptance checks in Chinese.
+```
+
+```text
+用 OpenNori 跑这个目标，验收标准用中文。
+```
+
+Existing approved contracts are not silently translated. If the user wants to
+change the presentation language of an existing contract, the agent should
+revise any visible wording that needs to change, then ask the user to approve
+the updated Nori Contract. The CLI only stores the approved presentation
+preference; it does not pretend an old contract was translated as a side effect
+of `status`, `report`, `check`, or evidence writes.
 
 ### Architecture Baseline
 
@@ -485,6 +516,8 @@ opennori init
 
 用户无需死记硬背任何 CLI 命令行参数或 Skill 的具体名字。内置的技能（Skills）会自动将您的自然语言指示翻译为调用确定性 `opennori` 状态层的指令。
 
+OpenNori 的协议字段名保持稳定英文，但人类可读的契约内容可以使用英文或简体中文。默认情况下，Skills 会从用户目标和对话语言中推断契约表达语言；当用户明确说“验收标准用中文”或“keep this contract in English”时，Skill 会把这个偏好记录进 draft，后续 status、report 和候选下一轮目标会沿用它。
+
 ## 生成的目录结构
 
 OpenNori 在项目本地使用一个独立的状态目录进行所有信息持久化：
@@ -561,6 +594,22 @@ Nori 倡导对于“修改字段”或“抛出错误提示”等含糊不清的
 - 页面刷新或重入后，如何验证数据确实持久化了
 - 保存失败时，界面的交互表现应当是什么样
 - 哪些需求是故意被排除在本次交付范围之外的
+
+### 契约语言偏好 (Contract Language Preference)
+
+契约语言是表达偏好，不是 Product AC。OpenNori 会在 brainstorm、discovery 和 Nori Contract 上保存 `presentation.language`，让生成的 goal、验收标准、发现问题和下一轮候选目标保持用户期望的语言。
+
+示例：
+
+```text
+用 OpenNori 跑这个目标，验收标准用中文。
+```
+
+```text
+Use OpenNori for this goal. Write the acceptance checks in Chinese.
+```
+
+已经批准的契约不会被静默翻译。如果用户希望改变现有契约的表达语言，agent 应显式修订需要改变的可见文案，并重新请求用户批准更新后的 Nori Contract。CLI 只保存经过批准的表达偏好；不会在 `status`、`report`、`check` 或证据写入时假装旧契约已经被自动翻译。
 
 ### 架构基线 (Architecture Baseline)
 

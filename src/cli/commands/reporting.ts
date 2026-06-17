@@ -46,6 +46,7 @@ export const reportCommand = defineCommand({
     return ok(
       {
         goal_id: contract.goal_id,
+        presentation: contract.presentation,
         report_path: output,
         workflow_status: ledger.status,
         current_gap: gap,

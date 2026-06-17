@@ -21,18 +21,20 @@ import {
 import { bootstrap, refreshManifest } from "../../../lifecycle.ts";
 import { loadGoalFromLocation, loadPair, runJsonCommand, type ActiveGoalPair } from "../../runtime.ts";
 import type { AcceptanceDiscovery, AcceptanceDiscoveryAnswers, Brainstorm, NoriBrief, NextGoalCandidate } from "../../../types.ts";
+import { withContractLanguage } from "../../../language.ts";
 import { brainstormPaths, discoveryPaths, jsonArg, resolveRoot, rootArg } from "./shared.ts";
 
 const briefFromBrainstormForCommand = briefFromBrainstorm as unknown as (brainstorm: Brainstorm, candidateId: string) => NoriBrief;
-const briefFromGoalForCommand = briefFromGoal as (goal: string, goalId?: string) => NoriBrief;
+const briefFromGoalForCommand = briefFromGoal as (goal: string, goalId?: string, languageInput?: unknown) => NoriBrief;
 const briefFromDiscoveryAnswersForCommand = briefFromDiscoveryAnswers as (
   discovery: AcceptanceDiscovery,
   answers: AcceptanceDiscoveryAnswers,
-  goalId?: string
+  goalId?: string,
+  languageInput?: unknown
 ) => NoriBrief;
 const briefFromNextGoalCandidateForCommand = briefFromNextGoalCandidate as (
   candidate: NextGoalCandidate,
-  options?: { sourceGoalId?: string; goalId?: string }
+  options?: { sourceGoalId?: string; goalId?: string; language?: unknown }
 ) => NoriBrief;
 
 function loadNextCandidateSource(args: Record<string, unknown>, root: string): ActiveGoalPair | null {
@@ -69,6 +71,10 @@ export const draftCommand = defineCommand({
     goalId: {
       type: "string",
       description: "Optional stable goal id."
+    },
+    language: {
+      type: "string",
+      description: "Human-readable Contract language for generated goal and AC text, such as zh-CN or en."
     },
     brief: {
       type: "string",
@@ -116,16 +122,19 @@ export const draftCommand = defineCommand({
     let brief;
     if (args.brief) {
       brief = readJson<NoriBrief>(path.resolve(String(args.brief)));
+      if (args.language) brief = withContractLanguage(brief, String(args.language));
     } else if (brainstormId) {
       const candidateId = args.candidate;
       if (!candidateId) throw new Error("--candidate is required with --from-brainstorm");
       brief = briefFromBrainstormForCommand(readJson<Brainstorm>(brainstormPaths(root, brainstormId).jsonPath), String(candidateId));
+      if (args.language) brief = withContractLanguage(brief, String(args.language));
     } else if (discoveryId) {
       if (!args.answers) throw new Error("--answers is required with --from-discovery");
       brief = briefFromDiscoveryAnswersForCommand(
         readJson<AcceptanceDiscovery>(discoveryPaths(root, discoveryId).jsonPath),
         readJson<AcceptanceDiscoveryAnswers>(path.resolve(String(args.answers))),
-        args.goalId
+        args.goalId,
+        args.language
       );
     } else if (nextCandidateId) {
       const sourcePair = loadNextCandidateSource(args, root);
@@ -158,12 +167,13 @@ export const draftCommand = defineCommand({
       }
       brief = briefFromNextGoalCandidateForCommand(candidate, {
         sourceGoalId: contract.goal_id,
-        goalId: args.goalId
+        goalId: args.goalId,
+        language: args.language || contract.presentation?.language
       });
     } else {
       const goal = String(args.goal || "").trim();
       if (!goal) throw new Error("--goal is required");
-      brief = briefFromGoalForCommand(goal, args.goalId);
+      brief = briefFromGoalForCommand(goal, args.goalId, args.language);
     }
     const contract = buildContractFromBrief(brief);
     const ledger = buildEvidenceLedger(contract);
@@ -188,6 +198,7 @@ export const draftCommand = defineCommand({
       {
         goal_id: contract.goal_id,
         state: "draft",
+        presentation: contract.presentation,
         acceptance_basis: contract.acceptance_basis,
         acceptance_path: paths.acceptancePath,
         evidence_path: paths.evidencePath,

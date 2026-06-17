@@ -13,6 +13,7 @@ export type EvidenceBasis =
   | "agent-observation"
   | (string & {});
 export type RiskLevel = "low" | "medium" | "high" | (string & {});
+export type ContractLanguage = "zh-CN" | "en" | (string & {});
 export type ProfileItemType = "skill" | "stack" | "constraint";
 export type ProfileStrength = "must" | "prefer" | "avoid";
 export type ProfileEvidenceResult = "satisfied" | "violated" | "waived";
@@ -40,6 +41,10 @@ export type AcceptanceCriterion = {
 export type NoriBrief = {
   goal_id?: string;
   goal: string;
+  presentation?: {
+    language?: ContractLanguage;
+    [key: string]: unknown;
+  };
   acceptance_basis?: AcceptanceBasis;
   criteria: AcceptanceCriterion[];
   [key: string]: unknown;
@@ -50,6 +55,10 @@ export type NoriContract = {
   goal_id: string;
   goal: string;
   created_at?: string;
+  presentation?: {
+    language?: ContractLanguage;
+    [key: string]: unknown;
+  };
   acceptance_basis?: AcceptanceBasis;
   criteria: AcceptanceCriterion[];
   [key: string]: unknown;
@@ -509,6 +518,10 @@ export type AcceptanceDiscovery = {
   protocol_version: "opennori/discovery-v1";
   id: string;
   goal: string;
+  presentation?: {
+    language?: ContractLanguage;
+    [key: string]: unknown;
+  };
   status: "needs-user-answers" | "ready-for-draft";
   is_acceptance_contract: false;
   gaps: AcceptanceDiscoveryGap[];
@@ -552,6 +565,10 @@ export type Brainstorm = {
   protocol_version: "opennori/brainstorm-v1";
   id: string;
   idea: string;
+  presentation?: {
+    language?: ContractLanguage;
+    [key: string]: unknown;
+  };
   status: "draft-source";
   candidates: BrainstormCandidate[];
   rule: string;
@@ -1004,6 +1021,10 @@ export type ContextExport = {
   root: string;
   goal_id: string;
   goal: string;
+  presentation?: {
+    language?: ContractLanguage;
+    [key: string]: unknown;
+  };
   acceptance_basis: AcceptanceBasis;
   workflow_status: WorkflowStatus;
   current_gap: CurrentGap | null;

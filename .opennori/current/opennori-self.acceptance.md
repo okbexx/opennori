@@ -4,10 +4,14 @@
 
 让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收驱动产品；用户不仅能判断产品目标是否完成，也能判断交付物是否按确认过的优秀技术架构完成。
 
+## Presentation
+
+Language: en
+
 ## Acceptance Basis
 
 Status: approved
-Summary: Added dashboard observation boundary AC after user rejected confirmation controls in dashboard.
+Summary: Revised Contract language preference AC to human-visible acceptance.
 
 ## Nori Profile
 
@@ -72,6 +76,7 @@ Summary: Added dashboard observation boundary AC after user rejected confirmatio
 | AC-D-2 | acceptance | 作为用户，我打开 OpenNori dashboard 观察 agent 工作时，agent 使用 OpenNori Skill 推进当前验收缺口后，我能看到 live activity 显示 agent、Skill、目标、当前 gap、状态和摘要；如果有多个 active goals，agent 不会把活动误绑定到错误目标。 | 在包含单个和多个 active goals 的项目中运行 activity start/heartbeat/finish，并查看 activity show、dashboard snapshot 和 agent_next.dashboard_activity。 | Skill 可从 agent_next.dashboard_activity 或低参数 activity 命令发布 start/heartbeat/finish；唯一当前 gap 可自动绑定 goal/gap，多目标歧义返回明确恢复动作；activity 只进入 .opennori/activity/events/snapshots，不改变 evidence/report completion。 | passing |
 | AC-D-3 | acceptance | 作为用户，我打开 OpenNori dashboard 观察 agent 执行时，首屏就能看出当前 agent 是否正在活动、使用哪个 Skill、正在推进哪个验收缺口，以及活动是否已经过期；我不需要展开详情面板或阅读事件日志才能判断当前执行态。 | 启动 dashboard，分别模拟 active activity、waiting user、expired/idle activity，在桌面和窄屏截图中查看首屏状态。 | 首屏有清晰的 live activity 主视觉：显示 agent/Skill、state、summary、current gap、last seen 或 stale 标记；active/verifying 有明显但不过度的动效，idle/expired 降低视觉权重；不新增聊天记录、过程任务列表、证据账本或完成权威入口。 | passing |
 | AC-D-4 | acceptance | 作为用户，我在 OpenNori dashboard 看到需要用户介入时，页面只告诉我应该回到 agent 对话里确认、修改或豁免，而不会提供 dashboard 内的确认、拒绝、waive 或写状态按钮。 | 启动 dashboard，制造 need_user / waiting_user 状态，检查页面首屏和控制区；同时对常见确认型 dashboard API 路径发送 POST。 | 页面清楚显示 dashboard 是 observation surface / reply in agent chat；可见控件只用于刷新或查看快照；POST /api/confirm、/api/approve、/api/waive、/api/evidence、/api/activity 等控制型请求返回 method_not_allowed；Product AC、evidence、profile、architecture 和 report 状态只能由 agent 对话中的 OpenNori Skill/CLI 路径写入。 | passing |
+| AC-Z-21 | productization | 作为用户，我对 agent 说“验收标准用中文”或“write this contract in English”后，能在 agent 展示的发现问题、Nori Contract、status/report 摘要和下一轮候选目标中看到我要求的语言；如果我已经有一份批准过的契约，OpenNori 不会在我未确认时把它改成另一种语言。 | 在对话或命令输出中分别生成中文和英文的 brainstorm、discover、draft、status/report/next-candidate 内容；再用一个已有 current contract 做普通证据写入和显式语言确认，观察可读契约标题、字段说明和报告/候选目标语言变化。 | 新目标的可读内容按用户要求显示中文或英文；用户不需要记忆底层参数；旧 contract 在普通 status/report/check/evidence 写入后仍保持原展示语言；只有用户明确批准改变展示语言后，后续契约和报告才显示新语言；底层协议字段保持稳定，不影响 agent 继续读取状态。 | passing |
 
 ## Rule
 

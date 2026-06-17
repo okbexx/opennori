@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "Added dashboard observation boundary AC after user rejected confirmation controls in dashboard.",
-      "approved_at": "2026-06-16T10:04:55.366Z"
+      "summary": "Revised Contract language preference AC to human-visible acceptance.",
+      "approved_at": "2026-06-17T10:39:14.007Z"
     },
     "criteria": [
       {
@@ -504,6 +504,15 @@
         "threshold": "页面清楚显示 dashboard 是 observation surface / reply in agent chat；可见控件只用于刷新或查看快照；POST /api/confirm、/api/approve、/api/waive、/api/evidence、/api/activity 等控制型请求返回 method_not_allowed；Product AC、evidence、profile、architecture 和 report 状态只能由 agent 对话中的 OpenNori Skill/CLI 路径写入。",
         "required": true,
         "risk": "medium"
+      },
+      {
+        "id": "AC-Z-21",
+        "layer": "productization",
+        "user_story": "作为用户，我对 agent 说“验收标准用中文”或“write this contract in English”后，能在 agent 展示的发现问题、Nori Contract、status/report 摘要和下一轮候选目标中看到我要求的语言；如果我已经有一份批准过的契约，OpenNori 不会在我未确认时把它改成另一种语言。",
+        "measurement": "在对话或命令输出中分别生成中文和英文的 brainstorm、discover、draft、status/report/next-candidate 内容；再用一个已有 current contract 做普通证据写入和显式语言确认，观察可读契约标题、字段说明和报告/候选目标语言变化。",
+        "threshold": "新目标的可读内容按用户要求显示中文或英文；用户不需要记忆底层参数；旧 contract 在普通 status/report/check/evidence 写入后仍保持原展示语言；只有用户明确批准改变展示语言后，后续契约和报告才显示新语言；底层协议字段保持稳定，不影响 agent 继续读取状态。",
+        "required": true,
+        "risk": "medium"
       }
     ]
   },
@@ -511,7 +520,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-17T09:18:38.874Z",
+    "updated_at": "2026-06-17T10:39:36.323Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -6001,6 +6010,112 @@
             "limitations": "This verifies the current local dashboard and package assets. It does not add a browser screenshot for a forced need_user fixture, and future UI work must keep the same observation-only boundary.",
             "gate": "accepted",
             "created_at": "2026-06-16T10:12:26.488Z"
+          }
+        ]
+      },
+      "AC-Z-21": {
+        "status": "passing",
+        "confidence": "verified",
+        "required": true,
+        "risk": "medium",
+        "evidence": [
+          {
+            "kind": "language-preference-implementation",
+            "basis": "tool-observation",
+            "summary": "OpenNori now lets users request Chinese or English Contract presentation in natural language. Generated brainstorm, discovery, draft, report next candidates, and context/status surfaces preserve presentation.language for human-readable text; Skills document the natural-language mapping; legacy/current contracts keep their existing presentation during ordinary evidence/status/report/check writes and change only after explicit user approval with --no-from-draft --language.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run check (118 tests passed; doctor ready)",
+                "command": "npm run check (118 tests passed; doctor ready)"
+              },
+              {
+                "type": "command",
+                "label": "pnpm build in /Users/jarl/code/jarlone/opennori-site",
+                "command": "pnpm build in /Users/jarl/code/jarlone/opennori-site"
+              },
+              {
+                "type": "command",
+                "label": "language smoke: brainstorm/discover zh-CN and draft en",
+                "command": "language smoke: brainstorm/discover zh-CN and draft en"
+              },
+              {
+                "type": "command",
+                "label": "legacy smoke: evidence write keeps Language: en; approve --no-from-draft --language zh-CN switches to 语言: zh-CN",
+                "command": "legacy smoke: evidence write keeps Language: en; approve --no-from-draft --language zh-CN switches to 语言: zh-CN"
+              },
+              {
+                "type": "artifact",
+                "label": "src/language.ts",
+                "path": "src/language.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/acceptance.ts",
+                "path": "src/acceptance.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/contract.ts",
+                "path": "src/core/contract.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/report.ts",
+                "path": "src/core/report.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/draft.ts",
+                "path": "src/cli/commands/acceptance/draft.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/approval.ts",
+                "path": "src/cli/commands/acceptance/approval.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": "AGENTS.md",
+                "path": "AGENTS.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+                "path": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+              }
+            ],
+            "reviewability": "Rerun npm run check, inspect language tests and Skill/README/website text, then run the smoke commands for zh-CN/en generation and legacy current-contract approval.",
+            "limitations": "This verifies deterministic OpenNori surfaces and local website text; changing existing contract wording still requires the agent/user to revise visible prose, not an automatic translation adapter.",
+            "gate": "accepted",
+            "created_at": "2026-06-17T10:39:36.322Z"
           }
         ]
       }

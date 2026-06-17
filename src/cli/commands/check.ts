@@ -118,6 +118,7 @@ export const checkCommand = defineCommand({
     const recommendation = nextRecommendation(contract, ledger, { root, architecture });
     return ok({
       goal_id: contract.goal_id,
+      presentation: contract.presentation,
       workflow_status: ledger.status,
       current_gap: gap,
       statuses: Object.fromEntries(Object.entries(ledger.criteria).map(([id, state]) => [id, (state as any).status])),

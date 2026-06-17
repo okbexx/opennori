@@ -17,6 +17,7 @@ import {
   writeJson
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
+import { withContractLanguage } from "../../../language.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
 import { jsonArg, rootArg } from "./shared.ts";
 
@@ -36,6 +37,10 @@ export const approveCommand = defineCommand({
       type: "string",
       description: "Human approval summary.",
       default: "User approved acceptance criteria."
+    },
+    language: {
+      type: "string",
+      description: "Explicitly approved human-readable Contract language, such as zh-CN or en."
     },
     json: jsonArg
   },
@@ -59,6 +64,9 @@ export const approveCommand = defineCommand({
       summary: args.summary || "User approved acceptance criteria.",
       approved_at: new Date().toISOString()
     };
+    if (args.language) {
+      contract.presentation = withContractLanguage(contract, String(args.language)).presentation;
+    }
     recomputeWorkflowStatus(contract, ledger);
     writeJson(targetPaths.evidencePath, { contract, ledger });
     syncAcceptanceMarkdown(targetPaths.acceptancePath, contract, ledger);
@@ -86,6 +94,7 @@ export const approveCommand = defineCommand({
     refreshSnapshot(root, { goalId: contract.goal_id });
     return ok({
       goal_id: contract.goal_id,
+      presentation: contract.presentation,
       state: "current",
       acceptance_path: targetPaths.acceptancePath,
       evidence_path: targetPaths.evidencePath,

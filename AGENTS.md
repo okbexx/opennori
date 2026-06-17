@@ -58,6 +58,14 @@ user natural-language goal
 
 Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, or implementation tasks into user AC. They can influence Nori Profile, Architecture Baseline, evidence risk, or recovery guidance, but Product AC must remain human-visible operations or judgments.
 
+Contract language preference is presentation metadata, not Product AC. New
+brainstorms, discoveries, drafts, reports, and next-loop candidates may infer
+or explicitly preserve `presentation.language` (`zh-CN` or `en`) for
+human-readable surfaces while keeping protocol field names stable English.
+Existing current or approved contracts must not be silently translated during
+status, report, evidence, or check writes; changing their presentation language
+requires explicit revision and user approval.
+
 Keep hard validation and subjective review separate:
 
 - Code may hard-fail objective integrity problems: schema shape, protocol version, required fields, duplicate ids, contract/ledger mismatch, invalid enums, stale managed files, missing local artifacts, or destructive actions without explicit confirmation.

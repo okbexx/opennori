@@ -130,6 +130,7 @@ export const evidenceAddCommand = defineCommand({
     refreshSnapshot(root, { goalId: contract.goal_id });
     return ok({
       goal_id: contract.goal_id,
+      presentation: contract.presentation,
       criterion: criterionId,
       criterion_status: ledger.criteria[criterionId].status,
       confidence: ledger.criteria[criterionId].confidence,

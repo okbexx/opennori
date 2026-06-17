@@ -528,12 +528,13 @@ test("brainstorm command module creates selectable directions without a contract
 
   assert.equal(brainstorm.ok, true);
   assert.equal(brainstorm.data.status, "draft-source");
+  assert.equal(brainstorm.data.presentation.language, "zh-CN");
   assert.equal(brainstorm.data.is_acceptance_contract, false);
   assert.equal(brainstorm.data.candidates.length, 3);
   assert.equal(fs.existsSync(brainstorm.data.brainstorm_path), true);
   assert.equal(fs.existsSync(brainstorm.data.markdown_path), true);
   assert.equal(brainstorm.artifacts.some((artifact) => artifact.kind === "brainstorm_source"), true);
-  assert.match(fs.readFileSync(brainstorm.data.markdown_path, "utf8"), /not a Nori Contract/);
+  assert.match(fs.readFileSync(brainstorm.data.markdown_path, "utf8"), /不是计划、Nori Contract 或完成证据/);
 });
 
 test("discover command module finds acceptance gaps without creating an current goal", async () => {
@@ -546,6 +547,7 @@ test("discover command module finds acceptance gaps without creating an current 
 
   assert.equal(discovery.ok, true);
   assert.equal(discovery.data.status, "needs-user-answers");
+  assert.equal(discovery.data.presentation.language, "zh-CN");
   assert.equal(discovery.data.is_acceptance_contract, false);
   assert.equal(fs.existsSync(discovery.data.discovery_path), true);
   assert.equal(fs.existsSync(discovery.data.markdown_path), true);
@@ -560,7 +562,7 @@ test("discover command module finds acceptance gaps without creating an current 
   assert.equal(gapIds.includes("missing-review-method"), true);
   assert.equal(gapIds.includes("missing-persistence-scope"), false);
   assert.equal(discovery.artifacts.some((artifact) => artifact.kind === "acceptance_discovery"), true);
-  assert.match(fs.readFileSync(discovery.data.markdown_path, "utf8"), /not a Nori Contract/);
+  assert.match(fs.readFileSync(discovery.data.markdown_path, "utf8"), /不是 Nori Contract、过程计划或完成证据/);
 });
 
 test("draft command module creates concrete contracts from discovery answers", async () => {
@@ -588,13 +590,15 @@ test("draft command module creates concrete contracts from discovery answers", a
     "--from-discovery", discovery.data.discovery_id,
     "--answers", answersPath,
     "--goal-id", "module-settings-contract",
+    "--language", "zh-CN",
     "--json"
   ]);
 
   assert.equal(draft.ok, true);
   assert.equal(draft.data.goal_id, "module-settings-contract");
+  assert.equal(draft.data.presentation.language, "zh-CN");
   assert.equal(draft.data.acceptance_basis.status, "draft");
-  assert.match(draft.data.acceptance_basis.summary, /Discovery answers/);
+  assert.match(draft.data.acceptance_basis.summary, /验收发现答案/);
   assert.equal(draft.data.criteria.length, 6);
   assert.equal(draft.data.criteria.some((criterion) => /Account Settings/.test(criterion.user_story)), true);
   assert.equal(draft.data.criteria.some((criterion) => /2-30 个字符/.test(`${criterion.user_story} ${criterion.measurement}`)), true);
@@ -697,9 +701,9 @@ test("draft command module creates draft contracts from completed goal candidate
   assert.equal(drafted.data.current_gap.id, "ACCEPTANCE-BASIS");
   assert.equal(drafted.data.criteria.every((criterion) => /^As a user/.test(criterion.user_story)), true);
   const draftedText = drafted.data.criteria.map((criterion) => `${criterion.measurement}\n${criterion.threshold}`).join("\n");
-  assert.match(draftedText, /正常用户入口/);
-  assert.match(draftedText, /核心操作/);
-  assert.match(draftedText, /证据来源和限制/);
+  assert.match(draftedText, /normal user entrypoint/);
+  assert.match(draftedText, /core operation/);
+  assert.match(draftedText, /evidence source, and limitations/);
   assert.doesNotMatch(draftedText, /按这条候选方向检查新的目标结果/);
 
   const notReady = await runDraftCommand([
@@ -1720,6 +1724,45 @@ test("approve command module marks acceptance basis approved and recomputes stat
   assert.equal(approved.data.agent_next.recommended_skill, "nori-reporting");
   assert.equal(approved.next_actions.some((action) => /architecture_check/.test(action)), true);
   assert.match(fs.readFileSync(acceptancePath, "utf8"), /Status: approved/);
+});
+
+test("approve command module only changes current contract language when explicitly approved", async () => {
+  const root = tempRoot();
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
+  const contract = {
+    schema_version: "opennori/contract-v1",
+    protocol_version: "opennori/v1",
+    goal_id: "module-goal",
+    goal: "交付设置页",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "作为用户，我能保存设置。",
+        measurement: "打开设置页并保存有效字段。",
+        threshold: "刷新后仍能看到保存后的值。"
+      }
+    ],
+    acceptance_basis: { status: "draft" }
+  };
+  const ledger = buildEvidenceLedger(contract);
+  fs.mkdirSync(path.dirname(acceptancePath), { recursive: true });
+  fs.writeFileSync(acceptancePath, "# Module goal\n");
+  writeJson(evidencePath, { contract, ledger });
+
+  const firstApproval = await runApproveCommand(["--summary", "User approved existing contract.", "--json"], {
+    loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root })
+  });
+  assert.equal(firstApproval.ok, true);
+  assert.equal(firstApproval.data.presentation, undefined);
+  assert.match(fs.readFileSync(acceptancePath, "utf8"), /Language: en/);
+
+  const languageApproval = await runApproveCommand(["--language", "zh-CN", "--summary", "User approved Chinese contract presentation.", "--json"], {
+    loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root })
+  });
+  assert.equal(languageApproval.ok, true);
+  assert.equal(languageApproval.data.presentation.language, "zh-CN");
+  assert.match(fs.readFileSync(acceptancePath, "utf8"), /语言: zh-CN/);
 });
 
 test("approve command module routes approved non-trivial gaps to architecture review before implementation", async () => {

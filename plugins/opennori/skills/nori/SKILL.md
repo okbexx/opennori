@@ -44,6 +44,8 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 ## Natural-Language Mapping
 
 - "Use OpenNori for this goal", "turn this into AC", "the AC is wrong", "brainstorm first" -> hand off to `nori-acceptance`.
+- "验收标准用中文", "用中文写 Nori Contract", "write the AC in English", or any explicit Contract language request -> carry that preference to `nori-acceptance`; the child Skill records it as Contract presentation, not as Product AC.
+- "把现有契约改成中文/英文" -> hand off to `nori-acceptance`; changing an approved/current Contract language requires explicit user approval and must not happen as an automatic status/report side effect.
 - If the user already stated the goal before initialization, do not ask them to repeat it after `opennori init`; continue acceptance discovery for that stated goal.
 - "Continue OpenNori", "what is next", "what is the current gap" -> run resume/status, then hand off to `nori-reporting` unless the next action clearly requires another child Skill.
 - "Is it complete", "can I accept this", "what do I need to do" -> use `nori-reporting` and answer from required AC, evidence, profile, architecture, and review risks.
@@ -91,6 +93,8 @@ Then include only the minimum context needed for the user to approve, revise, pr
 ## Misuse Guards
 
 - Do not make the user memorize CLI flags or internal Skill names.
+- Do not treat language preference as a Product AC. It is Contract presentation metadata that helps the user review goal, AC, discovery questions, reports, and next candidates.
+- Do not silently translate current or approved contracts; language changes to existing contracts require explicit revision and approval.
 - Do not split OpenNori into separate Plugin, Skill, and CLI user paths; they are one capability bundle.
 - Do not continue a half-installed mode when Plugin discovery, packaged Skills, CLI access, or `.opennori` state is missing; route to project health and recover the missing piece.
 - Do not present candidate goals as approved AC, evidence, phases, or task lists.

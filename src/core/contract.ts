@@ -7,6 +7,7 @@ import type {
   ParsedAcceptanceMarkdown,
   ValidationIssue
 } from "../types.ts";
+import { contractLanguage, contractLanguageFromBrief } from "../language.ts";
 import { renderProfileLines, VALID_PROFILE_ITEM_TYPES, VALID_PROFILE_STRENGTHS } from "./profile.ts";
 import { inferCriterionLayer, nowIso, slugify, PROTOCOL_VERSION } from "./shared.ts";
 
@@ -32,6 +33,10 @@ export function buildContractFromBrief(brief: NoriBrief): NoriContract {
     goal_id: goalId,
     goal,
     created_at: nowIso(),
+    presentation: {
+      ...(brief.presentation || {}),
+      language: contractLanguageFromBrief(brief)
+    },
     acceptance_basis: brief.acceptance_basis || { status: "draft" },
     criteria
   };
@@ -63,25 +68,65 @@ export function buildEvidenceLedger(contract: NoriContract): EvidenceLedger {
 }
 
 export function renderAcceptanceMarkdown(contract: NoriContract, ledger: EvidenceLedger): string {
+  const language = contractLanguage(contract);
+  const labels = language === "zh-CN"
+    ? {
+        title: "验收契约",
+        goal: "目标",
+        presentation: "表达偏好",
+        language: "语言",
+        acceptanceBasis: "验收基础",
+        status: "状态",
+        summary: "摘要",
+        none: "<无>",
+        profile: "Nori Profile",
+        criteria: "用户验收标准",
+        userAcceptanceCriterion: "用户验收标准",
+        measurement: "衡量方式",
+        threshold: "通过标准",
+        rule: "规则",
+        progressRule: "进度由验收证据决定，而不是由实现步骤决定。"
+      }
+    : {
+        title: "Acceptance Contract",
+        goal: "Goal",
+        presentation: "Presentation",
+        language: "Language",
+        acceptanceBasis: "Acceptance Basis",
+        status: "Status",
+        summary: "Summary",
+        none: "<none>",
+        profile: "Nori Profile",
+        criteria: "User Acceptance Criteria",
+        userAcceptanceCriterion: "User acceptance criterion",
+        measurement: "Measurement",
+        threshold: "Passing threshold",
+        rule: "Rule",
+        progressRule: "Progress is determined by acceptance evidence, not by implementation steps."
+      };
   const lines = [
-    `# ${contract.goal_id} Acceptance Contract`,
+    `# ${contract.goal_id} ${labels.title}`,
     "",
-    "## Goal",
+    `## ${labels.goal}`,
     "",
     contract.goal,
     "",
-    "## Acceptance Basis",
+    `## ${labels.presentation}`,
     "",
-    `Status: ${contract.acceptance_basis?.status || "draft"}`,
-    contract.acceptance_basis?.summary ? `Summary: ${contract.acceptance_basis.summary}` : "Summary: <none>",
+    `${labels.language}: ${language}`,
     "",
-    "## Nori Profile",
+    `## ${labels.acceptanceBasis}`,
+    "",
+    `${labels.status}: ${contract.acceptance_basis?.status || "draft"}`,
+    contract.acceptance_basis?.summary ? `${labels.summary}: ${contract.acceptance_basis.summary}` : `${labels.summary}: ${labels.none}`,
+    "",
+    `## ${labels.profile}`,
     "",
     ...renderProfileLines(ledger),
     "",
-    "## User Acceptance Criteria",
+    `## ${labels.criteria}`,
     "",
-    "| ID | Layer | User acceptance criterion | Measurement | Passing threshold | Status |",
+    `| ID | Layer | ${labels.userAcceptanceCriterion} | ${labels.measurement} | ${labels.threshold} | ${labels.status} |`,
     "| --- | --- | --- | --- | --- | --- |"
   ];
 
@@ -92,9 +137,9 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
 
   lines.push(
     "",
-    "## Rule",
+    `## ${labels.rule}`,
     "",
-    "Progress is determined by acceptance evidence, not by implementation steps."
+    labels.progressRule
   );
 
   return `${lines.join("\n")}\n`;
@@ -105,15 +150,15 @@ export function syncAcceptanceMarkdown(acceptancePath: string, contract: NoriCon
 }
 
 export function parseAcceptanceMarkdown(markdown: string): ParsedAcceptanceMarkdown {
-  const goalMatch = markdown.match(/## Goal\s+([\s\S]*?)(?:\n## Acceptance Basis|\n## User Acceptance Criteria)/);
-  const tableMatch = markdown.match(/## User Acceptance Criteria\s+([\s\S]*?)(?:\n## |\n$)/);
+  const goalMatch = markdown.match(/## (?:Goal|目标)\s+([\s\S]*?)(?:\n## (?:Acceptance Basis|验收基础)|\n## (?:User Acceptance Criteria|用户验收标准))/);
+  const tableMatch = markdown.match(/## (?:User Acceptance Criteria|用户验收标准)\s+([\s\S]*?)(?:\n## |\n$)/);
   const goal = goalMatch?.[1]?.trim() || "";
   const criteria: ParsedAcceptanceMarkdown["criteria"] = [];
 
   if (tableMatch) {
     for (const line of (tableMatch[1] || "").split("\n")) {
       const trimmed = line.trim();
-      if (!trimmed.startsWith("|") || trimmed.includes("---") || trimmed.includes("User acceptance criterion")) {
+      if (!trimmed.startsWith("|") || trimmed.includes("---") || trimmed.includes("User acceptance criterion") || trimmed.includes("用户验收标准")) {
         continue;
       }
       const cells = trimmed.split("|").slice(1, -1).map((cell: string) => cell.trim());
