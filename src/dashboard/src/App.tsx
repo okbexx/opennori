@@ -16,6 +16,88 @@ import { AcceptanceRadarNet, type RadarNode } from "./components/AcceptanceRadar
 import type { NoriSnapshot } from "./types";
 
 type ConnectionState = "connecting" | "live" | "retrying";
+function isPassingStatus(status: string | undefined): boolean {
+  return ["passing", "waived"].includes(String(status || "").toLowerCase());
+}
+
+function passedGroupRawData(criteria: NonNullable<NoriSnapshot["criteria"]>) {
+  const passedCriteria = criteria.filter((criterion) => isPassingStatus(criterion.status));
+  return {
+    title: "Passed Acceptance Criteria List",
+    description: "All criteria that have already satisfied the acceptance conditions.",
+    total_completed: passedCriteria.length,
+    criteria: passedCriteria.map((criterion) => ({
+      id: criterion.id,
+      user_story: criterion.user_story,
+      measurement: criterion.measurement,
+      threshold: criterion.threshold,
+      status: criterion.status,
+      confidence: criterion.confidence
+    }))
+  };
+}
+
+function syncSelectedNodeWithSnapshot(selectedNode: RadarNode | null, nextSnapshot: NoriSnapshot): RadarNode | null {
+  if (!selectedNode) return null;
+
+  if (selectedNode.type === "goal") {
+    if (!nextSnapshot.goal) return null;
+    return {
+      ...selectedNode,
+      id: nextSnapshot.goal.id,
+      label: "Goal",
+      status: nextSnapshot.goal.workflow_status,
+      rawData: nextSnapshot.goal
+    };
+  }
+
+  if (selectedNode.id === "passed-group") {
+    const criteria = nextSnapshot.criteria || [];
+    const passedCriteria = criteria.filter((criterion) => isPassingStatus(criterion.status));
+    if (passedCriteria.length === 0) return null;
+    return {
+      ...selectedNode,
+      label: "Passed",
+      subLabel: String(passedCriteria.length),
+      status: "passed_group",
+      rawData: passedGroupRawData(criteria)
+    };
+  }
+
+  if (selectedNode.id.startsWith("ac-")) {
+    const criterionId = selectedNode.id.slice("ac-".length);
+    const criterion = nextSnapshot.criteria?.find((item) => item.id === criterionId);
+    if (!criterion) return null;
+    return {
+      ...selectedNode,
+      label: criterion.id,
+      status: criterion.status,
+      rawData: criterion
+    };
+  }
+
+  if (selectedNode.id.startsWith("ev-")) {
+    const evidencePath = selectedNode.id.slice("ev-".length);
+    const separatorIndex = evidencePath.lastIndexOf("-");
+    if (separatorIndex < 1) return selectedNode;
+
+    const criterionId = evidencePath.slice(0, separatorIndex);
+    const evidenceIndex = Number.parseInt(evidencePath.slice(separatorIndex + 1), 10);
+    const criterion = nextSnapshot.criteria?.find((item) => item.id === criterionId);
+    const evidence = Number.isInteger(evidenceIndex) ? criterion?.evidence[evidenceIndex] : undefined;
+    if (!evidence) return null;
+
+    return {
+      ...selectedNode,
+      label: `E-${evidenceIndex + 1}`,
+      status: evidence.result || "unknown",
+      rawData: evidence
+    };
+  }
+
+  return selectedNode;
+}
+
 function relativeTime(value: string | undefined): string {
   if (!value) return "not seen";
   const timestamp = Date.parse(value);
@@ -68,23 +150,12 @@ export default function App() {
       setSnapshot(nextSnapshot);
       setConnection("live");
       setError("");
-
-      // 简体中文：在数据更新后，同步刷新已选中节点的最新状态数据
-      if (selectedNode) {
-        if (selectedNode.type === "goal" && nextSnapshot.goal) {
-          setSelectedNode((prev) => prev ? { ...prev, rawData: nextSnapshot.goal } : prev);
-        } else if (selectedNode.type === "ac" && nextSnapshot.criteria) {
-          const matchedAc = nextSnapshot.criteria.find((c) => `ac-${c.id}` === selectedNode.id);
-          if (matchedAc) {
-            setSelectedNode((prev) => prev ? { ...prev, status: matchedAc.status, rawData: matchedAc } : prev);
-          }
-        }
-      }
+      setSelectedNode((prev) => syncSelectedNodeWithSnapshot(prev, nextSnapshot));
     } catch (refreshError) {
       setConnection("retrying");
       setError(refreshError instanceof Error ? refreshError.message : String(refreshError));
     }
-  }, [selectedNode]);
+  }, []);
 
   useEffect(() => {
     void refresh();
