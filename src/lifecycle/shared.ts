@@ -12,6 +12,7 @@ export const NORI_CAPABILITIES = [
   "reviewable-evidence",
   "codex-plugin",
   "opennori-skills",
+  "plugin-sync",
   "setup",
   "brainstorm",
   "acceptance-discovery",

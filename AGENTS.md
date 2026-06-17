@@ -15,14 +15,20 @@ The user-facing install shape is:
 
 - `npx opennori setup` for first-time machine setup of the complete bundle.
 - `opennori init` for project-local `.opennori/` initialization after setup.
+- `opennori plugin sync` for local development or recovery when the installed Codex Plugin cache is stale.
 
 Do not present manual `codex plugin ...`, `npm install -g ...`, or
 `opennori bootstrap` as parallel main user paths. They may exist only as
-advanced recovery, automation, or source-checkout development details.
+advanced recovery implementation details behind OpenNori lifecycle commands.
 
 Do not implement project-local Skill copying, Skill Pack install/sync, or `.agents/skills` as product behavior. The product goal is for a user agent to get OpenNori through Codex Plugin/Skill discovery, then use the CLI only as the deterministic state layer. If Plugin discovery, packaged Skills, CLI access, or `.opennori` state is missing, route through doctor/project-health and recover the missing bundle part instead of continuing a half-installed workflow.
 
 For agent routing, prefer CLI JSON `data.agent_next` over project-local prose files. `.opennori/agent-guide.md` may summarize project state, but it is not OpenNori's discovery mechanism and must not carry critical Skill behavior.
+
+OpenNori CLI output must distinguish humans from agents: TTY usage without
+`--json` should show short summaries for lifecycle, health, status, report,
+dashboard, and plugin sync commands; `--json` and non-interactive use keep the
+full deterministic payload for agents and automation.
 
 `opennori dashboard` is a local visual observation surface over the acceptance loop. It must not become an agent runtime, process log, chat log, completion authority, or confirmation surface. Do not add dashboard controls that approve AC, confirm Architecture Baselines, waive risks, accept reports, or write Product AC/evidence/profile/architecture/report state. When user input is needed, the dashboard may show what decision is needed and should direct the user back to the agent conversation; the agent records the decision through OpenNori Skills and CLI. `opennori activity` only publishes live agent state for the dashboard; it is not Product AC evidence. Skills should prefer `data.agent_next.dashboard_activity` command templates when present, otherwise use low-parameter activity commands and let the CLI infer the unique current goal/gap. If `.opennori/current` contains multiple goals, treat that as broken state and route to doctor/project-health instead of guessing.
 

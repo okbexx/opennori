@@ -1,6 +1,7 @@
 import { fail, ok } from "./core.ts";
 import { runBootstrap } from "./cli/bootstrap.ts";
 import { CLI_NAME, commandLabelFor, resolveCliCommand, runCliCommand, usageFor } from "./cli/command-tree.ts";
+import { printHumanResult, shouldPrintHuman } from "./cli/human-output.ts";
 import { runInit } from "./cli/init.ts";
 import { runSetup } from "./cli/setup.ts";
 
@@ -15,6 +16,11 @@ function printJson(payload: unknown): void {
 }
 
 function printCommandResult(payload: CommandPayload): void {
+  printJson(payload);
+  if (!payload.ok) process.exitCode = 1;
+}
+
+function printPayload(payload: CommandPayload): void {
   printJson(payload);
   if (!payload.ok) process.exitCode = 1;
 }
@@ -63,6 +69,10 @@ export async function main(args: string[]): Promise<void> {
   }
 
   const payload = await runCliCommand(resolved);
+  if (shouldPrintHuman(args) && printHumanResult(payload as any, { commandPath: resolved.path })) {
+    if (!(payload as CommandPayload).ok) process.exitCode = 1;
+    return;
+  }
   if (resolved.policy.commandResult) printCommandResult(payload as CommandPayload);
-  else printJson(payload);
+  else printPayload(payload as CommandPayload);
 }

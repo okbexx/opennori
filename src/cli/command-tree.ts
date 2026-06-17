@@ -12,12 +12,17 @@ import { doctorCommand } from "./commands/doctor.ts";
 import { evidenceAddCommand, evidencePruneCommand } from "./commands/evidence.ts";
 import { installCommand } from "./commands/install.ts";
 import { listCommand } from "./commands/list.ts";
+import { pluginSyncCommand } from "./commands/plugin.ts";
 import { profileAddCommand, profileCheckCommand, profileEvidenceCommand, profileShowCommand } from "./commands/profile.ts";
 import { archiveCommand, reportCommand } from "./commands/reporting.ts";
 import { setupCommand } from "./commands/setup.ts";
 import { uninstallCommand } from "./commands/uninstall.ts";
 import { upgradeCommand } from "./commands/upgrade.ts";
-import { activeGoalRuntime, withActiveGoalWriteLock } from "./runtime.ts";
+import { agentNextForDoctor } from "../agent-next.ts";
+import { fail, ok } from "../core.ts";
+import { doctor } from "../lifecycle.ts";
+import type { JsonObject } from "../types.ts";
+import { activeGoalRuntime, isActiveGoalLoadError, withActiveGoalWriteLock } from "./runtime.ts";
 
 type Resolvable<T> = T | Promise<T> | (() => T | Promise<T>);
 type AnyCommand = CommandDef<any>;
@@ -93,6 +98,10 @@ const evidenceCommand = groupCommand("evidence", "Record OpenNori acceptance evi
   prune: withPolicy(asCommand(evidencePruneCommand), { activeGoal: true, activeGoalWrite: true })
 });
 
+const pluginCommand = groupCommand("plugin", "Manage OpenNori Codex Plugin cache sync.", {
+  sync: withPolicy(asCommand(pluginSyncCommand), { commandResult: true })
+});
+
 const contextCommand = groupCommand("context", "Export OpenNori context for review tools.", {
   export: withPolicy(asCommand(contextExportCommand), { activeGoal: true })
 });
@@ -118,6 +127,7 @@ export const rootCommand = defineCommand({
     uninstall: withPolicy(asCommand(uninstallCommand), { commandResult: true }),
     upgrade: withPolicy(asCommand(upgradeCommand), { commandResult: true }),
     dashboard: withPolicy(asCommand(dashboardCommand), { commandResult: true }),
+    plugin: pluginCommand,
     brainstorm: asCommand(brainstormCommand),
     discover: asCommand(discoverCommand),
     draft: withPolicy(asCommand(draftCommand), { commandResult: true }),
@@ -268,6 +278,41 @@ export async function commandLabelFor(rawArgs: string[]): Promise<string> {
   return [CLI_NAME, ...resolved.path].join(" ");
 }
 
+function missingCurrentGoalStatus(error: { root: string; type: string; message: string }): JsonObject {
+  const health = doctor(error.root);
+  const agentNext = health.agent_next || agentNextForDoctor(error.root, health);
+  const isHealthRecovery = health.status !== "ready";
+  const nextActions = [
+    agentNext.user_visible_next,
+    ...(agentNext.commands || []),
+    agentNext.safe_next_command
+  ].filter(Boolean) as string[];
+  return {
+    status: isHealthRecovery ? "needs-action" : "no_current_goal",
+    reason: error.type,
+    message: error.message,
+    root: error.root,
+    current_goal: null,
+    active_goals: health.active_goals,
+    draft_goals: health.draft_goals,
+    health: {
+      status: health.status,
+      recovery_actions: health.recovery_actions,
+      failed_checks: health.checks
+        .filter((check) => !check.ok)
+        .map((check) => ({
+          name: check.name,
+          summary: check.summary,
+          recovery: check.recovery,
+          severity: check.severity
+        }))
+    },
+    agent_next: agentNext,
+    side_effect: "none",
+    next_actions: nextActions
+  };
+}
+
 export async function runCliCommand(resolved: Extract<ResolvedCliCommand, { ok: true }>): Promise<unknown> {
   const runtime = resolved.policy.activeGoal ? activeGoalRuntime() : {};
   const execute = async () => {
@@ -280,7 +325,22 @@ export async function runCliCommand(resolved: Extract<ResolvedCliCommand, { ok: 
     });
     return result;
   };
-  return resolved.policy.activeGoal
-    ? withActiveGoalWriteLock(resolved.rawArgs, execute)
-    : execute();
+  try {
+    return await (resolved.policy.activeGoal
+      ? withActiveGoalWriteLock(resolved.rawArgs, execute)
+      : execute());
+  } catch (error) {
+    if (isActiveGoalLoadError(error) && (error.type === "no_current_goal" || error.type === "multiple_current_goals") && !resolved.policy.activeGoalWrite && !error.goal) {
+      const data = missingCurrentGoalStatus(error);
+      return ok(data, [], [], data.next_actions as string[]);
+    }
+    if (isActiveGoalLoadError(error)) {
+      return fail(
+        error.type,
+        error.message,
+        `Run ${CLI_NAME} doctor --root ${error.root} --json to inspect OpenNori state before retrying.`
+      );
+    }
+    throw error;
+  }
 }

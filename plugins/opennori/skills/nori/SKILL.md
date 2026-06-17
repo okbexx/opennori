@@ -51,7 +51,7 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 - "Must use this Skill", "prefer Radix UI", "avoid this tool", "ask before installing" -> hand off to `nori-capability-profile`.
 - "Decide architecture first", "use a better architecture", "follow the baseline", "challenge the baseline" -> use `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge`.
 - "Before self-building this parser/installer/schema/storage/UI primitive" -> hand off to `nori-build-vs-buy`.
-- "Install", "upgrade", "uninstall", "doctor", "state is broken" -> hand off to `nori-project-health`.
+- "Install", "upgrade", "uninstall", "doctor", "state is broken", "sync local OpenNori plugin", or "Codex Plugin cache is stale" -> hand off to `nori-project-health`.
 - "Show me the dashboard", "watch OpenNori run", "I want live status" -> run or suggest `opennori dashboard --root <repo>` and keep completion judgment plus user confirmations in conversation and status/report.
 - A complete goal with `agent_next.candidate_goals` and a user asking to continue -> choose or refine one human-facing next goal, then hand off to `nori-acceptance`.
 

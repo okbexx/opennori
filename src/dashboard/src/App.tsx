@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchSnapshot, subscribeToEvents } from "./api";
 import { AcceptanceRadarNet, type RadarNode } from "./components/AcceptanceRadarNet";
+import { InspectNodePanel } from "./components/InspectNodePanel";
 import type { NoriSnapshot } from "./types";
 
 type ConnectionState = "connecting" | "live" | "retrying";
@@ -143,6 +144,7 @@ export default function App() {
   const [error, setError] = useState<string>("");
   const [selectedNode, setSelectedNode] = useState<RadarNode | null>(null);
   const [copied, setCopied] = useState(false);
+  const [drawerTab, setDrawerTab] = useState<"visual" | "json">("visual");
 
   const refresh = useCallback(async () => {
     try {
@@ -244,7 +246,10 @@ export default function App() {
               <div className="relative flex-1 grid place-items-center min-h-0 min-w-0 h-full max-h-full overflow-hidden">
                 <AcceptanceRadarNet
                   snapshot={snapshot}
-                  onSelectNode={(node) => setSelectedNode(node)}
+                  onSelectNode={(node) => {
+                    setSelectedNode(node);
+                    setDrawerTab("visual"); // 点选节点时，默认重置为可视化 UI tab
+                  }}
                   selectedNodeId={selectedNode?.id || null}
                 />
 
@@ -297,13 +302,14 @@ export default function App() {
                   transition={{ type: "spring", damping: 22, stiffness: 150 }}
                   className="w-[min(420px,calc(100vw-2rem))] rounded-lg border border-[rgba(189,147,249,0.18)] bg-[rgba(16,20,38,0.72)] p-4 shadow-2xl backdrop-blur-md grid grid-rows-[auto_1fr] h-full max-h-full min-h-0 overflow-hidden"
                 >
-                  <div className="flex items-center justify-between gap-4 border-b border-slate-800 pb-3 mb-3">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#bd93f9]">
-                        Inspected Node
-                      </span>
-                      <h3 className="text-base font-semibold text-[#e2e8f0]">
-                        {selectedNode.type.toUpperCase()}: {selectedNode.label}
+                  <div className="border-b border-slate-800 pb-3 mb-3 flex flex-col gap-3">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-[#bd93f9]">
+                          Inspected Node
+                        </span>
+                        <h3 className="text-base font-semibold text-[#e2e8f0]">
+                        {selectedNode.type === "goal" ? `GOAL: ${selectedNode.id}` : `${selectedNode.type.toUpperCase()}: ${selectedNode.label}`}
                       </h3>
                     </div>
                     <button
@@ -316,11 +322,44 @@ export default function App() {
                     </button>
                   </div>
 
+                  {/* 简体中文：精细的分段胶囊式切换栏 (Segmented Control)，提供完美的对齐与大屏科技质感 */}
+                  <div className="inline-flex items-center rounded-lg bg-black/45 p-0.5 border border-slate-800/80 self-start">
+                    <button
+                      type="button"
+                      onClick={() => setDrawerTab("visual")}
+                      className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                        drawerTab === "visual"
+                          ? "bg-[#00f0ff]/15 text-[#00f0ff] shadow-[0_1px_3px_rgba(0,240,255,0.1)]"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      UI Panel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDrawerTab("json")}
+                      className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                        drawerTab === "json"
+                          ? "bg-[#bd93f9]/15 text-[#bd93f9] shadow-[0_1px_3px_rgba(189,147,249,0.1)]"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      Raw JSON
+                    </button>
+                  </div>
+                </div>
+
                   <div className="overflow-auto min-h-0 h-full max-h-full flex flex-col scrollbar-hover-visible">
-                    <span className="block text-xs font-semibold text-slate-400 mb-2">Readonly Data (JSON)</span>
-                    <pre className="flex-1 overflow-auto whitespace-pre-wrap break-all scrollbar-hover-visible rounded border border-slate-800/80 bg-black/40 p-3 text-[11px] leading-relaxed text-[#bd93f9] select-text">
-                      {JSON.stringify(selectedNode.rawData, null, 2)}
-                    </pre>
+                    {drawerTab === "visual" ? (
+                      <InspectNodePanel node={selectedNode} />
+                    ) : (
+                      <>
+                        <span className="block text-xs font-semibold text-slate-400 mb-2">Readonly Data (JSON)</span>
+                        <pre className="flex-1 overflow-auto whitespace-pre-wrap break-all scrollbar-hover-visible rounded border border-slate-800/80 bg-black/40 p-3 text-[11px] leading-relaxed text-[#bd93f9] select-text">
+                          {JSON.stringify(selectedNode.rawData, null, 2)}
+                        </pre>
+                      </>
+                    )}
                   </div>
                 </motion.div>
               ) : null}

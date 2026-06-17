@@ -44,7 +44,7 @@
         "goal_id": { "type": "string", "minLength": 1 },
         "status": {
           "type": "string",
-          "enum": ["active", "unknown", "failing", "passing", "blocked", "complete", "waived"]
+          "enum": ["draft", "active", "unknown", "failing", "passing", "blocked", "complete", "waived"]
         },
         "criteria": {
           "type": "object",

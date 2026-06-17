@@ -22,16 +22,20 @@ A fresh `opennori init` normally creates empty `.opennori/current`, `.opennori/d
 1. Run `opennori doctor --root <repo> --json` when the project may already use OpenNori.
 2. Run `opennori init --root <repo> --json` when the machine already has OpenNori and only project `.opennori` state is missing.
 3. Run `npx opennori setup` for first-time machine setup, missing global CLI, missing Codex Plugin discovery, missing packaged Skills, or unclear bundle readiness.
-4. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, damaged current state, or legacy `.opennori/active` state, present the missing bundle part and the recovery action. When safe_next_command exists, run that preview first.
-5. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no approved current contract, then hand off to `nori-acceptance`.
-6. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, or deletes state.
-7. After upgrade or repair, run `opennori check --root <repo> --json` and route soft review findings to the relevant Skill.
-8. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live health activity while diagnosing or recovering bundle readiness. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-project-health --state working --summary "..." --json`.
+4. Run `opennori plugin sync --json` when the installed Codex Plugin cache is stale but project `.opennori` state should not be touched; use `--local` only for source-checkout development.
+5. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, damaged current state, or legacy `.opennori/active` state, present the missing bundle part and the recovery action. When safe_next_command exists, run that preview first.
+6. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no approved current contract, then hand off to `nori-acceptance`.
+7. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, syncs plugin cache, or deletes state.
+8. After upgrade or repair, run `opennori check --root <repo> --json` and route soft review findings to the relevant Skill.
+9. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live health activity while diagnosing or recovering bundle readiness. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-project-health --state working --summary "..." --json`.
 
 Useful state commands:
 
 - `npx opennori setup`
 - `npx opennori setup --confirm`
+- `opennori plugin sync --json`
+- `opennori plugin sync --confirm --json`
+- `opennori plugin sync --local --confirm --json`
 - `opennori init --root <repo> --json`
 - `opennori init --root <repo> --confirm --json`
 - `opennori install --root <repo> --dry-run --json`
@@ -48,6 +52,7 @@ Useful state commands:
 ## Natural-Language Mapping
 
 - "Install OpenNori" or "set up OpenNori on this machine" -> setup preview, then confirm only after the user approves.
+- "Sync the local OpenNori plugin", "Codex Plugin cache is stale", or "local plugin should be latest" -> `opennori plugin sync --json`, then confirm only after the user approves. Use `--local` only when syncing from the current source checkout.
 - "Initialize OpenNori in this project" -> init preview, then confirm only after the user approves.
 - "Is OpenNori healthy" -> doctor and summarize ready, needs-action, or broken with recovery actions.
 - "The CLI works but Plugin/Skills are missing" or "Plugin is installed but .opennori is missing" -> diagnose bundle readiness and recover the missing part instead of treating the remainder as a separate user path.

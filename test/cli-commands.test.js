@@ -17,10 +17,13 @@ import { runEvidenceAddCommand, runEvidencePruneCommand } from "../src/cli/comma
 import { runBootstrapCommand } from "../src/cli/commands/bootstrap.ts";
 import { runInstallCommand } from "../src/cli/commands/install.ts";
 import { runListCommand } from "../src/cli/commands/list.ts";
+import { runPluginSyncCommand } from "../src/cli/commands/plugin.ts";
 import { runProfileAddCommand, runProfileEvidenceCommand, runProfileShowCommand } from "../src/cli/commands/profile.ts";
 import { runArchiveCommand, runReportCommand } from "../src/cli/commands/reporting.ts";
 import { runSetupCommand } from "../src/cli/commands/setup.ts";
 import { runSetup } from "../src/cli/setup.ts";
+import { printHumanResult } from "../src/cli/human-output.ts";
+import { resolveCliCommand, runCliCommand } from "../src/cli/command-tree.ts";
 import { runUninstallCommand } from "../src/cli/commands/uninstall.ts";
 import { runUpgradeCommand } from "../src/cli/commands/upgrade.ts";
 import { buildArchitectureBaseline, renderAgentGuideMarkdown, writeArchitectureBaseline } from "../src/architecture.ts";
@@ -62,6 +65,7 @@ function writeActiveGoal(root) {
 function writeActiveGoalWithId(root, goalId, status = "active", location = "current") {
   const contract = {
     schema_version: "opennori/contract-v1",
+    protocol_version: "opennori/v1",
     goal_id: goalId,
     goal: `Ship ${goalId}`,
     acceptance_basis: { status: "approved", summary: "Approved for test." },
@@ -80,6 +84,14 @@ function writeActiveGoalWithId(root, goalId, status = "active", location = "curr
   fs.mkdirSync(activeDir, { recursive: true });
   fs.writeFileSync(path.join(activeDir, `${goalId}.acceptance.md`), `# ${goalId}\n`);
   writeJson(path.join(activeDir, `${goalId}.evidence.json`), { contract, ledger });
+}
+
+function activeGoalRuntimeFor(root) {
+  return {
+    loadPair: (args = {}) => loadPair({ root, ...args }),
+    savePair() {},
+    refreshManifest() {}
+  };
 }
 
 function packageVersion() {
@@ -118,6 +130,20 @@ function setupRunner({ marketplace = false, plugin = false, pluginVersion = pack
     return { status: 0, stdout: `ok ${display}`, stderr: "" };
   };
   return { calls, runner };
+}
+
+function renderHuman(payload, commandPath) {
+  let output = "";
+  const stdout = {
+    isTTY: true,
+    write(chunk) {
+      output += String(chunk);
+      return true;
+    }
+  };
+  const handled = printHumanResult(payload, { commandPath, stdout });
+  assert.equal(handled, true);
+  return output;
 }
 
 test("citty command modules preserve agent-readable JSON payloads", async () => {
@@ -238,6 +264,57 @@ test("setup command upgrades stale installed Codex Plugin versions", async () =>
   assert.equal(calls.some((call) => call.join(" ") === "codex plugin add opennori@opennori"), true);
 });
 
+test("plugin sync previews and confirms Codex Plugin cache refresh without project state writes", async () => {
+  const root = tempRoot();
+  const { calls, runner } = setupRunner({
+    marketplace: true,
+    plugin: true,
+    pluginVersion: "0.1.8",
+    globalVersion: packageVersion()
+  });
+  const preview = await runPluginSyncCommand(["--json"], { runner });
+
+  assert.equal(preview.ok, true);
+  assert.equal(preview.data.status, "needs_confirm");
+  assert.equal(preview.data.plugin_sync_plan.schema_version, "opennori/plugin-sync-plan-v1");
+  assert.equal(preview.data.plugin_sync_plan.summary.will_write, 0);
+  assert.equal(preview.data.plugin_sync_plan.actions.some((action) => action.id === "codex_plugin" && action.action === "will-run"), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
+  assert.equal(calls.some((call) => call.join(" ") === "codex plugin add opennori@opennori"), false);
+
+  const confirmed = await runPluginSyncCommand(["--confirm", "--json"], { runner });
+
+  assert.equal(confirmed.ok, true);
+  assert.equal(confirmed.data.status, "synced");
+  assert.equal(calls.some((call) => call.join(" ") === "codex plugin add opennori@opennori"), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
+});
+
+test("plugin sync local mode can register the current package marketplace", async () => {
+  const { calls, runner } = setupRunner({
+    marketplace: false,
+    plugin: true,
+    pluginVersion: packageVersion(),
+    globalVersion: packageVersion()
+  });
+  const preview = await runPluginSyncCommand(["--local", "--json"], { runner });
+  const marketplaceAction = preview.data.plugin_sync_plan.actions.find((action) => action.id === "codex_marketplace");
+
+  assert.equal(preview.ok, true);
+  assert.equal(marketplaceAction.action, "will-run");
+  assert.equal(marketplaceAction.command[0], "codex");
+  assert.equal(marketplaceAction.command[1], "plugin");
+  assert.equal(marketplaceAction.command[2], "marketplace");
+  assert.equal(marketplaceAction.command[3], "add");
+  assert.equal(marketplaceAction.command[4], ROOT);
+
+  const confirmed = await runPluginSyncCommand(["--local", "--confirm", "--json"], { runner });
+
+  assert.equal(confirmed.ok, true);
+  assert.equal(calls.some((call) => call.join(" ") === `codex plugin marketplace add ${ROOT}`), true);
+  assert.equal(calls.some((call) => call.join(" ") === "codex plugin add opennori@opennori"), true);
+});
+
 test("interactive setup reports underlying setup failure instead of throwing on missing data", async () => {
   const root = tempRoot();
   const { runner } = setupRunner({
@@ -339,6 +416,95 @@ test("upgrade command module preserves preview and install-required safety", asy
   const missing = await runUpgradeCommand(["--root", tempRoot(), "--confirm", "--json"]);
   assert.equal(missing.ok, false);
   assert.equal(missing.error.type, "install_required");
+});
+
+test("human output summarizes lifecycle commands instead of printing full JSON", async () => {
+  const root = tempRoot();
+  await runInstallCommand(["--root", root, "--json"]);
+  fs.writeFileSync(path.join(root, ".opennori", "protocol.md"), "old protocol\n");
+
+  const upgrade = await runUpgradeCommand(["--root", root, "--confirm", "--json"]);
+  const upgradeText = renderHuman(upgrade, ["upgrade"]);
+  assert.match(upgradeText, /OpenNori upgrade complete/);
+  assert.match(upgradeText, /Actions:/);
+  assert.match(upgradeText, /Destructive:/);
+  assert.doesNotMatch(upgradeText.trimStart(), /^\{/);
+  assert.doesNotMatch(upgradeText, /"upgrade_plan"/);
+
+  const uninstall = await runUninstallCommand(["--root", root, "--dry-run", "--json"]);
+  const uninstallText = renderHuman(uninstall, ["uninstall"]);
+  assert.match(uninstallText, /OpenNori uninstall preview/);
+  assert.match(uninstallText, /Writes: 0 now/);
+
+  const plugin = await runPluginSyncCommand(["--json"], { runner: setupRunner({ marketplace: true, plugin: true }).runner });
+  const pluginText = renderHuman(plugin, ["plugin", "sync"]);
+  assert.match(pluginText, /OpenNori plugin sync preview/);
+  assert.doesNotMatch(pluginText, /"plugin_sync_plan"/);
+});
+
+test("human output summarizes doctor check status report and dashboard", async () => {
+  const root = tempRoot();
+  await runInstallCommand(["--root", root, "--json"]);
+  writeActiveGoalWithId(root, "human-output-goal");
+
+  const doctor = await runDoctorCommand(["--root", root, "--json"]);
+  assert.match(renderHuman(doctor, ["doctor"]), /OpenNori doctor/);
+
+  const status = await runStatusCommand(["--root", root, "--json"], activeGoalRuntimeFor(root));
+  const statusText = renderHuman(status, ["status"]);
+  assert.match(statusText, /OpenNori status/);
+  assert.match(statusText, /Goal: human-output-goal/);
+  assert.doesNotMatch(statusText, /"agent_next"/);
+
+  const check = await runCheckCommand(["--root", root, "--json"], activeGoalRuntimeFor(root));
+  const checkText = renderHuman(check, ["check"]);
+  assert.match(checkText, /OpenNori check/);
+  assert.match(checkText, /Evidence health:/);
+
+  const report = await runReportCommand(["--root", root, "--json"], activeGoalRuntimeFor(root));
+  const reportText = renderHuman(report, ["report"]);
+  assert.match(reportText, /OpenNori report generated/);
+  assert.match(reportText, /Report:/);
+
+  const dashboard = await runDashboardCommand(["--root", root, "--port", "0", "--once", "--json"]);
+  const dashboardText = renderHuman(dashboard, ["dashboard"]);
+  assert.match(dashboardText, /OpenNori dashboard running/);
+  assert.match(dashboardText, /URL:/);
+});
+
+test("status commands return routeable no-current-goal state instead of unexpected errors", async () => {
+  const root = tempRoot();
+  await runInitCommand(["--root", root, "--confirm", "--json"]);
+
+  const resolved = await resolveCliCommand(["status", "--root", root, "--json"]);
+  assert.equal(resolved.ok, true);
+  const status = await runCliCommand(resolved);
+  assert.equal(status.ok, true);
+  assert.equal(status.data.status, "no_current_goal");
+  assert.equal(status.data.current_goal, null);
+  assert.equal(status.data.agent_next.state, "initialized_no_active_contract");
+  assert.equal(status.data.agent_next.recommended_skill, "nori-acceptance");
+  assert.match(renderHuman(status, ["status"]), /OpenNori has no current goal/);
+});
+
+test("status routes incomplete project state to health recovery instead of unexpected errors", async () => {
+  const root = tempRoot();
+  await runInitCommand(["--root", root, "--confirm", "--json"]);
+  fs.rmSync(path.join(root, ".opennori", "current"), { recursive: true, force: true });
+  fs.rmSync(path.join(root, ".opennori", "drafts"), { recursive: true, force: true });
+
+  const resolved = await resolveCliCommand(["status", "--root", root, "--json"]);
+  assert.equal(resolved.ok, true);
+  const status = await runCliCommand(resolved);
+  assert.equal(status.ok, true);
+  assert.equal(status.data.status, "needs-action");
+  assert.equal(status.data.current_goal, null);
+  assert.equal(status.data.agent_next.state, "health_needs_recovery");
+  assert.equal(status.data.agent_next.recommended_skill, "nori-project-health");
+  assert.equal(status.data.health.failed_checks.some((check) => check.name === "dir_current"), true);
+  const text = renderHuman(status, ["status"]);
+  assert.match(text, /OpenNori has no current goal/);
+  assert.match(text, /Health: needs-action/);
 });
 
 test("list command module reports current goal gaps without CLI dispatch", async () => {

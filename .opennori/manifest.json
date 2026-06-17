@@ -3,13 +3,14 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-17T03:26:42.555Z",
+  "updated_at": "2026-06-17T09:31:57.814Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
     "reviewable-evidence",
     "codex-plugin",
     "opennori-skills",
+    "plugin-sync",
     "setup",
     "brainstorm",
     "acceptance-discovery",
@@ -162,7 +163,7 @@
     {
       "goal_id": "opennori-self-opennori-adoption-dogfood",
       "location": "drafts",
-      "status": "active",
+      "status": "draft",
       "current_gap": {
         "id": "ACCEPTANCE-BASIS",
         "user_story": "作为用户，我需要先确认或修改验收标准，才能让 agent 判断任务完成。",

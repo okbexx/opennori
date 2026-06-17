@@ -3,7 +3,7 @@ import type { SchemaValidationError } from "./validation.ts";
 export type JsonObject = Record<string, any>;
 
 export type AcceptanceStatus = "unknown" | "failing" | "passing" | "blocked" | "waived";
-export type WorkflowStatus = "active" | "blocked" | "complete";
+export type WorkflowStatus = "draft" | "active" | "blocked" | "complete";
 export type EvidenceResult = "failing" | "passing" | "blocked" | "waived";
 export type EvidenceBasis =
   | "human-confirmation"

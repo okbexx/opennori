@@ -50,8 +50,8 @@
   "ledger": {
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self-opennori-adoption-dogfood",
-    "status": "active",
-    "updated_at": "2026-06-15T12:38:59.658Z",
+    "status": "draft",
+    "updated_at": "2026-06-17T09:31:57.774Z",
     "criteria": {
       "AC-1": {
         "status": "unknown",

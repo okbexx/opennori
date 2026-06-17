@@ -334,6 +334,7 @@ test("draft requires user approval before completion evidence can finish the wor
   assert.match(acceptance, /Status: draft/);
 
   const ledger = JSON.parse(fs.readFileSync(draft.data.evidence_path, "utf8"));
+  assert.equal(ledger.ledger.status, "draft");
   for (const criterion of Object.keys(ledger.ledger.criteria)) {
     run([
       "evidence", "add",
@@ -357,7 +358,7 @@ test("draft requires user approval before completion evidence can finish the wor
     "--evidence", draft.data.evidence_path,
     "--json"
   ]);
-  assert.equal(beforeApprove.data.workflow_status, "active");
+  assert.equal(beforeApprove.data.workflow_status, "draft");
   assert.equal(beforeApprove.data.current_gap.id, "ACCEPTANCE-BASIS");
 
   const approved = run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
@@ -743,7 +744,7 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.equal(nextDraft.data.criteria.some((criterion) => /phase、task list 或 completion evidence/.test(criterion.threshold)), true);
   assert.equal(nextDraft.data.criteria.some((criterion) => /按这条候选方向检查新的目标结果/.test(criterion.measurement)), false);
   const nextDraftLedger = JSON.parse(fs.readFileSync(nextDraft.data.evidence_path, "utf8"));
-  assert.equal(nextDraftLedger.ledger.status, "active");
+  assert.equal(nextDraftLedger.ledger.status, "draft");
   assert.equal(nextDraftLedger.ledger.criteria["AC-1"].status, "unknown");
 
   const dogfoodDraft = run([
@@ -2258,7 +2259,10 @@ test("list separates drafts from the single current goal", () => {
     encoding: "utf8"
   });
   assert.equal(draftResume.status, 1);
-  assert.match(draftResume.stderr, /No current OpenNori goal found|No current/);
+  const draftResumePayload = JSON.parse(draftResume.stdout);
+  assert.equal(draftResumePayload.ok, false);
+  assert.equal(draftResumePayload.error.type, "no_current_goal");
+  assert.match(draftResumePayload.error.message, /No current OpenNori goal found/);
 });
 
 test("archive moves complete goals out of current and preserves report", () => {

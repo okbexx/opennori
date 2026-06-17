@@ -57,6 +57,40 @@ export type ActiveGoalRuntime = {
   refreshManifest: typeof refreshManifest;
 };
 
+export type ActiveGoalLoadErrorType =
+  | "no_current_goal"
+  | "no_draft_contract"
+  | "multiple_current_goals"
+  | "multiple_draft_contracts";
+
+type ActiveGoalLoadErrorOptions = {
+  type: ActiveGoalLoadErrorType;
+  root: string;
+  location: GoalStateLocation;
+  goal?: string;
+  message: string;
+};
+
+export class ActiveGoalLoadError extends Error {
+  readonly type: ActiveGoalLoadErrorType;
+  readonly root: string;
+  readonly location: GoalStateLocation;
+  readonly goal?: string;
+
+  constructor(options: ActiveGoalLoadErrorOptions) {
+    super(options.message);
+    this.name = "ActiveGoalLoadError";
+    this.type = options.type;
+    this.root = options.root;
+    this.location = options.location;
+    this.goal = options.goal;
+  }
+}
+
+export function isActiveGoalLoadError(error: unknown): error is ActiveGoalLoadError {
+  return error instanceof ActiveGoalLoadError;
+}
+
 export async function runJsonCommand(command: CliCommand, rawArgs: string[], data?: unknown): Promise<unknown> {
   const { result } = await runCommand(command, { rawArgs, data });
   return result;
@@ -197,14 +231,25 @@ export function loadPair(args: ActiveGoalArgs = {}): ActiveGoalPair {
   const pairs = location === "drafts" ? findDraftPairs(root) : findCurrentPairs(root);
   const pair = goal ? pairs.find((item) => item.goalId === goal) : pairs[0];
   if (!pair) {
-    throw new Error(location === "drafts"
-      ? `No draft OpenNori contract found under ${root}`
-      : `No current OpenNori goal found under ${root}`);
+    throw new ActiveGoalLoadError({
+      type: location === "drafts" ? "no_draft_contract" : "no_current_goal",
+      root,
+      location,
+      goal,
+      message: location === "drafts"
+        ? `No draft OpenNori contract found under ${root}`
+        : `No current OpenNori goal found under ${root}`
+    });
   }
   if (!goal && pairs.length > 1) {
-    throw new Error(location === "drafts"
-      ? "Multiple draft OpenNori contracts found. Pass --goal <goal-id> or explicit --acceptance/--evidence paths."
-      : "OpenNori current state is invalid: multiple current goals found. Run opennori doctor --root <project> --json.");
+    throw new ActiveGoalLoadError({
+      type: location === "drafts" ? "multiple_draft_contracts" : "multiple_current_goals",
+      root,
+      location,
+      message: location === "drafts"
+        ? "Multiple draft OpenNori contracts found. Pass --goal <goal-id> or explicit --acceptance/--evidence paths."
+        : "OpenNori current state is invalid: multiple current goals found. Run opennori doctor --root <project> --json."
+    });
   }
   const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
   return preparePair({

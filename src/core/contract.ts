@@ -52,7 +52,7 @@ export function buildEvidenceLedger(contract: NoriContract): EvidenceLedger {
   return {
     protocol_version: PROTOCOL_VERSION,
     goal_id: contract.goal_id,
-    status: "active",
+    status: contract.acceptance_basis?.status === "approved" ? "active" : "draft",
     updated_at: nowIso(),
     criteria,
     capability_profile: {

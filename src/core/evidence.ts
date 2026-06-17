@@ -196,7 +196,9 @@ export function recomputeWorkflowStatus(contract: NoriContract, ledger: Evidence
   const approved = contract.acceptance_basis?.status === "approved";
   const compliance = profileCompliance(ledger);
 
-  if (requiredStates.some((status: string) => status === "blocked")) {
+  if (!approved) {
+    ledger.status = "draft";
+  } else if (requiredStates.some((status: string) => status === "blocked")) {
     ledger.status = "blocked";
   } else if (compliance.required && !compliance.complete) {
     ledger.status = "blocked";
