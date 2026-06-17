@@ -16,16 +16,6 @@ import { AcceptanceRadarNet, type RadarNode } from "./components/AcceptanceRadar
 import type { NoriSnapshot } from "./types";
 
 type ConnectionState = "connecting" | "live" | "retrying";
-function shortText(value: string | null | undefined, maxLength = 120, fallback = "none"): string {
-  const text = String(value || "").trim();
-  if (!text) return fallback;
-  return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
-}
-
-function primaryGoalText(value: string | null | undefined): string {
-  return shortText(value, 92, "No current goal");
-}
-
 function relativeTime(value: string | undefined): string {
   if (!value) return "not seen";
   const timestamp = Date.parse(value);
@@ -122,8 +112,6 @@ export default function App() {
     });
   };
 
-  const goalLabel = useMemo(() => primaryGoalText(snapshot?.goal?.label), [snapshot]);
-
   // 简体中文：仅供复制的对话提示，Dashboard 不暴露底层状态写入命令
   const suggestedAgentReply = useMemo(() => {
     if (!snapshot) return "";
@@ -147,24 +135,30 @@ export default function App() {
 
         {/* 简体中文：限制 100vh 高度自适应并微调 padding 间距，消除滚动 */}
         <section className="relative z-10 grid h-full max-h-full grid-rows-[auto_1fr_auto] gap-3 p-3 lg:gap-4 lg:p-6 min-h-0 overflow-hidden">
-          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(0,240,255,0.06)] pb-4">
-            <div className="flex items-center gap-3">
-              <div className="grid h-11 w-11 place-items-center rounded-lg border border-[#00f0ff]/35 bg-[#00f0ff]/12 text-lg font-black text-[#00f0ff] filter drop-shadow-[0_0_8px_rgba(0,240,255,0.3)] animate-pulse">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(0,240,255,0.08)] pb-3">
+            <div className="flex items-center gap-3.5">
+              <div className="grid h-11 w-11 place-items-center rounded-lg border border-[#00f0ff]/35 bg-[#00f0ff]/12 text-lg font-black text-[#00f0ff] filter drop-shadow-[0_0_8px_rgba(0,240,255,0.35)] animate-pulse">
                 N
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">OpenNori Dashboard</p>
-                <h1 className="text-xl font-semibold leading-tight text-[#e2e8f0] sm:text-2xl">Acceptance Radar Net</h1>
+                <div className="flex items-center gap-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">OpenNori Dashboard</p>
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#34d399] animate-ping" />
+                  <span className="text-[8px] font-mono text-slate-500 tracking-wider">OBS.NODE_CONNECTED</span>
+                </div>
+                <h1 className="text-xl font-black tracking-wide bg-gradient-to-r from-[#00f0ff] to-[#bd93f9] bg-clip-text text-transparent filter drop-shadow-[0_0_8px_rgba(0,240,255,0.15)] sm:text-2xl">
+                  Acceptance Radar Net
+                </h1>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-[#00f0ff]/35 bg-[#00f0ff]/10 px-3 text-sm font-semibold text-[#c7d2fe]">
-                <Eye size={15} />
+              <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-[rgba(0,240,255,0.15)] bg-[#00f0ff]/8 px-3 text-xs font-bold uppercase tracking-wider text-[#00f0ff] shadow-[0_0_10px_rgba(0,240,255,0.04)]">
+                <Eye size={13} />
                 Observation only
               </span>
-              <span className={`inline-flex min-h-8 items-center gap-2 rounded-full border px-3 text-sm font-semibold ${connection === "live" ? "border-[#34d399]/35 bg-[#34d399]/10 text-[#a7f3d0]" : connection === "retrying" ? "border-[#fbbf24]/40 bg-[#fbbf24]/10 text-[#fde68a]" : "border-slate-800 bg-slate-900/40 text-slate-300"}`}>
-                <Radio size={15} className={connection === "live" ? "animate-pulse" : ""} />
+              <span className={`inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-mono font-semibold uppercase tracking-wider ${connection === "live" ? "border-[#34d399]/35 bg-[#34d399]/10 text-[#a7f3d0]" : connection === "retrying" ? "border-[#fbbf24]/40 bg-[#fbbf24]/10 text-[#fde68a]" : "border-slate-800 bg-slate-900/40 text-slate-300"}`}>
+                <Radio size={13} className={connection === "live" ? "animate-pulse" : ""} />
                 {connection}
               </span>
               <IconButton label="Refresh snapshot" onClick={() => void refresh()}>
@@ -175,14 +169,7 @@ export default function App() {
 
           <section className="grid min-h-0 gap-4 lg:grid-cols-[1fr_auto] h-full max-h-full overflow-hidden">
             {/* 1. 简体中文：核心雷达网画布 */}
-            <div className="relative flex flex-col justify-between h-full max-h-full min-h-0 min-w-0">
-              <div className="mb-2">
-                <p className="text-xs uppercase tracking-wider text-slate-500 font-bold">Active Goal</p>
-                <h2 className="text-xl font-black text-[#e2e8f0] tracking-normal max-w-4xl break-words">
-                  {goalLabel}
-                </h2>
-              </div>
-
+            <div className="relative flex flex-col h-full max-h-full min-h-0 min-w-0">
               <div className="relative flex-1 grid place-items-center min-h-0 min-w-0 h-full max-h-full overflow-hidden">
                 <AcceptanceRadarNet
                   snapshot={snapshot}
@@ -258,9 +245,9 @@ export default function App() {
                     </button>
                   </div>
 
-                  <div className="overflow-auto min-h-0 h-full max-h-full flex flex-col">
+                  <div className="overflow-auto min-h-0 h-full max-h-full flex flex-col scrollbar-hover-visible">
                     <span className="block text-xs font-semibold text-slate-400 mb-2">Readonly Data (JSON)</span>
-                    <pre className="flex-1 overflow-auto whitespace-pre rounded border border-slate-800/80 bg-black/40 p-3 text-[11px] leading-relaxed text-[#bd93f9] select-text">
+                    <pre className="flex-1 overflow-auto whitespace-pre-wrap break-all scrollbar-hover-visible rounded border border-slate-800/80 bg-black/40 p-3 text-[11px] leading-relaxed text-[#bd93f9] select-text">
                       {JSON.stringify(selectedNode.rawData, null, 2)}
                     </pre>
                   </div>
@@ -270,18 +257,18 @@ export default function App() {
           </section>
 
           {/* 4. 简体中文：底部滚动终端日志栏 */}
-          <footer className="grid gap-4 border-t border-[rgba(0,240,255,0.06)] pt-4">
-            <div className="rounded-lg border border-slate-800 bg-black/40 p-4 shadow-inner">
-              <div className="flex items-center gap-2 border-b border-slate-800/80 pb-2 mb-2">
-                <Terminal size={15} className="text-[#00f0ff]" />
+          <footer className="grid gap-2 border-t border-[rgba(0,240,255,0.06)] pt-2">
+            <div className="rounded-lg border border-slate-800 bg-black/30 p-3 shadow-inner">
+              <div className="flex items-center gap-2 border-b border-slate-800/80 pb-1.5 mb-1.5">
+                <Terminal size={13} className="text-[#00f0ff]" />
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Scrolling Event log console</span>
-                <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-[#00f0ff]/35 bg-[#00f0ff]/10 px-3 text-sm font-semibold text-[#c7d2fe]">
-                  <span className="h-2 w-2 rounded-full bg-[#00f0ff] animate-pulse" />
+                <span className="inline-flex min-h-6 items-center gap-1.5 rounded-full border border-[#00f0ff]/35 bg-[#00f0ff]/10 px-2.5 text-xs font-semibold text-[#c7d2fe]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
                   live
                 </span>
               </div>
 
-              <div className="max-h-36 overflow-auto scroll-smooth font-mono text-[11px] leading-relaxed text-slate-300 flex flex-col gap-1.5 select-text">
+              <div className="max-h-24 overflow-auto scroll-smooth scrollbar-hover-visible font-mono text-[11px] leading-relaxed text-slate-300 flex flex-col gap-1 select-text">
                 {recentEvents.length > 0 ? (
                   recentEvents.map((evt) => (
                     <div key={evt.id || `${evt.seq}-${evt.created_at}-${evt.type}`} className="flex items-start gap-3 hover:bg-slate-900/30 p-1 rounded transition">

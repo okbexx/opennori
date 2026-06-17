@@ -53,55 +53,43 @@ select {
   overflow: hidden;
 }
 
-/* 简体中文：雷达节点脉冲发光动画 */
-@keyframes nodePulse {
+/* 简体中文：雷达节点脉冲发光动画（适配 SVG circle 元素的扩散呼吸效果） */
+@keyframes svgPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(0, 240, 255, 0);
+    stroke-width: 1px;
+    opacity: 0.8;
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0);
+    stroke-width: 9px;
+    opacity: 0;
   }
 }
 
 .pulse-cyan {
-  animation: nodePulse 2s infinite;
-}
-
-/* 简体中文：针对不同状态节点的发光微调 */
-@keyframes successPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(52, 211, 153, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
-  }
+  stroke: #00f0ff;
+  animation: svgPulse 2s cubic-bezier(0.25, 0, 0.4, 1) infinite;
 }
 
 .pulse-success {
-  animation: successPulse 2s infinite;
-}
-
-@keyframes warningPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(251, 191, 36, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
-  }
+  stroke: #34d399;
+  animation: svgPulse 2s cubic-bezier(0.25, 0, 0.4, 1) infinite;
 }
 
 .pulse-warning {
-  animation: warningPulse 2s infinite;
+  stroke: #fbbf24;
+  animation: svgPulse 2s cubic-bezier(0.25, 0, 0.4, 1) infinite;
 }
+
+/* 简体中文：雷达扫描光束的无限匀速旋转动画 */
+@keyframes radar-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -112,4 +100,35 @@ select {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* 简体中文：滚动条默认隐藏，鼠标悬浮在容器上时显示半透明霓虹青滑块，大幅改善视觉纯净度 */
+.scrollbar-hover-visible {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s;
+}
+
+.scrollbar-hover-visible:hover {
+  scrollbar-color: rgba(0, 240, 255, 0.2) transparent;
+}
+
+.scrollbar-hover-visible::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background-color: transparent;
+}
+
+.scrollbar-hover-visible::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+  transition: background-color 0.25s ease-in-out;
+}
+
+.scrollbar-hover-visible:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 240, 255, 0.25);
+}
+
+.scrollbar-hover-visible::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 240, 255, 0.5);
 }
