@@ -34,7 +34,7 @@ function tempRoot() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "nori-command-test-"));
 }
 
-function writeActiveGoal(root) {
+function writeGoal(root, location = "current") {
   const contract = {
     schema_version: "opennori/contract-v1",
     goal_id: "module-goal",
@@ -42,20 +42,24 @@ function writeActiveGoal(root) {
     criteria: [
       {
         id: "AC-1",
-        user_story: "As a user, I can inspect active goal gaps.",
+        user_story: "As a user, I can inspect current goal gaps.",
         measurement: "Run list command module.",
         threshold: "Output includes the current gap."
       }
     ]
   };
   const ledger = buildEvidenceLedger(contract);
-  const paths = path.join(root, ".opennori", "active");
+  const paths = path.join(root, ".opennori", location);
   fs.mkdirSync(paths, { recursive: true });
   fs.writeFileSync(path.join(paths, "module-goal.acceptance.md"), "# Module goal\n");
   writeJson(path.join(paths, "module-goal.evidence.json"), { contract, ledger });
 }
 
-function writeActiveGoalWithId(root, goalId, status = "active") {
+function writeActiveGoal(root) {
+  writeGoal(root, "current");
+}
+
+function writeActiveGoalWithId(root, goalId, status = "active", location = "current") {
   const contract = {
     schema_version: "opennori/contract-v1",
     goal_id: goalId,
@@ -72,7 +76,7 @@ function writeActiveGoalWithId(root, goalId, status = "active") {
   };
   const ledger = buildEvidenceLedger(contract);
   ledger.status = status;
-  const activeDir = path.join(root, ".opennori", "active");
+  const activeDir = path.join(root, ".opennori", location);
   fs.mkdirSync(activeDir, { recursive: true });
   fs.writeFileSync(path.join(activeDir, `${goalId}.acceptance.md`), `# ${goalId}\n`);
   writeJson(path.join(activeDir, `${goalId}.evidence.json`), { contract, ledger });
@@ -291,7 +295,7 @@ test("uninstall command module preserves state unless include-state is confirmed
   const dryRun = await runUninstallCommand(["--root", root, "--dry-run", "--json"]);
   assert.equal(dryRun.ok, true);
   assert.equal(dryRun.data.uninstall_plan.summary.will_write, 0);
-  assert.equal(dryRun.data.uninstall_plan.actions.find((action) => action.path === ".opennori/active").action, "preserve");
+  assert.equal(dryRun.data.uninstall_plan.actions.find((action) => action.path === ".opennori/current").action, "preserve");
   assert.equal(fs.existsSync(path.join(root, ".agents", "skills", "nori", "SKILL.md")), false);
 
   const unconfirmed = await runUninstallCommand(["--root", root, "--json"]);
@@ -301,7 +305,7 @@ test("uninstall command module preserves state unless include-state is confirmed
   const removed = await runUninstallCommand(["--root", root, "--confirm", "--json"]);
   assert.equal(removed.ok, true);
   assert.equal(removed.data.include_state, false);
-  assert.equal(fs.existsSync(path.join(root, ".opennori", "active")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "current")), true);
 
   const stateRemovedRoot = tempRoot();
   await runInstallCommand(["--root", stateRemovedRoot, "--json"]);
@@ -337,7 +341,7 @@ test("upgrade command module preserves preview and install-required safety", asy
   assert.equal(missing.error.type, "install_required");
 });
 
-test("list command module reports active goal gaps without CLI dispatch", async () => {
+test("list command module reports current goal gaps without CLI dispatch", async () => {
   const root = tempRoot();
   writeActiveGoal(root);
 
@@ -366,7 +370,7 @@ test("brainstorm command module creates selectable directions without a contract
   assert.match(fs.readFileSync(brainstorm.data.markdown_path, "utf8"), /not a Nori Contract/);
 });
 
-test("discover command module finds acceptance gaps without creating an active goal", async () => {
+test("discover command module finds acceptance gaps without creating an current goal", async () => {
   const root = tempRoot();
   const discovery = await runDiscoverCommand([
     "--root", root,
@@ -379,7 +383,7 @@ test("discover command module finds acceptance gaps without creating an active g
   assert.equal(discovery.data.is_acceptance_contract, false);
   assert.equal(fs.existsSync(discovery.data.discovery_path), true);
   assert.equal(fs.existsSync(discovery.data.markdown_path), true);
-  assert.equal(fs.existsSync(path.join(root, ".opennori", "active")), false);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "current")), false);
   const gapIds = discovery.data.gaps.map((gap) => gap.id);
   assert.equal(gapIds.includes("missing-user-entry"), true);
   assert.equal(gapIds.includes("missing-field-scope"), true);
@@ -431,7 +435,7 @@ test("draft command module creates concrete contracts from discovery answers", a
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
 });
 
-test("draft command module creates active Nori Contracts from goals and brainstorm candidates", async () => {
+test("draft command module creates current Nori Contracts from goals and brainstorm candidates", async () => {
   const root = tempRoot();
   const draft = await runDraftCommand([
     "--root", root,
@@ -498,7 +502,7 @@ test("draft command module creates draft contracts from completed goal candidate
     reviewability: "Run the command and inspect the report artifact.",
     limitations: "This module test proves candidate drafting behavior, not an end-to-end user project."
   });
-  const activeDir = path.join(root, ".opennori", "active");
+  const activeDir = path.join(root, ".opennori", "current");
   fs.mkdirSync(activeDir, { recursive: true });
   writeJson(path.join(activeDir, "module-goal.evidence.json"), { contract, ledger });
   fs.writeFileSync(path.join(activeDir, "module-goal.acceptance.md"), "# Module goal\n");
@@ -539,7 +543,7 @@ test("draft command module creates draft contracts from completed goal candidate
     "--json"
   ]);
   assert.equal(notReady.ok, false);
-  assert.equal(notReady.error.type, "next_candidate_unavailable");
+  assert.equal(notReady.error.type, "next_candidate_source_unavailable");
 
   const missing = await runDraftCommand([
     "--root", root,
@@ -578,7 +582,7 @@ test("init command module initializes project state with preview safety", async 
   assert.match(doctor.data.agent_next.instruction, /already stated goal/);
 });
 
-test("draft command module creates active Nori Contracts from brief files", async () => {
+test("draft command module creates current Nori Contracts from brief files", async () => {
   const root = tempRoot();
   const briefPath = path.join(root, "brief.json");
   writeJson(briefPath, {
@@ -809,7 +813,7 @@ test("architecture profile command module installs and validates project profile
 test("architecture baseline command module previews before confirmed write", async () => {
   const root = tempRoot();
   const baselinePath = path.join(root, ".opennori", "architecture", "baseline.json");
-  const activeDir = path.join(root, ".opennori", "active");
+  const activeDir = path.join(root, ".opennori", "current");
   const activeAcceptancePath = path.join(activeDir, "module-goal.acceptance.md");
   const activeEvidencePath = path.join(activeDir, "module-goal.evidence.json");
   const contract = {
@@ -878,7 +882,7 @@ test("context export command module can write a review artifact", async () => {
   assert.equal(JSON.parse(fs.readFileSync(outputPath, "utf8")).goal_id, "module-goal");
 });
 
-test("profile show command module reads the active goal via injected loader", async () => {
+test("profile show command module reads the current goal via injected loader", async () => {
   const contract = {
     goal_id: "module-goal",
     criteria: [],
@@ -897,8 +901,8 @@ test("profile show command module reads the active goal via injected loader", as
 
 test("profile add and evidence modules update compliance and workflow state", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     schema_version: "opennori/contract-v1",
     protocol_version: "opennori/v1",
@@ -980,8 +984,8 @@ test("next command module routes approved gaps through architecture review when 
 
 test("resume command module includes completion, health, architecture, and next actions", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     goal_id: "module-goal",
     criteria: [],
@@ -1010,8 +1014,8 @@ test("resume command module includes completion, health, architecture, and next 
 
 test("resume command module suggests next-loop candidates for confidently complete goals", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     goal_id: "module-goal",
     goal: "Ship a settings page with profile editing, validation, persistence, failed-save recovery, reviewable screenshots, and release-ready report copy",
@@ -1162,13 +1166,13 @@ test("kernel events activity and snapshot expose dashboard state without replaci
   assert.equal(snapshot.goal.id, "module-goal");
   assert.equal(snapshot.current_gap.id, "ACCEPTANCE-BASIS");
   assert.equal(fs.existsSync(snapshotPath(root)), true);
-  assert.equal(fs.existsSync(path.join(root, ".opennori", "active", "module-goal.evidence.json")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "current", "module-goal.evidence.json")), true);
 });
 
 test("activity commands infer the unique current gap for dashboard publishing only", async () => {
   const root = tempRoot();
   writeActiveGoalWithId(root, "module-goal");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const before = fs.readFileSync(evidencePath, "utf8");
 
   const started = await runActivityStartCommand([
@@ -1213,26 +1217,41 @@ test("activity commands infer the unique current gap for dashboard publishing on
   assert.equal(readEvents(root).some((event) => event.type === "evidence.added"), false);
 });
 
-test("activity start refuses ambiguous active goals instead of attaching dashboard state to the wrong target", async () => {
+test("activity start ignores drafts and requires a current goal before publishing dashboard state", async () => {
   const root = tempRoot();
   await runInitCommand(["--root", root, "--confirm", "--json"]);
   await runDraftCommand(["--root", root, "--goal", "Ship first goal", "--goal-id", "first-goal", "--json"]);
   await runDraftCommand(["--root", root, "--goal", "Ship second goal", "--goal-id", "second-goal", "--json"]);
-  await runArchitectureBaselineCommand([
-    "--root", root,
-    "--goal", "Ship first goal",
-    "--goal-id", "first-goal",
-    "--profile", "typescript-agent-state-cli",
-    "--confirm",
-    "--json"
-  ]);
 
   const doctor = await runDoctorCommand(["--root", root, "--json"]);
   assert.equal(doctor.ok, true);
-  assert.equal(doctor.data.agent_next.state, "ready_with_active_goals");
+  assert.equal(doctor.data.agent_next.state, "initialized_no_active_contract");
   assert.equal(doctor.data.agent_next.needs_user, true);
   assert.equal(doctor.data.agent_next.dashboard_activity, undefined);
-  assert.match(doctor.data.agent_next.instruction, /which Nori Contract/);
+  assert.match(doctor.data.agent_next.instruction, /draft Nori Contract/);
+
+  const noCurrent = await runActivityStartCommand([
+    "--root", root,
+    "--skill", "nori-evidence",
+    "--summary", "Verifying a gap.",
+    "--json"
+  ]);
+
+  assert.equal(noCurrent.ok, true);
+  assert.equal(noCurrent.data.target, null);
+  assert.equal(noCurrent.data.snapshot.status, "no_active_goal");
+});
+
+test("activity start refuses invalid multiple current goals instead of attaching dashboard state to the wrong target", async () => {
+  const root = tempRoot();
+  writeActiveGoalWithId(root, "first-goal");
+  writeActiveGoalWithId(root, "second-goal");
+
+  const doctor = await runDoctorCommand(["--root", root, "--json"]);
+  assert.equal(doctor.ok, true);
+  assert.equal(doctor.data.status, "broken");
+  assert.equal(doctor.data.agent_next.state, "health_needs_recovery");
+  assert.equal(doctor.data.agent_next.dashboard_activity, undefined);
 
   const ambiguous = await runActivityStartCommand([
     "--root", root,
@@ -1243,7 +1262,7 @@ test("activity start refuses ambiguous active goals instead of attaching dashboa
 
   assert.equal(ambiguous.ok, false);
   assert.equal(ambiguous.error.type, "ambiguous_activity_target");
-  assert.match(ambiguous.error.message, /Pass --goal <goal-id>/);
+  assert.match(ambiguous.error.message, /multiple current goals/);
 
   const explicit = await runActivityStartCommand([
     "--root", root,
@@ -1255,27 +1274,26 @@ test("activity start refuses ambiguous active goals instead of attaching dashboa
 
   assert.equal(explicit.ok, true);
   assert.equal(explicit.data.activity.goal_id, "second-goal");
-  assert.equal(explicit.data.activity.gap_id, "ACCEPTANCE-BASIS");
+  assert.equal(explicit.data.activity.gap_id, "AC-1");
   assert.equal(explicit.data.target.inferred, false);
 });
 
-test("dashboard snapshot follows explicit live activity target when multiple active goals exist", async () => {
+test("dashboard snapshot ignores drafts and follows the unique current goal", async () => {
   const root = tempRoot();
   writeActiveGoalWithId(root, "first-goal");
-  writeActiveGoalWithId(root, "second-goal");
+  writeActiveGoalWithId(root, "second-goal", "active", "drafts");
 
   const started = await runActivityStartCommand([
     "--root", root,
-    "--goal", "second-goal",
     "--skill", "nori-evidence",
     "--state", "verifying",
-    "--summary", "Verifying the second goal gap.",
+    "--summary", "Verifying the current goal gap.",
     "--json"
   ]);
 
   assert.equal(started.ok, true);
   const snapshot = refreshSnapshot(root);
-  assert.equal(snapshot.goal.id, "second-goal");
+  assert.equal(snapshot.goal.id, "first-goal");
   assert.equal(snapshot.agent.skill, "nori-evidence");
   assert.equal(snapshot.agent.state, "verifying");
   assert.equal(snapshot.current_gap.id, "AC-1");
@@ -1352,7 +1370,7 @@ test("dashboard serves the built React app and assets", async () => {
 
   assert.equal(script.status, 200);
   assert.match(script.headers.get("content-type") || "", /text\/javascript/);
-  assert.match(scriptText, /Observation surface|Acceptance Loop/);
+  assert.match(scriptText, /Observation only|Acceptance Radar Net/);
   assert.match(scriptText, /reply in agent chat|Agent reply/);
   assert.doesNotMatch(scriptText, /Confirm/);
   assert.doesNotMatch(scriptText, /Waive/);
@@ -1384,8 +1402,8 @@ test("dashboard SSE emits generic and typed event frames", async () => {
 
 test("archive command module moves complete goals and preserves a report", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     schema_version: "opennori/contract-v1",
     protocol_version: "opennori/v1",
@@ -1419,19 +1437,19 @@ test("archive command module moves complete goals and preserves a report", async
   assert.equal(fs.existsSync(archived.data.report_path), true);
 });
 
-test("archive command module rejects active goals", async () => {
+test("archive command module rejects current goals", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     schema_version: "opennori/contract-v1",
     protocol_version: "opennori/v1",
     goal_id: "module-goal",
-    goal: "Do not archive active goal",
+    goal: "Do not archive current goal",
     criteria: [
       {
         id: "AC-1",
-        user_story: "As a user, I can keep active work in active state.",
+        user_story: "As a user, I can keep current work in active state.",
         measurement: "Open status.",
         threshold: "I can see the remaining gap."
       }
@@ -1454,8 +1472,8 @@ test("archive command module rejects active goals", async () => {
 
 test("evaluate command module recomputes and writes workflow state", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     schema_version: "opennori/contract-v1",
     goal_id: "module-goal",
@@ -1496,14 +1514,14 @@ test("changes command module groups acceptance and implementation files", async 
   assert.equal(changes.ok, true);
   assert.equal(changes.data.changed_files.available, true);
   assert.equal(changes.data.active_goals.length, 1);
-  assert.equal(changes.data.changed_files.acceptance.some((item) => item.path === ".opennori/active/module-goal.acceptance.md"), true);
+  assert.equal(changes.data.changed_files.acceptance.some((item) => item.path === ".opennori/current/module-goal.acceptance.md"), true);
   assert.equal(changes.data.changed_files.implementation.some((item) => item.path === "src/index.js"), true);
 });
 
 test("approve command module marks acceptance basis approved and recomputes status", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     schema_version: "opennori/contract-v1",
     goal_id: "module-goal",
@@ -1540,8 +1558,8 @@ test("approve command module marks acceptance basis approved and recomputes stat
 
 test("approve command module routes approved non-trivial gaps to architecture review before implementation", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     schema_version: "opennori/contract-v1",
     goal_id: "module-goal",
@@ -1575,8 +1593,8 @@ test("approve command module routes approved non-trivial gaps to architecture re
 
 test("criterion update command module clears stale evidence after a user revision", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     schema_version: "opennori/contract-v1",
     protocol_version: "opennori/v1",
@@ -1619,8 +1637,8 @@ test("criterion update command module clears stale evidence after a user revisio
 
 test("criterion add command module extends the contract and ledger together", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     schema_version: "opennori/contract-v1",
     protocol_version: "opennori/v1",
@@ -1666,8 +1684,8 @@ test("criterion add command module extends the contract and ledger together", as
 
 test("evidence add command module records flexible reviewable sources", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     schema_version: "opennori/contract-v1",
     protocol_version: "opennori/v1",
@@ -1741,8 +1759,8 @@ test("evidence add command module records flexible reviewable sources", async ()
 
 test("evidence prune command module removes obsolete criterion evidence", async () => {
   const root = tempRoot();
-  const acceptancePath = path.join(root, ".opennori", "active", "module-goal.acceptance.md");
-  const evidencePath = path.join(root, ".opennori", "active", "module-goal.evidence.json");
+  const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
   const contract = {
     schema_version: "opennori/contract-v1",
     protocol_version: "opennori/v1",

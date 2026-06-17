@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-16T10:12:41.609Z",
+  "updated_at": "2026-06-17T03:26:42.555Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -60,7 +60,13 @@
       "exists": true
     },
     {
-      "path": ".opennori/active",
+      "path": ".opennori/current",
+      "kind": "directory",
+      "required": true,
+      "exists": true
+    },
+    {
+      "path": ".opennori/drafts",
       "kind": "directory",
       "required": true,
       "exists": true
@@ -135,14 +141,27 @@
   "active_goals": [
     {
       "goal_id": "opennori-self",
+      "location": "current",
       "status": "complete",
       "current_gap": null,
-      "acceptance_path": ".opennori/active/opennori-self.acceptance.md",
-      "evidence_path": ".opennori/active/opennori-self.evidence.json",
+      "acceptance_path": ".opennori/current/opennori-self.acceptance.md",
+      "evidence_path": ".opennori/current/opennori-self.evidence.json",
       "recoverable": true
-    },
+    }
+  ],
+  "current_goal": {
+    "goal_id": "opennori-self",
+    "location": "current",
+    "status": "complete",
+    "current_gap": null,
+    "acceptance_path": ".opennori/current/opennori-self.acceptance.md",
+    "evidence_path": ".opennori/current/opennori-self.evidence.json",
+    "recoverable": true
+  },
+  "draft_goals": [
     {
       "goal_id": "opennori-self-opennori-adoption-dogfood",
+      "location": "drafts",
       "status": "active",
       "current_gap": {
         "id": "ACCEPTANCE-BASIS",
@@ -150,11 +169,23 @@
         "status": "unknown",
         "reason": "Acceptance criteria have not been approved by the user yet."
       },
-      "acceptance_path": ".opennori/active/opennori-self-opennori-adoption-dogfood.acceptance.md",
-      "evidence_path": ".opennori/active/opennori-self-opennori-adoption-dogfood.evidence.json",
+      "acceptance_path": ".opennori/drafts/opennori-self-opennori-adoption-dogfood.acceptance.md",
+      "evidence_path": ".opennori/drafts/opennori-self-opennori-adoption-dogfood.evidence.json",
       "recoverable": true
     }
   ],
+  "history_goals": [
+    {
+      "goal_id": "opennori-build-vs-buy-maturity",
+      "location": "completed",
+      "status": "complete",
+      "current_gap": null,
+      "acceptance_path": ".opennori/completed/opennori-build-vs-buy-maturity.acceptance.md",
+      "evidence_path": ".opennori/completed/opennori-build-vs-buy-maturity.evidence.json",
+      "recoverable": true
+    }
+  ],
+  "legacy_active_goals": [],
   "plugin": {
     "schema_version": "opennori/plugin-v1",
     "name": "opennori",
@@ -200,7 +231,7 @@
       },
       {
         "name": "nori-architecture-apply",
-        "description": "Apply a confirmed OpenNori Architecture Baseline while implementing acceptance gaps. Use before non-trivial code changes when an active goal has architecture state, when resuming implementation in a new session, or when the agent must ensure Product AC work stays aligned with the baseline.",
+        "description": "Apply a confirmed OpenNori Architecture Baseline while implementing acceptance gaps. Use before non-trivial code changes when a current goal has architecture state, when resuming implementation in a new session, or when the agent must ensure Product AC work stays aligned with the baseline.",
         "path": "plugins/opennori/skills/nori-architecture-apply/SKILL.md",
         "source": "package"
       },
@@ -218,7 +249,7 @@
       },
       {
         "name": "nori-project-health",
-        "description": "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and active-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, or needs safe lifecycle actions with preview and explicit confirmation.",
+        "description": "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, or needs safe lifecycle actions with preview and explicit confirmation.",
         "path": "plugins/opennori/skills/nori-project-health/SKILL.md",
         "source": "package"
       },

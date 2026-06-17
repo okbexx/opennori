@@ -1,8 +1,9 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { defineCommand } from "citty";
-import { currentGap, findActivePairs, ok, readJson } from "../../core.ts";
+import { currentGap, findCurrentPairs, findDraftPairs, ok, readJson } from "../../core.ts";
 import { runJsonCommand } from "../runtime.ts";
+import type { NoriEvidencePayload } from "../../types.ts";
 
 type ChangedFile = {
   status: string;
@@ -46,6 +47,18 @@ function gitChanges(root: string): GitChanges {
   return grouped;
 }
 
+function summarizePairs(pairs: ReturnType<typeof findCurrentPairs>) {
+  return pairs.map((pair) => {
+    const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+    return {
+      goal_id: pair.goalId,
+      location: pair.location,
+      workflow_status: payload.ledger?.status || "unknown",
+      current_gap: currentGap(payload.contract, payload.ledger)
+    };
+  });
+}
+
 export const changesCommand = defineCommand({
   meta: {
     name: "changes",
@@ -65,17 +78,13 @@ export const changesCommand = defineCommand({
   },
   run({ args }) {
     const root = path.resolve(String(args.root || process.cwd()));
-    const pairs = findActivePairs(root).map((pair) => {
-      const payload = readJson(pair.evidencePath);
-      return {
-        goal_id: pair.goalId,
-        workflow_status: payload.ledger?.status || "unknown",
-        current_gap: currentGap(payload.contract, payload.ledger)
-      };
-    });
+    const currentGoals = summarizePairs(findCurrentPairs(root));
     return ok({
       root,
-      active_goals: pairs,
+      current_goal: currentGoals[0] || null,
+      current_goals: currentGoals,
+      active_goals: currentGoals,
+      draft_goals: summarizePairs(findDraftPairs(root)),
       changed_files: gitChanges(root)
     });
   }

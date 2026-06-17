@@ -1,9 +1,14 @@
 import { defineCommand } from "citty";
+import fs from "node:fs";
+import path from "node:path";
 import { architectureState } from "../../../architecture.ts";
 import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
   currentGap,
   appendEvent,
+  fail,
+  findCurrentPairs,
+  pathsForGoal,
   nextRecommendation,
   ok,
   refreshSnapshot,
@@ -18,10 +23,15 @@ import { jsonArg, rootArg } from "./shared.ts";
 export const approveCommand = defineCommand({
   meta: {
     name: "approve",
-    description: "Mark the current OpenNori acceptance criteria as user-approved."
+    description: "Promote a draft Nori Contract to the current user-approved goal."
   },
   args: {
     ...activeGoalArgs,
+    fromDraft: {
+      type: "boolean",
+      description: "Approve a draft contract into the current goal.",
+      default: true
+    },
     summary: {
       type: "string",
       description: "Human approval summary.",
@@ -30,15 +40,32 @@ export const approveCommand = defineCommand({
     json: jsonArg
   },
   run({ args, data }) {
-    const { contract, ledger, acceptancePath, evidencePath, root } = data.loadPair(args);
+    const pair = data.loadPair({ ...args, fromDraft: args.fromDraft !== false });
+    const { contract, ledger, root } = pair;
+    const currentPairs = findCurrentPairs(root);
+    const existingCurrent = currentPairs.find((item) => item.goalId !== contract.goal_id);
+    if (existingCurrent) {
+      return fail(
+        "current_goal_exists",
+        `OpenNori already has a current goal: ${existingCurrent.goalId}`,
+        "Archive the current goal after completion/blocking, or explicitly choose a different project before approving this draft."
+      );
+    }
+    const targetPaths = pair.location === "current"
+      ? { acceptancePath: pair.acceptancePath, evidencePath: pair.evidencePath }
+      : pathsForGoal(root, contract.goal_id, "current");
     contract.acceptance_basis = {
       status: "approved",
       summary: args.summary || "User approved acceptance criteria.",
       approved_at: new Date().toISOString()
     };
     recomputeWorkflowStatus(contract, ledger);
-    writeJson(evidencePath, { contract, ledger });
-    syncAcceptanceMarkdown(acceptancePath, contract, ledger);
+    writeJson(targetPaths.evidencePath, { contract, ledger });
+    syncAcceptanceMarkdown(targetPaths.acceptancePath, contract, ledger);
+    if (pair.location === "drafts") {
+      fs.rmSync(pair.acceptancePath, { force: true });
+      fs.rmSync(pair.evidencePath, { force: true });
+    }
     refreshManifest(root);
     const architecture = architectureState(root, contract.goal_id);
     const gap = currentGap(contract, ledger);
@@ -49,11 +76,19 @@ export const approveCommand = defineCommand({
       gap_id: gap?.id,
       actor: { kind: "agent", name: "Agent", skill: "nori-acceptance" },
       summary: String(args.summary || "User approved acceptance criteria."),
-      data: { workflow_status: ledger.status }
+      data: {
+        workflow_status: ledger.status,
+        promoted_from: pair.location,
+        acceptance_path: targetPaths.acceptancePath,
+        evidence_path: targetPaths.evidencePath
+      }
     });
     refreshSnapshot(root, { goalId: contract.goal_id });
     return ok({
       goal_id: contract.goal_id,
+      state: "current",
+      acceptance_path: targetPaths.acceptancePath,
+      evidence_path: targetPaths.evidencePath,
       acceptance_basis: contract.acceptance_basis,
       workflow_status: ledger.status,
       current_gap: gap,

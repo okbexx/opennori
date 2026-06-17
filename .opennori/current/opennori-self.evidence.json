@@ -511,7 +511,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-16T10:12:26.489Z",
+    "updated_at": "2026-06-17T02:52:31.347Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -5635,11 +5635,6 @@
                 "type": "artifact",
                 "label": "test/cli-commands.test.js",
                 "path": "test/cli-commands.test.js"
-              },
-              {
-                "type": "artifact",
-                "label": ".opennori/active/opennori-self-opennori-adoption-dogfood.acceptance.md",
-                "path": ".opennori/active/opennori-self-opennori-adoption-dogfood.acceptance.md"
               }
             ],
             "reviewability": "Rerun the two targeted tests and the draft command, then inspect the generated draft criteria for concrete user action, report/evidence review, friction judgment, and ACCEPTANCE-BASIS pending approval.",

@@ -24,7 +24,8 @@ type InstallOptions = {
 
 export function installActions(root: string, { dryRun = false, force = false, mergeAgentRoute = false }: InstallOptions = {}): ManagedAction[] {
   const actions: ManagedAction[] = [
-    ensureDir(path.join(root, ".opennori", "active"), { dryRun }),
+    ensureDir(path.join(root, ".opennori", "current"), { dryRun }),
+    ensureDir(path.join(root, ".opennori", "drafts"), { dryRun }),
     ensureDir(path.join(root, ".opennori", "completed"), { dryRun }),
     ensureDir(path.join(root, ".opennori", "blocked"), { dryRun }),
     ensureDir(path.join(root, ".opennori", "reports"), { dryRun }),

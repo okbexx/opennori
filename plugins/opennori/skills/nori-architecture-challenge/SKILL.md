@@ -11,7 +11,7 @@ A challenge is a review artifact. It does not authorize implementation drift by 
 
 ## Start Here
 
-1. Read the current baseline and active Product AC.
+1. Read the current baseline and current Product AC.
 2. Collect the specific project evidence that conflicts with the baseline.
 3. Decide whether the conflict is real architecture drift or just implementation detail.
 4. Record a challenge with summary, evidence, recommendation, risk, and whether user input is needed.

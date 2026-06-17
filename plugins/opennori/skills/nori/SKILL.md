@@ -21,7 +21,7 @@ Do not present those pieces as optional standalone product paths.
 
 CLI JSON may include `data.agent_next`. Treat it as the deterministic routing surface from the state layer to Skills. Prefer `agent_next.state`, `agent_next.recommended_skill`, `agent_next.instruction`, `agent_next.user_visible_next`, `agent_next.dashboard_activity`, and `agent_next.candidate_goals` over guessing from files or command prose.
 
-`.opennori/agent-guide.md` is only a project-local supplementary guide. Do not depend on it for OpenNori discovery, and do not assume a fresh project has an Architecture Baseline or an active Nori Contract just because `.opennori/` directories exist.
+`.opennori/agent-guide.md` is only a project-local supplementary guide. Do not depend on it for OpenNori discovery, and do not assume a fresh project has an Architecture Baseline or a current Nori Contract just because `.opennori/` directories exist.
 
 ## Start Here
 
@@ -29,14 +29,14 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 2. If readiness is unknown, run `opennori doctor --root <repo> --json`.
 3. If the JSON has `data.agent_next`, follow it:
    - `health_needs_recovery` or `setup_preview_needs_confirmation` -> hand off to `nori-project-health`.
-   - `initialized_no_active_contract` -> use the user's already stated goal if the current conversation includes one; otherwise ask for the natural-language goal; then hand off to `nori-acceptance`.
-   - `ready_with_active_goals` -> run list/resume/status as directed.
+   - `initialized_no_active_contract` -> if drafts exist, show them for approval or revision; otherwise use the user's already stated goal if the current conversation includes one, or ask for the natural-language goal; then hand off to `nori-acceptance`.
+   - `ready_with_current_goal` -> run resume/status as directed.
    - `architecture_needs_review` -> follow `recommended_skill` (`nori-architecture-brainstorm`, `nori-architecture-challenge`, or `nori-build-vs-buy`) before non-trivial implementation continues.
    - `work_on_current_gap` -> work only on the current acceptance gap and hand off to `nori-evidence` after verification.
    - `completion_needs_review`, `evidence_needs_review`, or `acceptance_needs_user` -> use reporting/evidence/acceptance as directed and involve the user when `needs_user` is true.
    - `ready_for_next_loop` -> if the user asked to continue, choose or refine one `agent_next.candidate_goals` item and hand off to `nori-acceptance`.
-4. If the project is already initialized but the command did not expose `agent_next`, run `opennori list --root <repo> --json`, then `opennori resume --root <repo> --goal <goal-id> --json` or `opennori status --root <repo> --goal <goal-id> --json`.
-5. If multiple active goals exist and the user did not identify one, summarize the choices and ask for a target instead of guessing.
+4. If the project is already initialized but the command did not expose `agent_next`, run `opennori list --root <repo> --json`, then `opennori resume --root <repo> --json` or `opennori status --root <repo> --json`.
+5. If `.opennori/current` contains multiple goals, treat it as broken state and route to `nori-project-health`; do not ask the user to choose among multiple current goals.
 6. If doctor reports missing Plugin discovery, packaged Skills, CLI access, manifest, or project state, route to `nori-project-health`.
 7. For first-time machine setup, `nori-project-health` should use `npx opennori setup` preview/confirm; for an installed machine and a new project, use `opennori init` preview/confirm.
 8. If `opennori` is not on PATH, route to `nori-project-health` instead of continuing in a half-installed mode. Only use `node ./bin/opennori.js` while developing the OpenNori source checkout itself.
@@ -57,9 +57,9 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 
 ## State Writes
 
-This root Skill should avoid direct writes except for safe readiness checks and setup/init previews. Let child Skills mutate `.opennori/active`, `.opennori/architecture`, `.opennori/reports`, `.opennori/brainstorms`, `.opennori/completed`, `.opennori/blocked`, or `.opennori/manifest.json`.
+This root Skill should avoid direct writes except for safe readiness checks and setup/init previews. Let child Skills mutate `.opennori/current`, `.opennori/drafts`, `.opennori/architecture`, `.opennori/reports`, `.opennori/brainstorms`, `.opennori/completed`, `.opennori/blocked`, or `.opennori/manifest.json`.
 
-If a dashboard is open, the user asked to watch progress, or `agent_next.dashboard_activity` is present, the active child Skill may publish `opennori activity start|heartbeat|finish`. Prefer the command templates from `agent_next.dashboard_activity`; otherwise use the low-parameter form with `--skill`, `--state`, and `--summary` and let the CLI infer the unique current goal/gap. If multiple active goals are ambiguous, stop and ask which Nori Contract to observe instead of guessing. Activity is only a live signal for the user; it must not be used as Product AC evidence or completion proof.
+If a dashboard is open, the user asked to watch progress, or `agent_next.dashboard_activity` is present, the active child Skill may publish `opennori activity start|heartbeat|finish`. Prefer the command templates from `agent_next.dashboard_activity`; otherwise use the low-parameter form with `--skill`, `--state`, and `--summary` and let the CLI infer the unique current goal/gap. If no current goal exists, do not bind activity to drafts. If multiple current goals exist, route to project health because current state is invalid. Activity is only a live signal for the user; it must not be used as Product AC evidence or completion proof.
 
 The dashboard may show that a user reply is needed, but it must not approve AC, confirm architecture, waive risks, accept reports, or write completion state. Collect those decisions in conversation and record them through the appropriate OpenNori CLI command.
 

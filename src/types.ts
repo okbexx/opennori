@@ -370,6 +370,19 @@ export type NoriSnapshot = {
     decision: string;
   };
   last_event: NoriEvent | null;
+  /* 简体中文：只读 criteria 和 events 字段以支撑雷达网和控制台渲染 */
+  criteria?: Array<{
+    id: string;
+    layer?: string;
+    user_story: string;
+    measurement: string;
+    threshold: string;
+    required?: boolean;
+    status: AcceptanceStatus | string;
+    confidence: string;
+    evidence: EvidenceRecord[];
+  }>;
+  events?: NoriEvent[];
 };
 
 export type NextRecommendation = {
@@ -395,7 +408,7 @@ export type AgentNext = {
   state:
     | "setup_preview_needs_confirmation"
     | "initialized_no_active_contract"
-    | "ready_with_active_goals"
+    | "ready_with_current_goal"
     | "health_needs_recovery"
     | "work_on_current_gap"
     | "acceptance_needs_user"
@@ -903,6 +916,7 @@ export type ManifestManagedFile = {
 
 export type ActiveGoalSummary = {
   goal_id: string;
+  location?: "current" | "drafts" | "completed" | "blocked" | "active" | string;
   status: WorkflowStatus | "unknown" | "unreadable" | string;
   current_gap: CurrentGap | null;
   acceptance_path: string;
@@ -921,6 +935,10 @@ export type Manifest = {
   capabilities: string[];
   managed_files: ManifestManagedFile[];
   active_goals: ActiveGoalSummary[];
+  current_goal?: ActiveGoalSummary | null;
+  draft_goals?: ActiveGoalSummary[];
+  history_goals?: ActiveGoalSummary[];
+  legacy_active_goals?: ActiveGoalSummary[];
   plugin: PluginState;
   architecture: ArchitectureState;
   [key: string]: unknown;
@@ -957,6 +975,9 @@ export type DoctorState = {
   checks: DoctorCheck[];
   recovery_actions: DoctorRecoveryAction[];
   active_goals: ActiveGoalSummary[];
+  current_goal?: ActiveGoalSummary | null;
+  draft_goals?: ActiveGoalSummary[];
+  legacy_active_goals?: ActiveGoalSummary[];
   active_goal_issues: DoctorIssue[];
   manifest_path: string;
   plugin: PluginState;

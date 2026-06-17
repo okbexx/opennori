@@ -9,17 +9,17 @@ import {
   currentGap,
   appendEvent,
   fail,
+  findGoalPairs,
   ok,
   pathsForGoal,
   readJson,
   renderAcceptanceMarkdown,
-  refreshSnapshot,
   nextRecommendation,
   validateContract,
   writeJson
 } from "../../../core.ts";
 import { bootstrap, refreshManifest } from "../../../lifecycle.ts";
-import { loadPair, runJsonCommand } from "../../runtime.ts";
+import { loadGoalFromLocation, loadPair, runJsonCommand, type ActiveGoalPair } from "../../runtime.ts";
 import type { AcceptanceDiscovery, AcceptanceDiscoveryAnswers, Brainstorm, NoriBrief, NextGoalCandidate } from "../../../types.ts";
 import { brainstormPaths, discoveryPaths, jsonArg, resolveRoot, rootArg } from "./shared.ts";
 
@@ -34,6 +34,26 @@ const briefFromNextGoalCandidateForCommand = briefFromNextGoalCandidate as (
   candidate: NextGoalCandidate,
   options?: { sourceGoalId?: string; goalId?: string }
 ) => NoriBrief;
+
+function loadNextCandidateSource(args: Record<string, unknown>, root: string): ActiveGoalPair | null {
+  if (args.acceptance || args.evidence) {
+    return loadPair({
+      root,
+      acceptance: args.acceptance,
+      evidence: args.evidence
+    });
+  }
+  const sourceGoal = args.sourceGoal ? String(args.sourceGoal) : "";
+  if (!sourceGoal) {
+    return loadPair({ root });
+  }
+  for (const location of ["current", "completed", "blocked"] as const) {
+    if (findGoalPairs(root, location).some((pair) => pair.goalId === sourceGoal)) {
+      return loadGoalFromLocation(root, sourceGoal, location);
+    }
+  }
+  return null;
+}
 
 export const draftCommand = defineCommand({
   meta: {
@@ -108,12 +128,16 @@ export const draftCommand = defineCommand({
         args.goalId
       );
     } else if (nextCandidateId) {
-      const sourcePair = loadPair({
-        root,
-        goal: args.sourceGoal,
-        acceptance: args.acceptance,
-        evidence: args.evidence
-      });
+      const sourcePair = loadNextCandidateSource(args, root);
+      if (!sourcePair) {
+        return fail(
+          "next_candidate_source_unavailable",
+          args.sourceGoal
+            ? `No current or archived OpenNori goal found for --source-goal ${args.sourceGoal}`
+            : "No current OpenNori goal found for --from-next-candidate.",
+          "Use a current/completed/blocked goal as the source. Draft Nori Contracts must be approved before they can become executable current goals."
+        );
+      }
       const { contract, ledger } = sourcePair;
       const architecture = architectureState(sourcePair.root, contract.goal_id);
       const recommendation = nextRecommendation(contract, ledger, { root: sourcePair.root, architecture });
@@ -147,7 +171,7 @@ export const draftCommand = defineCommand({
     if (issues.length > 0) {
       return { ...fail("invalid_acceptance", "Draft does not produce a valid OpenNori contract", "Rewrite ACs from the user's perspective"), issues };
     }
-    const paths = pathsForGoal(root, contract.goal_id);
+    const paths = pathsForGoal(root, contract.goal_id, "drafts");
     fs.mkdirSync(path.dirname(paths.acceptancePath), { recursive: true });
     fs.writeFileSync(paths.acceptancePath, renderAcceptanceMarkdown(contract, ledger));
     writeJson(paths.evidencePath, { contract, ledger });
@@ -160,10 +184,10 @@ export const draftCommand = defineCommand({
       summary: `Drafted Nori Contract for ${contract.goal_id}.`,
       data: { acceptance_path: paths.acceptancePath, evidence_path: paths.evidencePath }
     });
-    refreshSnapshot(root, { goalId: contract.goal_id });
     return ok(
       {
         goal_id: contract.goal_id,
+        state: "draft",
         acceptance_basis: contract.acceptance_basis,
         acceptance_path: paths.acceptancePath,
         evidence_path: paths.evidencePath,

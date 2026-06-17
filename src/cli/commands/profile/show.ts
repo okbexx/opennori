@@ -12,7 +12,7 @@ import {
 export const profileShowCommand = defineCommand({
   meta: {
     name: "show",
-    description: "Show the Nori Profile attached to the active goal."
+    description: "Show the Nori Profile attached to the current goal."
   },
   args: {
     ...activeGoalArgs,

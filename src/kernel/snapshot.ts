@@ -4,10 +4,10 @@ import { architectureState } from "../architecture.ts";
 import { reviewAcceptanceQuality } from "../acceptance.ts";
 import { currentGap, evidenceHealth } from "../core/evidence.ts";
 import { completionAnswer, intervention } from "../core/report.ts";
-import { findActivePairs, readJson, writeJson } from "../core/shared.ts";
+import { findCurrentPairs, readJson, writeJson } from "../core/shared.ts";
 import type { EvidenceLedger, NoriEvidencePayload, NoriSnapshot } from "../types.ts";
 import { readActivity } from "./activity.ts";
-import { latestEvent } from "./events.ts";
+import { latestEvent, readEvents } from "./events.ts";
 
 export const SNAPSHOT_SCHEMA_VERSION = "opennori/snapshot-v1";
 
@@ -20,23 +20,14 @@ export function snapshotPath(root: string): string {
 }
 
 function chooseActivePair(root: string, goalId?: string, activityGoalId?: string) {
-  const pairs = findActivePairs(root);
+  const pairs = findCurrentPairs(root);
   if (goalId) return pairs.find((pair) => pair.goalId === goalId) || null;
   if (activityGoalId) {
     const activityPair = pairs.find((pair) => pair.goalId === activityGoalId);
     if (activityPair) return activityPair;
   }
   if (pairs.length === 1) return pairs[0] || null;
-  const activeWithGaps = pairs.filter((pair) => {
-    try {
-      const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
-      return payload.ledger.status !== "complete" && currentGap(payload.contract, payload.ledger) !== null;
-    } catch {
-      return false;
-    }
-  });
-  if (activeWithGaps.length === 1) return activeWithGaps[0] || null;
-  return activeWithGaps[0] || pairs[0] || null;
+  return null;
 }
 
 function latestEvidenceSummary(ledger: EvidenceLedger, gapId?: string): string {
@@ -69,7 +60,7 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
         : {
             name: "Agent",
             state: "idle",
-            summary: "No recent OpenNori agent activity."
+            summary: "No current OpenNori goal is approved yet."
           },
       goal: null,
       current_gap: null,
@@ -86,7 +77,10 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
         evidence: "idle",
         decision: "pending"
       },
-      last_event: event
+      last_event: event,
+      /* 简体中文：无活跃契约时，只读 events 列表依然返回最近的事件以供 Console 渲染 */
+      events: readEvents(root, { limit: 50 }),
+      criteria: []
     };
   }
 
@@ -164,7 +158,23 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
       evidence: evidenceState,
       decision: completion.complete ? "decided" : "pending"
     },
-    last_event: event
+    last_event: event,
+    /* 简体中文：为 snapshot 挂载只读 criteria 状态及 events 历史记录 */
+    criteria: contract.criteria.map((c) => {
+      const ledgerState = ledger.criteria?.[c.id];
+      return {
+        id: c.id,
+        layer: c.layer,
+        user_story: c.user_story,
+        measurement: c.measurement,
+        threshold: c.threshold,
+        required: c.required,
+        status: ledgerState?.status || c.status || "unknown",
+        confidence: ledgerState?.confidence || "unknown",
+        evidence: ledgerState?.evidence || []
+      };
+    }),
+    events: readEvents(root, { limit: 50 })
   };
 }
 

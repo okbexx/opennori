@@ -1,12 +1,27 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { currentGap, findActivePairs, ok, readJson } from "../../core.ts";
+import { currentGap, findCurrentPairs, findDraftPairs, findHistoryPairs, ok, readJson } from "../../core.ts";
 import { runJsonCommand } from "../runtime.ts";
+import type { NoriEvidencePayload } from "../../types.ts";
+
+function summarizePairs(pairs: ReturnType<typeof findCurrentPairs>) {
+  return pairs.map((pair) => {
+    const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+    return {
+      goal_id: pair.goalId,
+      location: pair.location,
+      status: payload.ledger?.status || "unknown",
+      current_gap: currentGap(payload.contract, payload.ledger),
+      acceptance_path: pair.acceptancePath,
+      evidence_path: pair.evidencePath
+    };
+  });
+}
 
 export const listCommand = defineCommand({
   meta: {
     name: "list",
-    description: "List recoverable active OpenNori goals."
+    description: "List current, draft, and historical OpenNori goals."
   },
   args: {
     root: {
@@ -22,17 +37,15 @@ export const listCommand = defineCommand({
   },
   run({ args }) {
     const root = path.resolve(String(args.root || process.cwd()));
-    const activeGoals = findActivePairs(root).map((pair) => {
-      const payload = readJson(pair.evidencePath);
-      return {
-        goal_id: pair.goalId,
-        status: payload.ledger?.status || "unknown",
-        current_gap: currentGap(payload.contract, payload.ledger),
-        acceptance_path: pair.acceptancePath,
-        evidence_path: pair.evidencePath
-      };
+    const currentGoals = summarizePairs(findCurrentPairs(root));
+    return ok({
+      root,
+      current_goal: currentGoals[0] || null,
+      current_goals: currentGoals,
+      active_goals: currentGoals,
+      draft_goals: summarizePairs(findDraftPairs(root)),
+      history_goals: summarizePairs(findHistoryPairs(root))
     });
-    return ok({ root, active_goals: activeGoals });
   }
 });
 

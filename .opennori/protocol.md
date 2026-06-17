@@ -52,7 +52,7 @@ current gap, risk gate, and report.
 
 | ID | Tool / entrypoint | User operation | User acceptance criterion | Passing threshold |
 | --- | --- | --- | --- | --- |
-| AC-P-1 | Editor / file browser | Open the active Nori Contract | The user understands goal, layered ACs, each status, and the current gap. | No chat history or implementation explanation required; understandable within 60 seconds. |
+| AC-P-1 | Editor / file browser | Open the current Nori Contract | The user understands goal, layered ACs, each status, and the current gap. | No chat history or implementation explanation required; understandable within 60 seconds. |
 | AC-P-2 | CLI | Run `opennori check` | The user can reject technical implementation details masquerading as ACs. | Files, fields, commands, tests, or modules cannot be accepted as user ACs by themselves. |
 | AC-P-3 | CLI | Run `opennori next` or `opennori status` | The user sees the current acceptance gap and completion answer, not a process-step list. | Output answers which AC is missing, whether complete, and whether human action is required. |
 | AC-P-4 | CLI / report | Inspect a high-risk AC | The user sees that weak evidence cannot make it passing. | High-risk passing cannot rely only on agent self-summary. |
@@ -72,7 +72,7 @@ The operator layer proves that Codex can actually use OpenNori as the work proto
 | --- | --- | --- | --- | --- |
 | AC-O-1 | Codex conversation | Start a task with "use OpenNori for this goal" | The user sees a draft Nori Contract written from the user's perspective. | Draft ACs describe user actions or judgments; user can approve or revise. |
 | AC-O-2 | Codex conversation | Approve or revise the acceptance criteria | The user controls what "done" means. | Agent cannot decide completion before user-confirmed criteria exist. |
-| AC-O-3 | New Codex session | Ask to continue OpenNori | The agent restores the active goal and current acceptance gap. | Recovery uses repo files, not old chat context. |
+| AC-O-3 | New Codex session | Ask to continue OpenNori | The agent restores the current goal and current acceptance gap. | Recovery uses repo files, not old chat context. |
 | AC-O-4 | Codex conversation | Ask "is it done?" | The agent answers only from required AC status and evidence. | Complete is allowed only when required ACs are all `passing` or `waived`. |
 | AC-O-5 | Codex conversation | Ask "what do I need to do?" | If blocked, the user sees a concrete human action. | Blocked output asks for a decision, input, permission, cost approval, or similar human action. |
 | AC-O-6 | Codex conversation | Revise an AC after new facts appear | The changed acceptance basis is preserved. | Updated ACs become the basis for `current_gap` and completion; old criteria are not silently reused. |
@@ -90,11 +90,11 @@ a durable workflow asset.
 | AC-Z-1 | Codex Plugin / package assets | Install or inspect the OpenNori package | The user's agent can discover focused OpenNori Skills without the user memorizing CLI flags. | `.agents/plugins/marketplace.json` points to `./plugins/opennori`; `plugins/opennori/.codex-plugin/plugin.json` points to package-local `skills/`; the `nori` Skill routes natural-language work through acceptance, evidence, profile, architecture, health, and reporting. |
 | AC-Z-2 | CLI | Run `opennori init` or `opennori install` | The user can initialize OpenNori project state without unexpected overwrites. | Init/install shows created/skipped assets; existing user content is not overwritten by default. |
 | AC-Z-3 | Git / PR diff | Review the agent's changes | The user can separate acceptance evidence changes from implementation noise. | Summary defaults to AC status changes, evidence changes, and user impact. |
-| AC-Z-4 | CLI | Run `opennori list` and select a goal | The user can see multiple active goals and choose one explicitly. | Multiple active goals are listed with status, gap, and paths; `--goal` selects the target. |
-| AC-Z-5 | CLI | Archive a completed or blocked goal | The user removes it from active work while preserving evidence and report. | Active no longer lists the goal; contract, ledger, and report remain recoverable. |
+| AC-Z-4 | CLI | Run `opennori list` | The user can distinguish the single current goal, draft contracts, completed history, blocked history, and legacy recovery state. | Drafts are listed separately and are not executable; multiple current goals are reported as broken state rather than a normal choice. |
+| AC-Z-5 | CLI | Archive a completed or blocked goal | The user removes it from current work while preserving evidence and report. | Current no longer lists the goal; contract, ledger, and report remain recoverable in completed or blocked history. |
 | AC-Z-6 | Project file browser | Inspect the project after running OpenNori | The user sees OpenNori-owned state under `.opennori/` instead of a generic project `process/` directory. | Install, draft, brainstorm, report, and archive write OpenNori state under `.opennori/` by default. |
-| AC-Z-7 | CLI / project file browser | Run `opennori install` | The user can inspect project OpenNori registration and judge version, managed entries, active goals, Plugin Skill availability, and protocol capabilities. | Install output uses create, skip, overwrite, or update semantics; `.opennori/manifest.json` records version, managed files, active goals, Plugin state, architecture state, and capabilities. |
-| AC-Z-8 | CLI | Run `opennori doctor` | The user can judge whether the project is `ready`, `needs-action`, or `broken`, and see the next recovery action. | Doctor checks `.opennori` structure, manifest consistency, active goal recoverability, packaged Plugin Skills, CLI runtime, and recovery suggestions. |
+| AC-Z-7 | CLI / project file browser | Run `opennori install` | The user can inspect project OpenNori registration and judge version, managed entries, current/draft/history goals, Plugin Skill availability, and protocol capabilities. | Install output uses create, skip, overwrite, or update semantics; `.opennori/manifest.json` records version, managed files, current/draft/history goals, Plugin state, architecture state, and capabilities. |
+| AC-Z-8 | CLI | Run `opennori doctor` | The user can judge whether the project is `ready`, `needs-action`, or `broken`, and see the next recovery action. | Doctor checks `.opennori` structure, manifest consistency, current goal recoverability, legacy active recovery, packaged Plugin Skills, CLI runtime, and recovery suggestions. |
 | AC-Z-9 | CLI | Preview install with `opennori install --dry-run` | The user can judge what OpenNori would create, skip, update, or overwrite before writing to the project. | Install plan lists action, kind, managed status, write intent, destructive flag, and reason; dry-run reports zero actual writes. |
 | AC-Z-10 | CLI | Apply force install | The user must preview and explicitly confirm destructive install actions before files are overwritten. | Real `opennori install --force` fails without confirmation; dry-run previews destructive overwrites; confirmed force install may write. |
 | AC-Z-11 | CLI | Preview and apply uninstall | The user can uninstall OpenNori entry assets without losing acceptance state by default. | Uninstall plan shows removals and preserved state; real uninstall requires confirmation; `.opennori` state is deleted only with `--include-state --confirm`. |
@@ -137,7 +137,7 @@ OpenNori writes its project-local state under `.opennori/`.
     evidence/
 ```
 
-Each active goal has:
+Each current or draft goal has:
 
 - `<goal>.acceptance.md` for human review
 - `<goal>.evidence.json` for deterministic agent/tool updates
@@ -147,7 +147,7 @@ Each active goal has:
 - manifest schema and OpenNori protocol version
 - OpenNori package version
 - managed `.opennori` files and directories
-- active goals recoverable from `.opennori/active`
+- the single current goal, draft goals, completed/blocked history, and legacy `.opennori/active` recovery state
 - OpenNori Plugin and package Skill asset state
 - Architecture Baseline, profile, challenge, build-vs-buy, and agent-readable surface state
 - protocol capabilities exposed by this CLI
@@ -168,7 +168,7 @@ OpenNori may maintain a local observation surface for users:
 
 These files are not Product AC, not implementation plans, and not completion
 evidence. They help users observe the acceptance loop while it runs. The source
-of truth for completion remains the active Nori Contract, evidence ledger,
+of truth for completion remains the current Nori Contract, evidence ledger,
 Nori Profile, Architecture Baseline, and report state.
 
 `opennori dashboard --root <project>` starts a local loopback HTTP/SSE kernel
@@ -187,9 +187,10 @@ buttons or control endpoints.
 CLI JSON `data.agent_next.dashboard_activity` is the preferred Skill-facing
 hint for live dashboard publishing. If a Skill does not have that hint, it may
 call `opennori activity start|heartbeat|finish` with only root, Skill, state,
-and summary; the CLI can infer the unique current goal/gap. If multiple active
-goals have current gaps, activity publishing must fail closed and ask for an
-explicit goal instead of attaching the dashboard to the wrong contract.
+and summary; the CLI can infer the unique current goal/gap. If no current goal
+exists, activity must not bind to drafts. If multiple current goals exist,
+activity publishing must fail closed and route to doctor because current state
+is broken.
 
 `opennori install --dry-run` returns an install plan. The plan uses deterministic action semantics:
 
@@ -239,10 +240,10 @@ The manifest records `plugin` state, and `opennori doctor` checks whether packag
 present and whether the manifest Plugin state is stale.
 
 When upgrading an existing OpenNori project, upgrade entry assets first, then run `opennori check`.
-`check` validates active Nori Contract integrity as hard state structure, then reports
+`check` validates current Nori Contract integrity as hard state structure, then reports
 `acceptance_review` findings for vague or possibly implementation-centered ACs such as "modify
 profile fields" or "show an error". These review findings are questions for the agent and user,
-not hard protocol rejection. `check` also reports `architecture_check` warnings when the active goal
+not hard protocol rejection. `check` also reports `architecture_check` warnings when the current goal
 has no confirmed Architecture Baseline, stale agent-readable surface, or unresolved Architecture
 Challenges. It reports `evidence_health` warnings when a complete-looking goal relies on stale,
 broad, source-free, or non-reviewable evidence. It does not rewrite existing contracts, evidence,
@@ -314,7 +315,7 @@ Once confirmed, the baseline is written to:
 - `.opennori/agent-guide.md`
 
 Agent route files such as `AGENTS.md` or `CLAUDE.md` should point new sessions to these surfaces.
-`opennori doctor` checks that the baseline exists when an active goal requires it, that the schema is
+`opennori doctor` checks that the baseline exists when a current goal requires it, that the schema is
 valid, and that at least one agent route references `.opennori/architecture/baseline.md`.
 
 If project evidence conflicts with a confirmed baseline, the agent must create an Architecture
@@ -334,7 +335,7 @@ opennori architecture build-vs-buy --root <project> --area "<area>" --need "<nee
 ```
 
 Architecture state affects completion confidence, not Product AC shape. When every required Product
-AC is `passing` or `waived` but the active goal has a missing/draft/invalid/challenged baseline,
+AC is `passing` or `waived` but the current goal has a missing/draft/invalid/challenged baseline,
 stale agent-readable architecture surface, or unhealthy build-vs-buy decisions, OpenNori reports
 `objective_complete: true` with `confidence: review-risk`. It must not create synthetic ARCH
 acceptance criteria or replace `current_gap` unless a real Product AC or blocking Profile item is
@@ -434,10 +435,10 @@ On every turn:
 15. If the user adds a new acceptance boundary after approval, run `opennori criterion add --root <repo> --id <id> ... --json`; the new criterion becomes an evidence gap without forcing the agent to edit state files manually.
 16. If the user revises a criterion later, run `opennori criterion update --root <repo> --criterion <id> ... --json`; old evidence for the changed criterion is cleared.
 17. If the user asks to update an existing OpenNori project, run `opennori doctor`, use `opennori upgrade --dry-run/--confirm` for manifest/protocol/guide refreshes, then run `opennori check`; ask the user before revising any existing AC flagged by `acceptance_review`. If packaged Plugin Skills are missing, reinstall or update the OpenNori package instead of copying Skills into the project.
-18. Run `opennori resume --root <repo>` or `opennori next --root <repo>` to recover the active goal and current acceptance gap from repository files.
+18. Run `opennori resume --root <repo>` or `opennori next --root <repo>` to recover the current goal and current acceptance gap from repository files.
 19. Work only to produce evidence for that gap under the confirmed Architecture Baseline.
-20. Add acceptance evidence with `opennori evidence add`; choose any suitable verification method, but record basis, sources, reviewability, confidence, and limitations. If existing evidence is invalid or obsolete, run `opennori evidence prune` first so stale proof does not occupy active context. Add profile compliance evidence with `opennori profile evidence` when profile items exist.
-21. If a dashboard is useful, publish live activity from `agent_next.dashboard_activity` or `opennori activity start/heartbeat/finish`; do not treat that activity as acceptance evidence or use dashboard controls for confirmation. If multiple active goals are ambiguous, ask which goal to observe instead of guessing.
+20. Add acceptance evidence with `opennori evidence add`; choose any suitable verification method, but record basis, sources, reviewability, confidence, and limitations. If existing evidence is invalid or obsolete, run `opennori evidence prune` first so stale proof does not occupy current context. Add profile compliance evidence with `opennori profile evidence` when profile items exist.
+21. If a dashboard is useful, publish live activity from `agent_next.dashboard_activity` or `opennori activity start/heartbeat/finish`; do not treat that activity as acceptance evidence or use dashboard controls for confirmation. If no current goal exists, do not bind activity to drafts; if multiple current goals exist, run doctor/project-health because the state is broken.
 22. Run `opennori evaluate`.
 23. Report acceptance state, profile compliance, and evidence, not implementation steps.
 24. If the goal is complete and the user asked to continue, review `agent_next.candidate_goals`, choose or refine the strongest human-facing next goal, then run discovery or draft for a new Nori Contract using candidate draft metadata when present. The resulting draft must give concrete measurement and passing thresholds for user approval; do not treat candidate goals as approved AC, phases, task lists, or evidence.
@@ -449,20 +450,20 @@ Useful commands:
 - `opennori draft --goal "<goal>" --root <repo>`: create a draft Nori Contract that needs user approval.
 - `opennori draft --from-brainstorm <brainstorm-id> --candidate <A|B|C> --root <repo>`: convert a selected brainstorm direction into a draft contract.
 - `opennori approve --root <repo>`: mark the acceptance basis as approved so completion can be decided.
-- `opennori criterion add --root <repo> --id <id> ...`: add a newly confirmed acceptance boundary to the active contract and ledger.
+- `opennori criterion add --root <repo> --id <id> ...`: add a newly confirmed acceptance boundary to the current contract and ledger.
 - `opennori criterion update --root <repo> --criterion <id> ...`: preserve a user revision as the new acceptance basis.
 - `opennori evidence add --root <repo> --criterion <id> --kind <kind> --summary "<summary>" --result <passing|failing|blocked|waived> --basis <basis> --source '<json-or-label>' --reviewability "<how to review>" --limitations "<known limits>"`: attach user-understandable, reviewable evidence without forcing a fixed adapter.
-- `opennori evidence prune --root <repo> --criterion <id> --reason "<reason>"`: remove invalid or obsolete evidence from an active criterion so reports and context exports only carry current proof.
+- `opennori evidence prune --root <repo> --criterion <id> --reason "<reason>"`: remove invalid or obsolete evidence from a current criterion so reports and context exports only carry current proof.
 - `opennori profile add --root <repo> --type <skill|stack|constraint> --name "<name>" --strength <must|prefer|avoid>`: record user execution preferences separately from ACs.
 - `opennori profile evidence --root <repo> --item <item-id> --result <satisfied|violated|waived>`: record whether the agent followed the profile.
 - `opennori profile show --root <repo>`: show profile compliance and blocking items.
-- `opennori list --root <repo>`: list active OpenNori goals.
+- `opennori list --root <repo>`: list the current goal, drafts, completed/blocked history, and legacy active recovery state.
 - `opennori install --root <repo>`: create or refresh project-local OpenNori assets and manifest.
-- `opennori upgrade --root <repo>`: preview and refresh project-local OpenNori assets without rewriting active contracts or evidence.
+- `opennori upgrade --root <repo>`: preview and refresh project-local OpenNori assets without rewriting current/draft/history contracts or evidence.
 - `opennori doctor --root <repo>`: inspect project OpenNori health and recovery actions.
-- `opennori check --root <repo>`: validate active contract structure, audit active ACs for underspecified acceptance quality, surface Architecture Baseline health for the active goal, and report evidence health.
+- `opennori check --root <repo>`: validate current contract structure, audit current ACs for underspecified acceptance quality, surface Architecture Baseline health for the current goal, and report evidence health.
 - `opennori dashboard --root <repo>`: start a local visual dashboard over OpenNori state.
 - `opennori activity start|heartbeat|finish --root <repo>`: publish live agent activity for the dashboard; this is not evidence. Goal/gap may be inferred only when unique.
-- `opennori resume --root <repo>`: recover the active goal, current gap, completion answer, and intervention state.
+- `opennori resume --root <repo>`: recover the current goal, current gap, completion answer, and intervention state.
 - `opennori status --root <repo>`: answer whether the goal is complete and whether the user needs to act.
 - `opennori report --root <repo>`: generate the human acceptance report.

@@ -10,3 +10,4 @@ npm-debug.log*
 .opennori/activity/
 .opennori/events/
 .opennori/snapshots/
+output/dashboard-review/

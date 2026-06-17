@@ -11,7 +11,7 @@ The baseline answers "what architecture should guide this work", not "what steps
 
 ## Start Here
 
-1. Read the active goal and Product AC from resume/status.
+1. Read the current goal and Product AC from resume/status.
 2. Read Nori Profile for required Skills, preferred stacks, avoid rules, and install policy.
 3. Inspect existing project architecture, dependencies, and user-supplied references.
 4. List available architecture profiles and select the best fit.

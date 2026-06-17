@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import type { CommandDef } from "citty";
 import { runCommand } from "citty";
-import { findActivePairs, pruneInvalidEvidence, readJson, syncAcceptanceMarkdown, writeJson } from "../core.ts";
+import { findCurrentPairs, findDraftPairs, findGoalPairs, inferGoalLocation, pruneInvalidEvidence, readJson, syncAcceptanceMarkdown, writeJson, type GoalStateLocation } from "../core.ts";
 import { refreshManifest } from "../lifecycle.ts";
 import type { EvidenceLedger, NoriContract, NoriEvidencePayload } from "../types.ts";
 
@@ -13,6 +13,7 @@ export type ActiveGoalArgs = {
   goal?: unknown;
   acceptance?: unknown;
   evidence?: unknown;
+  fromDraft?: unknown;
 };
 
 export const activeGoalArgs = {
@@ -32,6 +33,11 @@ export const activeGoalArgs = {
   evidence: {
     type: "string",
     description: "Explicit evidence JSON path."
+  },
+  fromDraft: {
+    type: "boolean",
+    description: "Read from draft contracts instead of the current contract.",
+    default: false
   }
 } as const;
 
@@ -41,6 +47,7 @@ export type ActiveGoalPair = {
   acceptancePath: string;
   evidencePath: string;
   root: string;
+  location: GoalStateLocation;
   evidencePrune?: ReturnType<typeof pruneInvalidEvidence>;
 };
 
@@ -179,19 +186,25 @@ export function loadPair(args: ActiveGoalArgs = {}): ActiveGoalPair {
       ledger: payload.ledger,
       acceptancePath,
       evidencePath,
-      root: inferRootFromAcceptancePath(acceptancePath)
+      root: inferRootFromAcceptancePath(acceptancePath),
+      location: inferGoalLocation(acceptancePath) || "current"
     });
   }
 
   const root = path.resolve(optionalString(args.root) || process.cwd());
   const goal = optionalString(args.goal);
-  const pairs = findActivePairs(root);
+  const location: GoalStateLocation = args.fromDraft ? "drafts" : "current";
+  const pairs = location === "drafts" ? findDraftPairs(root) : findCurrentPairs(root);
   const pair = goal ? pairs.find((item) => item.goalId === goal) : pairs[0];
   if (!pair) {
-    throw new Error(`No active OpenNori goal found under ${root}`);
+    throw new Error(location === "drafts"
+      ? `No draft OpenNori contract found under ${root}`
+      : `No current OpenNori goal found under ${root}`);
   }
   if (!goal && pairs.length > 1) {
-    throw new Error("Multiple active OpenNori goals found. Pass --goal <goal-id> or explicit --acceptance/--evidence paths.");
+    throw new Error(location === "drafts"
+      ? "Multiple draft OpenNori contracts found. Pass --goal <goal-id> or explicit --acceptance/--evidence paths."
+      : "OpenNori current state is invalid: multiple current goals found. Run opennori doctor --root <project> --json.");
   }
   const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
   return preparePair({
@@ -199,7 +212,24 @@ export function loadPair(args: ActiveGoalArgs = {}): ActiveGoalPair {
     ledger: payload.ledger,
     acceptancePath: pair.acceptancePath,
     evidencePath: pair.evidencePath,
-    root
+    root,
+    location: pair.location
+  });
+}
+
+export function loadGoalFromLocation(root: string, goalId: string, location: GoalStateLocation): ActiveGoalPair {
+  const pair = findGoalPairs(root, location).find((item) => item.goalId === goalId);
+  if (!pair) {
+    throw new Error(`No OpenNori ${location} goal found: ${goalId}`);
+  }
+  const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+  return preparePair({
+    contract: payload.contract,
+    ledger: payload.ledger,
+    acceptancePath: pair.acceptancePath,
+    evidencePath: pair.evidencePath,
+    root,
+    location: pair.location
   });
 }
 

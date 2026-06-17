@@ -17,7 +17,7 @@ When the root `nori` Skill or CLI JSON reports `data.agent_next.state: initializ
 2. If `agent_next.state` is `initialized_no_active_contract`, use the user's natural-language goal from the current conversation when present; ask for the goal only when it is missing; then begin discovery/draft.
 3. If the user is still exploring an idea, create brainstorm candidates before drafting a contract.
 4. If the user has a goal but the completion surface is vague, run discovery before draft.
-5. If a draft or active contract exists, inspect `acceptance_review` before claiming the AC is good enough.
+5. If a draft or current contract exists, inspect `acceptance_review` before claiming the AC is good enough.
 6. If `acceptance_review` reports `criterion_id: ACCEPTANCE-BASIS`, show those discovery questions before asking for approval; the draft is still a generic starting point.
 7. If the user has approved or revised AC, persist that decision before implementation continues.
 8. After `opennori approve`, read the returned `data.agent_next`. If it says `architecture_needs_review`, hand off to `nori-architecture-brainstorm` before implementation or evidence work.

@@ -91,10 +91,10 @@ export function architectureHealthChecks(architecture: ArchitectureState, baseli
     "architecture_baseline",
     !baselineRequired || architecture.decision === "valid" || architecture.decision === "challenged",
     !baselineRequired
-      ? "No active goal requires an Architecture Baseline yet."
+      ? "No current goal requires an Architecture Baseline yet."
       : architecture.baseline
         ? `Architecture Baseline decision is ${architecture.decision}.`
-        : "Active goal has no Architecture Baseline.",
+        : "Current goal has no Architecture Baseline.",
     "Run opennori architecture baseline --root <project> --goal <goal> --confirm --json before implementation, or resolve open architecture issues.",
     architecture.decision === "invalid" ? "broken" : "needs-action"
   ));

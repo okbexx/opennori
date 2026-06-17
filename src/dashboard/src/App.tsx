@@ -1,30 +1,21 @@
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
-  Activity,
-  AlertTriangle,
-  CheckCircle2,
-  CircleDot,
-  Clock3,
+  Check,
+  Copy,
   Eye,
-  GitBranch,
   Info,
-  RefreshCw,
   Radio,
-  ShieldCheck,
-  UserRound,
+  RefreshCw,
+  Terminal,
   X
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchSnapshot, subscribeToEvents } from "./api";
-import { AcceptanceLoop } from "./components/AcceptanceLoop";
-import type { ActivityState, NoriSnapshot } from "./types";
+import { AcceptanceRadarNet, type RadarNode } from "./components/AcceptanceRadarNet";
+import type { NoriSnapshot } from "./types";
 
 type ConnectionState = "connecting" | "live" | "retrying";
-type Tone = "neutral" | "good" | "warn" | "bad" | "accent";
-
-const activeAgentStates = new Set<ActivityState>(["thinking", "working", "verifying", "waiting_user"]);
-
 function shortText(value: string | null | undefined, maxLength = 120, fallback = "none"): string {
   const text = String(value || "").trim();
   if (!text) return fallback;
@@ -32,42 +23,7 @@ function shortText(value: string | null | undefined, maxLength = 120, fallback =
 }
 
 function primaryGoalText(value: string | null | undefined): string {
-  return shortText(value, 92, "No active goal");
-}
-
-function statusTone(value: string | undefined): Tone {
-  if (!value) return "neutral";
-  if (["complete", "clear", "valid", "ready", "approved", "decided"].includes(value)) return "good";
-  if (["review_risk", "review", "waiting_user", "needs_evidence", "draft", "not_complete"].includes(value)) return "warn";
-  if (["blocked", "broken", "invalid", "missing", "challenged"].includes(value)) return "bad";
-  return "neutral";
-}
-
-function decisionLabel(snapshot: NoriSnapshot | null): string {
-  if (!snapshot) return "loading";
-  if (snapshot.decision === "complete") return "complete";
-  if (snapshot.decision === "review_risk") return "complete, review risk";
-  if (snapshot.decision === "no_active_goal") return "no active goal";
-  return "not complete yet";
-}
-
-function architectureLabel(snapshot: NoriSnapshot | null): string {
-  if (!snapshot) return "loading";
-  const profile = snapshot.architecture.profile_title || snapshot.architecture.profile || "no profile";
-  const challengeCount = snapshot.architecture.open_challenges || 0;
-  const suffix = challengeCount > 0 ? `${challengeCount} challenge${challengeCount === 1 ? "" : "s"}` : snapshot.architecture.decision;
-  return `${profile} / ${suffix}`;
-}
-
-function userActionText(snapshot: NoriSnapshot | null): string {
-  if (!snapshot) return "Waiting for current acceptance state.";
-  if (!snapshot.need_user) return "No user reply is needed right now.";
-  return shortText(snapshot.user_action, 120, "Reply in the agent conversation before work continues.");
-}
-
-function userReplyDetail(snapshot: NoriSnapshot | null): string {
-  if (!snapshot?.need_user) return "The dashboard is observing. It does not confirm, reject, or waive state.";
-  return "Reply in the agent conversation; the agent records the decision through OpenNori CLI.";
+  return shortText(value, 92, "No current goal");
 }
 
 function relativeTime(value: string | undefined): string {
@@ -83,46 +39,6 @@ function relativeTime(value: string | undefined): string {
   return `${hours}h ago`;
 }
 
-function secondsRemaining(value: string | undefined): number | null {
-  if (!value) return null;
-  const timestamp = Date.parse(value);
-  if (!Number.isFinite(timestamp)) return null;
-  return Math.round((timestamp - Date.now()) / 1000);
-}
-
-function activityFreshness(snapshot: NoriSnapshot | null): { label: string; tone: Tone; stale: boolean } {
-  if (!snapshot?.agent.last_seen_at) return { label: "no activity", tone: "neutral", stale: true };
-  if (snapshot.agent.expired) return { label: "stale", tone: "warn", stale: true };
-  const remaining = secondsRemaining(snapshot.agent.expires_at);
-  if (remaining !== null && remaining < 0) return { label: "stale", tone: "warn", stale: true };
-  return { label: relativeTime(snapshot.agent.last_seen_at), tone: "good", stale: false };
-}
-
-function toneClasses(tone: Tone): string {
-  if (tone === "good") return "border-[#74d58a]/35 bg-[#74d58a]/10 text-[#c9f6d0]";
-  if (tone === "warn") return "border-[#ffb15e]/40 bg-[#ffb15e]/10 text-[#ffe2bf]";
-  if (tone === "bad") return "border-[#ff6b6b]/40 bg-[#ff6b6b]/10 text-[#ffd0d0]";
-  if (tone === "accent") return "border-[#57c7ff]/35 bg-[#57c7ff]/10 text-[#d5f2ff]";
-  return "border-[#f5f0e6]/14 bg-[#f5f0e6]/7 text-[#f5f0e6]";
-}
-
-function agentLabel(state: ActivityState): string {
-  if (state === "thinking") return "thinking";
-  if (state === "working") return "working";
-  if (state === "verifying") return "verifying";
-  if (state === "waiting_user") return "needs user";
-  if (state === "blocked") return "blocked";
-  return "idle";
-}
-
-function StatusPill({ tone, children }: { tone: Tone; children: React.ReactNode }) {
-  return (
-    <span className={`inline-flex min-h-8 items-center gap-2 rounded-full border px-3 text-sm font-semibold ${toneClasses(tone)}`}>
-      {children}
-    </span>
-  );
-}
-
 function IconButton({ label, children, onClick }: { label: string; children: React.ReactNode; onClick?: () => void }) {
   return (
     <Tooltip.Root>
@@ -131,7 +47,7 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
           type="button"
           aria-label={label}
           onClick={onClick}
-          className="grid h-10 w-10 place-items-center rounded-md border border-[#f5f0e6]/14 bg-[#f5f0e6]/7 text-[#f5f0e6] transition hover:border-[#57c7ff]/40 hover:bg-[#57c7ff]/12"
+          className="grid h-10 w-10 place-items-center rounded-md border border-slate-800 bg-slate-950/40 text-slate-300 transition hover:border-[#00f0ff]/40 hover:bg-[#00f0ff]/12"
         >
           {children}
         </button>
@@ -139,177 +55,13 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
       <Tooltip.Portal>
         <Tooltip.Content
           sideOffset={8}
-          className="rounded-md border border-[#f5f0e6]/14 bg-[#171914] px-3 py-2 text-xs font-semibold text-[#f5f0e6] shadow-2xl"
+          className="rounded-md border border-slate-800 bg-[#080914] px-3 py-2 text-xs font-semibold text-[#e2e8f0] shadow-2xl"
         >
           {label}
-          <Tooltip.Arrow className="fill-[#171914]" />
+          <Tooltip.Arrow className="fill-[#080914]" />
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip.Root>
-  );
-}
-
-function MetricPanel({
-  icon,
-  label,
-  value,
-  detail,
-  tone = "neutral"
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  detail?: string;
-  tone?: Tone;
-}) {
-  return (
-    <article className={`min-w-0 rounded-lg border p-4 ${toneClasses(tone)}`}>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <span className="grid h-9 w-9 place-items-center rounded-md bg-[#11130f]/55">{icon}</span>
-        <span className="min-w-0 text-right text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">{label}</span>
-      </div>
-      <strong className="block min-w-0 break-words text-xl font-semibold leading-tight text-[#f7f0e2] [overflow-wrap:anywhere]">{value}</strong>
-      {detail ? <span className="mt-2 block min-w-0 break-words text-sm leading-snug text-[#bfc7ba] [overflow-wrap:anywhere]">{detail}</span> : null}
-    </article>
-  );
-}
-
-function ActivityPresence({
-  snapshot,
-  agentActive,
-  agentState,
-  currentGap
-}: {
-  snapshot: NoriSnapshot | null;
-  agentActive: boolean;
-  agentState: ActivityState;
-  currentGap: string;
-}) {
-  const freshness = activityFreshness(snapshot);
-  const stale = freshness.stale || !agentActive;
-  const freshnessTone: Tone = stale ? snapshot?.agent.expired ? "warn" : "neutral" : freshness.tone;
-  const summary = shortText(snapshot?.agent.summary, 156, stale ? "No live OpenNori agent activity." : "OpenNori agent is active.");
-  const skill = shortText(snapshot?.agent.skill, 34, "no Skill");
-  const agentName = shortText(snapshot?.agent.name, 28, "Agent");
-  const state = agentLabel(agentState);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className={`relative overflow-hidden rounded-lg border p-4 ${stale ? "border-[#f5f0e6]/12 bg-[#f5f0e6]/6" : "border-[#57c7ff]/34 bg-[#122032]/70 shadow-[0_0_42px_rgba(87,199,255,0.13)]"}`}
-    >
-      {!stale ? (
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 h-[2px] w-1/2 bg-gradient-to-r from-transparent via-[#57c7ff]/80 to-transparent"
-          animate={{ x: ["-110%", "220%"] }}
-          transition={{ duration: 2.8, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-        />
-      ) : null}
-      <div className="relative z-10 grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-        <div className={`grid h-16 w-16 place-items-center rounded-lg border ${stale ? "border-[#f5f0e6]/12 bg-black/20 text-[#aeb8aa]" : "border-[#57c7ff]/40 bg-[#57c7ff]/12 text-[#d5f2ff]"}`}>
-          <motion.div
-            animate={!stale ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-            transition={{ duration: 1.6, repeat: !stale ? Number.POSITIVE_INFINITY : 0, ease: "easeInOut" }}
-          >
-            <Activity size={28} />
-          </motion.div>
-        </div>
-
-        <div className="min-w-0">
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            <StatusPill tone={stale ? "neutral" : "good"}>
-              <span className={`h-2.5 w-2.5 rounded-full ${stale ? "bg-[#6f776b]" : "animate-pulse bg-[#74d58a]"}`} />
-              {agentName} / {state}
-            </StatusPill>
-            <StatusPill tone="accent">
-              <Activity size={15} />
-              {skill}
-            </StatusPill>
-            <StatusPill tone={freshnessTone}>
-              <Clock3 size={15} />
-              {freshness.label}
-            </StatusPill>
-          </div>
-          <strong className="block min-w-0 break-words text-lg font-semibold leading-snug text-[#f7f0e2] [overflow-wrap:anywhere]">
-            {summary}
-          </strong>
-          <span className="mt-2 block min-w-0 break-words text-sm leading-snug text-[#bfc7ba] [overflow-wrap:anywhere]">
-            Gap: {currentGap}
-          </span>
-        </div>
-
-        <div className="rounded-md border border-[#f5f0e6]/12 bg-black/22 px-3 py-2 text-left sm:text-right">
-          <span className="block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">activity</span>
-          <strong className="block text-sm font-semibold text-[#f7f0e2]">{stale ? "idle" : "live"}</strong>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function SnapshotDialog({ snapshot }: { snapshot: NoriSnapshot | null }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="relative">
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>
-          <button
-            type="button"
-            aria-label={open ? "Hide snapshot" : "Inspect snapshot"}
-            aria-expanded={open}
-            onClick={() => setOpen((current) => !current)}
-            className="grid h-10 w-10 place-items-center rounded-md border border-[#f5f0e6]/14 bg-[#f5f0e6]/7 text-[#f5f0e6] transition hover:border-[#57c7ff]/40 hover:bg-[#57c7ff]/12"
-          >
-            <Eye size={18} />
-          </button>
-        </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Content
-            sideOffset={8}
-            className="rounded-md border border-[#f5f0e6]/14 bg-[#171914] px-3 py-2 text-xs font-semibold text-[#f5f0e6] shadow-2xl"
-          >
-            Inspect snapshot
-          <Tooltip.Arrow className="fill-[#171914]" />
-        </Tooltip.Content>
-      </Tooltip.Portal>
-      </Tooltip.Root>
-
-      <AnimatePresence>
-        {open ? (
-          <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ duration: 0.16 }}
-            className="absolute right-0 top-12 z-30 grid h-[min(520px,70vh)] w-[min(560px,calc(100vw-2rem))] grid-rows-[auto_1fr] overflow-hidden rounded-lg border border-[#f5f0e6]/16 bg-[#11130f] shadow-2xl"
-          >
-            <div className="flex items-center justify-between gap-4 border-b border-[#f5f0e6]/10 p-4">
-              <div className="min-w-0">
-                <h2 className="text-lg font-semibold text-[#f7f0e2]">Snapshot</h2>
-                <p className="mt-1 text-sm text-[#aeb8aa]">Read-only projection from .opennori state.</p>
-              </div>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => setOpen(false)}
-                className="grid h-10 w-10 place-items-center rounded-md border border-[#f5f0e6]/14 bg-[#f5f0e6]/7 text-[#f5f0e6] transition hover:bg-[#f5f0e6]/12"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="min-h-0 overflow-auto p-4">
-              <pre className="overflow-hidden whitespace-pre-wrap break-words rounded-md border border-[#f5f0e6]/10 bg-black/35 p-4 text-xs leading-relaxed text-[#dce5d9]">
-                {JSON.stringify(snapshot, null, 2)}
-              </pre>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-    </div>
   );
 }
 
@@ -317,6 +69,8 @@ export default function App() {
   const [snapshot, setSnapshot] = useState<NoriSnapshot | null>(null);
   const [connection, setConnection] = useState<ConnectionState>("connecting");
   const [error, setError] = useState<string>("");
+  const [selectedNode, setSelectedNode] = useState<RadarNode | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -324,11 +78,23 @@ export default function App() {
       setSnapshot(nextSnapshot);
       setConnection("live");
       setError("");
+
+      // 简体中文：在数据更新后，同步刷新已选中节点的最新状态数据
+      if (selectedNode) {
+        if (selectedNode.type === "goal" && nextSnapshot.goal) {
+          setSelectedNode((prev) => prev ? { ...prev, rawData: nextSnapshot.goal } : prev);
+        } else if (selectedNode.type === "ac" && nextSnapshot.criteria) {
+          const matchedAc = nextSnapshot.criteria.find((c) => `ac-${c.id}` === selectedNode.id);
+          if (matchedAc) {
+            setSelectedNode((prev) => prev ? { ...prev, status: matchedAc.status, rawData: matchedAc } : prev);
+          }
+        }
+      }
     } catch (refreshError) {
       setConnection("retrying");
       setError(refreshError instanceof Error ? refreshError.message : String(refreshError));
     }
-  }, []);
+  }, [selectedNode]);
 
   useEffect(() => {
     void refresh();
@@ -349,155 +115,200 @@ export default function App() {
     };
   }, [refresh]);
 
-  const agentState = snapshot?.agent.state || "idle";
-  const agentActive = activeAgentStates.has(agentState);
-  const needUserTone: Tone = snapshot?.need_user ? "warn" : "good";
-  const decisionTone = statusTone(snapshot?.decision);
-  const architectureTone = statusTone(snapshot?.architecture.decision);
-  const connectionTone: Tone = connection === "live" ? "good" : connection === "retrying" ? "warn" : "neutral";
-  const latestEvent = snapshot?.last_event;
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   const goalLabel = useMemo(() => primaryGoalText(snapshot?.goal?.label), [snapshot]);
-  const gapLabel = shortText(snapshot?.current_gap?.label, 112, snapshot?.status === "no_active_goal" ? "No active Nori Contract" : "No current gap");
-  const userAction = userActionText(snapshot);
+
+  // 简体中文：仅供复制的对话提示，Dashboard 不暴露底层状态写入命令
+  const suggestedAgentReply = useMemo(() => {
+    if (!snapshot) return "";
+    if (snapshot.need_user) {
+      return snapshot.user_action || "Please use OpenNori to record my decision in this agent conversation.";
+    }
+    return "Use OpenNori to continue from the current gap and record reviewable evidence.";
+  }, [snapshot]);
+
+  // 简体中文：只读事件历史过滤
+  const recentEvents = useMemo(() => {
+    return snapshot?.events || [];
+  }, [snapshot]);
 
   return (
     <Tooltip.Provider delayDuration={180}>
-      <main className="relative min-h-screen overflow-hidden bg-[#11130f] text-[#f7f0e2]">
-        <div className="pointer-events-none fixed inset-0 bg-[linear-gradient(130deg,#11130f_0%,#171914_48%,#231b13_100%)]" />
-        <div className="pointer-events-none fixed inset-0 opacity-[0.18] [background-image:linear-gradient(rgba(245,240,230,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(245,240,230,0.12)_1px,transparent_1px)] [background-size:64px_64px]" />
+      <main className="relative h-screen max-h-screen overflow-hidden bg-[#080914] text-[#e2e8f0]">
+        {/* 简体中文：赛博极光背景滤镜 */}
+        <div className="pointer-events-none fixed inset-0 bg-[linear-gradient(140deg,#080914_0%,#0c0f24_50%,#1a1129_100%)]" />
+        <div className="pointer-events-none fixed inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(0,240,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(0,240,255,0.12)_1px,transparent_1px)] [background-size:48px_48px]" />
 
-        <section className="relative z-10 grid min-h-screen grid-rows-[auto_1fr_auto] gap-4 p-4 sm:p-6 lg:p-8">
-          <header className="flex flex-wrap items-center justify-between gap-3">
+        {/* 简体中文：限制 100vh 高度自适应并微调 padding 间距，消除滚动 */}
+        <section className="relative z-10 grid h-full max-h-full grid-rows-[auto_1fr_auto] gap-3 p-3 lg:gap-4 lg:p-6 min-h-0 overflow-hidden">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(0,240,255,0.06)] pb-4">
             <div className="flex items-center gap-3">
-              <div className="grid h-11 w-11 place-items-center rounded-lg border border-[#57c7ff]/35 bg-[#57c7ff]/12 text-lg font-black text-[#d5f2ff]">
+              <div className="grid h-11 w-11 place-items-center rounded-lg border border-[#00f0ff]/35 bg-[#00f0ff]/12 text-lg font-black text-[#00f0ff] filter drop-shadow-[0_0_8px_rgba(0,240,255,0.3)] animate-pulse">
                 N
               </div>
               <div>
-                <p className="text-sm font-bold uppercase tracking-normal text-[#aeb8aa]">OpenNori Dashboard</p>
-                <h1 className="text-xl font-semibold leading-tight text-[#f7f0e2] sm:text-2xl">Acceptance Loop</h1>
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">OpenNori Dashboard</p>
+                <h1 className="text-xl font-semibold leading-tight text-[#e2e8f0] sm:text-2xl">Acceptance Radar Net</h1>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <StatusPill tone="accent">
+              <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-[#00f0ff]/35 bg-[#00f0ff]/10 px-3 text-sm font-semibold text-[#c7d2fe]">
                 <Eye size={15} />
-                Observation surface
-              </StatusPill>
-              <StatusPill tone={connectionTone}>
+                Observation only
+              </span>
+              <span className={`inline-flex min-h-8 items-center gap-2 rounded-full border px-3 text-sm font-semibold ${connection === "live" ? "border-[#34d399]/35 bg-[#34d399]/10 text-[#a7f3d0]" : connection === "retrying" ? "border-[#fbbf24]/40 bg-[#fbbf24]/10 text-[#fde68a]" : "border-slate-800 bg-slate-900/40 text-slate-300"}`}>
                 <Radio size={15} className={connection === "live" ? "animate-pulse" : ""} />
                 {connection}
-              </StatusPill>
+              </span>
               <IconButton label="Refresh snapshot" onClick={() => void refresh()}>
                 <RefreshCw size={18} />
               </IconButton>
-              <SnapshotDialog snapshot={snapshot} />
             </div>
           </header>
 
-          <section className="grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
-            <section className="grid min-h-[520px] min-w-0 grid-rows-[auto_auto_1fr] gap-4 rounded-lg border border-[#f5f0e6]/14 bg-[#11130f]/72 p-4 shadow-2xl backdrop-blur sm:p-5">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <AnimatePresence mode="wait">
-                    <motion.h2
-                      key={goalLabel}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.22 }}
-                      className="max-w-4xl break-words text-2xl font-black leading-tight tracking-normal text-[#f7f0e2] [overflow-wrap:anywhere] sm:text-3xl lg:text-4xl"
-                    >
-                      {goalLabel}
-                    </motion.h2>
-                  </AnimatePresence>
-                </div>
-                <div className="rounded-lg border border-[#f5f0e6]/12 bg-black/20 px-3 py-2 text-right">
-                  <span className="block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">judgment</span>
-                  <strong className="block text-sm font-semibold text-[#f7f0e2]">{decisionLabel(snapshot)}</strong>
-                </div>
+          <section className="grid min-h-0 gap-4 lg:grid-cols-[1fr_auto] h-full max-h-full overflow-hidden">
+            {/* 1. 简体中文：核心雷达网画布 */}
+            <div className="relative flex flex-col justify-between h-full max-h-full min-h-0 min-w-0">
+              <div className="mb-2">
+                <p className="text-xs uppercase tracking-wider text-slate-500 font-bold">Active Goal</p>
+                <h2 className="text-xl font-black text-[#e2e8f0] tracking-normal max-w-4xl break-words">
+                  {goalLabel}
+                </h2>
               </div>
 
-              <ActivityPresence snapshot={snapshot} agentActive={agentActive} agentState={agentState} currentGap={gapLabel} />
+              <div className="relative flex-1 grid place-items-center min-h-0 min-w-0 h-full max-h-full overflow-hidden">
+                <AcceptanceRadarNet
+                  snapshot={snapshot}
+                  onSelectNode={(node) => setSelectedNode(node)}
+                  selectedNodeId={selectedNode?.id || null}
+                />
 
-              <AcceptanceLoop
-                loop={snapshot?.loop}
-                agentState={agentState}
-                decision={snapshot?.decision || "not_complete"}
-                needUser={snapshot?.need_user === true}
-                hasGap={snapshot?.current_gap !== null && snapshot?.current_gap !== undefined}
-                noActiveGoal={snapshot?.status === "no_active_goal"}
-              />
-            </section>
-
-            <aside className="grid min-w-0 content-start gap-3">
-              <MetricPanel
-                icon={<CircleDot size={19} />}
-                label="Current gap"
-                value={gapLabel}
-                detail={shortText(snapshot?.current_gap?.reason, 100, "Acceptance gap is clear.")}
-                tone={snapshot?.current_gap ? "warn" : snapshot?.status === "no_active_goal" ? "neutral" : "good"}
-              />
-              <MetricPanel
-                icon={<UserRound size={19} />}
-                label="Agent reply"
-                value={snapshot?.need_user ? "needed" : "not needed"}
-                detail={`${userAction} ${userReplyDetail(snapshot)}`}
-                tone={needUserTone}
-              />
-              <MetricPanel
-                icon={snapshot?.decision === "complete" ? <CheckCircle2 size={19} /> : <AlertTriangle size={19} />}
-                label="Completion"
-                value={decisionLabel(snapshot)}
-                detail={shortText(snapshot?.completion?.answer, 98, "Waiting for current acceptance state.")}
-                tone={decisionTone}
-              />
-              <MetricPanel
-                icon={<GitBranch size={19} />}
-                label="Architecture"
-                value={architectureLabel(snapshot)}
-                detail={snapshot?.architecture.open_challenges ? "Architecture challenge needs review." : "Baseline state is projected separately from Product AC."}
-                tone={architectureTone}
-              />
-            </aside>
-          </section>
-
-          <footer className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.35fr)]">
-            <div className="grid gap-3 rounded-lg border border-[#f5f0e6]/14 bg-[#11130f]/72 p-4 sm:grid-cols-3">
-              <div className="min-w-0">
-                <span className="mb-1 block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">Latest event</span>
-                <strong className="block truncate text-base font-semibold text-[#f7f0e2]">{latestEvent ? latestEvent.type : "none"}</strong>
-                <span className="mt-1 block truncate text-sm text-[#bfc7ba]">{shortText(latestEvent?.summary, 96, "Waiting for OpenNori activity.")}</span>
-              </div>
-              <div className="min-w-0">
-                <span className="mb-1 block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">Evidence health</span>
-                <strong className="block truncate text-base font-semibold text-[#f7f0e2]">{snapshot?.evidence_health?.status || "unknown"}</strong>
-                <span className="mt-1 block truncate text-sm text-[#bfc7ba]">{shortText(snapshot?.evidence_health?.summary, 96, "No evidence projection yet.")}</span>
-              </div>
-              <div className="min-w-0">
-                <span className="mb-1 block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">Acceptance review</span>
-                <strong className="block truncate text-base font-semibold text-[#f7f0e2]">{snapshot?.acceptance_review?.status || "unknown"}</strong>
-                <span className="mt-1 block truncate text-sm text-[#bfc7ba]">{shortText(snapshot?.acceptance_review?.summary, 96, "No acceptance projection yet.")}</span>
+                {/* 2. 简体中文：悬浮的 Co-Pilot 协同引导舱 */}
+                {snapshot?.need_user ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className="absolute left-6 bottom-6 z-20 max-w-sm rounded-lg border border-[#fbbf24]/30 bg-[#121008]/85 p-4 shadow-2xl backdrop-blur-md"
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <div className="grid h-6 w-6 place-items-center rounded bg-[#fbbf24]/20 text-[#fbbf24] font-bold text-xs">
+                        i
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <strong className="block text-sm font-semibold text-[#fde68a]">Co-Pilot Guide Boundary</strong>
+                        <p className="mt-1 text-xs leading-relaxed text-slate-300">
+                          {snapshot.user_action || "Waiting for user judgment in agent chat."}
+                        </p>
+                        <div className="mt-3 flex items-center gap-2 rounded border border-[#fbbf24]/20 bg-black/40 p-2">
+                          <code className="flex-1 truncate text-[10px] text-[#fbbf24]">
+                            {suggestedAgentReply}
+                          </code>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(suggestedAgentReply)}
+                            className="text-slate-400 hover:text-[#fbbf24] transition-colors"
+                            title="Copy agent reply"
+                          >
+                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                          </button>
+                        </div>
+                        <span className="mt-2 block text-[10px] text-slate-400 leading-normal">
+                          Actions cannot be executed on Dashboard. Please reply in agent chat.
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : null}
               </div>
             </div>
 
-            <div className="flex min-h-24 items-center gap-3 rounded-lg border border-[#f5f0e6]/14 bg-[#11130f]/72 p-4">
-              <ShieldCheck className="shrink-0 text-[#74d58a]" size={24} />
-              <div className="min-w-0">
-                <span className="block text-xs font-bold uppercase tracking-normal text-[#aeb8aa]">Control boundary</span>
-                <strong className="block text-base font-semibold text-[#f7f0e2]">reply in agent chat</strong>
+            {/* 3. 简体中文：右侧滑出只读 Inspect 抽屉 */}
+            <AnimatePresence>
+              {selectedNode ? (
+                <motion.div
+                  initial={{ opacity: 0, x: 260 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 260 }}
+                  transition={{ type: "spring", damping: 22, stiffness: 150 }}
+                  className="w-[min(420px,calc(100vw-2rem))] rounded-lg border border-[rgba(189,147,249,0.18)] bg-[rgba(16,20,38,0.72)] p-4 shadow-2xl backdrop-blur-md grid grid-rows-[auto_1fr] h-full max-h-full min-h-0 overflow-hidden"
+                >
+                  <div className="flex items-center justify-between gap-4 border-b border-slate-800 pb-3 mb-3">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#bd93f9]">
+                        Inspected Node
+                      </span>
+                      <h3 className="text-base font-semibold text-[#e2e8f0]">
+                        {selectedNode.type.toUpperCase()}: {selectedNode.label}
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Close panel"
+                      onClick={() => setSelectedNode(null)}
+                      className="grid h-8 w-8 place-items-center rounded border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+
+                  <div className="overflow-auto min-h-0 h-full max-h-full flex flex-col">
+                    <span className="block text-xs font-semibold text-slate-400 mb-2">Readonly Data (JSON)</span>
+                    <pre className="flex-1 overflow-auto whitespace-pre rounded border border-slate-800/80 bg-black/40 p-3 text-[11px] leading-relaxed text-[#bd93f9] select-text">
+                      {JSON.stringify(selectedNode.rawData, null, 2)}
+                    </pre>
+                  </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </section>
+
+          {/* 4. 简体中文：底部滚动终端日志栏 */}
+          <footer className="grid gap-4 border-t border-[rgba(0,240,255,0.06)] pt-4">
+            <div className="rounded-lg border border-slate-800 bg-black/40 p-4 shadow-inner">
+              <div className="flex items-center gap-2 border-b border-slate-800/80 pb-2 mb-2">
+                <Terminal size={15} className="text-[#00f0ff]" />
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Scrolling Event log console</span>
+                <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-[#00f0ff]/35 bg-[#00f0ff]/10 px-3 text-sm font-semibold text-[#c7d2fe]">
+                  <span className="h-2 w-2 rounded-full bg-[#00f0ff] animate-pulse" />
+                  live
+                </span>
+              </div>
+
+              <div className="max-h-36 overflow-auto scroll-smooth font-mono text-[11px] leading-relaxed text-slate-300 flex flex-col gap-1.5 select-text">
+                {recentEvents.length > 0 ? (
+                  recentEvents.map((evt) => (
+                    <div key={evt.id || `${evt.seq}-${evt.created_at}-${evt.type}`} className="flex items-start gap-3 hover:bg-slate-900/30 p-1 rounded transition">
+                      <span className="text-slate-500 shrink-0">[{relativeTime(evt.created_at)}]</span>
+                      <span className="text-[#bd93f9] uppercase tracking-wider shrink-0 font-bold">
+                        {evt.actor.kind === "agent" ? `${evt.actor.name}(${evt.actor.skill || "nori"})` : evt.actor.kind}:
+                      </span>
+                      <span className="text-[#00f0ff] font-bold shrink-0">{evt.type}</span>
+                      <span className="text-slate-200">{evt.summary}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-slate-500 italic">No events recorded yet. Waiting for OpenNori activity.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+              <div className="flex items-center gap-2">
+                <span>Control boundary:</span>
+                <strong className="text-slate-400">reply in agent chat</strong>
               </div>
               {error ? (
-                <Tooltip.Root>
-                  <Tooltip.Trigger className="ml-auto text-[#ffb15e]">
-                    <Info size={18} />
-                  </Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content sideOffset={8} className="max-w-72 rounded-md border border-[#ffb15e]/30 bg-[#171914] px-3 py-2 text-xs text-[#ffe2bf] shadow-2xl">
-                      {error}
-                      <Tooltip.Arrow className="fill-[#171914]" />
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip.Root>
+                <div className="flex items-center gap-1.5 text-[#f87171]">
+                  <Info size={14} />
+                  <span>{error}</span>
+                </div>
               ) : null}
             </div>
           </footer>

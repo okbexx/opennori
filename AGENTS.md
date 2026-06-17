@@ -24,11 +24,11 @@ Do not implement project-local Skill copying, Skill Pack install/sync, or `.agen
 
 For agent routing, prefer CLI JSON `data.agent_next` over project-local prose files. `.opennori/agent-guide.md` may summarize project state, but it is not OpenNori's discovery mechanism and must not carry critical Skill behavior.
 
-`opennori dashboard` is a local visual observation surface over the acceptance loop. It must not become an agent runtime, process log, chat log, completion authority, or confirmation surface. Do not add dashboard controls that approve AC, confirm Architecture Baselines, waive risks, accept reports, or write Product AC/evidence/profile/architecture/report state. When user input is needed, the dashboard may show what decision is needed and should direct the user back to the agent conversation; the agent records the decision through OpenNori Skills and CLI. `opennori activity` only publishes live agent state for the dashboard; it is not Product AC evidence. Skills should prefer `data.agent_next.dashboard_activity` command templates when present, otherwise use low-parameter activity commands and let the CLI infer the unique current goal/gap. If multiple active goals are ambiguous, ask which goal to observe instead of guessing.
+`opennori dashboard` is a local visual observation surface over the acceptance loop. It must not become an agent runtime, process log, chat log, completion authority, or confirmation surface. Do not add dashboard controls that approve AC, confirm Architecture Baselines, waive risks, accept reports, or write Product AC/evidence/profile/architecture/report state. When user input is needed, the dashboard may show what decision is needed and should direct the user back to the agent conversation; the agent records the decision through OpenNori Skills and CLI. `opennori activity` only publishes live agent state for the dashboard; it is not Product AC evidence. Skills should prefer `data.agent_next.dashboard_activity` command templates when present, otherwise use low-parameter activity commands and let the CLI infer the unique current goal/gap. If `.opennori/current` contains multiple goals, treat that as broken state and route to doctor/project-health instead of guessing.
 
 Before implementing a non-trivial change, read:
 
-- `.opennori/active/*.acceptance.md`
+- `.opennori/current/*.acceptance.md`
 - `.opennori/architecture/baseline.md`
 - `.opennori/agent-guide.md`
 - `plugins/opennori/skills/nori*/SKILL.md`
@@ -38,7 +38,7 @@ Before implementing a non-trivial change, read:
 Follow the Architecture Baseline while completing Product AC.
 If the baseline conflicts with project evidence, create an Architecture Challenge instead of silently replacing it.
 
-When multiple active OpenNori goals exist, pass an explicit `--goal` instead of choosing implicitly.
+OpenNori has exactly one default current goal. Drafts live under `.opennori/drafts/` and are not executable until approved; completed and blocked goals are history. Legacy `.opennori/active/` is recovery input only and must not be used as the normal work context.
 
 OpenNori product changes must preserve the original acceptance loop:
 

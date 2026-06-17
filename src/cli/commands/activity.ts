@@ -118,7 +118,7 @@ function activityPayload(root: string, args: Record<string, any>, action: "start
     return fail(
       "ambiguous_activity_target",
       error instanceof Error ? error.message : String(error),
-      "Pass --goal <goal-id>, or ask the user which active Nori Contract the dashboard should observe."
+      "Recover .opennori/current so exactly one current Nori Contract exists before publishing dashboard activity."
     );
   }
 }

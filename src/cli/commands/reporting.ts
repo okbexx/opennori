@@ -71,7 +71,7 @@ export async function runReportCommand(rawArgs: string[], { loadPair }: ActiveGo
 export const archiveCommand = defineCommand({
   meta: {
     name: "archive",
-    description: "Move a complete or blocked OpenNori goal out of active work and preserve its report."
+    description: "Move a complete or blocked OpenNori goal out of current work and preserve its report."
   },
   args: {
     ...activeGoalArgs,

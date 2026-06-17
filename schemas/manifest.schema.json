@@ -12,6 +12,7 @@
     "capabilities",
     "managed_files",
     "active_goals",
+    "current_goal",
     "plugin",
     "architecture"
   ],
@@ -41,6 +42,15 @@
       }
     },
     "active_goals": { "type": "array" },
+    "current_goal": {
+      "anyOf": [
+        { "type": "object" },
+        { "type": "null" }
+      ]
+    },
+    "draft_goals": { "type": "array" },
+    "history_goals": { "type": "array" },
+    "legacy_active_goals": { "type": "array" },
     "plugin": {
       "type": "object",
       "required": [

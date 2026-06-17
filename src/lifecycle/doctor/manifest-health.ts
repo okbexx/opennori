@@ -85,15 +85,15 @@ export function inspectManifestHealth(root: string, activeGoals: ActiveGoalSumma
     ));
 
     const currentGoals = new Set(activeGoals.filter((goal) => goal.recoverable).map((goal) => goal.goal_id));
-    const manifestGoals = new Set((readableManifest.active_goals || []).map((goal) => goal.goal_id));
+    const manifestGoals = new Set(((readableManifest.current_goal ? [readableManifest.current_goal] : readableManifest.active_goals) || []).map((goal) => goal.goal_id));
     const staleGoals = [
       ...[...currentGoals].filter((goalId) => !manifestGoals.has(goalId)),
       ...[...manifestGoals].filter((goalId) => !currentGoals.has(goalId))
     ];
     checks.push(doctorCheck(
-      "manifest_active_goals",
+      "manifest_current_goal",
       staleGoals.length === 0,
-      staleGoals.length === 0 ? "Manifest active goals match recoverable active goals." : `Manifest active goals differ: ${staleGoals.join(", ")}.`,
+      staleGoals.length === 0 ? "Manifest current goal matches recoverable current state." : `Manifest current goal differs: ${staleGoals.join(", ")}.`,
       "Run any OpenNori state-changing command, or run opennori init --root <project> --confirm --json, to refresh the manifest."
     ));
 

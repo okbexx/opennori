@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { currentGap } from "../core/evidence.ts";
-import { findActivePairs, nowIso, readJson, writeJson } from "../core/shared.ts";
+import { findCurrentPairs, nowIso, readJson, writeJson } from "../core/shared.ts";
 import type { NoriActivity, NoriActivityInput, NoriActivityState, NoriActivityTarget, NoriEvidencePayload } from "../types.ts";
 import { appendEvent } from "./events.ts";
 
@@ -52,7 +52,7 @@ type TargetCandidate = NoriActivityTarget & {
   active: boolean;
 };
 
-function readTargetCandidate(pair: ReturnType<typeof findActivePairs>[number]): TargetCandidate | null {
+function readTargetCandidate(pair: ReturnType<typeof findCurrentPairs>[number]): TargetCandidate | null {
   try {
     const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
     const gap = currentGap(payload.contract, payload.ledger);
@@ -72,15 +72,15 @@ function ambiguousTargetMessage(root: string, candidates: NoriActivityTarget[]):
   const choices = candidates
     .map((candidate) => candidate.gap_id ? `${candidate.goal_id}:${candidate.gap_id}` : candidate.goal_id)
     .join(", ");
-  return `Multiple active OpenNori goals have current gaps under ${root}: ${choices}. Pass --goal <goal-id> so dashboard activity is not attached to the wrong goal.`;
+  return `OpenNori current state is invalid under ${root}: multiple current goals have gaps (${choices}). Run opennori doctor before publishing dashboard activity.`;
 }
 
 export function inferActivityTarget(root: string, input: Pick<NoriActivityInput, "goal_id" | "gap_id"> = {}): NoriActivityTarget | null {
-  const pairs = findActivePairs(root);
+  const pairs = findCurrentPairs(root);
   if (input.goal_id) {
     const pair = pairs.find((item) => item.goalId === input.goal_id);
     if (!pair) {
-      throw new Error(`No active OpenNori goal found for activity: ${input.goal_id}`);
+      throw new Error(`No current OpenNori goal found for activity: ${input.goal_id}`);
     }
     const candidate = readTargetCandidate(pair);
     if (!candidate) {

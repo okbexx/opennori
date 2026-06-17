@@ -108,12 +108,19 @@ export function agentNextForBootstrap(data: Pick<BootstrapData, "status" | "root
   }
 
   if (activeGoalCount(data.doctor) === 0) {
+    const draftCount = data.doctor.draft_goals?.filter((goal) => goal.recoverable !== false).length ?? 0;
     return agentNext({
       state: "initialized_no_active_contract",
       recommendedSkill: "nori-acceptance",
-      summary: "OpenNori is initialized, and no active Nori Contract exists yet.",
-      instruction: "Use the user's already stated natural-language goal if the current conversation includes one; otherwise ask for the goal. Then run acceptance discovery or draft human-centered acceptance criteria before implementation.",
-      userVisibleNext: "Continue with acceptance discovery for the stated goal, or ask for the goal if it was not provided.",
+      summary: draftCount > 0
+        ? "OpenNori is initialized with draft contracts, but no current Nori Contract is approved yet."
+        : "OpenNori is initialized, and no current Nori Contract exists yet.",
+      instruction: draftCount > 0
+        ? "Show the draft Nori Contract to the user and ask them to approve or revise it before implementation. Do not treat drafts as executable current goals."
+        : "Use the user's already stated natural-language goal if the current conversation includes one; otherwise ask for the goal. Then run acceptance discovery or draft human-centered acceptance criteria before implementation.",
+      userVisibleNext: draftCount > 0
+        ? "Approve or revise a draft Nori Contract before implementation."
+        : "Continue with acceptance discovery for the stated goal, or ask for the goal if it was not provided.",
       needsUser: true,
       commands: [`opennori doctor --root ${data.root} --json`]
     });
@@ -122,21 +129,21 @@ export function agentNextForBootstrap(data: Pick<BootstrapData, "status" | "root
   const goals = activeGoals(data.doctor);
   const goal = goals.length === 1 ? goals[0] : undefined;
   return agentNext({
-    state: "ready_with_active_goals",
+    state: "ready_with_current_goal",
     recommendedSkill: "nori-reporting",
-    summary: "OpenNori is ready and has active Nori Contracts.",
+    summary: "OpenNori is ready and has a current Nori Contract.",
     instruction: goals.length > 1
-      ? "List active goals and ask the user which Nori Contract to continue before publishing dashboard activity or resuming work."
-      : "Resume the active contract and report the current gap, completion decision, and evidence basis.",
+      ? "Run doctor and recover .opennori/current so exactly one current Nori Contract remains before resuming work."
+      : "Resume the current contract and report the current gap, completion decision, and evidence basis.",
     userVisibleNext: goals.length > 1
-      ? "Choose which active Nori Contract to continue."
+      ? "Recover OpenNori current state before continuing."
       : goal?.current_gap
       ? `Continue from current gap ${goal.current_gap.id}.`
-      : "Resume the active OpenNori goal.",
+      : "Resume the current OpenNori goal.",
     goalId: goal?.goal_id,
     currentGapId: goal?.current_gap?.id ?? null,
     needsUser: goals.length > 1,
-    commands: goal ? [`opennori resume --root ${data.root} --goal ${goal.goal_id} --json`] : [`opennori list --root ${data.root} --json`]
+    commands: goal ? [`opennori resume --root ${data.root} --json`] : [`opennori doctor --root ${data.root} --json`]
   });
 }
 
@@ -162,12 +169,19 @@ export function agentNextForDoctor(root: string, doctor: DoctorState): AgentNext
   }
 
   if (doctor.active_goals.length === 0) {
+    const draftCount = doctor.draft_goals?.filter((goal) => goal.recoverable !== false).length ?? 0;
     return agentNext({
       state: "initialized_no_active_contract",
       recommendedSkill: "nori-acceptance",
-      summary: "OpenNori is ready, and no active Nori Contract exists yet.",
-      instruction: "Do not implement yet. Use the user's already stated goal if available; otherwise ask for the goal. Run acceptance discovery or draft a Nori Contract before implementation.",
-      userVisibleNext: "Turn the stated goal into human-centered acceptance criteria, or ask for the goal if it was not provided.",
+      summary: draftCount > 0
+        ? "OpenNori is ready with draft contracts, but no current Nori Contract is approved yet."
+        : "OpenNori is ready, and no current Nori Contract exists yet.",
+      instruction: draftCount > 0
+        ? "Do not implement yet. Show the draft Nori Contract to the user and ask for approval or revision before promoting it to current."
+        : "Do not implement yet. Use the user's already stated goal if available; otherwise ask for the goal. Run acceptance discovery or draft a Nori Contract before implementation.",
+      userVisibleNext: draftCount > 0
+        ? "Approve or revise a draft Nori Contract before implementation."
+        : "Turn the stated goal into human-centered acceptance criteria, or ask for the goal if it was not provided.",
       needsUser: true,
       commands: [`opennori doctor --root ${root} --json`]
     });
@@ -176,23 +190,23 @@ export function agentNextForDoctor(root: string, doctor: DoctorState): AgentNext
   const goals = activeGoals(doctor);
   const goal = goals.length === 1 ? goals[0] : undefined;
   return agentNext({
-    state: "ready_with_active_goals",
+    state: "ready_with_current_goal",
     recommendedSkill: "nori-reporting",
-    summary: "OpenNori is ready and has active Nori Contracts.",
+    summary: "OpenNori is ready and has a current Nori Contract.",
     instruction: goals.length > 1
-      ? "List active goals and ask the user which Nori Contract to continue before publishing dashboard activity or resuming work."
-      : "Resume the chosen active goal and report the current gap, completion decision, and evidence basis.",
+      ? "Run doctor and recover .opennori/current so exactly one current Nori Contract remains before publishing dashboard activity or resuming work."
+      : "Resume the current goal and report the current gap, completion decision, and evidence basis.",
     userVisibleNext: goals.length > 1
-      ? "Choose which active Nori Contract to continue."
+      ? "Recover OpenNori current state before continuing."
       : goal?.current_gap
         ? `Continue from current gap ${goal.current_gap.id}.`
-        : "Review the active Nori Contract status.",
+        : "Review the current Nori Contract status.",
     goalId: goal?.goal_id,
     currentGapId: goal?.current_gap?.id ?? null,
     needsUser: goals.length > 1,
     commands: goals.length > 1 || !goal
-      ? [`opennori list --root ${root} --json`]
-      : [`opennori resume --root ${root} --goal ${goal.goal_id} --json`]
+      ? [`opennori doctor --root ${root} --json`]
+      : [`opennori resume --root ${root} --json`]
   });
 }
 

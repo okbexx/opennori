@@ -57,7 +57,7 @@ function architectureReviewSkill(architecture: ArchitectureState): AgentSkill {
 function architectureReviewActions(architecture: ArchitectureState): string[] {
   if (architecture.decision === "missing") {
     return [
-      "Preview an Architecture Baseline from the active goal, Product AC, Nori Profile, project evidence, and available profiles.",
+      "Preview an Architecture Baseline from the current goal, Product AC, Nori Profile, project evidence, and available profiles.",
       "Ask the user to confirm the baseline or explicitly waive architecture review before non-trivial implementation continues."
     ];
   }

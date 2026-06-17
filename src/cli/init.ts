@@ -100,13 +100,13 @@ function printInitResult(stdout: NodeJS.WriteStream, payload: InitPayload): void
   if (data.status === "installed") {
     printText(stdout, "OpenNori project state initialized.");
     printText(stdout, `Created or refreshed ${data.install_plan.summary.will_write} project assets.`);
-    printText(stdout, "No active Nori Contract exists yet; empty state directories are normal after init.");
+    printText(stdout, "No current Nori Contract exists yet; empty state directories are normal after init.");
     printText(stdout, "Next: tell your agent: Use OpenNori for this goal: <your goal>.");
     return;
   }
   if (data.status === "ready") {
     printText(stdout, "OpenNori project state is ready.");
-    printText(stdout, "If .opennori/active is empty, no Nori Contract has been started yet.");
+    printText(stdout, "If .opennori/current is empty, no Nori Contract has been approved as current yet.");
     printText(stdout, "Next: tell your agent: Use OpenNori for this goal: <your goal>.");
     return;
   }

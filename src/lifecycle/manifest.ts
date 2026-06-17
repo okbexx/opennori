@@ -4,7 +4,10 @@ import { REQUIRED_ARCHITECTURE_DIRS, architectureState, readArchitectureBaseline
 import {
   PROTOCOL_VERSION,
   currentGap,
-  findActivePairs,
+  findCurrentPairs,
+  findDraftPairs,
+  findHistoryPairs,
+  findLegacyActivePairs,
   readJson,
   writeJson
 } from "../core.ts";
@@ -25,12 +28,13 @@ import {
   relativeTo
 } from "./shared.ts";
 
-function activeGoalSummaries(root: string): ActiveGoalSummary[] {
-  return findActivePairs(root).map((pair) => {
+function goalSummaries(root: string, pairs = findCurrentPairs(root)): ActiveGoalSummary[] {
+  return pairs.map((pair) => {
     try {
       const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
       return {
         goal_id: pair.goalId,
+        location: pair.location,
         status: payload.ledger?.status || "unknown",
         current_gap: currentGap(payload.contract, payload.ledger),
         acceptance_path: relativeTo(root, pair.acceptancePath),
@@ -40,6 +44,7 @@ function activeGoalSummaries(root: string): ActiveGoalSummary[] {
     } catch (error) {
       return {
         goal_id: pair.goalId,
+        location: pair.location,
         status: "unreadable",
         current_gap: null,
         acceptance_path: relativeTo(root, pair.acceptancePath),
@@ -82,9 +87,9 @@ export function safeReadManifest(root: string): Manifest | null {
 
 export function buildManifest(root: string, options: { assumeManifestExists?: boolean } = {}): Manifest {
   const existing = safeReadManifest(root);
-  const activeGoals = activeGoalSummaries(root);
-  const architectureGoalId = activeGoals.length === 1
-    ? activeGoals[0]?.goal_id
+  const currentGoals = goalSummaries(root, findCurrentPairs(root));
+  const architectureGoalId = currentGoals.length === 1
+    ? currentGoals[0]?.goal_id
     : readArchitectureBaseline(root)?.goal_id;
   const architecture = architectureState(root, architectureGoalId);
   const now = new Date().toISOString();
@@ -96,7 +101,11 @@ export function buildManifest(root: string, options: { assumeManifestExists?: bo
     updated_at: now,
     capabilities: NORI_CAPABILITIES,
     managed_files: managedFiles(root, options),
-    active_goals: activeGoals,
+    active_goals: currentGoals,
+    current_goal: currentGoals[0] || null,
+    draft_goals: goalSummaries(root, findDraftPairs(root)),
+    history_goals: goalSummaries(root, findHistoryPairs(root)),
+    legacy_active_goals: goalSummaries(root, findLegacyActivePairs(root)),
     plugin: pluginState(),
     architecture
   };

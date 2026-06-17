@@ -26,14 +26,17 @@ export function doctorRecoveryActions(checks: DoctorCheck[], activeIssues: Docto
     }));
 
   for (const issue of activeIssues) {
+    const basePath = issue.path?.startsWith(".opennori/")
+      ? issue.path
+      : `.opennori/current/${issue.goal_id}`;
     actions.push({
       check: "active_goal_issue",
       severity: "broken",
       goal_id: issue.goal_id,
       path: issue.path,
       action: issue.path
-        ? `Inspect .opennori/active/${issue.goal_id}.evidence.json and fix ${issue.path}: ${issue.message}`
-        : `Inspect .opennori/active/${issue.goal_id}.acceptance.md and .opennori/active/${issue.goal_id}.evidence.json: ${issue.message}`
+        ? `Inspect ${basePath} and fix ${issue.path}: ${issue.message}`
+        : `Inspect .opennori/current/${issue.goal_id}.acceptance.md and .opennori/current/${issue.goal_id}.evidence.json: ${issue.message}`
     });
   }
 

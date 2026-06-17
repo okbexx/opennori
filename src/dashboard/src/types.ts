@@ -17,6 +17,19 @@ export type NoriEvent = {
   created_at: string;
 };
 
+export type EvidenceRecord = {
+  kind?: string;
+  basis?: string;
+  summary?: string;
+  result?: string;
+  confidence?: string;
+  path?: string;
+  sources?: Array<Record<string, unknown>>;
+  reviewability?: string;
+  limitations?: string;
+  [key: string]: unknown;
+};
+
 export type CompletionAnswer = {
   complete: boolean;
   objective_complete: boolean;
@@ -77,6 +90,19 @@ export type NoriSnapshot = {
     decision: string;
   };
   last_event: NoriEvent | null;
+  /* 简体中文：前端 snapshot 新增只读 criteria 状态及 events 历史字段 */
+  criteria?: Array<{
+    id: string;
+    layer?: string;
+    user_story: string;
+    measurement: string;
+    threshold: string;
+    required?: boolean;
+    status: string;
+    confidence: string;
+    evidence: EvidenceRecord[];
+  }>;
+  events?: NoriEvent[];
 };
 
 export type SnapshotResponse =

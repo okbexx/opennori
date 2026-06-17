@@ -19,7 +19,7 @@ import {
 export const profileAddCommand = defineCommand({
   meta: {
     name: "add",
-    description: "Add an execution preference to the Nori Profile for the active goal."
+    description: "Add an execution preference to the Nori Profile for the current goal."
   },
   args: {
     ...activeGoalArgs,

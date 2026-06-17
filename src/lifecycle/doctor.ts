@@ -20,10 +20,10 @@ export function doctor(root: string): DoctorState {
   checks.push(...architectureHealthChecks(architecture, active.details.length > 0));
   checks.push(...manifest.checks);
   checks.push(doctorCheck(
-    "active_goals_recoverable",
+    "current_goal_recoverable",
     active.issues.length === 0,
-    active.issues.length === 0 ? `${active.details.length} active goal(s) are recoverable.` : `${active.issues.length} active goal issue(s) found.`,
-    "Inspect active_goal_issues, fix the reported .opennori/active/<goal>.acceptance.md and .opennori/active/<goal>.evidence.json pair, then rerun opennori doctor --root <project> --json.",
+    active.issues.length === 0 ? `${active.details.length} current goal(s) are recoverable.` : `${active.issues.length} current/draft/history issue(s) found.`,
+    "Inspect active_goal_issues, fix the reported .opennori/current or .opennori/drafts contract/evidence pair, then rerun opennori doctor --root <project> --json.",
     "broken"
   ));
   const plugin = inspectPluginHealth(manifest.manifest, manifest.manifestReadable);
@@ -34,6 +34,9 @@ export function doctor(root: string): DoctorState {
     checks,
     recovery_actions: doctorRecoveryActions(checks, active.issues),
     active_goals: active.details,
+    current_goal: active.details[0] || null,
+    draft_goals: active.drafts,
+    legacy_active_goals: active.legacy,
     active_goal_issues: active.issues,
     manifest_path: manifest.manifestFile,
     plugin: plugin.plugin,

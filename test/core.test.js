@@ -29,6 +29,37 @@ function tempRoot() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "nori-test-"));
 }
 
+function argValue(args, name) {
+  const flag = name.startsWith("--") ? name : `--${name}`;
+  const index = args.indexOf(flag);
+  if (index === -1) return undefined;
+  return args[index + 1];
+}
+
+function draftAndApprove(args, options = {}) {
+  const draft = run(["draft", ...args]);
+  const root = options.root || argValue(args, "root");
+  if (!root) {
+    throw new Error("draftAndApprove requires --root or options.root");
+  }
+  const approved = run([
+    "approve",
+    "--root", root,
+    "--goal", draft.data.goal_id,
+    "--summary", options.summary || "User approved criteria.",
+    "--json"
+  ]);
+  return {
+    ...approved,
+    draft,
+    data: {
+      ...draft.data,
+      ...approved.data,
+      criteria: draft.data.criteria
+    }
+  };
+}
+
 function runInteractiveSetup(root, answer) {
   const script = `
 import { main } from ${JSON.stringify(CLI_MODULE)};
@@ -243,9 +274,9 @@ test("next returns the current acceptance gap, not a process step", () => {
   assert.match(payload.data.current_gap.reason, /no user-understandable evidence/);
 });
 
-test("resume and status recover active goal from repository files", () => {
+test("resume and status recover the current goal from repository files", () => {
   const root = tempRoot();
-  const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
+  const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
   const resume = run(["resume", "--root", root, "--json"]);
   assert.equal(resume.ok, true);
@@ -441,17 +472,25 @@ test("discovery answers draft specific user-facing acceptance criteria", () => {
   assert.match(joined, /网络失败/);
   assert.match(joined, /保留表单中的用户输入/);
 
-  const check = run(["check", "--root", root, "--json"]);
+  const check = run([
+    "check",
+    "--acceptance", draft.data.acceptance_path,
+    "--evidence", draft.data.evidence_path,
+    "--json"
+  ]);
   assert.equal(check.data.acceptance_review.status, "clear");
   assert.equal(check.warnings.some((warning) => warning.type === "acceptance_review"), false);
 });
 
 test("Nori Profile records required skills and blocks completion until satisfied", () => {
   const root = tempRoot();
-  const init = run(["draft", "--goal", "Build a frontend page", "--root", root, "--json"]);
+  const init = draftAndApprove([
+    "--goal", "Build a frontend page",
+    "--root", root,
+    "--json"
+  ], { summary: "User approved frontend acceptance criteria." });
   const ledger = JSON.parse(fs.readFileSync(init.data.evidence_path, "utf8"));
 
-  run(["approve", "--root", root, "--summary", "User approved frontend acceptance criteria.", "--json"]);
   for (const criterion of Object.keys(ledger.ledger.criteria)) {
     run([
       "evidence", "add",
@@ -510,10 +549,13 @@ test("Nori Profile records required skills and blocks completion until satisfied
 
 test("preferred profile items create review risk without blocking objective completion", () => {
   const root = tempRoot();
-  const init = run(["draft", "--goal", "Build a frontend page", "--root", root, "--json"]);
+  const init = draftAndApprove([
+    "--goal", "Build a frontend page",
+    "--root", root,
+    "--json"
+  ], { summary: "User approved frontend acceptance criteria." });
   const payload = JSON.parse(fs.readFileSync(init.data.evidence_path, "utf8"));
 
-  run(["approve", "--root", root, "--summary", "User approved frontend acceptance criteria.", "--json"]);
   for (const criterion of Object.keys(payload.ledger.criteria)) {
     run([
       "evidence", "add",
@@ -563,7 +605,7 @@ test("preferred profile items create review risk without blocking objective comp
 
 test("evidence can drive the workflow to complete and render a human report", () => {
   const root = tempRoot();
-  const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
+  const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
   run(["install", "--root", root, "--json"]);
   const ledger = JSON.parse(fs.readFileSync(init.data.evidence_path, "utf8"));
 
@@ -722,7 +764,7 @@ test("evidence can drive the workflow to complete and render a human report", ()
 
 test("blocked criteria produce a concrete intervention answer", () => {
   const root = tempRoot();
-  run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
+  draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
   const blocked = run([
     "evidence", "add",
@@ -851,8 +893,7 @@ test("evidence records flexible reviewable sources without fixed adapters", () =
 
 test("concurrent evidence writes preserve every reviewable record", async () => {
   const root = tempRoot();
-  run(["draft", "--goal", "Ship concurrent evidence safely", "--root", root, "--json"]);
-  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  const current = draftAndApprove(["--goal", "Ship concurrent evidence safely", "--root", root, "--json"]);
   const lockPath = path.join(root, ".opennori", ".locks", "active-goal.write.lock");
   fs.mkdirSync(lockPath, { recursive: true });
 
@@ -878,7 +919,7 @@ test("concurrent evidence writes preserve every reviewable record", async () => 
   fs.rmSync(lockPath, { recursive: true, force: true });
   await Promise.all(children.map(({ done }) => done));
 
-  const payload = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "active", "ship-concurrent-evidence-safely.evidence.json"), "utf8"));
+  const payload = JSON.parse(fs.readFileSync(current.data.evidence_path, "utf8"));
   const evidence = payload.ledger.criteria["AC-1"].evidence;
   assert.equal(evidence.length, 4);
   assert.deepEqual(
@@ -894,8 +935,11 @@ test("concurrent evidence writes preserve every reviewable record", async () => 
 
 test("check surfaces evidence health without forcing adapter taxonomy", () => {
   const weakRoot = tempRoot();
-  run(["draft", "--goal", "Ship with weak evidence", "--root", weakRoot, "--json"]);
-  run(["approve", "--root", weakRoot, "--summary", "User approved evidence health test.", "--json"]);
+  draftAndApprove([
+    "--goal", "Ship with weak evidence",
+    "--root", weakRoot,
+    "--json"
+  ], { summary: "User approved evidence health test." });
   run([
     "evidence", "add",
     "--root", weakRoot,
@@ -937,8 +981,11 @@ test("check surfaces evidence health without forcing adapter taxonomy", () => {
   assert.match(fs.readFileSync(report.data.report_path, "utf8"), /## Evidence Health/);
 
   const strongRoot = tempRoot();
-  run(["draft", "--goal", "Ship with reviewable evidence", "--root", strongRoot, "--json"]);
-  run(["approve", "--root", strongRoot, "--summary", "User approved evidence health test.", "--json"]);
+  draftAndApprove([
+    "--goal", "Ship with reviewable evidence",
+    "--root", strongRoot,
+    "--json"
+  ], { summary: "User approved evidence health test." });
   run([
     "evidence", "add",
     "--root", strongRoot,
@@ -961,8 +1008,7 @@ test("check surfaces evidence health without forcing adapter taxonomy", () => {
 
 test("missing local artifact evidence is pruned and does not occupy report or context export", () => {
   const root = tempRoot();
-  run(["draft", "--goal", "Ship without stale evidence", "--root", root, "--json"]);
-  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  const current = draftAndApprove(["--goal", "Ship without stale evidence", "--root", root, "--json"]);
 
   const stalePath = "docs/removed-proof.md";
   const added = run([
@@ -988,7 +1034,7 @@ test("missing local artifact evidence is pruned and does not occupy report or co
   assert.equal(criterion.status, "unknown");
   assert.equal(criterion.latest_evidence, null);
 
-  const evidencePath = path.join(root, ".opennori", "active", "ship-without-stale-evidence.evidence.json");
+  const evidencePath = current.data.evidence_path;
   const payload = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
   assert.equal(payload.ledger.criteria["AC-1"].evidence.length, 0);
   assert.equal(payload.ledger.criteria["AC-1"].status, "unknown");
@@ -1005,8 +1051,7 @@ test("missing local artifact evidence is pruned and does not occupy report or co
 
 test("agent can explicitly prune obsolete evidence before recording fresh proof", () => {
   const root = tempRoot();
-  run(["draft", "--goal", "Refresh obsolete evidence", "--root", root, "--json"]);
-  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  draftAndApprove(["--goal", "Refresh obsolete evidence", "--root", root, "--json"]);
 
   run([
     "evidence", "add",
@@ -1199,7 +1244,7 @@ test("public product surfaces present OpenNori as one capability bundle", () => 
 test("public JSON Schemas validate persisted OpenNori state and separate structure from semantics", () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
-  run(["draft", "--goal", "Ship schema-backed OpenNori state", "--root", root, "--json"]);
+  const current = draftAndApprove(["--goal", "Ship schema-backed OpenNori state", "--root", root, "--json"]);
   run([
     "architecture", "baseline",
     "--root", root,
@@ -1235,7 +1280,7 @@ test("public JSON Schemas validate persisted OpenNori state and separate structu
   ]);
 
   const manifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "manifest.json"), "utf8"));
-  const evidence = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "active", "ship-schema-backed-opennori-state.evidence.json"), "utf8"));
+  const evidence = JSON.parse(fs.readFileSync(current.data.evidence_path, "utf8"));
   const baseline = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.json"), "utf8"));
   const decision = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "decisions", "schema-validation.json"), "utf8"));
   const applyRecord = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "evidence", "ship-schema-backed-opennori-state-ac-1-aligned.json"), "utf8"));
@@ -1282,7 +1327,8 @@ test("install creates project assets and skips existing user content by default"
   assert.equal(payload.data.actions.find((action) => action.path === ".opennori/manifest.json").will_write, true);
   assert.equal(fs.readFileSync(protocolPath, "utf8"), "custom protocol\n");
   assert.equal(fs.existsSync(path.join(root, ".agents", "skills", "nori", "SKILL.md")), false);
-  assert.equal(fs.existsSync(path.join(root, ".opennori", "active")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "current")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "drafts")), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "brainstorms")), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "architecture", "profiles")), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "architecture", "challenges")), true);
@@ -1290,7 +1336,7 @@ test("install creates project assets and skips existing user content by default"
   assert.equal(fs.existsSync(path.join(root, ".opennori", "agent-guide.md")), true);
   const agentGuide = fs.readFileSync(path.join(root, ".opennori", "agent-guide.md"), "utf8");
   assert.match(agentGuide, /Empty state directories are normal immediately after `opennori init`/);
-  assert.match(agentGuide, /If `.opennori\/active\/\*\.acceptance\.md` is missing, do not implement yet/);
+  assert.match(agentGuide, /If `.opennori\/current\/\*\.acceptance\.md` is missing, do not implement yet/);
   assert.match(agentGuide, /Read `.opennori\/architecture\/baseline\.md` and `.opennori\/architecture\/baseline\.json` only when they exist/);
   assert.equal(fs.existsSync(path.join(root, "AGENTS.md")), false);
   assert.equal(fs.existsSync(path.join(root, "CLAUDE.md")), false);
@@ -1407,7 +1453,7 @@ test("doctor reports ready, needs-action, and broken project health", () => {
   assert.equal(ready.data.architecture.decision, "missing");
   assert.equal(ready.data.checks.find((check) => check.name === "architecture_baseline").ok, true);
 
-  run(["draft", "--goal", "Ship a non-trivial architecture-aware goal", "--root", readyRoot, "--json"]);
+  draftAndApprove(["--goal", "Ship a non-trivial architecture-aware goal", "--root", readyRoot, "--json"]);
   const needsBaseline = run(["doctor", "--root", readyRoot, "--json"]);
   assert.equal(needsBaseline.data.status, "needs-action");
   assert.equal(needsBaseline.data.checks.find((check) => check.name === "architecture_baseline").ok, false);
@@ -1462,29 +1508,29 @@ test("doctor reports ready, needs-action, and broken project health", () => {
 
   const brokenRoot = tempRoot();
   run(["install", "--root", brokenRoot, "--json"]);
-  fs.writeFileSync(path.join(brokenRoot, ".opennori", "active", "broken.evidence.json"), "{ bad json");
+  fs.writeFileSync(path.join(brokenRoot, ".opennori", "current", "broken.evidence.json"), "{ bad json");
   const broken = run(["doctor", "--root", brokenRoot, "--json"]);
   assert.equal(broken.data.status, "broken");
-  assert.equal(broken.data.checks.find((check) => check.name === "active_goals_recoverable").ok, false);
+  assert.equal(broken.data.checks.find((check) => check.name === "current_goal_recoverable").ok, false);
   assert.equal(broken.data.active_goal_issues.length, 1);
-  assert.match(broken.data.checks.find((check) => check.name === "active_goals_recoverable").recovery, /Inspect active_goal_issues/);
-  assert.equal(broken.data.recovery_actions.some((action) => action.check === "active_goals_recoverable" && /nori\/active\/<goal>/.test(action.action)), true);
+  assert.match(broken.data.checks.find((check) => check.name === "current_goal_recoverable").recovery, /Inspect active_goal_issues/);
+  assert.equal(broken.data.recovery_actions.some((action) => action.check === "current_goal_recoverable" && /opennori\/current/.test(action.action)), true);
   assert.equal(broken.data.recovery_actions.some((action) => action.check === "active_goal_issue" && action.goal_id === "broken" && /broken\.evidence\.json/.test(action.action)), true);
 
   const schemaBrokenRoot = tempRoot();
-  run(["draft", "--goal", "Ship schema validation diagnostics", "--root", schemaBrokenRoot, "--json"]);
-  const evidencePath = path.join(schemaBrokenRoot, ".opennori", "active", "ship-schema-validation-diagnostics.evidence.json");
+  const schemaBroken = draftAndApprove(["--goal", "Ship schema validation diagnostics", "--root", schemaBrokenRoot, "--json"]);
+  const evidencePath = schemaBroken.data.evidence_path;
   const evidencePayload = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
   delete evidencePayload.ledger.criteria;
   fs.writeFileSync(evidencePath, `${JSON.stringify(evidencePayload, null, 2)}\n`);
-  const schemaBroken = run(["doctor", "--root", schemaBrokenRoot, "--json"]);
-  assert.equal(schemaBroken.data.status, "broken");
-  assert.equal(schemaBroken.data.active_goal_issues.some((issue) => issue.path?.startsWith("schema/ledger")), true);
+  const schemaBrokenDoctor = run(["doctor", "--root", schemaBrokenRoot, "--json"]);
+  assert.equal(schemaBrokenDoctor.data.status, "broken");
+  assert.equal(schemaBrokenDoctor.data.active_goal_issues.some((issue) => issue.path?.startsWith("schema/ledger")), true);
 });
 
 test("uninstall previews removals and preserves OpenNori state by default", () => {
   const root = tempRoot();
-  const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
+  const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
   run(["install", "--root", root, "--json"]);
   run(["report", "--root", root, "--json"]);
 
@@ -1492,7 +1538,7 @@ test("uninstall previews removals and preserves OpenNori state by default", () =
   assert.equal(dryRun.data.uninstall_plan.schema_version, "opennori/uninstall-plan-v1");
   assert.equal(dryRun.data.uninstall_plan.summary.will_write, 0);
   assert.equal(dryRun.data.uninstall_plan.actions.filter((action) => action.kind === "skill").length, 0);
-  assert.equal(dryRun.data.uninstall_plan.actions.find((action) => action.path === ".opennori/active").action, "preserve");
+  assert.equal(dryRun.data.uninstall_plan.actions.find((action) => action.path === ".opennori/current").action, "preserve");
   assert.equal(dryRun.data.uninstall_plan.actions.find((action) => action.path === ".opennori/architecture").action, "preserve");
   assert.equal(dryRun.data.uninstall_plan.actions.find((action) => action.path === ".opennori/manifest.json").action, "delete");
   assert.equal(fs.existsSync(path.join(root, ".opennori", "manifest.json")), true);
@@ -1583,8 +1629,11 @@ test("profile check automatically checks local Skills and package stacks without
       "forbidden-lib": "1.0.0"
     }
   }));
-  const init = run(["draft", "--goal", "Build a frontend page", "--root", root, "--json"]);
-  run(["approve", "--root", root, "--summary", "User approved frontend acceptance criteria.", "--json"]);
+  const init = draftAndApprove([
+    "--goal", "Build a frontend page",
+    "--root", root,
+    "--json"
+  ], { summary: "User approved frontend acceptance criteria." });
 
   run([
     "profile", "add",
@@ -1634,7 +1683,7 @@ test("profile check automatically checks local Skills and package stacks without
 test("architecture baseline loop is agent-readable sticky and challengeable", () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
-  const draft = run(["draft", "--goal", "Refactor OpenNori into a TypeScript agent state CLI product", "--root", root, "--json"]);
+  const draft = draftAndApprove(["--goal", "Refactor OpenNori into a TypeScript agent state CLI product", "--root", root, "--json"]);
 
   const missingBaselineCheck = run(["check", "--root", root, "--json"]);
   assert.equal(missingBaselineCheck.data.architecture_check.status, "needs-action");
@@ -1723,7 +1772,9 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   ]);
   assert.equal(secondDraft.data.goal_id, "adoption-follow-up");
   const multiGoalManifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "manifest.json"), "utf8"));
-  assert.equal(multiGoalManifest.active_goals.length, 2);
+  assert.equal(multiGoalManifest.current_goal.goal_id, "refactor-opennori-into-a-typescript-agent-state-cli-product");
+  assert.equal(multiGoalManifest.draft_goals.some((goal) => goal.goal_id === "adoption-follow-up"), true);
+  assert.equal(multiGoalManifest.active_goals.length, 1);
   assert.equal(multiGoalManifest.architecture.required_for_goal, true);
   assert.equal(multiGoalManifest.architecture.baseline.goal_id, "refactor-opennori-into-a-typescript-agent-state-cli-product");
 
@@ -1773,8 +1824,7 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
 
 test("missing architecture baseline is a completion review risk, not a product AC gap", () => {
   const root = tempRoot();
-  const draft = run(["draft", "--goal", "Ship an architecture-aware user outcome", "--root", root, "--json"]);
-  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  const draft = draftAndApprove(["--goal", "Ship an architecture-aware user outcome", "--root", root, "--json"]);
 
   const payload = JSON.parse(fs.readFileSync(draft.data.evidence_path, "utf8"));
   for (const criterion of Object.keys(payload.ledger.criteria)) {
@@ -1810,8 +1860,7 @@ test("missing architecture baseline is a completion review risk, not a product A
 
 test("architecture apply records do not count as Product AC evidence", () => {
   const root = tempRoot();
-  const draft = run(["draft", "--goal", "Ship an architecture-guided user outcome", "--root", root, "--json"]);
-  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  const draft = draftAndApprove(["--goal", "Ship an architecture-guided user outcome", "--root", root, "--json"]);
   run([
     "architecture", "baseline",
     "--root", root,
@@ -1853,8 +1902,7 @@ test("architecture apply records do not count as Product AC evidence", () => {
 
 test("product evidence can reference architecture apply context without treating it as proof", () => {
   const root = tempRoot();
-  const draft = run(["draft", "--goal", "Ship architecture-context evidence", "--root", root, "--json"]);
-  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  const draft = draftAndApprove(["--goal", "Ship architecture-context evidence", "--root", root, "--json"]);
   run([
     "architecture", "baseline",
     "--root", root,
@@ -1986,8 +2034,7 @@ test("project architecture profiles can be added and used for baselines", () => 
 test("build-vs-buy health surfaces missing reuse review before self-build", () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
-  const draft = run(["draft", "--goal", "Ship a reusable infrastructure choice", "--root", root, "--json"]);
-  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  const draft = draftAndApprove(["--goal", "Ship a reusable infrastructure choice", "--root", root, "--json"]);
   const payload = JSON.parse(fs.readFileSync(draft.data.evidence_path, "utf8"));
   for (const criterion of Object.keys(payload.ledger.criteria)) {
     run([
@@ -2113,8 +2160,7 @@ test("superseded build-vs-buy decisions stay reviewable without blocking current
 
 test("context export exposes goal AC profile evidence and report paths for review tools", () => {
   const root = tempRoot();
-  run(["draft", "--goal", "Ship a reviewable workflow", "--root", root, "--json"]);
-  run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
+  draftAndApprove(["--goal", "Ship a reviewable workflow", "--root", root, "--json"]);
   run([
     "profile", "add",
     "--root", root,
@@ -2152,7 +2198,7 @@ test("context export exposes goal AC profile evidence and report paths for revie
   assert.equal(exported.data.architecture.baseline.profile, "typescript-agent-state-cli");
   assert.equal(exported.data.agent_next.schema_version, "opennori/agent-next-v1");
   assert.equal(exported.data.agent_next.goal_id, "ship-a-reviewable-workflow");
-  assert.equal(exported.data.paths.acceptance, ".opennori/active/ship-a-reviewable-workflow.acceptance.md");
+  assert.equal(exported.data.paths.acceptance, ".opennori/current/ship-a-reviewable-workflow.acceptance.md");
   assert.equal(exported.data.paths.report_exists, true);
   assert.equal(exported.data.manifest.capabilities.includes("context-export"), true);
 
@@ -2166,18 +2212,18 @@ test("context export exposes goal AC profile evidence and report paths for revie
 test("changes groups acceptance artifacts separately from implementation files", () => {
   const root = tempRoot();
   spawnSync("git", ["init"], { cwd: root, encoding: "utf8" });
-  fs.mkdirSync(path.join(root, ".opennori", "active"), { recursive: true });
+  fs.mkdirSync(path.join(root, ".opennori", "current"), { recursive: true });
   fs.mkdirSync(path.join(root, "src"), { recursive: true });
-  fs.writeFileSync(path.join(root, ".opennori", "active", "demo.acceptance.md"), "acceptance\n");
+  fs.writeFileSync(path.join(root, ".opennori", "current", "demo.acceptance.md"), "acceptance\n");
   fs.writeFileSync(path.join(root, "src", "index.js"), "console.log('demo')\n");
 
   const payload = run(["changes", "--root", root, "--json"]);
   assert.equal(payload.data.changed_files.available, true);
-  assert.equal(payload.data.changed_files.acceptance.some((item) => item.path === ".opennori/active/demo.acceptance.md"), true);
+  assert.equal(payload.data.changed_files.acceptance.some((item) => item.path === ".opennori/current/demo.acceptance.md"), true);
   assert.equal(payload.data.changed_files.implementation.some((item) => item.path === "src/index.js"), true);
 });
 
-test("list shows multiple active goals and resume requires explicit selection", () => {
+test("list separates drafts from the single current goal", () => {
   const root = tempRoot();
   const firstBrief = path.join(root, "first.json");
   const secondBrief = path.join(root, "second.json");
@@ -2196,26 +2242,28 @@ test("list shows multiple active goals and resume requires explicit selection", 
   fs.writeFileSync(firstBrief, JSON.stringify(makeBrief("first-goal", "First goal")));
   fs.writeFileSync(secondBrief, JSON.stringify(makeBrief("second-goal", "Second goal")));
 
-  run(["draft", "--brief", firstBrief, "--root", root, "--json"]);
+  draftAndApprove(["--brief", firstBrief, "--root", root, "--json"]);
   run(["draft", "--brief", secondBrief, "--root", root, "--json"]);
 
   const list = run(["list", "--root", root, "--json"]);
-  assert.deepEqual(list.data.active_goals.map((goal) => goal.goal_id), ["first-goal", "second-goal"]);
+  assert.deepEqual(list.data.current_goals.map((goal) => goal.goal_id), ["first-goal"]);
+  assert.deepEqual(list.data.draft_goals.map((goal) => goal.goal_id), ["second-goal"]);
 
-  const ambiguous = spawnSync(process.execPath, [CLI, "resume", "--root", root, "--json"], {
+  const resume = run(["resume", "--root", root, "--json"]);
+  assert.equal(resume.data.goal_id, "first-goal");
+  assert.equal(resume.data.current_gap.id, "AC-P-1");
+
+  const draftResume = spawnSync(process.execPath, [CLI, "resume", "--root", root, "--goal", "second-goal", "--json"], {
     cwd: ROOT,
     encoding: "utf8"
   });
-  assert.equal(ambiguous.status, 1);
-  assert.match(ambiguous.stderr, /Multiple active OpenNori goals found/);
-
-  const selected = run(["resume", "--root", root, "--goal", "second-goal", "--json"]);
-  assert.equal(selected.data.goal_id, "second-goal");
+  assert.equal(draftResume.status, 1);
+  assert.match(draftResume.stderr, /No current OpenNori goal found|No current/);
 });
 
-test("archive moves complete goals out of active and preserves report", () => {
+test("archive moves complete goals out of current and preserves report", () => {
   const root = tempRoot();
-  const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
+  const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
   const ledger = JSON.parse(fs.readFileSync(init.data.evidence_path, "utf8"));
 
   for (const criterion of Object.keys(ledger.ledger.criteria)) {
@@ -2240,12 +2288,12 @@ test("archive moves complete goals out of active and preserves report", () => {
   assert.equal(fs.existsSync(archived.data.report_path), true);
 
   const list = run(["list", "--root", root, "--json"]);
-  assert.equal(list.data.active_goals.length, 0);
+  assert.equal(list.data.current_goals.length, 0);
 });
 
-test("archive can preserve blocked goals outside active work", () => {
+test("archive can preserve blocked goals outside current work", () => {
   const root = tempRoot();
-  const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
+  const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
   run([
     "evidence", "add",
@@ -2272,7 +2320,7 @@ test("archive can preserve blocked goals outside active work", () => {
 
 test("criterion update preserves the revised acceptance basis and clears stale evidence", () => {
   const root = tempRoot();
-  const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
+  const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
   run([
     "evidence", "add",
@@ -2288,8 +2336,8 @@ test("criterion update preserves the revised acceptance basis and clears stale e
     "criterion", "update",
     "--root", root,
     "--criterion", "AC-P-1",
-    "--user-story", "作为用户，我打开 active Nori Contract 后，能在 30 秒内判断当前缺口。",
-    "--measurement", "打开 active Nori Contract 并阅读当前状态。",
+    "--user-story", "作为用户，我打开 current Nori Contract 后，能在 30 秒内判断当前缺口。",
+    "--measurement", "打开 current Nori Contract 并阅读当前状态。",
     "--threshold", "30 秒内能判断当前缺口。",
     "--summary", "User tightened AC-P-1 threshold.",
     "--json"
@@ -2297,7 +2345,7 @@ test("criterion update preserves the revised acceptance basis and clears stale e
 
   assert.equal(updated.data.acceptance_basis.status, "approved");
   assert.equal(updated.data.current_gap.id, "AC-P-1");
-  assert.equal(updated.data.current_gap.user_story, "作为用户，我打开 active Nori Contract 后，能在 30 秒内判断当前缺口。");
+  assert.equal(updated.data.current_gap.user_story, "作为用户，我打开 current Nori Contract 后，能在 30 秒内判断当前缺口。");
 
   const payload = JSON.parse(fs.readFileSync(init.data.evidence_path, "utf8"));
   assert.equal(payload.ledger.criteria["AC-P-1"].status, "unknown");
@@ -2306,7 +2354,7 @@ test("criterion update preserves the revised acceptance basis and clears stale e
 
 test("criterion add preserves contract and ledger consistency", () => {
   const root = tempRoot();
-  const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
+  const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
   const added = run([
     "criterion", "add",
@@ -2366,7 +2414,12 @@ test("check reviews possible implementation details without rejecting the contra
   const payload = run(["draft", "--brief", reviewBrief, "--root", root, "--json"]);
   assert.equal(payload.ok, true);
 
-  const check = run(["check", "--root", root, "--json"]);
+  const check = run([
+    "check",
+    "--acceptance", payload.data.acceptance_path,
+    "--evidence", payload.data.evidence_path,
+    "--json"
+  ]);
   assert.equal(check.ok, true);
   assert.equal(check.data.acceptance_review.status, "needs-user-review");
   assert.equal(check.warnings.some((warning) => warning.type === "acceptance_review" && warning.gap_id === "possible-implementation-detail"), true);
@@ -2391,7 +2444,12 @@ test("check reviews weak measurement and threshold semantics without hard failur
 
   const reviewPayload = run(["draft", "--brief", reviewBrief, "--root", reviewRoot, "--json"]);
   assert.equal(reviewPayload.ok, true);
-  const reviewCheck = run(["check", "--root", reviewRoot, "--json"]);
+  const reviewCheck = run([
+    "check",
+    "--acceptance", reviewPayload.data.acceptance_path,
+    "--evidence", reviewPayload.data.evidence_path,
+    "--json"
+  ]);
   assert.equal(reviewCheck.data.acceptance_review.status, "needs-user-review");
   assert.equal(reviewCheck.warnings.some((warning) => warning.gap_id === "measurement-review-method-unclear"), true);
   assert.equal(reviewCheck.warnings.some((warning) => warning.gap_id === "threshold-user-outcome-unclear"), true);
@@ -2423,7 +2481,12 @@ test("drafted generic goals keep acceptance discovery questions visible", () => 
   assert.equal(draft.ok, true);
   assert.match(draft.data.acceptance_basis.summary, /generic acceptance discovery/);
 
-  const check = run(["check", "--root", root, "--json"]);
+  const check = run([
+    "check",
+    "--acceptance", draft.data.acceptance_path,
+    "--evidence", draft.data.evidence_path,
+    "--json"
+  ]);
   assert.equal(check.ok, true);
   assert.equal(check.data.acceptance_review.status, "needs-user-review");
   const gapIds = check.data.acceptance_review.findings.map((finding) => finding.gap_id);
@@ -2437,7 +2500,7 @@ test("drafted generic goals keep acceptance discovery questions visible", () => 
   assert.equal(check.warnings.some((warning) => warning.type === "acceptance_review" && warning.criterion_id === "ACCEPTANCE-BASIS"), true);
 });
 
-test("check audits existing active contracts for underspecified acceptance quality without rewriting history", () => {
+test("check audits existing current contracts for underspecified acceptance quality without rewriting history", () => {
   const weakRoot = tempRoot();
   const weakBrief = path.join(weakRoot, "weak-contract.json");
   fs.writeFileSync(weakBrief, JSON.stringify({
@@ -2456,7 +2519,12 @@ test("check audits existing active contracts for underspecified acceptance quali
 
   const init = run(["draft", "--brief", weakBrief, "--root", weakRoot, "--json"]);
   const before = fs.readFileSync(init.data.evidence_path, "utf8");
-  const check = run(["check", "--root", weakRoot, "--json"]);
+  const check = run([
+    "check",
+    "--acceptance", init.data.acceptance_path,
+    "--evidence", init.data.evidence_path,
+    "--json"
+  ]);
   const after = fs.readFileSync(init.data.evidence_path, "utf8");
 
   assert.equal(check.ok, true);
@@ -2484,8 +2552,13 @@ test("check audits existing active contracts for underspecified acceptance quali
     ]
   }));
 
-  run(["draft", "--brief", goodBrief, "--root", goodRoot, "--json"]);
-  const goodCheck = run(["check", "--root", goodRoot, "--json"]);
+  const goodPayload = run(["draft", "--brief", goodBrief, "--root", goodRoot, "--json"]);
+  const goodCheck = run([
+    "check",
+    "--acceptance", goodPayload.data.acceptance_path,
+    "--evidence", goodPayload.data.evidence_path,
+    "--json"
+  ]);
   assert.equal(goodCheck.data.acceptance_review.status, "clear");
   assert.equal(goodCheck.warnings.some((warning) => warning.type === "acceptance_review"), false);
   assert.equal(goodCheck.data.architecture_check.status, "needs-action");

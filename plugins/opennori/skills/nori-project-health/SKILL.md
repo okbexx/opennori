@@ -1,29 +1,29 @@
 ---
 name: nori-project-health
-description: "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and active-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, or needs safe lifecycle actions with preview and explicit confirmation."
+description: "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, or needs safe lifecycle actions with preview and explicit confirmation."
 ---
 
 ## Mission
 
 Keep OpenNori project state usable and recoverable without making lifecycle commands the user's workflow.
 
-Health work protects `.opennori/` integrity, manifest freshness, packaged Plugin Skill visibility, and active-goal recoverability. It should not decide subjective product acceptance.
+Health work protects `.opennori/` integrity, manifest freshness, packaged Plugin Skill visibility, and current-goal recoverability. It should not decide subjective product acceptance.
 
 Treat OpenNori readiness as bundle readiness. Plugin discovery, packaged Skills, CLI access, and `.opennori` state are coupled product parts; if one is missing, recover it instead of telling the user to use the remaining pieces as a separate workflow.
 
-When CLI JSON includes `data.agent_next`, use it as the state-layer routing instruction. Health work should not guess whether to draft, recover, or resume when `agent_next.state` already says `initialized_no_active_contract`, `health_needs_recovery`, `setup_preview_needs_confirmation`, or `ready_with_active_goals`.
+When CLI JSON includes `data.agent_next`, use it as the state-layer routing instruction. Health work should not guess whether to draft, recover, or resume when `agent_next.state` already says `initialized_no_active_contract`, `health_needs_recovery`, `setup_preview_needs_confirmation`, or `ready_with_current_goal`.
 
 If `agent_next.safe_next_command` is present, the agent may run that preview command before asking the user for confirmation. Use it to turn a noisy doctor result into a concrete preview such as project initialization. Never ask the user to choose from raw recovery actions when a safe preview command is available.
 
-A fresh `opennori init` normally creates empty `.opennori/active`, `.opennori/reports`, `.opennori/brainstorms`, and architecture subdirectories. Empty directories are not broken state; they mean no active Nori Contract exists yet. Route `initialized_no_active_contract` to `nori-acceptance` instead of trying to repair files.
+A fresh `opennori init` normally creates empty `.opennori/current`, `.opennori/drafts`, `.opennori/reports`, `.opennori/brainstorms`, and architecture subdirectories. Empty directories are not broken state; they mean no current Nori Contract has been approved yet. Route `initialized_no_active_contract` to `nori-acceptance` instead of trying to repair files.
 
 ## Start Here
 
 1. Run `opennori doctor --root <repo> --json` when the project may already use OpenNori.
 2. Run `opennori init --root <repo> --json` when the machine already has OpenNori and only project `.opennori` state is missing.
 3. Run `npx opennori setup` for first-time machine setup, missing global CLI, missing Codex Plugin discovery, missing packaged Skills, or unclear bundle readiness.
-4. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, or damaged active state, present the missing bundle part and the recovery action. When safe_next_command exists, run that preview first.
-5. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no active contract, then hand off to `nori-acceptance`.
+4. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, damaged current state, or legacy `.opennori/active` state, present the missing bundle part and the recovery action. When safe_next_command exists, run that preview first.
+5. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no approved current contract, then hand off to `nori-acceptance`.
 6. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, or deletes state.
 7. After upgrade or repair, run `opennori check --root <repo> --json` and route soft review findings to the relevant Skill.
 8. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live health activity while diagnosing or recovering bundle readiness. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-project-health --state working --summary "..." --json`.
@@ -51,7 +51,7 @@ Useful state commands:
 - "Initialize OpenNori in this project" -> init preview, then confirm only after the user approves.
 - "Is OpenNori healthy" -> doctor and summarize ready, needs-action, or broken with recovery actions.
 - "The CLI works but Plugin/Skills are missing" or "Plugin is installed but .opennori is missing" -> diagnose bundle readiness and recover the missing part instead of treating the remainder as a separate user path.
-- "I ran init and .opennori directories are empty" -> explain that this is normal until a Nori Contract is drafted; route to acceptance discovery.
+- "I ran init and .opennori directories are empty" -> explain that this is normal until a draft is approved as the current Nori Contract; route to acceptance discovery.
 - "Upgrade this project" -> upgrade dry run, confirm if approved, then check.
 - "Remove OpenNori" -> uninstall dry run; preserve `.opennori` state unless the user explicitly asks to delete it.
 - "State is broken" -> doctor, identify hard integrity failures, and propose recovery actions.
@@ -59,7 +59,7 @@ Useful state commands:
 
 ## State Writes
 
-May write manifest, protocol, agent guide, lifecycle-managed `.opennori/` assets, and uninstall removals after confirmation. It may not silently rewrite active Product AC, evidence, profile, architecture decisions, or reports as a side effect of health checks.
+May write manifest, protocol, agent guide, lifecycle-managed `.opennori/` assets, and uninstall removals after confirmation. It may not silently rewrite current Product AC, evidence, profile, architecture decisions, or reports as a side effect of health checks.
 
 May write live dashboard activity for health diagnosis or recovery. Activity is not lifecycle confirmation, not recovery evidence, and not Product AC evidence. Do not ask the user to confirm setup, init, upgrade, uninstall, waiver, or recovery actions inside the dashboard; show the preview in conversation and record explicit approval through the CLI path.
 
@@ -109,7 +109,7 @@ Confirm initialization?
 - Do not copy OpenNori Skills into the user project; packaged Plugin Skills are the agent discovery surface.
 - Do not present Plugin, Skills, CLI, or `.opennori` state as separate install choices; recover bundle readiness.
 - Do not continue in a half-installed state without surfacing the missing bundle part and a recovery action.
-- Do not treat empty `.opennori/active` as broken after fresh init; no active contract is an acceptance-start state, not a repair state.
+- Do not treat empty `.opennori/current` or `.opennori/drafts` as broken after fresh init; no current contract is an acceptance-start state, not a repair state.
 - Do not perform destructive lifecycle writes without preview and explicit confirmation.
 - Do not show repeated recovery_actions or full JSON unless the user explicitly asks for diagnostic detail.
 - Do not treat soft review findings as hard protocol rejection.

@@ -9,7 +9,7 @@ import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../runti
 export const checkCommand = defineCommand({
   meta: {
     name: "check",
-    description: "Validate active OpenNori contract quality, architecture health, and evidence health."
+    description: "Validate current OpenNori contract quality, architecture health, and evidence health."
   },
   args: {
     ...activeGoalArgs,

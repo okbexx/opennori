@@ -51,7 +51,7 @@ export function upgradeResult({
 
   const nextActions = dryRun
     ? ["Review the upgrade plan, then rerun with --confirm if the planned updates are acceptable."]
-    : ["Run opennori check --root <project> --json to audit existing active Nori Contracts for underspecified ACs before continuing work."];
+    : ["Run opennori check --root <project> --json to audit the current Nori Contract before continuing work."];
 
   return ok({
     root: projectRoot,
