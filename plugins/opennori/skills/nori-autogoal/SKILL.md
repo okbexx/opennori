@@ -9,6 +9,8 @@ Turn a rough idea into the same standard Nori Contract Draft the user would get 
 
 Autogoal is not a new contract type and not a separate workflow. It is a Skill-driven convergence mode that reduces user questioning before approval.
 
+If the user and agent have already discussed candidate AC, assumptions, or open questions and the user asks OpenNori to take over that discussion, do not use autogoal. Hand off to `nori-acceptance` to adopt the existing discussion into a standard draft with `acceptance_basis.source: "conversation"`.
+
 The final user-approved artifact must still be a normal Nori Contract:
 
 - Goal
@@ -24,13 +26,14 @@ Do not output an "Autogoal Contract", MVP scope, first version, prototype, imple
 1. Identify the project root and run `opennori doctor --root <repo> --json` unless readiness is already known from the current turn.
 2. If doctor reports missing Plugin discovery, packaged Skills, CLI access, manifest, or project state, hand off to `nori-project-health`; do not continue in a half-installed mode.
 3. Read existing OpenNori state with `opennori list --root <repo> --json` and `opennori status/resume --root <repo> --json` when a current goal may exist.
-4. Read the user's rough idea, any stated constraints, Nori Profile preferences, and relevant project context such as README, product docs, existing UI/API surfaces, and nearby source files.
-5. Preserve the user's full intended product closure. If the idea is broad, do not reduce it to a smaller MVP. Express the full closure through the contract's goal and AC.
-6. Do internal acceptance discovery yourself: entrypoint, user operation, concrete objects, success signal, persistence/recovery, failure behavior, boundary, and review method.
-7. Convert reasonable inferences into assumptions instead of making the user answer a long questionnaire.
-8. Ask the user only questions that would change the completion definition. Do not ask implementation, library, file, architecture, or sequencing questions here.
-9. When enough information exists, create a temporary NoriBrief JSON and run `opennori draft --brief <brief.json> --root <repo> --json`. The resulting artifact is a standard draft Nori Contract.
-10. Show the draft using the standard `nori-acceptance` reply shape and ask the user to approve or revise. Do not ask the user to approve autogoal notes.
+4. If the prompt contains already discussed AC material, phrases such as "take over the AC we just discussed", "整理我们刚才讨论的 AC", or "不要开始实现，先给我确认", stop autogoal and hand off to `nori-acceptance`.
+5. Read the user's rough idea, any stated constraints, Nori Profile preferences, and relevant project context such as README, product docs, existing UI/API surfaces, and nearby source files.
+6. Preserve the user's full intended product closure. If the idea is broad, do not reduce it to a smaller MVP. Express the full closure through the contract's goal and AC.
+7. Do internal acceptance discovery yourself: entrypoint, user operation, concrete objects, success signal, persistence/recovery, failure behavior, boundary, and review method.
+8. Convert reasonable inferences into assumptions instead of making the user answer a long questionnaire.
+9. Ask the user only questions that would change the completion definition. Do not ask implementation, library, file, architecture, or sequencing questions here.
+10. When enough information exists, create a temporary NoriBrief JSON and run `opennori draft --brief <brief.json> --root <repo> --json`. The resulting artifact is a standard draft Nori Contract.
+11. Show the draft using the standard `nori-acceptance` reply shape and ask the user to approve or revise. Do not ask the user to approve autogoal notes.
 
 Useful state commands:
 
@@ -74,6 +77,7 @@ The user should never need to prepare this JSON. The Skill prepares it from the 
 - "I only have a rough idea" -> preserve the full idea, infer a complete user loop, then draft a standard Nori Contract.
 - "不要问我那么多问题" -> infer reasonable assumptions, ask only completion-changing questions, and show them before approval.
 - "这个目标很大" -> preserve the broad goal as a complete user closure; do not reduce it to MVP, first version, prototype, or happy-path subset.
+- "整理我们刚才讨论的 AC", "take over the AC we just discussed", or "不要开始实现，先给我确认" -> hand off to `nori-acceptance`; this is conversation adoption, not rough-idea autogoal.
 - "approve" after an autogoal draft -> run `opennori approve`, then follow returned `agent_next`; for non-trivial work this usually hands off to `nori-architecture-brainstorm`.
 - "revise: ..." after an autogoal draft -> revise the standard Nori Contract draft, not a separate autogoal artifact.
 
@@ -141,5 +145,6 @@ Keep any autogoal notes short and clearly secondary. The user is approving the N
 - Do not ask implementation questions in autogoal. Architecture and build-vs-buy are handled after Product AC approval.
 - Do not ask the user a full questionnaire when reasonable assumptions can be made. Ask only questions that change completion meaning.
 - Do not treat assumptions as approval. Show them and let the user approve or revise the draft.
+- Do not use autogoal when the user is asking to preserve already discussed AC. Route that to `nori-acceptance` so it stays `source: "conversation"` and draft-only.
 - Do not treat brainstorms, discoveries, candidate goals, activity, dashboard snapshots, or autogoal notes as evidence.
 - Do not claim completion from a draft. Completion still requires approved AC and reviewable evidence.

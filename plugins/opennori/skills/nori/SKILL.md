@@ -1,6 +1,6 @@
 ---
 name: nori
-description: "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, asks for project health, wants architecture decided first, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, and .opennori state as coupled parts of one product."
+description: "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, asks for project health, wants architecture decided first, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, and .opennori state as coupled parts of one product."
 ---
 
 ## Mission
@@ -50,6 +50,7 @@ entrypoints, operations, outcomes, evidence needs, and boundaries.
 ## Natural-Language Mapping
 
 - "Use OpenNori for this goal", "turn this into AC", "the AC is wrong", "brainstorm first" -> hand off to `nori-acceptance`.
+- "Use OpenNori to take over the AC we just discussed", "整理我们刚才讨论的 AC", "把上面的 AC 收敛成 Nori Contract Draft", or "不要开始实现，先给我确认" -> hand off to `nori-acceptance` with the already discussed goal, candidate AC, assumptions, and unresolved questions. This is conversation adoption into a draft, not autogoal.
 - "autogoal", "自动帮我把 idea 变成 goal/AC", "I only have a rough idea", or "用 OpenNori autogoal" -> hand off to `nori-autogoal`; it must converge to a standard Nori Contract Draft, not a special autogoal artifact.
 - "Are these AC good enough", "this AC is too vague", "the goal is broad", or visible AC text lacks concrete user judgment -> hand off to `nori-acceptance`; do not wait for `opennori check` to flag it.
 - "验收标准用中文", "用中文写 Nori Contract", "write the AC in English", or any explicit Contract language request -> carry that preference to `nori-acceptance`; the child Skill records it as Contract presentation, not as Product AC.
@@ -80,6 +81,7 @@ Use one child Skill at a time and carry forward only the relevant state:
 - Current goal id, current gap, completion confidence, and review risks.
 - Any user statement that changes completion meaning.
 - Any rough idea or autogoal instruction that should become a standard Nori Contract Draft.
+- Any already discussed AC material that should be adopted into a standard draft without approval, implementation, or evidence.
 - Any architecture/profile constraint that affects how the agent may proceed.
 - Any evidence source, limitation, or human confirmation the user just supplied.
 
@@ -104,6 +106,7 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not make the user memorize CLI flags or internal Skill names.
 - Do not treat autogoal as a new contract type. It is only a Skill-driven path to the same standard Nori Contract Draft.
 - Do not let autogoal shrink broad ideas into MVP, first version, prototype, happy-path subset, phases, or task lists.
+- Do not route already discussed AC material through autogoal. If the user asks OpenNori to take over a current AC discussion, preserve that material through `nori-acceptance` as `acceptance_basis.source: "conversation"` and keep it draft-only until user approval.
 - Do not treat language preference as a Product AC. It is Contract presentation metadata that helps the user review goal, AC, discovery questions, reports, and next candidates.
 - Do not silently translate current or approved contracts; language changes to existing contracts require explicit revision and approval.
 - Do not split OpenNori into separate Plugin, Skill, and CLI user paths; they are one capability bundle.

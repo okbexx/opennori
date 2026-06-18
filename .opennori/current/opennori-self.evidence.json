@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User approved adding autogoal as a standard Nori Contract drafting capability.",
-      "approved_at": "2026-06-18T06:57:07.364Z"
+      "summary": "User added conversation-to-contract adoption AC.",
+      "approved_at": "2026-06-18T08:03:25.845Z"
     },
     "criteria": [
       {
@@ -522,6 +522,15 @@
         "threshold": "autogoal 由 packaged Skill 驱动，并明确要求保持用户完整意图、不把大目标降级为 MVP/第一版/原型；输出形态与手动多轮澄清后的 Nori Contract Draft 一致，包含 Goal、用户视角 AC、Measure/Passes when、假设和只影响完成定义的问题；approve 后进入普通 OpenNori current gap/evidence/status/report 生命周期；CLI 只保存标准 draft 或 brief source，不把主观 AC 质量写成硬 validator。",
         "required": true,
         "risk": "high"
+      },
+      {
+        "id": "AC-O-10",
+        "layer": "operator",
+        "user_story": "作为用户，我在非 OpenNori 项目里已经和 agent 讨论过目标和 AC 后，要求 OpenNori 接管这段讨论时，最终看到的是基于已有讨论整理出的标准 Nori Contract Draft，并且状态保持 draft/need user，而不是重新 autogoal、直接开始实现或把讨论记录当作完成证据。",
+        "measurement": "用户在 agent 对话中提供已有目标、AC、假设和未决问题后，说‘用 OpenNori 接管我们刚才讨论的 AC，整理成 Nori Contract Draft，不要开始实现，先给我确认。’",
+        "threshold": "agent 使用 nori-acceptance 将已有讨论材料整理为标准 draft Nori Contract，写入 .opennori/drafts，展示 Goal、AC、衡量方式、通过条件、假设和开放问题；status/report 表达 need user approve/revise，不进入 current/active、不记录 passing evidence、不走 autogoal 的粗略 idea 收敛路径。",
+        "required": true,
+        "risk": "high"
       }
     ]
   },
@@ -529,7 +538,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-18T07:11:52.007Z",
+    "updated_at": "2026-06-18T08:22:44.589Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -6134,6 +6143,44 @@
             "limitations": "This verifies local implementation, packaged Skill behavior text, CLI standard draft rendering, README, and site content. It does not publish a new npm package or deploy the website in this slice, and future agent output quality still depends on the loaded Skill and user approval.",
             "gate": "accepted",
             "created_at": "2026-06-18T07:11:52.007Z"
+          }
+        ]
+      },
+      "AC-O-10": {
+        "status": "passing",
+        "confidence": "verified",
+        "required": true,
+        "risk": "high",
+        "evidence": [
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "OpenNori now supports adopting an in-progress AC discussion as a standard draft Nori Contract. The root nori Skill routes 'take over the AC we just discussed' to nori-acceptance, nori-acceptance prepares a brief with acceptance_basis.source conversation and writes only .opennori/drafts via draft --brief, nori-autogoal explicitly hands off already discussed AC material instead of treating it as a rough idea, and docs/site/default prompts show the user-facing phrase. Objective tests verify the adopted conversation brief remains draft with ACCEPTANCE-BASIS as current gap, no current contract, assumptions/open questions rendered, and no implementation/task-list/autogoal artifact wording.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "architecture-apply",
+                "label": "opennori-self-ac-o-10-aligned",
+                "path": ".opennori/architecture/evidence/opennori-self-ac-o-10-aligned.json",
+                "role": "context",
+                "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "command",
+                "label": "pnpm build (opennori-site)",
+                "command": "pnpm build (opennori-site)"
+              }
+            ],
+            "reviewability": "Rerun npm run check in /Users/jarl/code/jarlone/opennori, rerun pnpm build in /Users/jarl/code/jarlone/opennori-site, inspect the packaged nori/nori-acceptance/nori-autogoal Skills and test/core.test.js conversation adoption brief test, then verify README/site examples show the natural-language adoption prompt.",
+            "limitations": "This verifies local source, packaged Skill behavior, deterministic draft state, tests, and website text. It does not publish npm or deploy the website in this slice; future agent behavior still depends on the installed Plugin cache being synced to this version.",
+            "gate": "accepted",
+            "created_at": "2026-06-18T08:22:44.589Z"
           }
         ]
       }

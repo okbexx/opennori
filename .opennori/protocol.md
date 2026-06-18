@@ -234,6 +234,14 @@ Each packaged Skill states its mission, starting state reads, natural-language m
 state writes, handoff rules, user-facing reply shape, and misuse guards. This lets agents use
 OpenNori from natural language while the CLI remains a deterministic state layer.
 
+If a user and agent are already discussing goal and AC before OpenNori is initialized or before a
+contract is approved, the agent should not restart the user through autogoal or a full discovery
+questionnaire. The `nori-acceptance` Skill adopts the current conversation into a standard draft
+Nori Contract by preparing a brief with `acceptance_basis.status: "draft"` and
+`acceptance_basis.source: "conversation"`, then calling `opennori draft --brief`. The result stays
+under `.opennori/drafts/` until the user approves or revises it. Conversation notes are not
+completion evidence, and adoption must not start implementation or move the contract to current.
+
 The package ships `.agents/plugins/marketplace.json` pointing to `./plugins/opennori`, where
 `plugins/opennori/.codex-plugin/plugin.json` declares `skills: "./skills/"`. `opennori install`
 writes project state under `.opennori/`; it does not copy OpenNori Skills into the user's project.

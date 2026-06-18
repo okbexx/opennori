@@ -274,6 +274,68 @@ test("autogoal brief drafts a standard Nori Contract with assumptions and open q
   assert.doesNotMatch(acceptance, /Implementation Plan|Task List/);
 });
 
+test("conversation adoption brief stays a draft Nori Contract awaiting user approval", () => {
+  const root = tempRoot();
+  run(["install", "--root", root, "--json"]);
+  const briefPath = path.join(root, "conversation-brief.json");
+  fs.writeFileSync(briefPath, JSON.stringify({
+    goal_id: "settings-discussion-adoption",
+    goal: "交付个人设置页面，让用户能修改资料并判断保存是否可靠。",
+    presentation: { language: "zh-CN" },
+    acceptance_basis: {
+      status: "draft",
+      summary: "Draft adopted from an in-progress AC discussion. User approval is still required.",
+      source: "conversation",
+      assumptions: [
+        "用户和 agent 已经讨论过可编辑字段、保存反馈和失败恢复。",
+        "当前目标是整理可批准的验收契约，不开始实现。"
+      ],
+      open_questions: [
+        "头像上传失败时是否需要保留本地预览？"
+      ]
+    },
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "作为用户，我能打开个人设置页并编辑昵称、头像和简介。",
+        measurement: "用户在设置页修改昵称、头像和简介后点击保存。",
+        threshold: "保存成功后页面显示成功反馈，刷新后仍能看到更新后的值。",
+        risk: "medium"
+      },
+      {
+        id: "AC-2",
+        user_story: "作为用户，我在保存失败时能理解发生了什么并继续处理自己的输入。",
+        measurement: "用户触发保存失败或超时场景。",
+        threshold: "页面显示可理解的失败提示，保留用户输入，并提供重试或返回路径。",
+        risk: "high"
+      }
+    ]
+  }, null, 2));
+
+  const draft = run(["draft", "--root", root, "--brief", briefPath, "--json"]);
+  assert.equal(draft.data.goal_id, "settings-discussion-adoption");
+  assert.equal(draft.data.state, "draft");
+  assert.equal(draft.data.acceptance_basis.status, "draft");
+  assert.equal(draft.data.acceptance_basis.source, "conversation");
+  assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.match(draft.data.acceptance_path, /\.opennori\/drafts\/settings-discussion-adoption\.acceptance\.md$/);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "current", "settings-discussion-adoption.acceptance.md")), false);
+
+  const acceptance = fs.readFileSync(draft.data.acceptance_path, "utf8");
+  assert.match(acceptance, /# settings-discussion-adoption 验收契约/);
+  assert.match(acceptance, /状态: draft/);
+  assert.match(acceptance, /假设:/);
+  assert.match(acceptance, /已经讨论过可编辑字段/);
+  assert.match(acceptance, /开放问题:/);
+  assert.match(acceptance, /头像上传失败/);
+  assert.match(acceptance, /保存失败时能理解发生了什么/);
+  assert.doesNotMatch(acceptance, /Implementation Plan|Task List|Autogoal Contract/);
+
+  const list = run(["list", "--root", root, "--json"]);
+  assert.equal(list.data.current_goals.length, 0);
+  assert.equal(list.data.draft_goals.some((goal) => goal.goal_id === "settings-discussion-adoption"), true);
+});
+
 test("opennori quickstart is interactive for human terminals", () => {
   const declinedRoot = tempRoot();
   const declined = runInteractiveSetup(declinedRoot, "n");
@@ -1271,6 +1333,7 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.equal(plugin.interface.defaultPrompt.length >= 5, true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /Set up OpenNori/.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /autogoal/i.test(prompt)), true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /AC we just discussed/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /acceptance criteria/.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /dashboard.*live agent activity/i.test(prompt)), true);
   assert.equal(marketplace.name, "opennori");
@@ -1311,6 +1374,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /opennori resume/);
   assert.match(noriAsset, /opennori status/);
   assert.match(noriAsset, /already stated goal/);
+  assert.match(noriAsset, /AC we just discussed/);
+  assert.match(noriAsset, /acceptance_basis\.source: "conversation"/);
   assert.doesNotMatch(noriAsset, /skill export/);
   assert.doesNotMatch(noriAsset, /process steps/);
 
@@ -1322,6 +1387,9 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(acceptanceAsset, /AC quality is a Skill responsibility/);
   assert.match(acceptanceAsset, /scratch question source/);
   assert.match(acceptanceAsset, /do not treat its gap ids or wording as\s+authoritative/);
+  assert.match(acceptanceAsset, /source: "conversation"/);
+  assert.match(acceptanceAsset, /opennori draft --brief/);
+  assert.match(acceptanceAsset, /Do not route an already discussed AC set through autogoal/);
 
   const evidenceAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-evidence", "SKILL.md"), "utf8");
   assert.match(evidenceAsset, /Do not force evidence into a fixed adapter taxonomy/);
@@ -1333,6 +1401,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(autogoalAsset, /opennori draft --brief/);
   assert.match(autogoalAsset, /Do not create a new "Autogoal Contract" format/);
   assert.match(autogoalAsset, /MVP, first version, prototype/);
+  assert.match(autogoalAsset, /conversation adoption/);
+  assert.match(autogoalAsset, /nori-acceptance/);
 
   const healthAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-project-health", "SKILL.md"), "utf8");
   assert.match(healthAsset, /safe_next_command/);
@@ -1489,6 +1559,7 @@ test("install creates project assets and skips existing user content by default"
   const agentGuide = fs.readFileSync(path.join(root, ".opennori", "agent-guide.md"), "utf8");
   assert.match(agentGuide, /Empty state directories are normal immediately after `opennori init`/);
   assert.match(agentGuide, /If `.opennori\/current\/\*\.acceptance\.md` is missing, do not implement yet/);
+  assert.match(agentGuide, /take over an AC discussion that already happened in chat/);
   assert.match(agentGuide, /Read `.opennori\/architecture\/baseline\.md` and `.opennori\/architecture\/baseline\.json` only when they exist/);
   assert.equal(fs.existsSync(path.join(root, "AGENTS.md")), false);
   assert.equal(fs.existsSync(path.join(root, "CLAUDE.md")), false);
