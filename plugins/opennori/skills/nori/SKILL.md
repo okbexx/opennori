@@ -53,6 +53,7 @@ entrypoints, operations, outcomes, evidence needs, and boundaries.
 - "Use OpenNori to take over the AC we just discussed", "整理我们刚才讨论的 AC", "把上面的 AC 收敛成 Nori Contract Draft", or "不要开始实现，先给我确认" -> hand off to `nori-acceptance` with the already discussed goal, candidate AC, assumptions, and unresolved questions. This is conversation adoption into a draft, not autogoal.
 - "autogoal", "自动帮我把 idea 变成 goal/AC", "I only have a rough idea", or "用 OpenNori autogoal" -> hand off to `nori-autogoal`; it must converge to a standard Nori Contract Draft, not a special autogoal artifact.
 - "Are these AC good enough", "this AC is too vague", "the goal is broad", or visible AC text lacks concrete user judgment -> hand off to `nori-acceptance`; do not wait for `opennori check` to flag it.
+- "The UI/UX AC is missing", "this is a page/app/dashboard/desktop/workbench/form", "the interface must feel usable", or a visible interface goal has only data/status/function AC -> hand off to `nori-acceptance` to add user-experience acceptance checks for navigation, information hierarchy, states, feedback, readability, consistency, recovery, and UI boundaries.
 - "验收标准用中文", "用中文写 Nori Contract", "write the AC in English", or any explicit Contract language request -> carry that preference to `nori-acceptance`; the child Skill records it as Contract presentation, not as Product AC.
 - "把现有契约改成中文/英文" -> hand off to `nori-acceptance`; changing an approved/current Contract language requires explicit user approval and must not happen as an automatic status/report side effect.
 - If the user already stated the goal before initialization, do not ask them to repeat it after `opennori init`; continue acceptance discovery for that stated goal.
@@ -114,6 +115,7 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not present candidate goals as approved AC, evidence, phases, or task lists.
 - Do not answer confidently complete while required AC evidence, blocking profile items, architecture challenges, evidence health, or acceptance review risks remain unresolved or unaccepted.
 - Do not outsource AC quality judgment to CLI heuristics. The agent must inspect AC wording and ask the user the missing acceptance questions when the human judgment surface is vague.
+- Do not accept visible interface goals with only functional/data AC. The agent must check whether the user can navigate, scan, understand state, get feedback, recover from failure, and judge visual/interaction consistency.
 - Do not turn architecture, profile, build-vs-buy, Plugin, hook, or tool preferences into Product AC.
 - Do not treat dashboard activity, events, or snapshots as acceptance evidence.
 - Do not treat dashboard as a place for confirmation buttons or state-changing controls.

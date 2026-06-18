@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-18T09:48:45.249Z",
+  "updated_at": "2026-06-18T12:54:30.378Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -300,6 +300,17 @@
         "summary": "Architecture Profile and Baseline now require concrete technical architecture sections while keeping subjective architecture quality in Skills and user review.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/ac-a-3-technical-baseline-sections.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "ac-o-11-visible-interface-ux-discovery",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-O-11",
+        "status": "aligned",
+        "summary": "Visible interface UI/UX acceptance discovery is implemented as packaged Skill behavior and user-review guidance, not as CLI subjective validation.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/ac-o-11-visible-interface-ux-discovery.json",
         "schema_valid": true,
         "schema_errors": []
       },

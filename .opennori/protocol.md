@@ -450,6 +450,7 @@ On every turn:
 
 1. If the user gives a fuzzy goal or candidate AC, run `opennori discover --goal "<goal>" --root <repo> --json` before drafting.
 1a. If the user asks for autogoal or wants fewer clarification rounds from a rough idea, use `nori-autogoal`: the Skill reads context, preserves the full user intent, infers assumptions, asks only completion-changing questions, and creates a standard Nori Contract Draft through `opennori draft --brief`. Autogoal is not a new contract type and must not shrink a broad idea into MVP, first version, prototype, phases, or task lists.
+1b. If the goal includes a visible interface such as a page, app, Dashboard, Desktop, workbench, form, settings screen, or admin console, the Skill must discover UI/UX acceptance as Product AC. It should cover entry/navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability, visual and interaction consistency, recovery paths, and UI boundaries. This is Skill/user review behavior, not a CLI hard validator.
 2. Ask only the discovery questions that affect completion judgment. Do not turn discovery gaps into implementation tasks or completion evidence.
 3. If the user wants to discuss, brainstorm, explore, or is not ready to define acceptance criteria, run `opennori brainstorm --idea "<idea>" --root <repo> --json`.
 4. Show only candidate acceptance directions and ask the user to choose or revise a direction. Brainstorm output is not a contract or completion evidence.

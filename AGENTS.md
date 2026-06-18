@@ -67,6 +67,8 @@ If the user and agent have already discussed a goal, candidate AC, assumptions, 
 
 Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, or implementation tasks into user AC. They can influence Nori Profile, Architecture Baseline, evidence risk, or recovery guidance, but Product AC must remain human-visible operations or judgments.
 
+For user-visible interface goals, OpenNori Skills must discover UI/UX acceptance, not only functional completion. Pages, apps, dashboards, desktop tools, workbenches, forms, settings screens, and admin consoles need user-facing checks for entry/navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability, visual and interaction consistency, recovery paths, and UI boundaries. Keep this in Skill behavior and user confirmation; do not implement it as a CLI hard validator or fixed word-list test.
+
 Contract language preference is presentation metadata, not Product AC. New
 brainstorms, discoveries, drafts, reports, and next-loop candidates may infer
 or explicitly preserve `presentation.language` (`zh-CN` or `en`) for

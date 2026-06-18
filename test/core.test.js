@@ -1291,12 +1291,16 @@ test("agent can explicitly prune obsolete evidence before recording fresh proof"
 
 test("protocol v1 example contains concrete user tool operations", () => {
   const brief = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "opennori-self.json"), "utf8"));
-  assert.equal(brief.criteria.length, 49);
+  assert.equal(brief.criteria.length, 50);
   assert.deepEqual(new Set(brief.criteria.map((criterion) => criterion.layer)), new Set(["protocol", "operator", "productization", "architecture"]));
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-P-")).length, 13);
-  assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-O-")).length, 8);
+  assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-O-")).length, 9);
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-Z-")).length, 18);
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-A-")).length, 10);
+  const interfaceAcceptanceCriterion = brief.criteria.find((criterion) => criterion.id === "AC-O-11");
+  assert.equal(interfaceAcceptanceCriterion?.layer, "operator");
+  assert.match(interfaceAcceptanceCriterion?.user_story ?? "", /UI\/UX|可见交互界面/);
+  assert.match(interfaceAcceptanceCriterion?.threshold ?? "", /Skill|agent|CLI hard validator/);
 
   const expectedTools = [
     "Codex 对话",
@@ -1314,7 +1318,8 @@ test("protocol v1 example contains concrete user tool operations", () => {
     "opennori list",
     "OpenNori Plugin",
     "证据来源",
-    "复查"
+    "复查",
+    "UI/UX"
   ];
 
   const joined = JSON.stringify(brief, null, 2);
@@ -1376,6 +1381,7 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /already stated goal/);
   assert.match(noriAsset, /AC we just discussed/);
   assert.match(noriAsset, /acceptance_basis\.source: "conversation"/);
+  assert.match(noriAsset, /UI\/UX|visible interface/i);
   assert.doesNotMatch(noriAsset, /skill export/);
   assert.doesNotMatch(noriAsset, /process steps/);
 
@@ -1390,6 +1396,7 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(acceptanceAsset, /source: "conversation"/);
   assert.match(acceptanceAsset, /opennori draft --brief/);
   assert.match(acceptanceAsset, /Do not route an already discussed AC set through autogoal/);
+  assert.match(acceptanceAsset, /Visible interface experience/);
 
   const evidenceAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-evidence", "SKILL.md"), "utf8");
   assert.match(evidenceAsset, /Do not force evidence into a fixed adapter taxonomy/);
@@ -1403,6 +1410,7 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(autogoalAsset, /MVP, first version, prototype/);
   assert.match(autogoalAsset, /conversation adoption/);
   assert.match(autogoalAsset, /nori-acceptance/);
+  assert.match(autogoalAsset, /visible interface goals/);
 
   const healthAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-project-health", "SKILL.md"), "utf8");
   assert.match(healthAsset, /safe_next_command/);

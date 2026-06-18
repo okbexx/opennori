@@ -247,6 +247,16 @@ links, recovery paths, and boundaries the user must see. Passing evidence can
 still be provisional until those questions are resolved or explicitly accepted
 as remaining review risk.
 
+For user-visible interfaces, Nori should also discover experience acceptance.
+If the goal includes a page, app, Dashboard, Desktop, workbench, form, settings
+screen, or admin console, the agent should not stop at data or happy-path
+function checks. It should ask or infer how the user enters and navigates,
+which information appears first, how empty/loading/error/success states look,
+what feedback follows actions, whether the interface is readable and
+consistent, how the user recovers from failure, and what the UI must not expose.
+These UX checks stay as human-facing AC and user confirmation, not CLI
+hard-fail rules.
+
 ### Contract Language Preference
 
 Contract language is a presentation preference, not a Product AC. OpenNori
@@ -705,6 +715,8 @@ Nori 倡导对于“修改字段”或“抛出错误提示”等含糊不清的
 - 页面刷新或重入后，如何验证数据确实持久化了
 - 保存失败时，界面的交互表现应当是什么样
 - 哪些需求是故意被排除在本次交付范围之外的
+
+如果目标包含页面、应用、Dashboard、Desktop、工作台、表单、设置页或管理台，Nori 还应当挖掘体验验收。代理不能只写数据或 happy-path 功能 AC，而要问清或合理推断：用户从哪里进入、如何导航、首屏先看到什么、空态/加载/错误/成功状态如何表达、操作后有什么反馈、界面是否可读且一致、失败后如何恢复，以及哪些 UI 边界不应暴露。这些属于人类视角 AC 和用户确认，不是 CLI 硬编码裁判。
 
 ### 契约语言偏好 (Contract Language Preference)
 

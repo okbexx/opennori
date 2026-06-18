@@ -136,6 +136,7 @@ Ask questions that affect user acceptance:
 - Boundaries: what is intentionally out of scope.
 - Review method: how the user or reviewer can verify the behavior.
 - Abstract product surfaces: if an AC says overview, long-term assets, memory, knowledge candidates, capabilities, or result changes, ask what exact visible objects, fields, states, source links, failure states, and boundaries the user must see.
+- Visible interface experience: if the goal includes a page, app, Dashboard, Desktop, workbench, form, settings screen, admin console, or other user-facing interface, ask or infer UX acceptance for entry and navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability and scanability, visual and interaction consistency, recovery paths, and UI boundaries such as what must not be shown or exposed.
 
 Do not turn these questions into implementation tasks or evidence.
 
@@ -144,6 +145,10 @@ different question set. A settings page may need field scope and validation;
 a workbench may need visible objects, state labels, source links, empty/error
 states, and recovery behavior; an agent capability may need invocation surface,
 readiness state, fallback behavior, and how the user can tell the agent used it.
+For interface-heavy goals, avoid a single vague "UI/UX is good" criterion. Split
+experience acceptance into concrete user judgments: where the user enters, what
+they scan first, what states they see, what feedback follows an action, how
+failures recover, and what would count as confusing or out of bounds.
 Ask fewer, sharper questions when the user already provided enough detail.
 
 ## State Writes
@@ -183,6 +188,7 @@ Match the reply language to the Nori Contract presentation language when it is k
 
 - Do not accept generic criteria such as "modify fields" or "show an error" until field scope, validation, success, persistence, failure, and review method are clear enough for the user to judge.
 - Do not accept abstract criteria such as "overall situation", "long-term assets", "project memory", "knowledge candidates", "capabilities", or "result changes" until the exact visible objects, states, source links, failure/recovery behavior, and boundaries are clear enough for the user to judge.
+- Do not accept interface goals that only cover data, backend state, or happy-path function. Visible UI goals also need user-experience acceptance for navigation, hierarchy, states, feedback, readability, consistency, and recovery unless the user explicitly declares those out of scope.
 - Do not make tests, modules, files, commands, Skills, libraries, architecture, or build-vs-buy decisions into Product AC.
 - Do not treat brainstorm output, discovery questions, candidate goals, or agent assumptions as a Nori Contract.
 - Do not treat autogoal output as a different contract type. If autogoal is used, the user still approves or revises a standard Nori Contract Draft.

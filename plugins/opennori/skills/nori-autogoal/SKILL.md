@@ -30,10 +30,11 @@ Do not output an "Autogoal Contract", MVP scope, first version, prototype, imple
 5. Read the user's rough idea, any stated constraints, Nori Profile preferences, and relevant project context such as README, product docs, existing UI/API surfaces, and nearby source files.
 6. Preserve the user's full intended product closure. If the idea is broad, do not reduce it to a smaller MVP. Express the full closure through the contract's goal and AC.
 7. Do internal acceptance discovery yourself: entrypoint, user operation, concrete objects, success signal, persistence/recovery, failure behavior, boundary, and review method.
-8. Convert reasonable inferences into assumptions instead of making the user answer a long questionnaire.
-9. Ask the user only questions that would change the completion definition. Do not ask implementation, library, file, architecture, or sequencing questions here.
-10. When enough information exists, create a temporary NoriBrief JSON and run `opennori draft --brief <brief.json> --root <repo> --json`. The resulting artifact is a standard draft Nori Contract.
-11. Show the draft using the standard `nori-acceptance` reply shape and ask the user to approve or revise. Do not ask the user to approve autogoal notes.
+8. For visible interface goals such as pages, apps, dashboards, desktops, workbenches, forms, settings screens, and admin consoles, include user-experience acceptance. Cover entry and navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability and scanability, visual and interaction consistency, recovery paths, and UI boundaries. Do not collapse this into one vague "UI looks good" check.
+9. Convert reasonable inferences into assumptions instead of making the user answer a long questionnaire.
+10. Ask the user only questions that would change the completion definition. Do not ask implementation, library, file, architecture, or sequencing questions here.
+11. When enough information exists, create a temporary NoriBrief JSON and run `opennori draft --brief <brief.json> --root <repo> --json`. The resulting artifact is a standard draft Nori Contract.
+12. Show the draft using the standard `nori-acceptance` reply shape and ask the user to approve or revise. Do not ask the user to approve autogoal notes.
 
 Useful state commands:
 
@@ -141,6 +142,7 @@ Keep any autogoal notes short and clearly secondary. The user is approving the N
 - Do not create a new "Autogoal Contract" format.
 - Do not output MVP, first version, prototype, happy-path subset, phase list, task list, implementation plan, or roadmap as the final artifact unless the user explicitly asks for a prototype or demo.
 - Do not shrink a broad idea for agent convenience. If implementation is large, that affects later execution order, not the completion definition.
+- Do not generate only functional/data/status AC for a user-visible interface. Autogoal must include concrete UX acceptance dimensions for navigation, hierarchy, states, feedback, readability, consistency, recovery, and UI boundaries when the goal includes a page, app, Dashboard, Desktop, workbench, form, or settings/admin screen.
 - Do not make architecture, libraries, files, commands, Skills, tests, or build-vs-buy choices into Product AC.
 - Do not ask implementation questions in autogoal. Architecture and build-vs-buy are handled after Product AC approval.
 - Do not ask the user a full questionnaire when reasonable assumptions can be made. Ask only questions that change completion meaning.
