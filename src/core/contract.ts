@@ -78,6 +78,8 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
         acceptanceBasis: "验收基础",
         status: "状态",
         summary: "摘要",
+        assumptions: "假设",
+        openQuestions: "开放问题",
         none: "<无>",
         profile: "Nori Profile",
         criteria: "用户验收标准",
@@ -95,6 +97,8 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
         acceptanceBasis: "Acceptance Basis",
         status: "Status",
         summary: "Summary",
+        assumptions: "Assumptions",
+        openQuestions: "Open Questions",
         none: "<none>",
         profile: "Nori Profile",
         criteria: "User Acceptance Criteria",
@@ -104,6 +108,20 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
         rule: "Rule",
         progressRule: "Progress is determined by acceptance evidence, not by implementation steps."
       };
+  const basis = contract.acceptance_basis || { status: "draft" };
+  const basisLines = [
+    `${labels.status}: ${basis.status || "draft"}`,
+    basis.summary ? `${labels.summary}: ${basis.summary}` : `${labels.summary}: ${labels.none}`
+  ];
+  const assumptions = Array.isArray(basis.assumptions) ? basis.assumptions.map((item) => String(item).trim()).filter(Boolean) : [];
+  const openQuestions = Array.isArray(basis.open_questions) ? basis.open_questions.map((item) => String(item).trim()).filter(Boolean) : [];
+  if (assumptions.length > 0) {
+    basisLines.push("", `${labels.assumptions}:`, ...assumptions.map((item) => `- ${item}`));
+  }
+  if (openQuestions.length > 0) {
+    basisLines.push("", `${labels.openQuestions}:`, ...openQuestions.map((item) => `- ${item}`));
+  }
+
   const lines = [
     `# ${contract.goal_id} ${labels.title}`,
     "",
@@ -117,8 +135,7 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
     "",
     `## ${labels.acceptanceBasis}`,
     "",
-    `${labels.status}: ${contract.acceptance_basis?.status || "draft"}`,
-    contract.acceptance_basis?.summary ? `${labels.summary}: ${contract.acceptance_basis.summary}` : `${labels.summary}: ${labels.none}`,
+    ...basisLines,
     "",
     `## ${labels.profile}`,
     "",

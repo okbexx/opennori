@@ -11,7 +11,7 @@ Language: en
 ## Acceptance Basis
 
 Status: approved
-Summary: User revised AC-P-12: existing-project AC quality review is Skill-driven, not a CLI word-list audit.
+Summary: User approved adding autogoal as a standard Nori Contract drafting capability.
 
 ## Nori Profile
 
@@ -77,6 +77,7 @@ Summary: User revised AC-P-12: existing-project AC quality review is Skill-drive
 | AC-D-3 | acceptance | 作为用户，我打开 OpenNori dashboard 观察 agent 执行时，首屏就能看出当前 agent 是否正在活动、使用哪个 Skill、正在推进哪个验收缺口，以及活动是否已经过期；我不需要展开详情面板或阅读事件日志才能判断当前执行态。 | 启动 dashboard，分别模拟 active activity、waiting user、expired/idle activity，在桌面和窄屏截图中查看首屏状态。 | 首屏有清晰的 live activity 主视觉：显示 agent/Skill、state、summary、current gap、last seen 或 stale 标记；active/verifying 有明显但不过度的动效，idle/expired 降低视觉权重；不新增聊天记录、过程任务列表、证据账本或完成权威入口。 | passing |
 | AC-D-4 | acceptance | 作为用户，我在 OpenNori dashboard 看到需要用户介入时，页面只告诉我应该回到 agent 对话里确认、修改或豁免，而不会提供 dashboard 内的确认、拒绝、waive 或写状态按钮。 | 启动 dashboard，制造 need_user / waiting_user 状态，检查页面首屏和控制区；同时对常见确认型 dashboard API 路径发送 POST。 | 页面清楚显示 dashboard 是 observation surface / reply in agent chat；可见控件只用于刷新或查看快照；POST /api/confirm、/api/approve、/api/waive、/api/evidence、/api/activity 等控制型请求返回 method_not_allowed；Product AC、evidence、profile、architecture 和 report 状态只能由 agent 对话中的 OpenNori Skill/CLI 路径写入。 | passing |
 | AC-Z-21 | productization | 作为用户，我对 agent 说“验收标准用中文”或“write this contract in English”后，能在 agent 展示的发现问题、Nori Contract、status/report 摘要和下一轮候选目标中看到我要求的语言；如果我已经有一份批准过的契约，OpenNori 不会在我未确认时把它改成另一种语言。 | 在对话或命令输出中分别生成中文和英文的 brainstorm、discover、draft、status/report/next-candidate 内容；再用一个已有 current contract 做普通证据写入和显式语言确认，观察可读契约标题、字段说明和报告/候选目标语言变化。 | 新目标的可读内容按用户要求显示中文或英文；用户不需要记忆底层参数；旧 contract 在普通 status/report/check/evidence 写入后仍保持原展示语言；只有用户明确批准改变展示语言后，后续契约和报告才显示新语言；底层协议字段保持稳定，不影响 agent 继续读取状态。 | passing |
+| AC-O-9 | operator | 作为用户，我给 agent 一个粗略 idea 并要求使用 OpenNori autogoal 后，最终看到并批准的是标准 Nori Contract Draft，而不是新的 autogoal 专用产物、MVP/第一版/原型、过程计划或任务列表。 | 用户在 Codex 对话中说“用 OpenNori autogoal 把这个 idea 变成可验收目标”，agent 读取项目上下文并输出标准 Nori Contract Draft；用户检查 packaged Skills、Plugin manifest、README/protocol 和生成的 draft 形态。 | autogoal 由 packaged Skill 驱动，并明确要求保持用户完整意图、不把大目标降级为 MVP/第一版/原型；输出形态与手动多轮澄清后的 Nori Contract Draft 一致，包含 Goal、用户视角 AC、Measure/Passes when、假设和只影响完成定义的问题；approve 后进入普通 OpenNori current gap/evidence/status/report 生命周期；CLI 只保存标准 draft 或 brief source，不把主观 AC 质量写成硬 validator。 | passing |
 
 ## Rule
 

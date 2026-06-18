@@ -239,6 +239,7 @@ export type NextGoalCandidate = {
 
 export type AgentSkill =
   | "nori"
+  | "nori-autogoal"
   | "nori-acceptance"
   | "nori-architecture-apply"
   | "nori-architecture-brainstorm"

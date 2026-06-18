@@ -31,6 +31,7 @@
     "websiteURL": "https://opennori.dev/",
     "defaultPrompt": [
       "Set up OpenNori for this project.",
+      "Use OpenNori autogoal to turn this rough idea into a Nori Contract.",
       "Use OpenNori to turn this goal into acceptance criteria.",
       "Continue the current OpenNori goal.",
       "Is this OpenNori goal complete yet?",

@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User revised AC-P-12: existing-project AC quality review is Skill-driven, not a CLI word-list audit.",
-      "approved_at": "2026-06-18T02:45:57.612Z"
+      "summary": "User approved adding autogoal as a standard Nori Contract drafting capability.",
+      "approved_at": "2026-06-18T06:57:07.364Z"
     },
     "criteria": [
       {
@@ -513,6 +513,15 @@
         "threshold": "新目标的可读内容按用户要求显示中文或英文；用户不需要记忆底层参数；旧 contract 在普通 status/report/check/evidence 写入后仍保持原展示语言；只有用户明确批准改变展示语言后，后续契约和报告才显示新语言；底层协议字段保持稳定，不影响 agent 继续读取状态。",
         "required": true,
         "risk": "medium"
+      },
+      {
+        "id": "AC-O-9",
+        "layer": "operator",
+        "user_story": "作为用户，我给 agent 一个粗略 idea 并要求使用 OpenNori autogoal 后，最终看到并批准的是标准 Nori Contract Draft，而不是新的 autogoal 专用产物、MVP/第一版/原型、过程计划或任务列表。",
+        "measurement": "用户在 Codex 对话中说“用 OpenNori autogoal 把这个 idea 变成可验收目标”，agent 读取项目上下文并输出标准 Nori Contract Draft；用户检查 packaged Skills、Plugin manifest、README/protocol 和生成的 draft 形态。",
+        "threshold": "autogoal 由 packaged Skill 驱动，并明确要求保持用户完整意图、不把大目标降级为 MVP/第一版/原型；输出形态与手动多轮澄清后的 Nori Contract Draft 一致，包含 Goal、用户视角 AC、Measure/Passes when、假设和只影响完成定义的问题；approve 后进入普通 OpenNori current gap/evidence/status/report 生命周期；CLI 只保存标准 draft 或 brief source，不把主观 AC 质量写成硬 validator。",
+        "required": true,
+        "risk": "high"
       }
     ]
   },
@@ -520,7 +529,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-18T02:52:39.807Z",
+    "updated_at": "2026-06-18T07:11:52.007Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -6052,6 +6061,79 @@
             "limitations": "This verifies deterministic OpenNori surfaces and local website text; changing existing contract wording still requires the agent/user to revise visible prose, not an automatic translation adapter.",
             "gate": "accepted",
             "created_at": "2026-06-17T10:39:36.322Z"
+          }
+        ]
+      },
+      "AC-O-9": {
+        "status": "passing",
+        "confidence": "verified",
+        "required": true,
+        "risk": "high",
+        "evidence": [
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "OpenNori autogoal is implemented as a packaged Skill-driven convergence mode that outputs the standard Nori Contract Draft. The root and acceptance Skills route rough-idea/autogoal requests to nori-autogoal, the new Skill instructs agents to preserve the full idea and avoid MVP/phase/task-list downgrades, draft --brief renders assumptions and open questions in ordinary acceptance markdown, and README plus the public site explain the user-facing behavior.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "architecture-apply",
+                "label": "ac-o-9-autogoal-standard-contract-draft",
+                "path": "/Users/jarl/code/jarlone/opennori/.opennori/architecture/evidence/ac-o-9-autogoal-standard-contract-draft.json",
+                "role": "context",
+                "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "command",
+                "label": "pnpm build (opennori-site)",
+                "command": "pnpm build (opennori-site)"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-autogoal/SKILL.md",
+                "path": "plugins/opennori/skills/nori-autogoal/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/contract.ts",
+                "path": "src/core/contract.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+                "path": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+              }
+            ],
+            "reviewability": "Rerun npm run check in /Users/jarl/code/jarlone/opennori, rerun pnpm build in /Users/jarl/code/jarlone/opennori-site, inspect the packaged nori-autogoal/root/acceptance Skills, and inspect the core.test autogoal brief case showing a normal Nori Contract Draft with assumptions and open questions.",
+            "limitations": "This verifies local implementation, packaged Skill behavior text, CLI standard draft rendering, README, and site content. It does not publish a new npm package or deploy the website in this slice, and future agent output quality still depends on the loaded Skill and user approval.",
+            "gate": "accepted",
+            "created_at": "2026-06-18T07:11:52.007Z"
           }
         ]
       }

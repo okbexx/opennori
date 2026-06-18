@@ -219,6 +219,7 @@ behavior protocols, not CLI manuals for users. The user should not need to remem
 command flags; the root `nori` Skill routes natural-language requests to focused Skills:
 
 - `nori`: root router for OpenNori turns
+- `nori-autogoal`: converge a rough idea into a standard Nori Contract Draft without creating a separate autogoal artifact
 - `nori-acceptance`: discover AC gaps, brainstorm, draft, approve, and revise human-facing ACs
 - `nori-evidence`: record reviewable evidence without forcing fixed adapters
 - `nori-capability-profile`: record required Skills, preferred stacks, avoided tools, and install policy
@@ -421,6 +422,7 @@ summaries.
 On every turn:
 
 1. If the user gives a fuzzy goal or candidate AC, run `opennori discover --goal "<goal>" --root <repo> --json` before drafting.
+1a. If the user asks for autogoal or wants fewer clarification rounds from a rough idea, use `nori-autogoal`: the Skill reads context, preserves the full user intent, infers assumptions, asks only completion-changing questions, and creates a standard Nori Contract Draft through `opennori draft --brief`. Autogoal is not a new contract type and must not shrink a broad idea into MVP, first version, prototype, phases, or task lists.
 2. Ask only the discovery questions that affect completion judgment. Do not turn discovery gaps into implementation tasks or completion evidence.
 3. If the user wants to discuss, brainstorm, explore, or is not ready to define acceptance criteria, run `opennori brainstorm --idea "<idea>" --root <repo> --json`.
 4. Show only candidate acceptance directions and ask the user to choose or revise a direction. Brainstorm output is not a contract or completion evidence.
@@ -449,6 +451,7 @@ Useful commands:
 
 - `opennori brainstorm --idea "<idea>" --root <repo>`: create selectable acceptance directions before a contract exists.
 - `opennori discover --goal "<goal>" --root <repo>`: create a question source before drafting a contract; the agent still decides which questions matter for the user.
+- `opennori draft --brief <brief.json> --root <repo>`: create a standard draft Nori Contract from a Skill-prepared brief, including autogoal convergence output.
 - `opennori draft --goal "<goal>" --root <repo>`: create a draft Nori Contract that needs user approval.
 - `opennori draft --from-brainstorm <brainstorm-id> --candidate <A|B|C> --root <repo>`: convert a selected brainstorm direction into a draft contract.
 - `opennori approve --root <repo>`: mark the acceptance basis as approved so completion can be decided.

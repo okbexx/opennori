@@ -9,6 +9,8 @@ Help the agent and user define what "done" means from the human user's point of 
 
 Good AC says what entry the user uses, what operation or judgment they perform, what result they see, and how they can decide it is acceptable. It does not describe the agent's implementation path.
 
+When the user explicitly asks for autogoal or wants OpenNori to derive a full contract from a rough idea with fewer clarification rounds, hand off to `nori-autogoal`. Autogoal still produces the same standard Nori Contract Draft; it is not a separate artifact type.
+
 When the root `nori` Skill or CLI JSON reports `data.agent_next.state: initialized_no_active_contract`, treat that as the normal starting point for this Skill. The project is ready; it needs a human-centered Nori Contract, not lifecycle repair. If the user already stated a goal earlier in the same conversation, use that goal instead of asking them to repeat it.
 
 AC quality is a Skill responsibility, not a CLI validator. Do not wait for
@@ -56,6 +58,7 @@ Useful state commands:
 ## Natural-Language Mapping
 
 - "I want to build X" -> discover missing acceptance details, then draft Product AC.
+- "Use OpenNori autogoal", "用 OpenNori autogoal", or "I only have a rough idea" -> hand off to `nori-autogoal` for Skill-driven convergence into a standard Nori Contract Draft.
 - "Use Chinese AC", "验收标准用中文", "write this contract in English" -> keep the user-visible goal, discovery questions, AC, and next-candidate draft in that language by passing the matching `--language`; protocol field names remain stable English.
 - "Change this existing contract to Chinese/English" -> explain that existing approved/current contracts are not silently translated; revise any visible wording that needs translation, then ask for approval and use `approve --no-from-draft --language ...`.
 - "Brainstorm this idea" -> produce selectable acceptance directions; ask which direction should become the contract.
@@ -147,6 +150,7 @@ Match the reply language to the Nori Contract presentation language when it is k
 - Do not accept abstract criteria such as "overall situation", "long-term assets", "project memory", "knowledge candidates", "capabilities", or "result changes" until the exact visible objects, states, source links, failure/recovery behavior, and boundaries are clear enough for the user to judge.
 - Do not make tests, modules, files, commands, Skills, libraries, architecture, or build-vs-buy decisions into Product AC.
 - Do not treat brainstorm output, discovery questions, candidate goals, or agent assumptions as a Nori Contract.
+- Do not treat autogoal output as a different contract type. If autogoal is used, the user still approves or revises a standard Nori Contract Draft.
 - Do not accept a draft from a candidate if its measurement or threshold only says to follow the candidate direction; revise it into user actions, visible results, report/evidence review, or friction judgment before asking for approval.
 - Do not use `draft --from-next-candidate` unless the source goal is already `ready-for-next-loop`; if the command returns completion or evidence review risk, handle that risk before continuing.
 - Do not claim completion from AC quality alone; completion still requires reviewable evidence.

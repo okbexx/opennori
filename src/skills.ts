@@ -11,6 +11,7 @@ export const OPENNORI_PLUGIN_SKILLS_DIR = path.join(OPENNORI_PLUGIN_ROOT, "skill
 const SKILLS_DIR = OPENNORI_PLUGIN_SKILLS_DIR;
 const PREFERRED_SKILL_ORDER = [
   "nori",
+  "nori-autogoal",
   "nori-acceptance",
   "nori-evidence",
   "nori-capability-profile",

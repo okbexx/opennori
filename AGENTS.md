@@ -56,6 +56,8 @@ user natural-language goal
   -> user judges completion from status/report
 ```
 
+Autogoal is only a Skill-driven way to reach the same standard Nori Contract Draft from a rough idea. Do not introduce an Autogoal Contract type or a separate output workflow. Autogoal must preserve the user's full idea, avoid MVP/first-version/prototype/phase/task-list framing, infer reasonable assumptions, ask only completion-changing questions, and then write a normal draft through the existing OpenNori draft state path.
+
 Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, or implementation tasks into user AC. They can influence Nori Profile, Architecture Baseline, evidence risk, or recovery guidance, but Product AC must remain human-visible operations or judgments.
 
 Contract language preference is presentation metadata, not Product AC. New
