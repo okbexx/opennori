@@ -1322,6 +1322,7 @@ test("kernel events activity and snapshot expose dashboard state without replaci
   assert.equal(started.data.activity.agent, "Codex");
   assert.equal(started.data.snapshot.agent.state, "verifying");
   assert.equal(started.data.snapshot.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(readEvents(root).some((event) => event.type === "ac.started" && event.gap_id === "ACCEPTANCE-BASIS"), true);
 
   const heartbeat = await runActivityHeartbeatCommand(["--root", root, "--agent", "Codex", "--state", "working", "--json"]);
   assert.equal(heartbeat.data.activity.state, "working");
@@ -1331,6 +1332,7 @@ test("kernel events activity and snapshot expose dashboard state without replaci
 
   const finished = await runActivityFinishCommand(["--root", root, "--summary", "Done for now.", "--json"]);
   assert.equal(finished.data.activity.state, "idle");
+  assert.equal(readEvents(root).some((event) => event.type === "ac.finished" && event.gap_id === "ACCEPTANCE-BASIS"), true);
 
   const snapshot = refreshSnapshot(root, { goalId: "module-goal" });
   assert.equal(snapshot.goal.id, "module-goal");
@@ -1383,6 +1385,8 @@ test("activity commands infer the unique current gap for dashboard publishing on
   assert.equal(finished.ok, true);
   assert.equal(finished.data.activity.state, "idle");
   assert.equal(fs.readFileSync(evidencePath, "utf8"), before);
+  assert.equal(readEvents(root).some((event) => event.type === "ac.started" && event.gap_id === "AC-1"), true);
+  assert.equal(readEvents(root).some((event) => event.type === "ac.finished" && event.gap_id === "AC-1"), true);
   assert.equal(readEvents(root).some((event) => event.type === "activity.started"), true);
   assert.equal(readEvents(root).some((event) => event.type === "evidence.added"), false);
 });
@@ -1568,6 +1572,33 @@ test("dashboard SSE emits generic and typed event frames", async () => {
 
   assert.match(responseText, /(^|\n)id: 1\ndata: /);
   assert.match(responseText, /\nevent: dashboard\.started\n/);
+});
+
+test("dashboard SSE stays read-only and does not refresh snapshot on heartbeat", async () => {
+  const root = tempRoot();
+  const handle = await startDashboardServer({ root, port: 0, open: false });
+  const currentSnapshotPath = snapshotPath(root);
+  fs.rmSync(currentSnapshotPath, { force: true });
+
+  let heartbeatSeen = false;
+  const request = http.get(`${handle.url}api/events?after=1`, (response) => {
+    response.setEncoding("utf8");
+    response.on("data", (chunk) => {
+      if (chunk.includes(": heartbeat")) {
+        heartbeatSeen = true;
+        request.destroy();
+        handle.server.close();
+      }
+    });
+  });
+
+  await new Promise((resolve, reject) => {
+    request.on("close", resolve);
+    request.on("error", reject);
+  });
+
+  assert.equal(heartbeatSeen, true);
+  assert.equal(fs.existsSync(currentSnapshotPath), false);
 });
 
 test("archive command module moves complete goals and preserves a report", async () => {

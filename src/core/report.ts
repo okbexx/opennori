@@ -91,6 +91,13 @@ function architectureReviewActions(architecture: ArchitectureState): string[] {
   ];
 }
 
+function reviewRiskSkill(input: {
+  acceptanceReview: AcceptanceQualityAudit;
+}): AgentSkill {
+  if (input.acceptanceReview.status !== "clear") return "nori-acceptance";
+  return "nori-reporting";
+}
+
 function goalLabel(goal: string): string {
   const normalized = goal.replace(/\s+/g, " ").trim();
   if (normalized.length <= 96) return normalized;
@@ -454,7 +461,7 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
     const actions: string[] = [];
     if (acceptanceReview.status !== "clear") {
       actions.push("Show acceptance_review findings to the user.");
-      actions.push("Ask the user to revise the affected criteria, confirm assumptions, or accept the remaining review risk.");
+      actions.push("Use nori-acceptance to ask the concrete missing acceptance questions, then revise the affected criteria, record explicit assumptions, or ask the user to accept the remaining review risk.");
     }
     if (health.status !== "clear") {
       actions.push("Review evidence_health findings.");
@@ -475,6 +482,7 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
     return {
       status: "completion-review-required",
       focus: null,
+      recommended_skill: reviewRiskSkill({ acceptanceReview }),
       summary: `All required ACs have passing or waived evidence, but completion has review risk: ${reviewRisks.join(", ")}.`,
       actions
     };

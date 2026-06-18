@@ -27,7 +27,7 @@ A fresh `opennori init` normally creates empty `.opennori/current`, `.opennori/d
 6. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no approved current contract, then hand off to `nori-acceptance`.
 7. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, syncs plugin cache, or deletes state.
 8. After upgrade or repair, run `opennori check --root <repo> --json` and route soft review findings to the relevant Skill.
-9. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live health activity while diagnosing or recovering bundle readiness. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-project-health --state working --summary "..." --json`.
+9. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live health activity while diagnosing or recovering bundle readiness for that current state: start before health work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-project-health --state working --summary "..." --json`. Do not invent activity for setup/init preview, no-current-goal state, or drafts.
 
 Useful state commands:
 
@@ -47,7 +47,7 @@ Useful state commands:
 - `opennori uninstall --root <repo> --include-state --confirm --json`
 - `opennori doctor --root <repo> --json`
 - `opennori check --root <repo> --json`
-- `opennori activity start|heartbeat|finish --root <repo> --skill nori-project-health --state working --summary "..." --json` (optional dashboard signal)
+- `opennori activity start|heartbeat|finish --root <repo> --skill nori-project-health --state working --summary "..." --json` (required dashboard signal when the dashboard is observed and a current goal/gap exists; do not bind setup/init previews or drafts)
 
 ## Natural-Language Mapping
 
@@ -66,7 +66,7 @@ Useful state commands:
 
 May write manifest, protocol, agent guide, lifecycle-managed `.opennori/` assets, and uninstall removals after confirmation. It may not silently rewrite current Product AC, evidence, profile, architecture decisions, or reports as a side effect of health checks.
 
-May write live dashboard activity for health diagnosis or recovery. Activity is not lifecycle confirmation, not recovery evidence, and not Product AC evidence. Do not ask the user to confirm setup, init, upgrade, uninstall, waiver, or recovery actions inside the dashboard; show the preview in conversation and record explicit approval through the CLI path.
+Must write live dashboard activity for health diagnosis or recovery when the dashboard is observed and a current goal/gap exists. Activity is not lifecycle confirmation, not recovery evidence, and not Product AC evidence. Do not ask the user to confirm setup, init, upgrade, uninstall, waiver, or recovery actions inside the dashboard; show the preview in conversation and record explicit approval through the CLI path.
 
 ## Handoffs
 

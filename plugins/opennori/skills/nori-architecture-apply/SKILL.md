@@ -13,7 +13,7 @@ This Skill is for agent behavior during implementation. It is not an architectur
 
 1. Run `opennori status --root <repo> --json` and identify current Product AC gap.
 2. Run `opennori architecture show --root <repo> --json` or read `.opennori/architecture/baseline.md`.
-3. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live activity. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-apply --state working --summary "..." --json` and let the CLI infer the unique current goal/gap.
+3. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live activity while applying the baseline: start before implementation/alignment work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-apply --state working --summary "..." --json` and let the CLI infer the unique current goal/gap.
 4. Compare the intended code change with baseline principles, directory boundaries, dependency policy, preferred libraries, avoid rules, and build-vs-buy policy.
 5. If the change fits, record an architecture apply record for the current AC gap, then read the returned `data.agent_next`.
 6. If it conflicts, stop implementation and create an Architecture Challenge.
@@ -24,7 +24,7 @@ Useful state commands:
 - `opennori status --root <repo> --json`
 - `opennori architecture show --root <repo> --json`
 - `opennori architecture apply --root <repo> --goal <goal-id> --criterion <ac-id> --summary "..." --fit "..." --implementation-focus "..." --json`
-- `opennori activity start|heartbeat|finish --root <repo> --skill nori-architecture-apply --state working --summary "..." --json` (optional dashboard signal; goal/gap can be inferred when unique)
+- `opennori activity start|heartbeat|finish --root <repo> --skill nori-architecture-apply --state working --summary "..." --json` (required dashboard signal when the dashboard is observed and a current goal/gap exists; goal/gap can be inferred when unique)
 - `opennori context export --root <repo> --json`
 
 ## Natural-Language Mapping
@@ -38,7 +38,7 @@ Useful state commands:
 
 May write architecture apply records under `.opennori/architecture/evidence/`. These records document baseline alignment for an acceptance gap; they are not Product AC evidence and must not mark an AC passing by themselves. Delegate Product AC evidence, challenges, build-vs-buy decisions, and reporting writes to the responsible Skills.
 
-May publish live activity for the dashboard, preferably from `agent_next.dashboard_activity` command templates when present. Activity is not architecture evidence and must not replace apply records or Product AC evidence.
+Must publish live activity for the dashboard when the dashboard is observed and a current goal/gap exists, preferably from `agent_next.dashboard_activity` command templates when present. Activity is not architecture evidence and must not replace apply records or Product AC evidence.
 
 ## Handoffs
 

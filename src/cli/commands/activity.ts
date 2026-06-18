@@ -95,11 +95,15 @@ function activityPayload(root: string, args: Record<string, any>, action: "start
           gap_id: args.gap ? String(args.gap) : target?.gap_id || undefined,
           summary: args.summary ? String(args.summary) : undefined
         })
-      : writeActivity(root, {
-          ...activityInput(args),
-          goal_id: args.goal ? String(args.goal) : target?.goal_id,
-          gap_id: args.gap ? String(args.gap) : target?.gap_id || undefined
-        });
+      : writeActivity(
+          root,
+          {
+            ...activityInput(args),
+            goal_id: args.goal ? String(args.goal) : target?.goal_id,
+            gap_id: args.gap ? String(args.gap) : target?.gap_id || undefined
+          },
+          { mode: action }
+        );
     const snapshot = refreshSnapshot(root, { goalId: activity.goal_id });
     return ok({
       activity,

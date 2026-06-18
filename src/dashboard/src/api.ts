@@ -1,4 +1,4 @@
-import type { NoriSnapshot, SnapshotResponse } from "./types";
+import type { NoriEvent, NoriSnapshot, SnapshotResponse } from "./types";
 
 export async function fetchSnapshot(): Promise<NoriSnapshot> {
   const response = await fetch("/api/snapshot", {
@@ -14,10 +14,25 @@ export async function fetchSnapshot(): Promise<NoriSnapshot> {
   return payload.data;
 }
 
-export function subscribeToEvents(onEvent: () => void, onError: () => void): () => void {
+export function subscribeToEvents(onEvent: (event: NoriEvent | null) => void, onError: () => void): () => void {
   const source = new EventSource("/api/events");
-  source.onopen = onEvent;
-  source.onmessage = onEvent;
+  let lastSeenSeq = 0;
+  const handleEventMessage = (message: MessageEvent<string>) => {
+    try {
+      const event = JSON.parse(message.data) as NoriEvent;
+      if (Number(event.seq || 0) <= lastSeenSeq) return;
+      lastSeenSeq = Number(event.seq || 0);
+      onEvent(event);
+    } catch {
+      onEvent(null);
+    }
+  };
+  source.onopen = () => onEvent(null);
+  source.onmessage = handleEventMessage;
+  source.addEventListener("ac.started", handleEventMessage);
+  source.addEventListener("activity.started", handleEventMessage);
+  source.addEventListener("activity.heartbeat", handleEventMessage);
+  source.addEventListener("activity.finished", handleEventMessage);
   source.onerror = onError;
   return () => source.close();
 }

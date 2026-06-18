@@ -520,7 +520,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-17T10:39:36.323Z",
+    "updated_at": "2026-06-17T14:56:03.296Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -720,6 +720,59 @@
             "limitations": "This proves the current OpenNori semantics locally; future new review surfaces still need the same boundary audit.",
             "gate": "accepted",
             "created_at": "2026-06-14T01:35:42.092Z"
+          },
+          {
+            "kind": "acceptance-quality-gate",
+            "basis": "tool-observation",
+            "summary": "OpenNori check now surfaces abstract product ACs as acceptance_review findings and routes completion review back to nori-acceptance instead of ordinary reporting.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "command",
+                "label": "node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json",
+                "command": "node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json"
+              },
+              {
+                "type": "artifact",
+                "label": "src/acceptance.ts",
+                "path": "src/acceptance.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/report.ts",
+                "path": "src/core/report.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/check.ts",
+                "path": "src/cli/commands/check.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+                "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+              }
+            ],
+            "reviewability": "Rerun npm run check, then run the AW check command and confirm acceptance_review reports AC-2 through AC-7 concrete questions with agent_next.recommended_skill set to nori-acceptance.",
+            "limitations": "This remains a heuristic review surface, not a hard validator; user or agent judgment is still required to revise or accept remaining AC quality risk.",
+            "gate": "accepted",
+            "created_at": "2026-06-17T14:56:03.185Z"
           }
         ]
       },
@@ -1615,6 +1668,39 @@
             "limitations": "This improves heuristic discovery for settings/profile goals and generic drafts; future domain-specific goal types still need their own discovery coverage.",
             "gate": "accepted",
             "created_at": "2026-06-15T08:20:44.679Z"
+          },
+          {
+            "kind": "existing-contract-ac-quality-review",
+            "basis": "tool-observation",
+            "summary": "Existing current contracts with broad workbench ACs are now audited without rewriting history: AW remains objectively complete but is marked completion_needs_review with 7 acceptance_review findings.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json",
+                "command": "node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": "/Users/jarl/code/jarlone/agent-workbench/.opennori/current/aw-long-term-product-goal.acceptance.md",
+                "path": "/Users/jarl/code/jarlone/agent-workbench/.opennori/current/aw-long-term-product-goal.acceptance.md"
+              }
+            ],
+            "reviewability": "Run the AW check command and inspect AC-2 broad-overview-scope, AC-3 asset-scope-underspecified, AC-4 memory-context-scope, AC-5 knowledge-state-scope, AC-6 capability-scope, and AC-7 result-change-scope plus measurement-review-method-unclear.",
+            "limitations": "The check highlights review questions and routing; it does not mutate the AW contract or decide the revised AC wording for the user.",
+            "gate": "accepted",
+            "created_at": "2026-06-17T14:56:03.296Z"
           }
         ]
       },

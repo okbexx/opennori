@@ -15,7 +15,8 @@ Reporting is not an implementation diary.
 2. Prefer resume/status for current state, report for a durable human report, changes for diff grouping, and context export when another tool needs review context.
 3. Read completion, current_gap, acceptance_review, evidence_health, profile_review, architecture decision, build_vs_buy health, agent_next, and next_recommendation.
 4. If the user asked to continue, follow `agent_next` routing and its `candidate_goals` instead of stopping at a status dump.
-5. If the user wants a visual live view, use `opennori dashboard --root <repo>` as an observation surface, but keep the completion answer based on status/report data.
+5. If `agent_next.state` is `completion_needs_review` and `agent_next.recommended_skill` is `nori-acceptance`, do not present this as normal completion acceptance. Say the evidence is objectively complete but the AC wording needs user review, list the concrete acceptance questions, and hand off to `nori-acceptance`.
+6. If the user wants a visual live view, use `opennori dashboard --root <repo>` as an observation surface, but keep the completion answer based on status/report data.
 
 Useful state commands:
 
@@ -38,6 +39,7 @@ Useful state commands:
 - "Continue" after a complete goal -> inspect `agent_next.candidate_goals`, choose or refine the strongest human-facing next goal, then hand off to `nori-acceptance`.
 - "Export for review" -> use context export and state what the reviewer can inspect.
 - "Open dashboard" or "watch it run" -> start the local dashboard and explain that it observes activity, current gap, architecture, user-intervention needs, and completion judgment without certifying completion or hosting confirmation controls.
+- Acceptance review is the only remaining review risk and `agent_next.recommended_skill` is `nori-acceptance` -> lead with "objectively evidenced, not confidently acceptable yet", then route to AC revision instead of asking for a blind risk acceptance.
 
 ## State Writes
 
@@ -75,5 +77,6 @@ Then add short evidence or risk bullets only when they affect acceptance.
 - Do not describe implementation details as the main progress signal.
 - Do not treat candidate goals as approved AC, phases, task lists, or evidence.
 - Do not hide review-risk completion behind a simple "done".
+- Do not ask the user to accept an AC quality risk before showing the concrete missing acceptance questions and offering revision through `nori-acceptance`.
 - Do not treat dashboard activity, events, or snapshots as completion evidence.
 - Do not treat dashboard as a control surface. It can show "Need user"; the user decision is still made in conversation and written by CLI.

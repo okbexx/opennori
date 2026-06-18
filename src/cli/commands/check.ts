@@ -35,7 +35,7 @@ export const checkCommand = defineCommand({
       source: finding.source
     }));
     const nextActions = acceptanceReview.status === "needs-user-review"
-      ? ["Show acceptance_review questions to the user, then revise criteria, record assumptions, or accept the review risk before claiming confident completion."]
+      ? ["Use nori-acceptance to show acceptance_review questions to the user, then revise criteria, record assumptions, or accept the review risk before claiming confident completion."]
       : [];
     const architecture = architectureState(root, contract.goal_id);
     const architectureWarnings: JsonObject[] = [];

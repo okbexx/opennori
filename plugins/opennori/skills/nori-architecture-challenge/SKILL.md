@@ -16,13 +16,13 @@ A challenge is a review artifact. It does not authorize implementation drift by 
 3. Decide whether the conflict is real architecture drift or just implementation detail.
 4. Record a challenge with summary, evidence, recommendation, risk, and whether user input is needed.
 5. Stop architecture-changing work until the user confirms, revises, or waives.
-6. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live activity while preparing the challenge. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-challenge --state thinking --summary "..." --json`.
+6. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live activity while preparing the challenge: start before challenge work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-challenge --state thinking --summary "..." --json`.
 
 Useful state command:
 
 `opennori architecture challenge --root <repo> --summary "<conflict>" --evidence "<project evidence>" --recommendation "<suggested baseline change>" --json`
 
-Optional dashboard signal:
+Dashboard signal when observed:
 
 `opennori activity start|heartbeat|finish --root <repo> --skill nori-architecture-challenge --state thinking --summary "..." --json`
 
@@ -37,7 +37,7 @@ Optional dashboard signal:
 
 May write `.opennori/architecture/challenges/*` artifacts. Do not rewrite the baseline, Product AC, evidence, or profile directly.
 
-May write live dashboard activity for challenge preparation. Activity is not challenge evidence and does not authorize architecture drift.
+Must write live dashboard activity for challenge preparation when the dashboard is observed and a current goal/gap exists. Activity is not challenge evidence and does not authorize architecture drift.
 
 ## Handoffs
 

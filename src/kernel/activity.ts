@@ -48,6 +48,18 @@ function normalizeActivity(input: NoriActivityInput, previous?: NoriActivity): N
   };
 }
 
+function sameAcTarget(left?: Pick<NoriActivity, "goal_id" | "gap_id">, right?: Pick<NoriActivity, "goal_id" | "gap_id">): boolean {
+  return !!left?.goal_id && !!left?.gap_id && left.goal_id === right?.goal_id && left.gap_id === right?.gap_id;
+}
+
+function hasAcTarget(activity?: Pick<NoriActivity, "goal_id" | "gap_id">): activity is Pick<NoriActivity, "goal_id" | "gap_id"> & { goal_id: string; gap_id: string } {
+  return !!activity?.goal_id && !!activity.gap_id;
+}
+
+type WriteActivityOptions = {
+  mode?: "start" | "heartbeat";
+};
+
 type TargetCandidate = NoriActivityTarget & {
   active: boolean;
 };
@@ -144,13 +156,42 @@ export function readActivity(root: string): NoriActivity | null {
   }
 }
 
-export function writeActivity(root: string, input: NoriActivityInput): NoriActivity {
+export function writeActivity(root: string, input: NoriActivityInput, options: WriteActivityOptions = {}): NoriActivity {
   const previous = readActivity(root) || undefined;
   const activity = normalizeActivity(resolveInputTarget(root, input, previous), previous);
+  const mode = options.mode || (previous ? "heartbeat" : "start");
   fs.mkdirSync(activityDir(root), { recursive: true });
   writeJson(activityPath(root), activity);
+  if (hasAcTarget(previous) && hasAcTarget(activity) && !sameAcTarget(previous, activity)) {
+    appendEvent(root, {
+      type: "ac.finished",
+      goal_id: previous.goal_id,
+      gap_id: previous.gap_id,
+      actor: { kind: "agent", name: activity.agent, skill: activity.skill },
+      summary: `Stopped working on acceptance gap ${previous.gap_id}.`,
+      data: {
+        state: activity.state,
+        next_goal_id: activity.goal_id,
+        next_gap_id: activity.gap_id
+      }
+    });
+  }
+  if (hasAcTarget(activity) && (mode === "start" || !sameAcTarget(previous, activity))) {
+    appendEvent(root, {
+      type: "ac.started",
+      goal_id: activity.goal_id,
+      gap_id: activity.gap_id,
+      actor: { kind: "agent", name: activity.agent, skill: activity.skill },
+      summary: activity.summary || `Started working on acceptance gap ${activity.gap_id}.`,
+      data: {
+        state: activity.state,
+        previous_goal_id: previous?.goal_id,
+        previous_gap_id: previous?.gap_id
+      }
+    });
+  }
   appendEvent(root, {
-    type: previous ? "activity.heartbeat" : "activity.started",
+    type: mode === "start" ? "activity.started" : "activity.heartbeat",
     goal_id: activity.goal_id,
     gap_id: activity.gap_id,
     actor: { kind: "agent", name: activity.agent, skill: activity.skill },
@@ -172,6 +213,20 @@ export function finishActivity(root: string, input: Partial<NoriActivityInput> =
     ttl_ms: DEFAULT_TTL_MS
   }, previous), previous);
   writeJson(activityPath(root), activity);
+  if (previous?.goal_id && previous.gap_id) {
+    appendEvent(root, {
+      type: "ac.finished",
+      goal_id: previous.goal_id,
+      gap_id: previous.gap_id,
+      actor: { kind: "agent", name: activity.agent, skill: activity.skill },
+      summary: activity.summary || `Finished working on acceptance gap ${previous.gap_id}.`,
+      data: {
+        state: activity.state,
+        next_goal_id: activity.goal_id,
+        next_gap_id: activity.gap_id
+      }
+    });
+  }
   appendEvent(root, {
     type: "activity.finished",
     goal_id: activity.goal_id,

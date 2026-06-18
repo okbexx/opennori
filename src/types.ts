@@ -260,6 +260,8 @@ export type NoriEventType =
   | "contract.drafted"
   | "contract.approved"
   | "gap.changed"
+  | "ac.started"
+  | "ac.finished"
   | "activity.started"
   | "activity.heartbeat"
   | "activity.finished"

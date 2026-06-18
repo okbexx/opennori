@@ -7,6 +7,8 @@ import type { NoriEvent } from "../../types.ts";
 import { readEvents } from "../events.ts";
 import { refreshSnapshot } from "../snapshot.ts";
 
+const EVENT_STREAM_POLL_MS = 5000;
+
 export type DashboardAppOptions = {
   root: string;
   goalId?: string;
@@ -98,9 +100,8 @@ export function createDashboardApp(options: DashboardAppOptions) {
     return streamSSE(c, async (stream) => {
       await sendPendingEvents(stream, client, root);
       while (!stream.aborted) {
-        await stream.sleep(1500);
+        await stream.sleep(EVENT_STREAM_POLL_MS);
         try {
-          refreshSnapshot(root, { goalId: options.goalId });
           await sendPendingEvents(stream, client, root);
           await stream.write(": heartbeat\n\n");
         } catch {

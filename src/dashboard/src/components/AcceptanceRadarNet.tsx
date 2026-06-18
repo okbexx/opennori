@@ -57,7 +57,8 @@ function getNodeColor(status: string, type: "goal" | "ac" | "evidence"): string 
 }
 
 /* 简体中文：根据状态获取发光 className */
-function getNodePulseClass(status: string, type: "goal" | "ac" | "evidence"): string {
+function getNodePulseClass(status: string, type: "goal" | "ac" | "evidence", animate: boolean): string {
+  if (!animate) return "";
   if (type === "goal") return "pulse-cyan";
   if (type === "ac" && status === "passed_group") return "pulse-success";
 
@@ -97,6 +98,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
 
   // 简体中文：雷达辅助网的基准尺寸，取宽高的最小值
   const baseSize = Math.min(width, height);
+  const sweepSize = baseSize * 0.92;
 
   const nodes: RadarNode[] = [];
   const links: RadarLink[] = [];
@@ -261,6 +263,16 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
       ref={containerRef}
       className="relative grid h-full max-h-full w-full min-h-0 min-w-0 place-items-center overflow-hidden rounded-lg border border-[rgba(0,240,255,0.06)] bg-[rgba(16,20,38,0.4)] p-4 shadow-2xl backdrop-blur-md"
     >
+      <div
+        className="radar-sweep-plane"
+        data-active={isAgentActive ? "true" : "false"}
+        style={{
+          width: sweepSize,
+          height: sweepSize,
+          left: centerX - sweepSize / 2,
+          top: centerY - sweepSize / 2
+        }}
+      />
       {/* 简体中文：将 Active Goal 作为绝对定位浮动指令舱（Core Mission Command Module）放在雷达左上角，使雷达大屏能向上撑满整块画布 */}
       {hasGoal && (
         <div className="absolute top-4 left-4 z-20 max-w-xs lg:max-w-md rounded-lg border-l-[3.5px] border-l-[#00f0ff] border border-[rgba(0,240,255,0.08)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
@@ -270,7 +282,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
 
           <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
             <span className="inline-flex items-center gap-1 rounded bg-[#00f0ff]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#00f0ff]">
-              <Cpu size={10} className="animate-spin" style={{ animationDuration: "8s" }} />
+              <Cpu size={10} className={isAgentActive ? "animate-spin" : ""} style={{ animationDuration: "8s" }} />
               GOAL_ID: {snapshot.goal?.id || "none"}
             </span>
             <span className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[9px] font-mono font-bold ${snapshot?.goal?.workflow_status === "complete" ? "bg-[#34d399]/10 text-[#34d399]" : "bg-[#fbbf24]/10 text-[#fbbf24]"}`}>
@@ -294,7 +306,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
       )}
 
       <svg
-        className="loop-board select-none h-full w-full max-h-full max-w-full"
+        className="loop-board relative z-10 select-none h-full w-full max-h-full max-w-full"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
         aria-label="OpenNori acceptance radial radar network"
@@ -317,11 +329,6 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          {/* 简体中文：雷达扫描扇形渐变色 */}
-          <linearGradient id="radar-sweep-gradient" x1="1" y1="1" x2="0" y2="0">
-            <stop offset="0%" stopColor="rgba(0, 240, 255, 0.15)" />
-            <stop offset="100%" stopColor="rgba(0, 240, 255, 0)" />
-          </linearGradient>
         </defs>
 
         {/* 简体中文：绘制雷达网格只读辅助背景网（同心圆与 8 方向发散经纬定位线） */}
@@ -357,28 +364,6 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
               />
             );
           })}
-
-          {/* 简体中文：雷达背景扫描半透明旋转扇形光束 */}
-          {(() => {
-            const sweepR = baseSize * 0.46;
-            const x1 = centerX + sweepR;
-            const y1 = centerY;
-            const x2 = centerX + sweepR * Math.cos(Math.PI / 6); // 30度扇形扫描线，更加聚光
-            const y2 = centerY - sweepR * Math.sin(Math.PI / 6);
-            const sweepPath = `M ${centerX} ${centerY} L ${x1} ${y1} A ${sweepR} ${sweepR} 0 0 0 ${x2} ${y2} Z`;
-
-            return (
-              <path
-                d={sweepPath}
-                fill="url(#radar-sweep-gradient)"
-                style={{
-                  transformOrigin: `${centerX}px ${centerY}px`,
-                  animation: "radar-spin 8s linear infinite",
-                  pointerEvents: "none"
-                }}
-              />
-            );
-          })()}
         </g>
 
         {/* 3. 绘制放射连线轨道 */}
@@ -424,7 +409,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
           // 简体中文：整体成倍放大节点半径，提升视觉存在感与可读性
           const radius = node.type === "goal" ? 46 : isPassedGroup ? 40 : node.type === "ac" ? 34 : 24;
           const nodeColor = getNodeColor(node.status, node.type);
-          const pulseClass = getNodePulseClass(node.status, node.type);
+          const pulseClass = getNodePulseClass(node.status, node.type, isAgentActive);
 
           return (
             /* biome-ignore lint/a11y/useSemanticElements: SVG nodes need to stay inside the radar graph; keyboard handling is provided. */
@@ -476,7 +461,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
                   <text
                     textAnchor="middle"
                     y="-4"
-                    className="select-none font-bold animate-pulse"
+                    className={`select-none font-bold ${isAgentActive ? "animate-pulse" : ""}`}
                     style={{
                       fill: isSelected ? "#ffffff" : "#94a3b8",
                       fontSize: "10px"

@@ -372,6 +372,51 @@ const IMPLEMENTATION_ONLY_PHRASES = [
   "schema passes"
 ];
 
+const ABSTRACT_ACCEPTANCE_SIGNALS = [
+  {
+    gap_id: "broad-overview-scope",
+    terms: ["整体情况", "整体状态", "overall picture", "overall status", "project overview"],
+    question: "这个总览或整体状态必须包含哪些具体可见字段、状态值和异常/空态？哪些只是可选摘要？",
+    why: "总览类 AC 容易让不同 agent 用不同摘要凑数；用户需要知道哪些可见对象是完成所必需。",
+    message: "Acceptance criterion uses a broad overview target that may need concrete visible objects and states."
+  },
+  {
+    gap_id: "asset-scope-underspecified",
+    terms: ["长期资产", "多种资产类型", "资产类型", "long-term assets", "asset types"],
+    question: "哪些资产类型、入口、详情、预览、版本、diff、确认或恢复状态必须可见？哪些明确不在范围？",
+    why: "资产类 AC 如果只说资产类型或长期资产，用户无法判断每类资产是否达到验收深度。",
+    message: "Acceptance criterion uses a broad asset target that may need exact asset types and review states."
+  },
+  {
+    gap_id: "memory-context-scope",
+    terms: ["项目记忆", "历史事件", "上下文包", "长期记录", "project memory", "historical events", "context package"],
+    question: "用户需要看到哪些记忆、事件、决策、约束或来源关系，才算能复用上下文？",
+    why: "记忆和历史类 AC 容易停留在抽象名词；用户需要能复查具体对象、来源和使用边界。",
+    message: "Acceptance criterion uses a broad memory/context target that may need concrete objects and sources."
+  },
+  {
+    gap_id: "knowledge-state-scope",
+    terms: ["知识库绑定", "知识候选", "沉淀状态", "目标知识引用", "knowledge binding", "knowledge candidates", "knowledge state"],
+    question: "哪些绑定、候选、来源、目标引用、确认状态、写入状态和失败恢复状态必须可见？",
+    why: "知识流转类 AC 如果只说候选或沉淀状态，用户无法判断哪些内容可继续处理、哪些已经完成或失败。",
+    message: "Acceptance criterion uses a broad knowledge-state target that may need concrete lifecycle states."
+  },
+  {
+    gap_id: "capability-scope",
+    terms: ["Skill、CLI、MCP", "Skill/CLI/MCP", "能力库", "能力详情", "capability registry", "project capabilities"],
+    question: "用户要看到哪些能力条目、来源、doctor 结果、审计状态或导出状态，才算能力可被 agent 使用？",
+    why: "能力类 AC 需要区分展示、可用性、审计和导出，否则用户无法判断 agent 是否真的能依约使用这些能力。",
+    message: "Acceptance criterion uses a broad capability target that may need exact entries and readiness states."
+  },
+  {
+    gap_id: "result-change-scope",
+    terms: ["明确的结果变化", "结果变化", "可追溯证据", "result changes", "traceable evidence"],
+    question: "哪些对象会新增或更新，用户在哪里看到变化，什么证据能证明操作成功或需要恢复？",
+    why: "结果变化类 AC 如果不说明具体对象和可复查证据，agent 很容易用笼统成功摘要替代用户验收。",
+    message: "Acceptance criterion uses a broad result-change target that may need exact changed objects and evidence."
+  }
+];
+
 const NEGATION_TERMS = ["不能", "不应", "不是", "不得", "避免", "cannot", "must not", "should not", "reject"];
 const GENERIC_DRAFT_SUMMARY = "Draft generated from generic acceptance discovery. User must answer the open acceptance questions before approval.";
 const DISCOVERY_ANSWER_DRAFT_SUMMARY = "Draft generated from reviewed Acceptance Discovery answers. User still needs to approve or revise the Nori Contract before implementation.";
@@ -524,6 +569,15 @@ function looksImplementationOnly(text: unknown): boolean {
   return includesAny(value, IMPLEMENTATION_ONLY_PHRASES);
 }
 
+function looksUserPerspective(text: unknown): boolean {
+  const value = String(text || "").trim();
+  const lowered = value.toLowerCase();
+  return /^作为[^，,。]*用户/.test(value)
+    || /^作为[^，,。]*评审者/.test(value)
+    || /^as\s+[^,.]*\buser\b/.test(lowered)
+    || /^as\s+[^,.]*\breviewer\b/.test(lowered);
+}
+
 export function discoverAcceptanceGaps(
   text: string,
   { fallback = false, allowedIds = null as Set<string> | null, language = undefined as PresentationLanguage | undefined } = {}
@@ -662,13 +716,27 @@ export function reviewAcceptanceQuality(contract: NoriContract): AcceptanceQuali
     };
 
     const userStory = String(criterion.user_story || "");
-    if (userStory && !userStory.startsWith("作为用户") && !userStory.toLowerCase().startsWith("as a user")) {
+    if (userStory && !looksUserPerspective(userStory)) {
       addCustomFinding(
         "user-perspective-format",
         "user_story",
         "这条 AC 是否确实从最终用户或评审者的操作/判断出发？",
         "AC 不必机械套用固定句式，但 agent 需要确认它表达的是人类用户可执行的操作或判断。",
         "Acceptance criterion does not use the usual user-perspective wording."
+      );
+    }
+
+    const abstractGapIds = new Set<string>();
+    for (const signal of ABSTRACT_ACCEPTANCE_SIGNALS) {
+      if (!sentenceHasSpecifics(userStory, signal.terms)) continue;
+      if (abstractGapIds.has(signal.gap_id)) continue;
+      abstractGapIds.add(signal.gap_id);
+      addCustomFinding(
+        signal.gap_id,
+        "user_story",
+        signal.question,
+        signal.why,
+        signal.message
       );
     }
 

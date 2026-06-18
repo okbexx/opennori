@@ -19,14 +19,14 @@ Nori Profile answers "how should the agent work" and "what constraints affect co
    - `avoid`: violation blocks completion unless waived.
 4. Record install policy when the user mentions whether new dependencies or Skills may be installed.
 5. Record compliance evidence before confident completion.
-6. If a dashboard is being watched or `agent_next.dashboard_activity` is present, publish live profile activity while recording or checking preferences. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-capability-profile --state working --summary "..." --json`.
+6. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live profile activity while recording or checking preferences: start before profile work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-capability-profile --state working --summary "..." --json`.
 
 Useful state commands:
 
 - `opennori profile show --root <repo> --json`
 - `opennori profile add --root <repo> --type <skill|stack|constraint> --name "<name>" --strength <must|prefer|avoid> --purpose "<why>" --install-policy <existing_only|ask_before_install|allowed> --json`
 - `opennori profile evidence --root <repo> --item <item-id> --result <satisfied|violated|waived> --summary "<evidence>" --json`
-- `opennori activity start|heartbeat|finish --root <repo> --skill nori-capability-profile --state working --summary "..." --json` (optional dashboard signal)
+- `opennori activity start|heartbeat|finish --root <repo> --skill nori-capability-profile --state working --summary "..." --json` (required dashboard signal when the dashboard is observed and a current goal/gap exists)
 
 ## Natural-Language Mapping
 
@@ -41,7 +41,7 @@ Useful state commands:
 
 May write Nori Profile items and profile compliance evidence. Do not write Product AC, evidence for acceptance criteria, Architecture Baseline, or reports directly.
 
-May write live dashboard activity for profile work. Activity is not profile compliance evidence and is not Product AC evidence.
+Must write live dashboard activity for profile work when the dashboard is observed and a current goal/gap exists. Activity is not profile compliance evidence and is not Product AC evidence.
 
 ## Handoffs
 

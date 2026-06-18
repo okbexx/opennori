@@ -53,6 +53,30 @@ select {
   overflow: hidden;
 }
 
+.radar-sweep-plane {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 9999px;
+  opacity: 0.55;
+  transform: translateZ(0) rotate(0deg);
+  transform-origin: center;
+  will-change: transform;
+  animation: radar-spin 18s linear infinite;
+  background:
+    conic-gradient(from 0deg, rgba(0, 240, 255, 0.18) 0deg, rgba(0, 240, 255, 0.08) 18deg, rgba(0, 240, 255, 0) 58deg, rgba(0, 240, 255, 0) 360deg),
+    radial-gradient(circle, rgba(0, 240, 255, 0) 0 58%, rgba(0, 240, 255, 0.12) 60%, rgba(0, 240, 255, 0) 62%);
+  mix-blend-mode: screen;
+}
+
+.radar-sweep-plane[data-active="true"] {
+  opacity: 0.78;
+  animation-duration: 8s;
+  background:
+    conic-gradient(from 0deg, rgba(0, 240, 255, 0.28) 0deg, rgba(52, 211, 153, 0.12) 24deg, rgba(0, 240, 255, 0) 68deg, rgba(0, 240, 255, 0) 360deg),
+    radial-gradient(circle, rgba(0, 240, 255, 0) 0 58%, rgba(0, 240, 255, 0.18) 60%, rgba(0, 240, 255, 0) 62%);
+}
+
 /* 简体中文：雷达节点脉冲发光动画（适配 SVG circle 元素的扩散呼吸效果） */
 @keyframes svgPulse {
   0% {

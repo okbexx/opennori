@@ -2677,3 +2677,71 @@ test("check audits existing current contracts for underspecified acceptance qual
   assert.equal(goodCheck.warnings.some((warning) => warning.type === "acceptance_review"), false);
   assert.equal(goodCheck.data.architecture_check.status, "needs-action");
 });
+
+test("check routes abstract product acceptance criteria back to acceptance discovery", () => {
+  const root = tempRoot();
+  const brief = path.join(root, "abstract-product-contract.json");
+  fs.writeFileSync(brief, JSON.stringify({
+    goal_id: "abstract-product-contract",
+    goal: "Ship a project workbench",
+    acceptance_basis: { status: "approved", summary: "User approved broad product contract." },
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "作为用户，我选择一个项目后，能看到这个项目的整体情况，而不是只看到单一能力列表或文件列表。",
+        measurement: "选择已初始化项目后，查看项目概览和右侧详情。",
+        threshold: "界面展示项目身份、路径、更新时间、仓库或环境绑定摘要、健康状态、索引状态、最近事件和下一步建议。"
+      },
+      {
+        id: "AC-2",
+        user_story: "作为用户，我能在工作台中查看项目的长期资产，长期包括多种资产类型。",
+        measurement: "在项目资产视图中查看 Markdown 文档和 HTML 原型。",
+        threshold: "每个资产能追溯来源、版本和状态。"
+      },
+      {
+        id: "AC-3",
+        user_story: "作为用户，我能看到项目记忆和历史事件，理解这个项目之前发生过什么、哪些结论或上下文值得后续 agent 复用。",
+        measurement: "查看项目记忆、时间线、上下文包、决策、约束或相关长期记录的入口和详情。",
+        threshold: "这些记忆不是只存在于一次 agent 对话里，并能关联来源资产或事件。"
+      },
+      {
+        id: "AC-4",
+        user_story: "作为用户，当 agent 操作项目后，我能回到工作台看到明确的结果变化和可追溯证据。",
+        measurement: "让 agent 更新资产、记忆、知识候选、能力记录或索引后，刷新项目视图。",
+        threshold: "工作台展示新增或更新的对象、时间线事件、审计信息和下一步建议。"
+      }
+    ]
+  }));
+
+  const draft = draftAndApprove(["--brief", brief, "--root", root, "--json"], {
+    summary: "User approved broad product contract."
+  });
+  const payload = JSON.parse(fs.readFileSync(draft.data.evidence_path, "utf8"));
+  for (const criterion of Object.keys(payload.ledger.criteria)) {
+    run([
+      "evidence", "add",
+      "--root", root,
+      "--criterion", criterion,
+      "--kind", "test-summary",
+      "--summary", `${criterion} has passing evidence, but the AC wording remains broad.`,
+      "--result", "passing",
+      "--source-command", "npm run check",
+      "--reviewability", "Reviewer can inspect the workbench screen and the OpenNori report.",
+      "--limitations", "The fixture intentionally uses broad product nouns to exercise acceptance review.",
+      "--json"
+    ]);
+  }
+
+  const check = run(["check", "--root", root, "--json"]);
+  assert.equal(check.data.workflow_status, "complete");
+  assert.equal(check.data.acceptance_review.status, "needs-user-review");
+  const gapIds = check.data.acceptance_review.findings.map((finding) => finding.gap_id);
+  assert.equal(gapIds.includes("broad-overview-scope"), true);
+  assert.equal(gapIds.includes("asset-scope-underspecified"), true);
+  assert.equal(gapIds.includes("memory-context-scope"), true);
+  assert.equal(gapIds.includes("result-change-scope"), true);
+  assert.equal(check.data.agent_next.state, "completion_needs_review");
+  assert.equal(check.data.agent_next.recommended_skill, "nori-acceptance");
+  assert.match(check.data.agent_next.instruction, /acceptance_review/);
+  assert.equal(check.next_actions.some((action) => /nori-acceptance/.test(action)), true);
+});

@@ -10,13 +10,27 @@ import {
   X
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchSnapshot, subscribeToEvents } from "./api";
 import { AcceptanceRadarNet, type RadarNode } from "./components/AcceptanceRadarNet";
 import { InspectNodePanel } from "./components/InspectNodePanel";
-import type { NoriSnapshot } from "./types";
+import type { NoriEvent, NoriSnapshot } from "./types";
 
 type ConnectionState = "connecting" | "live" | "retrying";
+
+const RUNNING_AGENT_STATES = new Set(["thinking", "working", "verifying"]);
+
+function isAgentRunning(snapshot: NoriSnapshot | null): boolean {
+  return !!snapshot && RUNNING_AGENT_STATES.has(String(snapshot.agent.state));
+}
+
+function snapshotRenderKey(snapshot: NoriSnapshot): string {
+  return JSON.stringify({
+    ...snapshot,
+    generated_at: undefined
+  });
+}
+
 function isPassingStatus(status: string | undefined): boolean {
   return ["passing", "waived"].includes(String(status || "").toLowerCase());
 }
@@ -35,6 +49,20 @@ function passedGroupRawData(criteria: NonNullable<NoriSnapshot["criteria"]>) {
       status: criterion.status,
       confidence: criterion.confidence
     }))
+  };
+}
+
+function criterionNodeFromSnapshot(snapshot: NoriSnapshot, criterionId: string): RadarNode | null {
+  const criterion = snapshot.criteria?.find((item) => item.id === criterionId);
+  if (!criterion) return null;
+  return {
+    id: `ac-${criterion.id}`,
+    type: "ac",
+    label: criterion.id,
+    status: criterion.status,
+    x: 0,
+    y: 0,
+    rawData: criterion
   };
 }
 
@@ -99,6 +127,17 @@ function syncSelectedNodeWithSnapshot(selectedNode: RadarNode | null, nextSnapsh
   return selectedNode;
 }
 
+function gapIdFromFocusEvent(event: NoriEvent | null): string | null {
+  if (!event?.gap_id) return null;
+  const type = String(event.type || "");
+  if (type === "ac.started") return event.gap_id;
+  if (type === "activity.started" || type === "activity.heartbeat") {
+    const state = String(event.data?.state || "");
+    if (RUNNING_AGENT_STATES.has(state)) return event.gap_id;
+  }
+  return null;
+}
+
 function relativeTime(value: string | undefined): string {
   if (!value) return "not seen";
   const timestamp = Date.parse(value);
@@ -145,14 +184,26 @@ export default function App() {
   const [selectedNode, setSelectedNode] = useState<RadarNode | null>(null);
   const [copied, setCopied] = useState(false);
   const [drawerTab, setDrawerTab] = useState<"visual" | "json">("visual");
+  const snapshotKeyRef = useRef("");
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (focusGapId?: string | null) => {
     try {
       const nextSnapshot = await fetchSnapshot();
-      setSnapshot(nextSnapshot);
+      const nextSnapshotKey = snapshotRenderKey(nextSnapshot);
+      if (nextSnapshotKey !== snapshotKeyRef.current) {
+        snapshotKeyRef.current = nextSnapshotKey;
+        setSnapshot(nextSnapshot);
+        setSelectedNode((prev) => {
+          if (focusGapId) {
+            return criterionNodeFromSnapshot(nextSnapshot, focusGapId) || syncSelectedNodeWithSnapshot(prev, nextSnapshot);
+          }
+          return syncSelectedNodeWithSnapshot(prev, nextSnapshot);
+        });
+      } else if (focusGapId) {
+        setSelectedNode((prev) => criterionNodeFromSnapshot(nextSnapshot, focusGapId) || prev);
+      }
       setConnection("live");
       setError("");
-      setSelectedNode((prev) => syncSelectedNodeWithSnapshot(prev, nextSnapshot));
     } catch (refreshError) {
       setConnection("retrying");
       setError(refreshError instanceof Error ? refreshError.message : String(refreshError));
@@ -161,8 +212,8 @@ export default function App() {
 
   useEffect(() => {
     void refresh();
-    const unsubscribe = subscribeToEvents(() => {
-      void refresh();
+    const unsubscribe = subscribeToEvents((event) => {
+      void refresh(gapIdFromFocusEvent(event));
     }, () => {
       setConnection("retrying");
       window.setTimeout(() => {
@@ -196,8 +247,9 @@ export default function App() {
 
   // 简体中文：只读事件历史过滤
   const recentEvents = useMemo(() => {
-    return snapshot?.events || [];
+    return [...(snapshot?.events || [])].sort((left, right) => Number(right.seq || 0) - Number(left.seq || 0));
   }, [snapshot]);
+  const agentRunning = isAgentRunning(snapshot);
 
   return (
     <Tooltip.Provider delayDuration={180}>
@@ -210,13 +262,13 @@ export default function App() {
         <section className="relative z-10 grid h-full max-h-full grid-rows-[auto_1fr_auto] gap-3 p-3 lg:gap-4 lg:p-6 min-h-0 overflow-hidden">
           <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(0,240,255,0.08)] pb-3">
             <div className="flex items-center gap-3.5">
-              <div className="grid h-11 w-11 place-items-center rounded-lg border border-[#00f0ff]/35 bg-[#00f0ff]/12 text-lg font-black text-[#00f0ff] filter drop-shadow-[0_0_8px_rgba(0,240,255,0.35)] animate-pulse">
+              <div className={`grid h-11 w-11 place-items-center rounded-lg border border-[#00f0ff]/35 bg-[#00f0ff]/12 text-lg font-black text-[#00f0ff] filter drop-shadow-[0_0_8px_rgba(0,240,255,0.35)] ${agentRunning ? "animate-pulse" : ""}`}>
                 N
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">OpenNori Dashboard</p>
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#34d399] animate-ping" />
+                  <span className={`inline-block h-1.5 w-1.5 rounded-full bg-[#34d399] ${agentRunning ? "animate-ping" : ""}`} />
                   <span className="text-[8px] font-mono text-slate-500 tracking-wider">OBS.NODE_CONNECTED</span>
                 </div>
                 <h1 className="text-xl font-black tracking-wide bg-gradient-to-r from-[#00f0ff] to-[#bd93f9] bg-clip-text text-transparent filter drop-shadow-[0_0_8px_rgba(0,240,255,0.15)] sm:text-2xl">
@@ -231,7 +283,7 @@ export default function App() {
                 Observation only
               </span>
               <span className={`inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-mono font-semibold uppercase tracking-wider ${connection === "live" ? "border-[#34d399]/35 bg-[#34d399]/10 text-[#a7f3d0]" : connection === "retrying" ? "border-[#fbbf24]/40 bg-[#fbbf24]/10 text-[#fde68a]" : "border-slate-800 bg-slate-900/40 text-slate-300"}`}>
-                <Radio size={13} className={connection === "live" ? "animate-pulse" : ""} />
+                <Radio size={13} className={agentRunning ? "animate-pulse" : ""} />
                 {connection}
               </span>
               <IconButton label="Refresh snapshot" onClick={() => void refresh()}>
@@ -373,7 +425,7 @@ export default function App() {
                 <Terminal size={13} className="text-[#00f0ff]" />
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Scrolling Event log console</span>
                 <span className="inline-flex min-h-6 items-center gap-1.5 rounded-full border border-[#00f0ff]/35 bg-[#00f0ff]/10 px-2.5 text-xs font-semibold text-[#c7d2fe]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+                  <span className={`h-1.5 w-1.5 rounded-full bg-[#00f0ff] ${agentRunning ? "animate-pulse" : ""}`} />
                   live
                 </span>
               </div>
