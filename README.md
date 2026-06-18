@@ -274,14 +274,16 @@ of `status`, `report`, `check`, or evidence writes.
 ### Architecture Baseline
 
 For non-trivial work, Nori should establish an Architecture Baseline before
-implementation. The baseline records architecture profile, principles,
-boundaries, preferred and avoided choices, build-vs-buy policy, and challenge
-rules the agent must follow while completing Product AC.
+implementation. The baseline has two layers: an Architecture Charter for
+product boundaries and agent behavior, and a Technical Architecture Baseline
+for runtime topology, source of truth, module/package boundaries, contract
+surfaces, data flows, dependency decisions, reference mappings, and
+verification.
 
 Architecture Baseline is not a plan. It is sticky implementation guidance: if
 project evidence conflicts with it, the agent creates an Architecture Challenge
 instead of silently changing the technology stack, state model, dependency
-policy, or directory boundary.
+policy, contract surface, module boundary, or directory boundary.
 
 Missing, challenged, or stale architecture state is reported as
 `architecture_review`: the Product AC can be objectively complete, but OpenNori
@@ -723,6 +725,8 @@ Use OpenNori for this goal. Write the acceptance checks in Chinese.
 ### 架构基线 (Architecture Baseline)
 
 对于非平凡（复杂）的技术实现，Nori 要求在动手敲代码前先建立架构基线。基线记录了当前项目的技术画像、设计原则、规范边界、首选及规避的工具技术、自研与复用策略，以及代理在实现产品验收条件（Product AC）时必须严格遵守的质询挑战规则。
+
+架构基线分两层：Architecture Charter 约束产品边界和 agent 行为；Technical Architecture Baseline 约束运行拓扑、真相源、模块/包边界、CLI/MCP/API/IPC 契约面、数据流、依赖决策、参考项目映射和验证方式。只有原则、偏好或治理约束的 baseline 不足以指导非平凡实现。
 
 架构基线绝不是开发计划，而是具有粘性的约束指南：如果项目实施证据与基线发生冲突，AI 代理必须显式发起一个架构质询（Architecture Challenge），而不是默默地更改技术栈、状态模型、依赖方针或目录结构。
 

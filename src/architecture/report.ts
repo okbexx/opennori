@@ -9,6 +9,9 @@ function renderArchitectureReportSection(root: string, goalId: string | undefine
     "",
     `Architecture decision: ${state.decision}`,
     `Baseline: ${state.baseline ? `${state.baseline.profile} (${state.baseline.status})` : "<missing>"}`,
+    `Technical baseline: ${state.baseline?.technical_baseline_summary
+      ? `${state.baseline.technical_baseline_summary.runtime_topology_count} runtime, ${state.baseline.technical_baseline_summary.module_boundary_count} module, ${state.baseline.technical_baseline_summary.contract_surface_count} contract, ${state.baseline.technical_baseline_summary.data_flow_count} flow, ${state.baseline.technical_baseline_summary.dependency_decision_count} dependency, ${state.baseline.technical_baseline_summary.reference_mapping_count} reference items`
+      : "<missing>"}`,
     `Challenge: ${state.open_challenges.length > 0 ? `${state.open_challenges.length} open` : "none"}`,
     `Architecture apply records: ${state.apply_records?.length || 0}`,
     `Build-vs-buy: ${state.build_vs_buy.status} (${state.build_vs_buy_decisions.length} decisions)`,

@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "ac-a-3-technical-baseline-sections",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-3",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Architecture Profile and Baseline now require concrete technical architecture sections while keeping subjective architecture quality in Skills and user review.",
+  "fit": "The implementation extends Architecture Profile/Baseline as a two-layer model: charter plus technical baseline. Code hard-checks objective section presence, while Skills instruct agents to judge whether the runtime, state, module, contract, flow, dependency, reference, and verification decisions are actually specific enough before user confirmation.",
+  "implementation_focus": "AC-A-3 built-in and project architecture profiles can generate a baseline that affects completion judgment without turning architecture into Product AC.",
+  "evidence": "npm run check passed; OpenNori check/status report architecture valid; Agent Workbench check/status validates a project baseline with nonzero technical section counts.",
+  "limitations": "This proves the protocol, built-in profile, packaged Skill guidance, OpenNori self baseline, and AW baseline structure. It does not prove every future project profile will be high quality; agents and users still must review specificity before confirmation.",
+  "created_at": "2026-06-18T09:48:19.684Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

@@ -12,6 +12,7 @@
     "goal",
     "principles",
     "checks",
+    "technical_baseline",
     "build_vs_buy_policy"
   ],
   "additionalProperties": true,
@@ -42,6 +43,62 @@
         }
       }
     },
+    "technical_baseline": {
+      "type": "object",
+      "required": [
+        "runtime_topology",
+        "source_of_truth",
+        "module_boundaries",
+        "contract_surfaces",
+        "data_flows",
+        "dependency_decisions",
+        "reference_mappings",
+        "verification"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "runtime_topology": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/technical_item" }
+        },
+        "source_of_truth": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/technical_item" }
+        },
+        "module_boundaries": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/technical_item" }
+        },
+        "contract_surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/technical_item" }
+        },
+        "data_flows": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/technical_flow" }
+        },
+        "dependency_decisions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/technical_item" }
+        },
+        "reference_mappings": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/technical_item" }
+        },
+        "verification": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
     "build_vs_buy_policy": {
       "type": "object",
       "required": ["order", "require_reason_when_self_building"],
@@ -53,6 +110,31 @@
           "items": { "type": "string", "minLength": 1 }
         },
         "require_reason_when_self_building": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "technical_item": {
+      "type": "object",
+      "required": ["name", "decision"],
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "decision": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string" }
+      }
+    },
+    "technical_flow": {
+      "type": "object",
+      "required": ["name", "steps"],
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
       }
     }
   }

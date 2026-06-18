@@ -29,6 +29,7 @@ Dashboard signal when observed:
 ## Natural-Language Mapping
 
 - "The baseline does not fit this repo" -> record a challenge with project evidence.
+- "The baseline is too vague" -> challenge it with missing concrete technical baseline evidence: runtime topology, source of truth, module boundaries, contract surfaces, data flows, dependency decisions, reference mappings, or verification.
 - "This dependency is not viable" -> challenge the dependency policy with license, maintenance, security, package size, performance, or integration evidence.
 - "Can we just use another architecture" -> create a challenge first; do not silently switch.
 - "User approved the change" -> update or create the appropriate baseline through architecture brainstorm/profile flow, then continue implementation.
@@ -63,5 +64,6 @@ Need user: yes/no
 - Do not treat a challenge as permission to change the baseline.
 - Do not create task lists or phases.
 - Do not challenge just because another approach is personally preferred.
+- Do not continue implementation under a baseline that cannot answer which runtime, state, module, contract, dependency, and verification boundaries apply.
 - Do not hide architecture risk inside implementation notes.
 - Do not treat dashboard activity, events, or snapshots as proof that a challenge is resolved.

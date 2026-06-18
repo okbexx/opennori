@@ -46,7 +46,7 @@ export const architectureProfileCommand = defineCommand({
     const profile = normalizeArchitectureProfile(readJson<Partial<ArchitectureProfile>>(sourcePath), args.id);
     const issues = validateArchitectureProfile(profile);
     if (issues.length > 0) {
-      return { ...fail("invalid_architecture_profile", "Architecture Profile failed validation", "Add id, title, summary, principles, checks, and build_vs_buy_policy."), issues };
+      return { ...fail("invalid_architecture_profile", "Architecture Profile failed validation", "Add id, title, summary, principles, checks, technical_baseline, and build_vs_buy_policy."), issues };
     }
     const target = writeArchitectureProfile(root, profile, { force: Boolean(args.force) });
     refreshManifest(root);

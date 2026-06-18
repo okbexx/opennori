@@ -5,6 +5,9 @@ import type {
   ArchitectureBaseline,
   JsonObject,
   PreferredLibraryPolicy,
+  TechnicalArchitectureBaseline,
+  TechnicalArchitectureFlow,
+  TechnicalArchitectureItem,
   ValidationIssue
 } from "../types.ts";
 import { validateSchema } from "../validation.ts";
@@ -38,6 +41,7 @@ export function buildArchitectureBaseline(root: string, {
     sources: profile.sources || [],
     principles: profile.principles || [],
     checks: profile.checks || [],
+    technical_baseline: normalizeTechnicalBaseline(profile.technical_baseline),
     preferred_libraries: profile.preferred_libraries || [],
     avoid: profile.avoid || [],
     build_vs_buy_policy: profile.build_vs_buy_policy || {
@@ -85,6 +89,21 @@ export function validateArchitectureBaseline(baseline: ArchitectureBaseline | Js
   if (!Array.isArray(baseline.checks) || baseline.checks.length === 0) {
     issues.push({ path: "checks", message: "Architecture Baseline must include architecture checks." });
   }
+  const technicalBaseline = normalizeTechnicalBaseline(baseline.technical_baseline as Partial<TechnicalArchitectureBaseline> | undefined);
+  if (
+    technicalBaseline.runtime_topology.length === 0
+    || technicalBaseline.source_of_truth.length === 0
+    || technicalBaseline.module_boundaries.length === 0
+    || technicalBaseline.contract_surfaces.length === 0
+    || technicalBaseline.data_flows.length === 0
+    || technicalBaseline.dependency_decisions.length === 0
+    || technicalBaseline.reference_mappings.length === 0
+  ) {
+    issues.push({
+      path: "technical_baseline",
+      message: "Architecture Baseline must include concrete technical_baseline runtime, state, module, contract, flow, dependency, and reference mapping sections."
+    });
+  }
   if (!baseline.build_vs_buy_policy) {
     issues.push({ path: "build_vs_buy_policy", message: "Architecture Baseline must include build-vs-buy policy." });
   }
@@ -98,6 +117,7 @@ export function readArchitectureBaseline(root: string): ArchitectureBaseline | n
 }
 
 function renderArchitectureBaselineMarkdown(baseline: ArchitectureBaseline): string {
+  const technicalBaseline = normalizeTechnicalBaseline(baseline.technical_baseline);
   const lines = [
     "# OpenNori Architecture Baseline",
     "",
@@ -117,6 +137,42 @@ function renderArchitectureBaselineMarkdown(baseline: ArchitectureBaseline): str
     "## Principles",
     "",
     ...baseline.principles.map((principle: string) => `- ${principle}`),
+    "",
+    "## Technical Architecture Baseline",
+    "",
+    "This section is the concrete implementation baseline. It is not Product AC and not an implementation task list.",
+    "",
+    "### Runtime Topology",
+    "",
+    ...renderTechnicalItems(technicalBaseline.runtime_topology),
+    "",
+    "### Source Of Truth",
+    "",
+    ...renderTechnicalItems(technicalBaseline.source_of_truth),
+    "",
+    "### Module Boundaries",
+    "",
+    ...renderTechnicalItems(technicalBaseline.module_boundaries),
+    "",
+    "### Contract Surfaces",
+    "",
+    ...renderTechnicalItems(technicalBaseline.contract_surfaces),
+    "",
+    "### Data Flows",
+    "",
+    ...renderTechnicalFlows(technicalBaseline.data_flows),
+    "",
+    "### Dependency Decisions",
+    "",
+    ...renderTechnicalItems(technicalBaseline.dependency_decisions),
+    "",
+    "### Reference Mappings",
+    "",
+    ...renderTechnicalItems(technicalBaseline.reference_mappings),
+    "",
+    "### Verification",
+    "",
+    ...renderVerification(technicalBaseline.verification),
     "",
     "## Architecture Checks",
     ""
@@ -144,7 +200,49 @@ function renderArchitectureBaselineMarkdown(baseline: ArchitectureBaseline): str
     "If project evidence conflicts with this baseline, create an Architecture Challenge instead of silently replacing it.",
     ""
   );
-  return `${lines.join("\n")}\n`;
+  return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function asArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? value as T[] : [];
+}
+
+function normalizeTechnicalBaseline(input: Partial<TechnicalArchitectureBaseline> | undefined): TechnicalArchitectureBaseline {
+  return {
+    runtime_topology: asArray<TechnicalArchitectureItem>(input?.runtime_topology),
+    source_of_truth: asArray<TechnicalArchitectureItem>(input?.source_of_truth),
+    module_boundaries: asArray<TechnicalArchitectureItem>(input?.module_boundaries),
+    contract_surfaces: asArray<TechnicalArchitectureItem>(input?.contract_surfaces),
+    data_flows: asArray<TechnicalArchitectureFlow>(input?.data_flows),
+    dependency_decisions: asArray<TechnicalArchitectureItem>(input?.dependency_decisions),
+    reference_mappings: asArray<TechnicalArchitectureItem>(input?.reference_mappings),
+    verification: asArray<string>(input?.verification)
+  };
+}
+
+function renderTechnicalItems(items: TechnicalArchitectureItem[]): string[] {
+  if (items.length === 0) return ["- <none>"];
+  return items.map((item) => {
+    const reason = item.reason ? ` Reason: ${item.reason}` : "";
+    return `- ${item.name}: ${item.decision}${reason}`;
+  });
+}
+
+function renderTechnicalFlows(flows: TechnicalArchitectureFlow[]): string[] {
+  if (flows.length === 0) return ["- <none>"];
+  const lines: string[] = [];
+  for (const flow of flows) {
+    lines.push(`- ${flow.name}:`);
+    for (const [index, step] of flow.steps.entries()) {
+      lines.push(`  ${index + 1}. ${step}`);
+    }
+  }
+  return lines;
+}
+
+function renderVerification(items: string[]): string[] {
+  if (items.length === 0) return ["- <none>"];
+  return items.map((item) => `- ${item}`);
 }
 
 export function writeArchitectureBaseline(root: string, baseline: ArchitectureBaseline) {

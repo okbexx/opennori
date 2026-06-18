@@ -14,7 +14,9 @@ This Skill is for agent behavior during implementation. It is not an architectur
 1. Run `opennori status --root <repo> --json` and identify current Product AC gap.
 2. Run `opennori architecture show --root <repo> --json` or read `.opennori/architecture/baseline.md`.
 3. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live activity while applying the baseline: start before implementation/alignment work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-apply --state working --summary "..." --json` and let the CLI infer the unique current goal/gap.
-4. Compare the intended code change with baseline principles, directory boundaries, dependency policy, preferred libraries, avoid rules, and build-vs-buy policy.
+4. Compare the intended code change with both baseline layers:
+   - Architecture Charter: product boundary, agent behavior constraints, challenge rule, preferred libraries, avoid rules, and build-vs-buy policy.
+   - Technical Architecture Baseline: runtime topology, source-of-truth model, module/package boundaries, CLI/MCP/API/IPC contract surfaces, data flows, dependency decisions, reference mappings, and verification.
 5. If the change fits, record an architecture apply record for the current AC gap, then read the returned `data.agent_next`.
 6. If it conflicts, stop implementation and create an Architecture Challenge.
 7. When `agent_next.state` is `evidence_ready_for_recording`, hand off to `nori-evidence` and attach the apply record as architecture context.
@@ -31,6 +33,7 @@ Useful state commands:
 
 - "Continue implementation" -> read current gap and baseline before editing.
 - "Use the established architecture" -> verify the change follows baseline constraints.
+- "Keep the bottom-level architecture solid" -> inspect the Technical Architecture Baseline before editing and explain which runtime/state/module/contract/dependency boundary the work touches.
 - "This library/structure differs from the baseline" -> hand off to challenge before changing architecture.
 - "All AC pass but architecture review remains" -> do not reopen Product AC; report review risk separately.
 
@@ -55,6 +58,7 @@ When architecture matters, state:
 ```text
 Current AC gap: ...
 Baseline used: ...
+Technical boundary touched: ...
 Architecture fit: aligned / needs challenge
 Implementation focus: ...
 ```
@@ -64,6 +68,7 @@ Keep architecture commentary brief unless there is a conflict or risk.
 ## Misuse Guards
 
 - Do not silently change stack, state model, dependency policy, directory boundary, or package boundary.
+- Do not treat broad principles as enough architecture alignment when a concrete Technical Architecture Baseline exists.
 - Do not implement broad refactors unrelated to the current Product AC gap.
 - Do not present Architecture Checks as Product AC failures.
 - Do not skip evidence after implementation just because the architecture fit is good.

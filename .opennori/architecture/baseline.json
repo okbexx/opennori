@@ -7,9 +7,9 @@
   "goal_id": "opennori-self",
   "goal": "Migrate OpenNori toward the TypeScript agent state CLI architecture while preserving its acceptance-driven product boundary",
   "summary": "Use strict TypeScript, a citty command layer, public JSON Schema with Ajv validation, tsc builds without bundling, Vitest and Biome quality gates, manifest-managed lifecycle actions, directory-based Skills, and build-vs-buy checks before custom infrastructure.",
-  "created_at": "2026-06-13T10:11:37.679Z",
-  "updated_at": "2026-06-13T10:11:37.679Z",
-  "accepted_at": "2026-06-13T10:11:37.679Z",
+  "created_at": "2026-06-18T09:43:44.184Z",
+  "updated_at": "2026-06-18T09:43:44.184Z",
+  "accepted_at": "2026-06-18T09:43:44.184Z",
   "sticky": true,
   "requires_challenge_to_change": true,
   "applies_to": [
@@ -92,6 +92,207 @@
       "review": "Check .opennori/architecture/challenges for unresolved challenges."
     }
   ],
+  "technical_baseline": {
+    "runtime_topology": [
+      {
+        "name": "agent-skill-layer",
+        "decision": "Codex loads package-provided OpenNori Skills from the Codex Plugin and uses them to translate natural language into deterministic CLI state operations.",
+        "reason": "Skills hold subjective product and architecture judgment; the CLI must not become a hard-coded product-quality oracle."
+      },
+      {
+        "name": "cli-state-layer",
+        "decision": "The opennori CLI is the deterministic state boundary for contracts, evidence, profile, architecture, lifecycle, report, and dashboard snapshot operations.",
+        "reason": "The CLI gives agents stable JSON and gives humans short TTY summaries without requiring users to remember internal flags."
+      },
+      {
+        "name": "project-state-layer",
+        "decision": ".opennori is the project-local source for Nori Contracts, evidence ledgers, profiles, architecture baselines, reports, events, activity, and snapshots.",
+        "reason": "Project state must travel with the project and remain inspectable outside the chat session."
+      },
+      {
+        "name": "dashboard-observation-layer",
+        "decision": "The dashboard kernel only reads state, events, activity, and snapshots and streams observation data to the local dashboard.",
+        "reason": "The dashboard must not become an agent runtime, confirmation surface, or Product AC evidence source."
+      }
+    ],
+    "source_of_truth": [
+      {
+        "name": "json-contract-state",
+        "decision": "Structured JSON files under .opennori are authoritative for protocol state; Markdown is generated review surface or human-readable supplement.",
+        "reason": "Agents and tools need deterministic state while users need readable reports."
+      },
+      {
+        "name": "schema-validation-boundary",
+        "decision": "Public JSON Schema plus Ajv validate objective protocol shape; subjective quality remains a Skill and user-review responsibility.",
+        "reason": "Architecture and AC quality are contextual judgments and must not become brittle word-list validators."
+      },
+      {
+        "name": "generated-projections",
+        "decision": ".opennori/events, activity, snapshots, reports, and baseline markdown are projections or review surfaces unless explicitly documented as authoritative state.",
+        "reason": "Projection files must not replace contract, evidence, profile, or architecture JSON."
+      }
+    ],
+    "module_boundaries": [
+      {
+        "name": "src/cli",
+        "decision": "Owns citty command definitions, argument normalization, human-vs-json output routing, and command composition only.",
+        "reason": "CLI modules should stay thin and delegate OpenNori semantics to domain modules."
+      },
+      {
+        "name": "src/core",
+        "decision": "Owns contracts, evidence ledgers, profiles, reports, recommendation state, and shared project-state helpers.",
+        "reason": "Acceptance-loop semantics must remain reusable across CLI, reports, and dashboard projections."
+      },
+      {
+        "name": "src/architecture",
+        "decision": "Owns architecture profiles, baselines, build-vs-buy decisions, challenges, apply records, agent surfaces, and architecture report sections.",
+        "reason": "Architecture guidance is separate from Product AC but participates in completion confidence."
+      },
+      {
+        "name": "src/lifecycle",
+        "decision": "Owns setup, init, install, upgrade, uninstall, manifest, doctor, managed-file plans, profile checks, context export, and plugin sync.",
+        "reason": "Installation and recovery safety need dry-run, confirm, ownership, and recovery boundaries."
+      },
+      {
+        "name": "src/kernel-and-dashboard",
+        "decision": "Kernel modules own event/activity/snapshot projections and dashboard transport; dashboard frontend owns visual observation only.",
+        "reason": "Live observation must not be confused with workflow authority or evidence."
+      },
+      {
+        "name": "plugins/opennori/skills",
+        "decision": "Packaged Skills own agent behavior protocols, natural-language routing, subjective AC/evidence/architecture judgment, and misuse guards.",
+        "reason": "OpenNori is Skill-driven; users should not learn CLI internals."
+      }
+    ],
+    "contract_surfaces": [
+      {
+        "name": "cli-json",
+        "decision": "Every agent-facing command keeps stable JSON with ok/data/artifacts/warnings/next_actions and agent_next where routing matters.",
+        "reason": "Skills need deterministic state and next-step routing."
+      },
+      {
+        "name": "human-tty",
+        "decision": "TTY commands without --json use concise human summaries for lifecycle, status, report, dashboard, and plugin sync flows.",
+        "reason": "Human users should not receive large JSON blobs for normal operations."
+      },
+      {
+        "name": "schemas",
+        "decision": "Protocol objects that are persisted or exchanged across commands have JSON Schema coverage.",
+        "reason": "Schema coverage protects objective compatibility without judging product quality."
+      },
+      {
+        "name": "plugin-skill-assets",
+        "decision": "Codex Plugin metadata points to directory-based Skills; lifecycle commands do not copy OpenNori Skills into user projects.",
+        "reason": "Plugin-first distribution keeps OpenNori as one capability bundle."
+      }
+    ],
+    "data_flows": [
+      {
+        "name": "natural-language-to-contract",
+        "steps": [
+          "User states a goal in natural language.",
+          "Codex loads OpenNori Skills through Plugin discovery.",
+          "Skill asks only completion-changing questions and calls draft/approve commands.",
+          "CLI writes a standard draft or current Nori Contract under .opennori.",
+          "User approves or revises before implementation."
+        ]
+      },
+      {
+        "name": "architecture-before-implementation",
+        "steps": [
+          "Agent reads current goal, Product AC, Nori Profile, project evidence, and references.",
+          "Skill selects or creates an Architecture Profile with product charter and concrete technical baseline.",
+          "CLI previews a baseline without side effects.",
+          "User confirms or revises the baseline.",
+          "CLI writes baseline JSON/Markdown and agent-readable route surfaces."
+        ]
+      },
+      {
+        "name": "gap-to-evidence",
+        "steps": [
+          "Agent reads current gap and confirmed architecture baseline.",
+          "Agent records architecture apply context when architecture matters.",
+          "Agent implements only the current Product AC gap.",
+          "Agent records reviewable Product AC evidence with sources, basis, confidence, and limitations.",
+          "Status/report compute completion and review risks."
+        ]
+      },
+      {
+        "name": "dashboard-observation",
+        "steps": [
+          "CLI and Skills publish activity/events/snapshots as observation signals.",
+          "Kernel reads .opennori state and streams snapshots/events.",
+          "Dashboard renders current goal, gap, agent activity, architecture decision, and completion decision.",
+          "Any user decision is routed back to the agent conversation and recorded through CLI state commands."
+        ]
+      }
+    ],
+    "dependency_decisions": [
+      {
+        "name": "TypeScript",
+        "decision": "Use strict TypeScript source and tsc-emitted JavaScript for the published npm runtime.",
+        "reason": "Types keep protocol and CLI boundaries coherent while npm users run plain JavaScript output."
+      },
+      {
+        "name": "citty",
+        "decision": "Use citty for the command tree and command modules.",
+        "reason": "Nested CLI growth should not be handled by handwritten argument parsing."
+      },
+      {
+        "name": "Ajv-and-JSON-Schema",
+        "decision": "Use JSON Schema as public protocol documentation and Ajv for runtime validation.",
+        "reason": "The protocol is inspectable by users and agents, and objective validation stays separate from subjective review."
+      },
+      {
+        "name": "Vitest",
+        "decision": "Use Vitest for CLI, domain, lifecycle, and dashboard-kernel behavior tests.",
+        "reason": "Tests should cover objective state behavior without encoding subjective AC quality."
+      },
+      {
+        "name": "Hono-dashboard-kernel",
+        "decision": "Use Hono and @hono/node-server for local dashboard routing and SSE transport.",
+        "reason": "Routing and streaming are solved infrastructure; OpenNori should own domain projections, not HTTP glue."
+      },
+      {
+        "name": "React-dashboard",
+        "decision": "Use React, Vite, Tailwind, Radix primitives, Motion, and lucide-react for the dashboard UI.",
+        "reason": "The dashboard needs responsive live visual state, accessible primitives, animation, and icons without becoming a control plane."
+      }
+    ],
+    "reference_mappings": [
+      {
+        "name": "OpenAI Codex Skills",
+        "decision": "Map directory-based Skills and Plugin discovery into plugins/opennori/skills and .codex-plugin metadata.",
+        "reason": "OpenNori must be agent-discoverable without project-local Skill copies."
+      },
+      {
+        "name": "vibecode-pro-max-kit",
+        "decision": "Reuse the Skill directory and managed install insight, reject process/phase workflow as OpenNori mainline.",
+        "reason": "OpenNori is acceptance-centered, not phase-centered."
+      },
+      {
+        "name": "ECC",
+        "decision": "Map profiles/components/manifest/doctor thinking into Nori Profile, lifecycle manifest, doctor, and Architecture Profile review.",
+        "reason": "Productized recovery and capability checks matter, but they must serve the acceptance loop."
+      },
+      {
+        "name": "CLI-Anything",
+        "decision": "Map agent-native tool wrapping into stable CLI JSON, Skill guidance, and context export.",
+        "reason": "Agents need deterministic command contracts rather than prose-only instructions."
+      },
+      {
+        "name": "CodeGraph/GitNexus",
+        "decision": "Borrow context/status/search/doctor discipline, not a full symbol graph platform.",
+        "reason": "OpenNori needs completion context and evidence health without becoming code intelligence infrastructure."
+      }
+    ],
+    "verification": [
+      "npm run check",
+      "node ./bin/opennori.js check --root . --json",
+      "node ./bin/opennori.js status --root . --json",
+      "git diff --check"
+    ]
+  },
   "preferred_libraries": [
     {
       "area": "language",

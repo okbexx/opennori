@@ -951,6 +951,16 @@ test("architecture profile command module installs and validates project profile
         review: "Inspect src/cli/commands."
       }
     ],
+    technical_baseline: {
+      runtime_topology: [{ name: "team-cli-runtime", decision: "Run through the team CLI runtime." }],
+      source_of_truth: [{ name: "team-state", decision: "Use project-local JSON state as truth." }],
+      module_boundaries: [{ name: "team-command-modules", decision: "Commands delegate to domain modules." }],
+      contract_surfaces: [{ name: "team-json", decision: "Expose stable JSON to agents." }],
+      data_flows: [{ name: "team-command-flow", steps: ["Parse command.", "Validate input.", "Write state."] }],
+      dependency_decisions: [{ name: "team-parser", decision: "Prefer the existing team parser." }],
+      reference_mappings: [{ name: "team-standard", decision: "Map the team standard into CLI modules." }],
+      verification: ["npm test"]
+    },
     build_vs_buy_policy: {
       order: ["current-project-dependency", "mature-open-source-library", "small-local-implementation"],
       require_reason_when_self_building: true
@@ -971,6 +981,16 @@ test("architecture profile command module installs and validates project profile
   assert.equal(invalid.ok, false);
   assert.equal(invalid.error.type, "invalid_architecture_profile");
   assert.equal(invalid.issues.some((issue) => issue.path === "summary"), true);
+
+  const missingVerificationPath = path.join(root, "missing-verification-architecture.json");
+  const missingVerificationProfile = JSON.parse(fs.readFileSync(sourcePath, "utf8"));
+  delete missingVerificationProfile.technical_baseline.verification;
+  writeJson(missingVerificationPath, missingVerificationProfile);
+
+  const missingVerification = await runArchitectureProfileCommand(["--root", root, "--from", missingVerificationPath, "--id", "module-team-cli-missing-verification", "--json"]);
+  assert.equal(missingVerification.ok, false);
+  assert.equal(missingVerification.error.type, "invalid_architecture_profile");
+  assert.equal(missingVerification.issues.some((issue) => issue.path === "technical_baseline" && /verification/.test(issue.message)), true);
 });
 
 test("architecture baseline command module previews before confirmed write", async () => {

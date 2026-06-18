@@ -1923,6 +1923,12 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   assert.equal(builtinProfile.sources.some((source) => source.label === "CodeGraph / GitNexus"), true);
   assert.equal(builtinProfile.principles.includes("build-vs-buy-before-custom-infrastructure"), true);
   assert.equal(builtinProfile.checks.some((check) => check.id === "ARCH-5" && check.audience === "agent"), true);
+  assert.equal(builtinProfile.technical_baseline.runtime_topology.some((item) => item.name === "cli-state-layer"), true);
+  assert.equal(builtinProfile.technical_baseline.module_boundaries.some((item) => item.name === "src/architecture"), true);
+  assert.equal(builtinProfile.technical_baseline.contract_surfaces.some((item) => item.name === "cli-json"), true);
+  assert.equal(builtinProfile.technical_baseline.data_flows.some((item) => item.name === "architecture-before-implementation"), true);
+  assert.equal(builtinProfile.technical_baseline.dependency_decisions.some((item) => item.name === "citty"), true);
+  assert.equal(builtinProfile.technical_baseline.reference_mappings.some((item) => item.name === "ECC"), true);
   assert.equal(builtinProfile.preferred_libraries.some((entry) => entry.area === "cli"), true);
   assert.equal(builtinProfile.avoid.includes("silent architecture replacement"), true);
   assert.equal(builtinProfile.build_vs_buy_policy.require_reason_when_self_building, true);
@@ -1952,8 +1958,14 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   assert.equal(confirmed.data.baseline.sticky, true);
   assert.equal(confirmed.data.baseline.requires_challenge_to_change, true);
   assert.equal(confirmed.data.baseline.principles.includes("build-vs-buy-before-custom-infrastructure"), true);
+  assert.equal(confirmed.data.baseline.technical_baseline.runtime_topology.some((item) => item.name === "cli-state-layer"), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "architecture", "baseline.json")), true);
-  assert.match(fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.md"), "utf8"), /Architecture Baseline/);
+  const baselineMarkdown = fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.md"), "utf8");
+  assert.match(baselineMarkdown, /Architecture Baseline/);
+  assert.match(baselineMarkdown, /## Technical Architecture Baseline/);
+  assert.match(baselineMarkdown, /### Runtime Topology/);
+  assert.match(baselineMarkdown, /### Module Boundaries/);
+  assert.match(baselineMarkdown, /### Data Flows/);
   assert.match(fs.readFileSync(path.join(root, ".opennori", "agent-guide.md"), "utf8"), /Architecture Baseline/);
 
   const decision = run([
@@ -1975,6 +1987,8 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   const status = run(["status", "--root", root, "--json"]);
   assert.equal(status.data.architecture.decision, "valid");
   assert.equal(status.data.architecture.baseline.profile, "typescript-agent-state-cli");
+  assert.equal(status.data.architecture.baseline.technical_baseline_summary.runtime_topology_count > 0, true);
+  assert.equal(status.data.architecture.baseline.technical_baseline_summary.module_boundary_count > 0, true);
   assert.equal(status.data.architecture.build_vs_buy_decisions.length, 1);
 
   const clearCheck = run(["check", "--root", root, "--json"]);
@@ -2010,6 +2024,7 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   const reportText = fs.readFileSync(report.data.report_path, "utf8");
   assert.match(reportText, /## Architecture Baseline/);
   assert.match(reportText, /Architecture decision: valid/);
+  assert.match(reportText, /Technical baseline: /);
   assert.match(reportText, /Build-vs-buy: clear \(1 decisions\)/);
 
   const exported = run([
@@ -2209,6 +2224,16 @@ test("project architecture profiles can be added and used for baselines", () => 
         review: "Inspect command modules and parser wiring."
       }
     ],
+    technical_baseline: {
+      runtime_topology: [{ name: "team-cli-runtime", decision: "Run through the team CLI package." }],
+      source_of_truth: [{ name: "team-schema-package", decision: "Use the shared schema package as the contract source." }],
+      module_boundaries: [{ name: "commands", decision: "Command modules delegate to domain modules." }],
+      contract_surfaces: [{ name: "json-cli", decision: "Expose stable JSON for agents." }],
+      data_flows: [{ name: "command-to-state", steps: ["Parse command.", "Validate schema.", "Write project state."] }],
+      dependency_decisions: [{ name: "team-cli-parser", decision: "Prefer the team CLI parser dependency." }],
+      reference_mappings: [{ name: "team-standard", decision: "Map team standards into command and schema modules." }],
+      verification: ["pnpm test"]
+    },
     preferred_libraries: [{ area: "cli", policy: "Prefer the team CLI parser package." }],
     avoid: ["new handwritten parser without challenge"],
     build_vs_buy_policy: {
@@ -2252,6 +2277,48 @@ test("project architecture profiles can be added and used for baselines", () => 
   assert.equal(baseline.data.baseline.profile_origin, "project");
   assert.equal(baseline.data.baseline.principles.includes("team-parser-first"), true);
   assert.match(fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.md"), "utf8"), /team-parser-first/);
+});
+
+test("project architecture profiles without technical verification are not usable for baselines", () => {
+  const root = tempRoot();
+  run(["install", "--root", root, "--json"]);
+
+  const profilesDir = path.join(root, ".opennori", "architecture", "profiles");
+  fs.mkdirSync(profilesDir, { recursive: true });
+  fs.writeFileSync(path.join(profilesDir, "missing-verification.json"), `${JSON.stringify({
+    id: "missing-verification",
+    title: "Missing Verification Profile",
+    summary: "This profile has concrete sections but no verification commands or review checks.",
+    principles: ["use-concrete-architecture"],
+    checks: [
+      {
+        id: "TEAM-1",
+        audience: "maintainer",
+        statement: "Architecture has concrete boundaries.",
+        review: "Inspect the baseline."
+      }
+    ],
+    technical_baseline: {
+      runtime_topology: [{ name: "runtime", decision: "Use the project runtime." }],
+      source_of_truth: [{ name: "state", decision: "Use project-local JSON state." }],
+      module_boundaries: [{ name: "modules", decision: "Keep command and domain modules separate." }],
+      contract_surfaces: [{ name: "json", decision: "Expose stable JSON." }],
+      data_flows: [{ name: "flow", steps: ["Read input.", "Write state."] }],
+      dependency_decisions: [{ name: "parser", decision: "Use the existing parser." }],
+      reference_mappings: [{ name: "standard", decision: "Map the team standard into modules." }]
+    },
+    build_vs_buy_policy: {
+      order: ["current-project-dependency", "mature-open-source-library", "small-local-implementation"],
+      require_reason_when_self_building: true
+    }
+  }, null, 2)}\n`);
+
+  const profiles = run(["architecture", "profiles", "--root", root, "--json"]);
+  const projectProfile = profiles.data.profiles.find((profile) => profile.id === "missing-verification");
+  assert.equal(Boolean(projectProfile), true);
+  assert.equal(projectProfile.valid, false);
+  assert.equal(projectProfile.review.can_generate_baseline, false);
+  assert.equal(projectProfile.validation_issues.some((issue) => issue.path === "technical_baseline" && /verification/.test(issue.message)), true);
 });
 
 test("build-vs-buy health surfaces missing reuse review before self-build", () => {

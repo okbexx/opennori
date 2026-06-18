@@ -604,6 +604,31 @@ export type BuildVsBuyPolicy = {
   [key: string]: unknown;
 };
 
+export type TechnicalArchitectureItem = {
+  name: string;
+  decision: string;
+  reason?: string;
+  [key: string]: unknown;
+};
+
+export type TechnicalArchitectureFlow = {
+  name: string;
+  steps: string[];
+  [key: string]: unknown;
+};
+
+export type TechnicalArchitectureBaseline = {
+  runtime_topology: TechnicalArchitectureItem[];
+  source_of_truth: TechnicalArchitectureItem[];
+  module_boundaries: TechnicalArchitectureItem[];
+  contract_surfaces: TechnicalArchitectureItem[];
+  data_flows: TechnicalArchitectureFlow[];
+  dependency_decisions: TechnicalArchitectureItem[];
+  reference_mappings: TechnicalArchitectureItem[];
+  verification: string[];
+  [key: string]: unknown;
+};
+
 export type ArchitectureProfile = {
   id: string;
   title: string;
@@ -613,6 +638,7 @@ export type ArchitectureProfile = {
   sources: ArchitectureSource[];
   principles: string[];
   checks: ArchitectureCheck[];
+  technical_baseline?: Partial<TechnicalArchitectureBaseline>;
   preferred_libraries: PreferredLibraryPolicy[];
   avoid: string[];
   build_vs_buy_policy: BuildVsBuyPolicy;
@@ -663,6 +689,7 @@ export type ArchitectureBaseline = {
   sources: ArchitectureSource[];
   principles: string[];
   checks: ArchitectureCheck[];
+  technical_baseline: TechnicalArchitectureBaseline;
   preferred_libraries: PreferredLibraryPolicy[];
   avoid: string[];
   build_vs_buy_policy: BuildVsBuyPolicy;
@@ -741,6 +768,14 @@ export type ArchitectureState = {
     profile: string;
     profile_title: string;
     goal_id: string;
+    technical_baseline_summary?: {
+      runtime_topology_count: number;
+      module_boundary_count: number;
+      contract_surface_count: number;
+      data_flow_count: number;
+      dependency_decision_count: number;
+      reference_mapping_count: number;
+    };
     sticky: boolean;
     requires_challenge_to_change: boolean;
     accepted_at: string | null;

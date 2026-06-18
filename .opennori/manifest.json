@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-18T08:22:57.039Z",
+  "updated_at": "2026-06-18T09:48:45.249Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -277,13 +277,32 @@
       "profile": "typescript-agent-state-cli",
       "profile_title": "TypeScript Agent State CLI",
       "goal_id": "opennori-self",
+      "technical_baseline_summary": {
+        "runtime_topology_count": 4,
+        "module_boundary_count": 6,
+        "contract_surface_count": 4,
+        "data_flow_count": 4,
+        "dependency_decision_count": 6,
+        "reference_mapping_count": 5
+      },
       "sticky": true,
       "requires_challenge_to_change": true,
-      "accepted_at": "2026-06-13T10:11:37.679Z"
+      "accepted_at": "2026-06-18T09:43:44.184Z"
     },
     "issues": [],
     "open_challenges": [],
     "apply_records": [
+      {
+        "id": "ac-a-3-technical-baseline-sections",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-3",
+        "status": "aligned",
+        "summary": "Architecture Profile and Baseline now require concrete technical architecture sections while keeping subjective architecture quality in Skills and user review.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/ac-a-3-technical-baseline-sections.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
       {
         "id": "ac-o-9-autogoal-standard-contract-draft",
         "goal_id": "opennori-self",

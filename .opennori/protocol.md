@@ -291,11 +291,30 @@ need to remember `opennori profile` commands.
 ## Architecture Baseline
 
 Architecture Baseline is separate from Product AC. It is not a plan, phase list, task list, or
-implementation checklist. It is sticky architecture guidance for agents and maintainers:
+implementation checklist. It is sticky architecture guidance for agents and maintainers.
+
+It has two layers:
+
+1. Architecture Charter: product boundary, agent behavior constraints, challenge rule, and
+   build-vs-buy policy.
+2. Technical Architecture Baseline: concrete runtime topology, source-of-truth model,
+   module/package boundaries, CLI/MCP/API/IPC contract surfaces, data flows, dependency decisions,
+   reference mappings, and verification.
+
+A baseline that only lists broad principles, preferred libraries, or governance constraints is not
+concrete enough for non-trivial implementation. Agents should challenge or revise it before coding.
 
 - selected Architecture Profile
 - goal it applies to
 - architecture principles and boundaries
+- technical runtime topology
+- source-of-truth and cache/projection boundaries
+- module/package ownership boundaries
+- CLI/MCP/API/IPC contract surfaces
+- implementation data flows
+- dependency decisions with reasons
+- reference mappings from mature projects or official SDKs
+- verification commands or review methods
 - Architecture Checks for maintainers or agents
 - preferred libraries or technologies
 - avoid policy
@@ -311,8 +330,8 @@ OpenNori includes built-in profiles and supports project profiles under:
 
 Use `opennori architecture profiles --root <project> --json` to list built-ins and project profiles.
 The output is intentionally reviewable before baseline confirmation: each profile includes suitable
-use cases, reference sources, architecture principles, checks, preferred libraries, avoid
-boundaries, validation issues, and build-vs-buy policy.
+use cases, reference sources, architecture principles, concrete technical baseline sections,
+checks, preferred libraries, avoid boundaries, validation issues, and build-vs-buy policy.
 Use `opennori architecture profile --root <project> --from <profile.json> --json` to add a reviewed
 project profile. Existing profiles are not overwritten unless the agent uses `--force` after review.
 

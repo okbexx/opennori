@@ -43,6 +43,11 @@ Before implementing a non-trivial change, read:
 
 Follow the Architecture Baseline while completing Product AC.
 If the baseline conflicts with project evidence, create an Architecture Challenge instead of silently replacing it.
+An Architecture Baseline is incomplete if it only states product boundaries,
+governance principles, or preferred libraries. For non-trivial implementation it
+must also include a concrete Technical Architecture Baseline: runtime topology,
+source-of-truth model, module/package boundaries, contract surfaces, data flows,
+dependency decisions, reference mappings, and verification.
 
 OpenNori has exactly one default current goal. Drafts live under `.opennori/drafts/` and are not executable until approved; completed and blocked goals are history. Legacy `.opennori/active/` is recovery input only and must not be used as the normal work context.
 
