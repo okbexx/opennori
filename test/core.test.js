@@ -1291,16 +1291,20 @@ test("agent can explicitly prune obsolete evidence before recording fresh proof"
 
 test("protocol v1 example contains concrete user tool operations", () => {
   const brief = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "opennori-self.json"), "utf8"));
-  assert.equal(brief.criteria.length, 50);
+  assert.equal(brief.criteria.length, 51);
   assert.deepEqual(new Set(brief.criteria.map((criterion) => criterion.layer)), new Set(["protocol", "operator", "productization", "architecture"]));
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-P-")).length, 13);
-  assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-O-")).length, 9);
+  assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-O-")).length, 10);
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-Z-")).length, 18);
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-A-")).length, 10);
   const interfaceAcceptanceCriterion = brief.criteria.find((criterion) => criterion.id === "AC-O-11");
   assert.equal(interfaceAcceptanceCriterion?.layer, "operator");
   assert.match(interfaceAcceptanceCriterion?.user_story ?? "", /UI\/UX|可见交互界面/);
   assert.match(interfaceAcceptanceCriterion?.threshold ?? "", /Skill|agent|CLI hard validator/);
+  const completeProductCriterion = brief.criteria.find((criterion) => criterion.id === "AC-O-12");
+  assert.equal(completeProductCriterion?.layer, "operator");
+  assert.match(completeProductCriterion?.user_story ?? "", /完整产品|完整功能闭环|完整 Dashboard/);
+  assert.match(completeProductCriterion?.threshold ?? "", /完整验收面|MVP|CLI hard validator/);
 
   const expectedTools = [
     "Codex 对话",
@@ -1319,7 +1323,8 @@ test("protocol v1 example contains concrete user tool operations", () => {
     "OpenNori Plugin",
     "证据来源",
     "复查",
-    "UI/UX"
+    "UI/UX",
+    "完整验收面"
   ];
 
   const joined = JSON.stringify(brief, null, 2);
@@ -1338,6 +1343,7 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.equal(plugin.interface.defaultPrompt.length >= 5, true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /Set up OpenNori/.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /autogoal/i.test(prompt)), true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /complete product.*not an MVP/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /AC we just discussed/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /acceptance criteria/.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /dashboard.*live agent activity/i.test(prompt)), true);
@@ -1381,6 +1387,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /already stated goal/);
   assert.match(noriAsset, /AC we just discussed/);
   assert.match(noriAsset, /acceptance_basis\.source: "conversation"/);
+  assert.match(noriAsset, /complete product/);
+  assert.match(noriAsset, /full acceptance surface/);
   assert.match(noriAsset, /UI\/UX|visible interface/i);
   assert.doesNotMatch(noriAsset, /skill export/);
   assert.doesNotMatch(noriAsset, /process steps/);
@@ -1396,6 +1404,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(acceptanceAsset, /source: "conversation"/);
   assert.match(acceptanceAsset, /opennori draft --brief/);
   assert.match(acceptanceAsset, /Do not route an already discussed AC set through autogoal/);
+  assert.match(acceptanceAsset, /compact 3-5 item AC set/);
+  assert.match(acceptanceAsset, /full acceptance surface/);
   assert.match(acceptanceAsset, /Visible interface experience/);
 
   const evidenceAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-evidence", "SKILL.md"), "utf8");
@@ -1410,6 +1420,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(autogoalAsset, /MVP, first version, prototype/);
   assert.match(autogoalAsset, /conversation adoption/);
   assert.match(autogoalAsset, /nori-acceptance/);
+  assert.match(autogoalAsset, /small\s+starter contract/);
+  assert.match(autogoalAsset, /full acceptance surface/);
   assert.match(autogoalAsset, /visible interface goals/);
 
   const healthAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-project-health", "SKILL.md"), "utf8");

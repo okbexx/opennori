@@ -21,6 +21,15 @@ stores drafts, contracts, evidence, and objective state; this Skill must use
 the conversation, project context, and user intent to decide what questions to
 ask before approval.
 
+When the user's goal is a complete product, complete feature loop, full app,
+full dashboard, full workbench, or otherwise asks for a complete delivery, do
+not default to a compact 3-5 item AC set. First define the full acceptance
+surface the user would need to judge the product as complete. It is acceptable
+for the Nori Contract to contain more AC when the goal genuinely has more user
+judgment surfaces. Later implementation still proceeds one current gap at a
+time; do not confuse execution sequencing with narrowing the completion
+definition.
+
 ## Start Here
 
 1. Read current OpenNori state with doctor/list/resume/status when a goal may already exist, and follow `data.agent_next` when present.
@@ -31,6 +40,10 @@ ask before approval.
    acceptance questions yourself; optionally use `opennori discover` as a
    scratch question source, but do not treat its gap ids or wording as
    authoritative.
+   For complete-product goals, expand the full acceptance surface before
+   approval instead of compressing it into a starter slice. If scope must be
+   reduced, ask the user whether they intentionally want a prototype, MVP,
+   first version, or narrower goal.
 6. If a draft or current contract exists, inspect it yourself before claiming
    the AC is good enough. CLI `acceptance_review` may be present for
    compatibility, but it is not the source of truth for subjective AC quality.
@@ -62,6 +75,7 @@ Useful state commands:
 ## Natural-Language Mapping
 
 - "I want to build X" -> discover missing acceptance details, then draft Product AC.
+- "Build the full product", "ship the complete feature", "完整产品", "完整功能闭环", "完整应用", "完整 Dashboard", "完整工作台", or "不要 MVP" -> draft a full acceptance surface. Cover all user-visible roles, entries, workflows, states, rules, permissions, persistence, failure/recovery, UI/UX, reporting/review method, and explicit boundaries that affect whether the user can accept the whole product.
 - "Use OpenNori autogoal", "用 OpenNori autogoal", or "I only have a rough idea" -> hand off to `nori-autogoal` for Skill-driven convergence into a standard Nori Contract Draft.
 - "Use OpenNori to take over the AC we just discussed", "整理我们刚才讨论的 AC", "把上面的 AC 收敛成 Nori Contract Draft", or "不要开始实现，先给我确认" -> adopt the in-progress conversation into a standard draft Nori Contract with `acceptance_basis.source: "conversation"`; ask for approve/revise before implementation.
 - "Use Chinese AC", "验收标准用中文", "write this contract in English" -> keep the user-visible goal, discovery questions, AC, and next-candidate draft in that language by passing the matching `--language`; protocol field names remain stable English.
@@ -135,6 +149,7 @@ Ask questions that affect user acceptance:
 - Failure behavior: what the user sees when the operation cannot complete.
 - Boundaries: what is intentionally out of scope.
 - Review method: how the user or reviewer can verify the behavior.
+- Complete product surface: when the goal is a full product, full app, full dashboard, full workbench, or complete feature loop, enumerate the acceptance dimensions before drafting: user roles, entry and navigation, primary workflows, state transitions, data objects and rules, permissions, onboarding or first-run state, empty/loading/error/success states, persistence, failure recovery, reporting or audit surface, cross-session continuity, and explicit out-of-scope boundaries.
 - Abstract product surfaces: if an AC says overview, long-term assets, memory, knowledge candidates, capabilities, or result changes, ask what exact visible objects, fields, states, source links, failure states, and boundaries the user must see.
 - Visible interface experience: if the goal includes a page, app, Dashboard, Desktop, workbench, form, settings screen, admin console, or other user-facing interface, ask or infer UX acceptance for entry and navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability and scanability, visual and interaction consistency, recovery paths, and UI boundaries such as what must not be shown or exposed.
 
@@ -149,6 +164,11 @@ For interface-heavy goals, avoid a single vague "UI/UX is good" criterion. Split
 experience acceptance into concrete user judgments: where the user enters, what
 they scan first, what states they see, what feedback follows an action, how
 failures recover, and what would count as confusing or out of bounds.
+For complete-product goals, do not hide important acceptance dimensions inside a
+single broad criterion. Prefer enough specific AC for the user to review the
+whole product closure. The user may explicitly remove, defer, or narrow AC, but
+the agent must not silently downgrade the definition to MVP, first version, or a
+happy-path subset.
 Ask fewer, sharper questions when the user already provided enough detail.
 
 ## State Writes
@@ -188,6 +208,7 @@ Match the reply language to the Nori Contract presentation language when it is k
 
 - Do not accept generic criteria such as "modify fields" or "show an error" until field scope, validation, success, persistence, failure, and review method are clear enough for the user to judge.
 - Do not accept abstract criteria such as "overall situation", "long-term assets", "project memory", "knowledge candidates", "capabilities", or "result changes" until the exact visible objects, states, source links, failure/recovery behavior, and boundaries are clear enough for the user to judge.
+- Do not accept a compact starter AC set for complete product, complete feature loop, full app, full dashboard, or full workbench goals unless the user explicitly chooses a prototype, MVP, first version, or narrower scope. AC count is not the quality target; complete user-judgable coverage is.
 - Do not accept interface goals that only cover data, backend state, or happy-path function. Visible UI goals also need user-experience acceptance for navigation, hierarchy, states, feedback, readability, consistency, and recovery unless the user explicitly declares those out of scope.
 - Do not make tests, modules, files, commands, Skills, libraries, architecture, or build-vs-buy decisions into Product AC.
 - Do not treat brainstorm output, discovery questions, candidate goals, or agent assumptions as a Nori Contract.

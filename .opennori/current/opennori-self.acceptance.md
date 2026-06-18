@@ -11,7 +11,7 @@ Language: en
 ## Acceptance Basis
 
 Status: approved
-Summary: User added UI/UX acceptance discovery capability for visible interface goals.
+Summary: User required OpenNori to expand full acceptance surfaces for complete product goals instead of compact MVP AC sets.
 
 ## Nori Profile
 
@@ -80,6 +80,7 @@ Summary: User added UI/UX acceptance discovery capability for visible interface 
 | AC-O-9 | operator | 作为用户，我给 agent 一个粗略 idea 并要求使用 OpenNori autogoal 后，最终看到并批准的是标准 Nori Contract Draft，而不是新的 autogoal 专用产物、MVP/第一版/原型、过程计划或任务列表。 | 用户在 Codex 对话中说“用 OpenNori autogoal 把这个 idea 变成可验收目标”，agent 读取项目上下文并输出标准 Nori Contract Draft；用户检查 packaged Skills、Plugin manifest、README/protocol 和生成的 draft 形态。 | autogoal 由 packaged Skill 驱动，并明确要求保持用户完整意图、不把大目标降级为 MVP/第一版/原型；输出形态与手动多轮澄清后的 Nori Contract Draft 一致，包含 Goal、用户视角 AC、Measure/Passes when、假设和只影响完成定义的问题；approve 后进入普通 OpenNori current gap/evidence/status/report 生命周期；CLI 只保存标准 draft 或 brief source，不把主观 AC 质量写成硬 validator。 | passing |
 | AC-O-10 | operator | 作为用户，我在非 OpenNori 项目里已经和 agent 讨论过目标和 AC 后，要求 OpenNori 接管这段讨论时，最终看到的是基于已有讨论整理出的标准 Nori Contract Draft，并且状态保持 draft/need user，而不是重新 autogoal、直接开始实现或把讨论记录当作完成证据。 | 用户在 agent 对话中提供已有目标、AC、假设和未决问题后，说‘用 OpenNori 接管我们刚才讨论的 AC，整理成 Nori Contract Draft，不要开始实现，先给我确认。’ | agent 使用 nori-acceptance 将已有讨论材料整理为标准 draft Nori Contract，写入 .opennori/drafts，展示 Goal、AC、衡量方式、通过条件、假设和开放问题；status/report 表达 need user approve/revise，不进入 current/active、不记录 passing evidence、不走 autogoal 的粗略 idea 收敛路径。 | passing |
 | AC-O-11 | operator | 作为用户，我给 agent 一个包含页面、应用、Dashboard、Desktop、工作台、表单或其他可见交互界面的目标时，OpenNori 能引导 agent 自动挖掘 UI/UX 体验验收，而不是只生成数据、状态或功能完成 AC。 | 阅读 nori、nori-acceptance、nori-autogoal packaged Skills、OpenNori protocol、README 和自验收报告，并用界面类目标检查 agent 应追问或补齐哪些体验维度。 | Skills 明确要求界面类目标覆盖入口与导航、信息层级、空态/加载/错误/成功状态、操作反馈、可读性、视觉一致性、恢复路径和不应暴露的 UI 边界；这些要求以 agent 行为协议和用户确认表达，不写成 CLI hard validator 或固定词表测试。 | passing |
+| AC-O-12 | operator | 作为用户，我告诉 agent 要做完整产品、完整功能闭环、完整应用、完整 Dashboard 或完整工作台时，OpenNori 会让 agent 充分展开用户可验收 AC，而不是默认压缩成少量 MVP、第一版或 happy-path AC。 | 阅读 nori、nori-acceptance、nori-autogoal packaged Skills、本机 OpenNori 开发 Skills、OpenNori protocol、README、官网和自验收报告；用完整产品类目标检查 agent 是否会覆盖足够的验收面，并让用户显式确认保留完整闭环或缩小范围。 | Skills 明确要求完整产品类目标默认展开完整验收面，包括用户角色、入口与导航、核心工作流、状态转换、数据规则、权限与边界、失败与恢复、持久化、UI/UX、报告或审查方式；AC 数量可以按目标需要增加，执行仍按当前缺口推进；只有用户明确要求原型、MVP、第一版或缩小范围时，agent 才能压缩完成定义；该规则只写入 Skill 行为协议、文档、用户确认和资产测试，不写成 CLI hard validator 或固定自然语言词表。 | passing |
 
 ## Rule
 

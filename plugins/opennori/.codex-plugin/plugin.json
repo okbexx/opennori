@@ -32,6 +32,7 @@
     "defaultPrompt": [
       "Set up OpenNori for this project.",
       "Use OpenNori autogoal to turn this rough idea into a Nori Contract.",
+      "Use OpenNori to define the full Nori Contract for this complete product, not an MVP.",
       "Use OpenNori to take over the AC we just discussed.",
       "Use OpenNori to turn this goal into acceptance criteria.",
       "Continue the current OpenNori goal.",
