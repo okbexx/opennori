@@ -11,15 +11,28 @@ Good AC says what entry the user uses, what operation or judgment they perform, 
 
 When the root `nori` Skill or CLI JSON reports `data.agent_next.state: initialized_no_active_contract`, treat that as the normal starting point for this Skill. The project is ready; it needs a human-centered Nori Contract, not lifecycle repair. If the user already stated a goal earlier in the same conversation, use that goal instead of asking them to repeat it.
 
+AC quality is a Skill responsibility, not a CLI validator. Do not wait for
+`opennori check` to prove that an AC is vague or specific enough. The CLI
+stores drafts, contracts, evidence, and objective state; this Skill must use
+the conversation, project context, and user intent to decide what questions to
+ask before approval.
+
 ## Start Here
 
 1. Read current OpenNori state with doctor/list/resume/status when a goal may already exist, and follow `data.agent_next` when present.
 2. If `agent_next.state` is `initialized_no_active_contract`, use the user's natural-language goal from the current conversation when present; ask for the goal only when it is missing; then begin discovery/draft.
 3. If the user is still exploring an idea, create brainstorm candidates before drafting a contract.
-4. If the user has a goal but the completion surface is vague, run discovery before draft.
-5. If a draft or current contract exists, inspect `acceptance_review` before claiming the AC is good enough.
-6. If `acceptance_review` reports `criterion_id: ACCEPTANCE-BASIS`, show those discovery questions before asking for approval; the draft is still a generic starting point.
-7. If `agent_next.state` is `completion_needs_review` and `agent_next.recommended_skill` is `nori-acceptance`, treat existing passing evidence as provisional: show the concrete `acceptance_review.findings`, ask only the missing questions that affect user judgment, then revise criteria or record explicit user-approved assumptions. Do not ask the user to simply accept risk before making the missing acceptance surface understandable.
+4. If the user has a goal but the completion surface is vague, ask the missing
+   acceptance questions yourself; optionally use `opennori discover` as a
+   scratch question source, but do not treat its gap ids or wording as
+   authoritative.
+5. If a draft or current contract exists, inspect it yourself before claiming
+   the AC is good enough. CLI `acceptance_review` may be present for
+   compatibility, but it is not the source of truth for subjective AC quality.
+6. If the draft came from a generic goal or has `ACCEPTANCE-BASIS`, show the
+   user the missing acceptance questions before asking for approval; the draft
+   is still a starting point.
+7. If `agent_next.state` is `completion_needs_review` and `agent_next.recommended_skill` is `nori-acceptance`, treat existing passing evidence as provisional: explain the unresolved acceptance ambiguity, ask only the missing questions that affect user judgment, then revise criteria or record explicit user-approved assumptions. Do not ask the user to simply accept risk before making the missing acceptance surface understandable.
 8. If the user has approved or revised AC, persist that decision before implementation continues.
 9. After `opennori approve`, read the returned `data.agent_next`. If it says `architecture_needs_review`, hand off to `nori-architecture-brainstorm` before implementation or evidence work.
 10. If `agent_next.state` is `ready_for_next_loop` and the user asked to continue, select or refine one `agent_next.candidate_goals` item, then create a draft from it; prefer the candidate's `draft_args` or `draft_command` when present instead of reconstructing CLI flags. Do not ask the user to invent the next prompt from scratch. After drafting, show concrete measurement and passing thresholds for approval; do not show a candidate-direction wrapper as if it were enough.
@@ -51,8 +64,9 @@ Useful state commands:
 - "Approve these AC" -> write approval, read `agent_next`, and route to architecture review, evidence, or reporting from that returned state.
 - "Change AC-2 to mean..." -> update that criterion and treat older evidence for it as stale.
 - Complete goal with `agent_next.candidate_goals` -> choose or refine the strongest human-facing candidate, use its `draft_args` or `draft_command` when present, then show the draft for user approval with concrete Measure / Passes when text.
-- Generic `draft --goal` output with `acceptance_review` findings -> show the missing acceptance questions first; do not ask for blind approval.
-- `completion_needs_review` with `recommended_skill: nori-acceptance` -> explain that the contract is objectively evidenced but not confidently acceptable yet; group findings by AC, ask the concrete missing questions, and revise AC before reporting confident completion.
+- Generic `draft --goal` output -> inspect the draft yourself, ask missing
+  acceptance questions first, and do not ask for blind approval.
+- `completion_needs_review` with `recommended_skill: nori-acceptance` -> explain that the contract is objectively evidenced but not confidently acceptable yet; identify the unresolved ambiguity from the AC text and user context, ask concrete missing questions, and revise AC before reporting confident completion.
 
 Discovery answer shape for agent-created temporary files:
 
@@ -88,6 +102,13 @@ Ask questions that affect user acceptance:
 - Abstract product surfaces: if an AC says overview, long-term assets, memory, knowledge candidates, capabilities, or result changes, ask what exact visible objects, fields, states, source links, failure states, and boundaries the user must see.
 
 Do not turn these questions into implementation tasks or evidence.
+
+Use judgment. These are not fixed adapters, and every goal type can require a
+different question set. A settings page may need field scope and validation;
+a workbench may need visible objects, state labels, source links, empty/error
+states, and recovery behavior; an agent capability may need invocation surface,
+readiness state, fallback behavior, and how the user can tell the agent used it.
+Ask fewer, sharper questions when the user already provided enough detail.
 
 ## State Writes
 

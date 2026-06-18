@@ -18,9 +18,9 @@
     {
       "id": "AC-P-2",
       "layer": "protocol",
-      "user_story": "作为用户，我运行 opennori check 后，能知道验收标准是否仍然是用户视角，而不是技术实现清单。",
-      "measurement": "对当前 active goal 或故意写坏的验收草案运行 opennori check。",
-      "threshold": "“存在文件、字段、命令、测试通过、实现某模块”这类内容不能作为用户验收标准通过校验。",
+      "user_story": "作为用户，我运行 opennori check 后，能区分客观状态健康检查和需要 agent 与我复核的 AC 质量判断，而不是以为 CLI 会替我判断 AC 好坏。",
+      "measurement": "对当前 active goal 运行 opennori check --json，并查看 README、AGENTS.md 和 OpenNori packaged Skills 对 AC 质量边界的说明。",
+      "threshold": "check 只报告 contract/ledger 结构、Architecture Baseline、Profile、build-vs-buy 和 evidence health 等客观状态；不会因为某句自然语言像“修改字段”或“失败时有提示”就生成固定 quality gap；nori / nori-acceptance / nori-reporting Skills 明确要求 agent 自行审查 AC 文字并向用户追问缺失的验收问题。",
       "risk": "medium"
     },
     {
@@ -98,9 +98,9 @@
     {
       "id": "AC-P-12",
       "layer": "protocol",
-      "user_story": "作为用户，我运行 opennori check 或让 agent 升级已使用 OpenNori 的项目后，能发现现有 active contract 里过于含糊的 AC，而不是让旧的弱验收标准静默通过。",
-      "measurement": "对已有 active goal 中包含“修改字段”“失败时有提示”等空泛完成条件的 Nori Contract 运行 opennori check；再对结构正确且包含具体用户操作、字段范围、反馈和判断方式的 contract 运行 check。",
-      "threshold": "check 在不改写历史 contract/evidence 的前提下输出 acceptance_review findings、warnings 和下一步建议；弱 AC 会标出缺少的字段范围、校验规则、成功反馈、失败场景或范围边界；具体 AC 不产生 review finding。",
+      "user_story": "作为用户，我让 agent 升级或继续一个已经使用 OpenNori 的项目时，能看到 agent 会用 OpenNori Skills 复核旧 AC 是否仍足够可验收，但项目状态检查不会把主观 AC 质量写成硬编码 CLI 裁判。",
+      "measurement": "查看 opennori upgrade/check 的项目状态输出、nori-acceptance Skill、nori-reporting Skill、README 和测试，确认旧 contract 不被自动改写，主观 AC 复核由 agent 提问和用户确认完成。",
+      "threshold": "upgrade/check 保留并报告现有 contract/evidence/report 状态，不因固定词表重写或 hard-fail 旧 AC；测试不再断言某句自然语言必须触发特定 gap id 或问题文本；Skills 明确要求 agent 对“修改字段”“整体情况”“长期资产”等含糊表述追问具体入口、对象、规则、状态、失败恢复和边界。",
       "risk": "high"
     },
     {

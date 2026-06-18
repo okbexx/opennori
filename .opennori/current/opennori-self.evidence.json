@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "Revised Contract language preference AC to human-visible acceptance.",
-      "approved_at": "2026-06-17T10:39:14.007Z"
+      "summary": "User revised AC-P-12: existing-project AC quality review is Skill-driven, not a CLI word-list audit.",
+      "approved_at": "2026-06-18T02:45:57.612Z"
     },
     "criteria": [
       {
@@ -22,9 +22,9 @@
       {
         "id": "AC-P-2",
         "layer": "protocol",
-        "user_story": "作为用户，我运行 opennori check 后，能知道验收标准是否仍然需要人类视角复核，而不是被技术实现清单静默当成完成。",
-        "measurement": "对当前 active goal 或故意包含实现词、测试通过、字段存在等表达的验收草案运行 opennori check。",
-        "threshold": "check 只对 contract/ledger 结构完整性做硬失败；对可能偏离用户视角、过于含糊或实现中心的 AC 输出 acceptance_review findings、warnings 和 agent_guidance，提醒 agent 与用户确认、修订、记录假设或接受 review risk。",
+        "user_story": "作为用户，我运行 opennori check 后，能区分客观状态健康检查和需要 agent 与我复核的 AC 质量判断，而不是以为 CLI 会替我判断 AC 好坏。",
+        "measurement": "对当前 active goal 运行 opennori check --json，并查看 README、AGENTS.md 和 OpenNori packaged Skills 对 AC 质量边界的说明。",
+        "threshold": "check 只报告 contract/ledger 结构、Architecture Baseline、Profile、build-vs-buy 和 evidence health 等客观状态；不会因为某句自然语言像“修改字段”或“失败时有提示”就生成固定 quality gap；nori / nori-acceptance / nori-reporting Skills 明确要求 agent 自行审查 AC 文字并向用户追问缺失的验收问题。",
         "required": true,
         "risk": "medium"
       },
@@ -112,9 +112,9 @@
       {
         "id": "AC-P-12",
         "layer": "protocol",
-        "user_story": "作为用户，我运行 opennori check 或让 agent 升级已使用 OpenNori 的项目后，能发现现有 active contract 里过于含糊的 AC，并知道这是需要讨论的 review risk，而不是协议硬拒绝。",
-        "measurement": "对已有 active goal 中包含“修改字段”“失败时有提示”或实现中心表达的 Nori Contract 运行 opennori check；再对结构正确且包含具体用户操作、字段范围、反馈和判断方式的 contract 运行 check。",
-        "threshold": "check 在不改写历史 contract/evidence 的前提下输出 acceptance_review findings、warnings 和下一步建议；弱 AC 会标出缺少的字段范围、校验规则、成功反馈、失败场景或范围边界；具体 AC 不产生 review finding；结构合法的 contract 不会只因启发式词表而 invalid。",
+        "user_story": "作为用户，我让 agent 升级或继续一个已经使用 OpenNori 的项目时，能看到 agent 会用 OpenNori Skills 复核旧 AC 是否仍足够可验收，但项目状态检查不会把主观 AC 质量写成硬编码 CLI 裁判。",
+        "measurement": "查看 opennori upgrade/check 的项目状态输出、nori-acceptance Skill、nori-reporting Skill、README 和测试，确认旧 contract 不被自动改写，主观 AC 复核由 agent 提问和用户确认完成。",
+        "threshold": "upgrade/check 保留并报告现有 contract/evidence/report 状态，不因固定词表重写或 hard-fail 旧 AC；测试不再断言某句自然语言必须触发特定 gap id 或问题文本；Skills 明确要求 agent 对“修改字段”“整体情况”“长期资产”等含糊表述追问具体入口、对象、规则、状态、失败恢复和边界。",
         "required": true,
         "risk": "high"
       },
@@ -520,7 +520,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-17T14:56:03.296Z",
+    "updated_at": "2026-06-18T02:52:39.807Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -618,9 +618,9 @@
         "risk": "medium",
         "evidence": [
           {
-            "kind": "review-result",
+            "kind": "protocol-boundary-review",
             "basis": "tool-observation",
-            "summary": "OpenNori check now separates hard contract integrity from soft acceptance_review: validateContractIntegrity keeps structure/ledger hard failures, check returns acceptance_review findings with agent_guidance for subjective AC concerns, and tests prove implementation-centered wording no longer rejects otherwise valid contracts.",
+            "summary": "OpenNori check now stays an objective state-health surface: runtime reviewAcceptanceQuality returns a non-authoritative clear compatibility surface, check describes contract structure/architecture/profile/evidence health, README/protocol/AGENTS and packaged Skills assign subjective AC quality to agent/user review, and npm run check passes.",
             "result": "passing",
             "confidence": "verified",
             "sources": [
@@ -628,16 +628,6 @@
                 "type": "command",
                 "label": "npm run check",
                 "command": "npm run check"
-              },
-              {
-                "type": "command",
-                "label": "node ./bin/opennori.js check --root . --json",
-                "command": "node ./bin/opennori.js check --root . --json"
-              },
-              {
-                "type": "artifact",
-                "label": "src/core/contract.ts",
-                "path": "src/core/contract.ts"
               },
               {
                 "type": "artifact",
@@ -648,105 +638,6 @@
                 "type": "artifact",
                 "label": "src/cli/commands/check.ts",
                 "path": "src/cli/commands/check.ts"
-              },
-              {
-                "type": "artifact",
-                "label": "test/core.test.js",
-                "path": "test/core.test.js"
-              }
-            ],
-            "reviewability": "Run npm run check and opennori check, then inspect contract integrity validation, acceptance review implementation, and tests around implementation-centered AC wording.",
-            "limitations": "This proves the local CLI and test behavior; agent/user judgment still decides whether to revise, confirm assumptions, waive, or accept review risk.",
-            "gate": "accepted",
-            "created_at": "2026-06-14T00:58:27.223Z"
-          },
-          {
-            "kind": "review-result",
-            "basis": "tool-observation",
-            "summary": "OpenNori keeps subjective preference quality out of hard validators while still surfacing it: profile_review is now a completion review risk, not an invalid contract or failed Product AC.",
-            "result": "passing",
-            "confidence": "verified",
-            "sources": [
-              {
-                "type": "command",
-                "label": "npx vitest run test/core.test.js -t 'profile|completion-review|required skills'",
-                "command": "npx vitest run test/core.test.js -t 'profile|completion-review|required skills'"
-              }
-            ],
-            "reviewability": "Inspect the profile review-risk implementation and Skill rules, then rerun the targeted tests.",
-            "limitations": "This covers Nori Profile preference semantics; other subjective review surfaces should continue to be audited separately.",
-            "gate": "accepted",
-            "created_at": "2026-06-14T01:10:50.101Z"
-          },
-          {
-            "kind": "review-result",
-            "basis": "tool-observation",
-            "summary": "OpenNori now keeps subjective product and architecture judgments out of hard contract rejection while surfacing them as review risks: acceptance_review, architecture_review, evidence_health, profile_review, and build_vs_buy affect completion confidence rather than rewriting Product AC.",
-            "result": "passing",
-            "confidence": "verified",
-            "sources": [
-              {
-                "type": "command",
-                "label": "npm run check",
-                "command": "npm run check"
-              },
-              {
-                "type": "command",
-                "label": "node ./bin/opennori.js check --root . --goal opennori-self --json",
-                "command": "node ./bin/opennori.js check --root . --goal opennori-self --json"
-              },
-              {
-                "type": "artifact",
-                "label": "src/core/report.ts",
-                "path": "src/core/report.ts"
-              },
-              {
-                "type": "artifact",
-                "label": "src/cli/commands/check.ts",
-                "path": "src/cli/commands/check.ts"
-              },
-              {
-                "type": "artifact",
-                "label": "test/core.test.js",
-                "path": "test/core.test.js"
-              },
-              {
-                "type": "artifact",
-                "label": ".opennori/protocol.md",
-                "path": ".opennori/protocol.md"
-              }
-            ],
-            "reviewability": "Run npm run check and opennori check, then inspect report.ts/check.ts and the protocol section explaining review-risk versus hard validation.",
-            "limitations": "This proves the current OpenNori semantics locally; future new review surfaces still need the same boundary audit.",
-            "gate": "accepted",
-            "created_at": "2026-06-14T01:35:42.092Z"
-          },
-          {
-            "kind": "acceptance-quality-gate",
-            "basis": "tool-observation",
-            "summary": "OpenNori check now surfaces abstract product ACs as acceptance_review findings and routes completion review back to nori-acceptance instead of ordinary reporting.",
-            "result": "passing",
-            "confidence": "verified",
-            "sources": [
-              {
-                "type": "command",
-                "label": "npm run check",
-                "command": "npm run check"
-              },
-              {
-                "type": "command",
-                "label": "node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json",
-                "command": "node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json"
-              },
-              {
-                "type": "artifact",
-                "label": "src/acceptance.ts",
-                "path": "src/acceptance.ts"
-              },
-              {
-                "type": "artifact",
-                "label": "src/core/report.ts",
-                "path": "src/core/report.ts"
               },
               {
                 "type": "artifact",
@@ -755,8 +646,18 @@
               },
               {
                 "type": "artifact",
-                "label": "src/cli/commands/check.ts",
-                "path": "src/cli/commands/check.ts"
+                "label": "src/core/report.ts",
+                "path": "src/core/report.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": "AGENTS.md",
+                "path": "AGENTS.md"
               },
               {
                 "type": "artifact",
@@ -767,12 +668,17 @@
                 "type": "artifact",
                 "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
                 "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
               }
             ],
-            "reviewability": "Rerun npm run check, then run the AW check command and confirm acceptance_review reports AC-2 through AC-7 concrete questions with agent_next.recommended_skill set to nori-acceptance.",
-            "limitations": "This remains a heuristic review surface, not a hard validator; user or agent judgment is still required to revise or accept remaining AC quality risk.",
+            "reviewability": "Rerun npm run check, inspect check JSON for objective acceptance_review summary, and read README/AGENTS plus nori/nori-acceptance/nori-reporting Skills for the agent-side AC quality rules.",
+            "limitations": "This proves the OpenNori code and packaged Skills no longer hard-code subjective AC-quality decisions. It does not mean every future agent will ask perfect questions; that remains Skill behavior and user review.",
             "gate": "accepted",
-            "created_at": "2026-06-17T14:56:03.185Z"
+            "created_at": "2026-06-18T02:52:27.180Z"
           }
         ]
       },
@@ -1584,9 +1490,9 @@
         "risk": "high",
         "evidence": [
           {
-            "kind": "review-result",
+            "kind": "skill-boundary-review",
             "basis": "tool-observation",
-            "summary": "Existing contracts with vague or implementation-centered wording are now surfaced through acceptance_review warnings instead of invalid_acceptance hard failures: weak settings ACs produce missing-field-scope, validation, success, and failure review findings, while specific ACs stay clear and history is not rewritten.",
+            "summary": "Existing-project AC review is now Skill-driven rather than a CLI word-list audit: tests no longer assert natural-language ACs must trigger fixed gap ids/questions; discover tests only cover question-source state; project-health, acceptance, reporting, root Skills, AGENTS, README, and protocol tell agents to inspect vague old ACs and ask user-facing questions without mutating existing contracts.",
             "result": "passing",
             "confidence": "verified",
             "sources": [
@@ -1594,64 +1500,11 @@
                 "type": "command",
                 "label": "npm run check",
                 "command": "npm run check"
-              },
-              {
-                "type": "command",
-                "label": "node ./bin/opennori.js check --root . --goal opennori-self --json",
-                "command": "node ./bin/opennori.js check --root . --goal opennori-self --json"
-              },
-              {
-                "type": "artifact",
-                "label": "src/acceptance.ts",
-                "path": "src/acceptance.ts"
-              },
-              {
-                "type": "artifact",
-                "label": "src/cli/commands/check.ts",
-                "path": "src/cli/commands/check.ts"
               },
               {
                 "type": "artifact",
                 "label": "test/core.test.js",
                 "path": "test/core.test.js"
-              },
-              {
-                "type": "artifact",
-                "label": ".opennori/protocol.md",
-                "path": ".opennori/protocol.md"
-              }
-            ],
-            "reviewability": "Run the test suite and inspect the acceptance_review fixtures plus protocol upgrade/check guidance.",
-            "limitations": "The review is heuristic by design; domain-specific AC quality remains an agent and user judgment, not a fixed adapter taxonomy.",
-            "gate": "accepted",
-            "created_at": "2026-06-14T00:58:27.545Z"
-          },
-          {
-            "kind": "acceptance-discovery-dogfood",
-            "basis": "tool-observation",
-            "summary": "Real settings-page dogfood now keeps vague goals from becoming apparently-clear contracts: discover asks for entry, field scope, validation, success feedback, persistence, failure behavior, boundaries, and review method; draft --goal marks generic output as needing acceptance discovery; check surfaces ACCEPTANCE-BASIS findings instead of reporting clear.",
-            "result": "passing",
-            "confidence": "verified",
-            "sources": [
-              {
-                "type": "command",
-                "label": "tmp=$(mktemp -d /tmp/opennori-step3-final-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js discover --root \"$tmp\" --goal \"Ship a settings page where users edit profile details\" --json; node ./bin/opennori.js draft --root \"$tmp\" --goal \"Ship a settings page where users edit profile details\" --json; node ./bin/opennori.js check --root \"$tmp\" --json",
-                "command": "tmp=$(mktemp -d /tmp/opennori-step3-final-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js discover --root \"$tmp\" --goal \"Ship a settings page where users edit profile details\" --json; node ./bin/opennori.js draft --root \"$tmp\" --goal \"Ship a settings page where users edit profile details\" --json; node ./bin/opennori.js check --root \"$tmp\" --json"
-              },
-              {
-                "type": "command",
-                "label": "npm run check",
-                "command": "npm run check"
-              },
-              {
-                "type": "artifact",
-                "label": "src/acceptance.ts",
-                "path": "src/acceptance.ts"
-              },
-              {
-                "type": "artifact",
-                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
-                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
               },
               {
                 "type": "artifact",
@@ -1660,31 +1513,28 @@
               },
               {
                 "type": "artifact",
-                "label": "test/core.test.js",
-                "path": "test/core.test.js"
-              }
-            ],
-            "reviewability": "Rerun the smoke and confirm discovery_gap_ids include user-entry, field-scope, validation-rule, success-signal, persistence-scope, failure-case, out-of-scope-boundary, and review-method; confirm check reports needs-user-review for ACCEPTANCE-BASIS.",
-            "limitations": "This improves heuristic discovery for settings/profile goals and generic drafts; future domain-specific goal types still need their own discovery coverage.",
-            "gate": "accepted",
-            "created_at": "2026-06-15T08:20:44.679Z"
-          },
-          {
-            "kind": "existing-contract-ac-quality-review",
-            "basis": "tool-observation",
-            "summary": "Existing current contracts with broad workbench ACs are now audited without rewriting history: AW remains objectively complete but is marked completion_needs_review with 7 acceptance_review findings.",
-            "result": "passing",
-            "confidence": "verified",
-            "sources": [
-              {
-                "type": "command",
-                "label": "node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json",
-                "command": "node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json"
+                "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+                "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
               },
               {
                 "type": "artifact",
-                "label": "test/core.test.js",
-                "path": "test/core.test.js"
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+                "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/protocol.md",
+                "path": ".opennori/protocol.md"
               },
               {
                 "type": "artifact",
@@ -1693,14 +1543,14 @@
               },
               {
                 "type": "artifact",
-                "label": "/Users/jarl/code/jarlone/agent-workbench/.opennori/current/aw-long-term-product-goal.acceptance.md",
-                "path": "/Users/jarl/code/jarlone/agent-workbench/.opennori/current/aw-long-term-product-goal.acceptance.md"
+                "label": "examples/opennori-self.json",
+                "path": "examples/opennori-self.json"
               }
             ],
-            "reviewability": "Run the AW check command and inspect AC-2 broad-overview-scope, AC-3 asset-scope-underspecified, AC-4 memory-context-scope, AC-5 knowledge-state-scope, AC-6 capability-scope, and AC-7 result-change-scope plus measurement-review-method-unclear.",
-            "limitations": "The check highlights review questions and routing; it does not mutate the AW contract or decide the revised AC wording for the user.",
+            "reviewability": "Rerun npm run check, inspect discovery/check tests for objective assertions only, and read the packaged Skills to verify agent-side rules for reviewing vague existing ACs.",
+            "limitations": "This protects OpenNori from hard-coded subjective AC-quality tests and validators. Real old-project AC revision still depends on the agent loading the Skills and the user confirming the revised contract.",
             "gate": "accepted",
-            "created_at": "2026-06-17T14:56:03.296Z"
+            "created_at": "2026-06-18T02:52:39.807Z"
           }
         ]
       },

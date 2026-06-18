@@ -3,12 +3,12 @@
   "id": "acceptance-domain-将-acceptance-discovery-brainstorm-和-ac-quality",
   "created_at": "2026-06-12T02:12:40.456Z",
   "area": "acceptance-domain",
-  "need": "将 acceptance discovery、brainstorm 和 AC quality audit 从 CLI 入口拆到领域模块",
+  "need": "将 acceptance discovery、brainstorm 和 draft generation 从 CLI 入口拆到领域模块，同时把主观 AC 质量审查留给 Skills 和用户确认",
   "recommendation": "self-build",
-  "summary": "Acceptance discovery、brainstorm 和 AC quality audit 是 OpenNori 的核心产品领域逻辑，当前由 src/acceptance.ts 承载，CLI command modules 只负责参数和状态读写。",
-  "current_project": "src/acceptance.ts 已拥有 BRAINSTORM_CANDIDATES、DEFAULT_CRITERIA、DISCOVERY_GAPS、auditAcceptanceQuality 等规则；src/cli/commands/acceptance.ts 负责命令入口；test/core.test.js 与 test/cli-commands.test.js 覆盖 discovery、brainstorm 和 quality audit。",
+  "summary": "Acceptance discovery、brainstorm 和 draft generation 是 OpenNori 的领域逻辑，当前由 src/acceptance.ts 承载；主观 AC 质量不再由 CLI 词表判定，而由 packaged Skills 要求 agent 与用户复核。",
+  "current_project": "src/acceptance.ts 承载 BRAINSTORM_CANDIDATES、DEFAULT_CRITERIA、DISCOVERY_GAPS 和 draft helpers；src/cli/commands/acceptance.ts 负责命令入口；test/core.test.js 与 test/cli-commands.test.js 只覆盖 discovery/brainstorm/draft 的客观状态读写，不测试自然语言 AC 质量判断。",
   "standard_library": "Node.js ESM 模块足够承载常量和纯函数；无需新增运行时依赖。",
   "official_sdk": "无官方 SDK 适用；这是 OpenNori 产品领域规则。",
-  "open_source": "成熟 NLP/validation 库会增加复杂度，且不能替代 OpenNori 对人类视角 AC 的产品判断；TK 参考强调 Skill/产品面和确定性核心分离。",
-  "self_build_reason": "规则小、可测试、属于 OpenNori 核心语义；抽成领域模块比新增依赖更直接，后续若规则复杂再重新评估 schema/NLP 库。"
+  "open_source": "成熟 NLP/validation 库会增加复杂度，也不能替代 agent/user 对人类视角 AC 的语义判断；TK 参考强调 Skill/产品面和确定性核心分离。",
+  "self_build_reason": "brainstorm/discover/draft 的结构化读写规则小且属于 OpenNori 核心语义；主观 AC 质量判断不在自研 CLI 范围内，应沉淀到 Skills 行为规则和用户确认。"
 }

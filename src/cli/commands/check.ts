@@ -9,7 +9,7 @@ import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../runti
 export const checkCommand = defineCommand({
   meta: {
     name: "check",
-    description: "Validate current OpenNori contract quality, architecture health, and evidence health."
+    description: "Validate current OpenNori contract structure, architecture health, profile state, and evidence health."
   },
   args: {
     ...activeGoalArgs,
@@ -35,7 +35,7 @@ export const checkCommand = defineCommand({
       source: finding.source
     }));
     const nextActions = acceptanceReview.status === "needs-user-review"
-      ? ["Use nori-acceptance to show acceptance_review questions to the user, then revise criteria, record assumptions, or accept the review risk before claiming confident completion."]
+      ? ["Use nori-acceptance to review unresolved acceptance ambiguity with the user, then revise criteria, record assumptions, or accept the review risk before claiming confident completion."]
       : [];
     const architecture = architectureState(root, contract.goal_id);
     const architectureWarnings: JsonObject[] = [];

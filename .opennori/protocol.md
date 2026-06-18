@@ -240,15 +240,17 @@ The manifest records `plugin` state, and `opennori doctor` checks whether packag
 present and whether the manifest Plugin state is stale.
 
 When upgrading an existing OpenNori project, upgrade entry assets first, then run `opennori check`.
-`check` validates current Nori Contract integrity as hard state structure, then reports
-`acceptance_review` findings for vague or possibly implementation-centered ACs such as "modify
-profile fields" or "show an error". These review findings are questions for the agent and user,
-not hard protocol rejection. `check` also reports `architecture_check` warnings when the current goal
-has no confirmed Architecture Baseline, stale agent-readable surface, or unresolved Architecture
-Challenges. It reports `evidence_health` warnings when a complete-looking goal relies on stale,
-broad, source-free, or non-reviewable evidence. It does not rewrite existing contracts, evidence,
-reports, archives, brainstorms, or baselines. The user decides whether to revise affected criteria,
-confirm assumptions, accept review risk, revise architecture, or refresh evidence.
+`check` validates current Nori Contract integrity as hard state structure and reports objective
+architecture, build-vs-buy, profile, and evidence-health state. It must not be treated as a
+subjective AC-quality judge. Vague or possibly implementation-centered ACs such as "modify profile
+fields" or "show an error" are handled by the OpenNori Skills and the agent/user conversation. The
+agent may use `opennori discover` as a scratch question source, but gap ids and question wording are
+not protocol-level acceptance truth. `check` reports `architecture_check` warnings when the current
+goal has no confirmed Architecture Baseline, stale agent-readable surface, or unresolved
+Architecture Challenges. It reports `evidence_health` warnings when a complete-looking goal relies
+on stale, broad, source-free, or non-reviewable evidence. It does not rewrite existing contracts,
+evidence, reports, archives, brainstorms, or baselines. The user decides whether to revise affected
+criteria, confirm assumptions, accept review risk, revise architecture, or refresh evidence.
 
 ## Nori Profile
 
@@ -434,7 +436,7 @@ On every turn:
 14. If project evidence conflicts with the baseline, run `opennori architecture challenge`; do not silently replace the baseline.
 15. If the user adds a new acceptance boundary after approval, run `opennori criterion add --root <repo> --id <id> ... --json`; the new criterion becomes an evidence gap without forcing the agent to edit state files manually.
 16. If the user revises a criterion later, run `opennori criterion update --root <repo> --criterion <id> ... --json`; old evidence for the changed criterion is cleared.
-17. If the user asks to update an existing OpenNori project, run `opennori doctor`, use `opennori upgrade --dry-run/--confirm` for manifest/protocol/guide refreshes, then run `opennori check`; ask the user before revising any existing AC flagged by `acceptance_review`. If packaged Plugin Skills are missing, reinstall or update the OpenNori package instead of copying Skills into the project.
+17. If the user asks to update an existing OpenNori project, run `opennori doctor`, use `opennori upgrade --dry-run/--confirm` for manifest/protocol/guide refreshes, then run `opennori check`; use `nori-acceptance` to review existing AC wording with the user instead of relying on fixed CLI quality gaps. If packaged Plugin Skills are missing, reinstall or update the OpenNori package instead of copying Skills into the project.
 18. Run `opennori resume --root <repo>` or `opennori next --root <repo>` to recover the current goal and current acceptance gap from repository files.
 19. Work only to produce evidence for that gap under the confirmed Architecture Baseline.
 20. Add acceptance evidence with `opennori evidence add`; choose any suitable verification method, but record basis, sources, reviewability, confidence, and limitations. If existing evidence is invalid or obsolete, run `opennori evidence prune` first so stale proof does not occupy current context. Add profile compliance evidence with `opennori profile evidence` when profile items exist.
@@ -446,7 +448,7 @@ On every turn:
 Useful commands:
 
 - `opennori brainstorm --idea "<idea>" --root <repo>`: create selectable acceptance directions before a contract exists.
-- `opennori discover --goal "<goal>" --root <repo>`: find underspecified acceptance gaps before drafting a contract.
+- `opennori discover --goal "<goal>" --root <repo>`: create a question source before drafting a contract; the agent still decides which questions matter for the user.
 - `opennori draft --goal "<goal>" --root <repo>`: create a draft Nori Contract that needs user approval.
 - `opennori draft --from-brainstorm <brainstorm-id> --candidate <A|B|C> --root <repo>`: convert a selected brainstorm direction into a draft contract.
 - `opennori approve --root <repo>`: mark the acceptance basis as approved so completion can be decided.
@@ -461,7 +463,7 @@ Useful commands:
 - `opennori install --root <repo>`: create or refresh project-local OpenNori assets and manifest.
 - `opennori upgrade --root <repo>`: preview and refresh project-local OpenNori assets without rewriting current/draft/history contracts or evidence.
 - `opennori doctor --root <repo>`: inspect project OpenNori health and recovery actions.
-- `opennori check --root <repo>`: validate current contract structure, audit current ACs for underspecified acceptance quality, surface Architecture Baseline health for the current goal, and report evidence health.
+- `opennori check --root <repo>`: validate current contract structure, surface Architecture Baseline health for the current goal, and report evidence health.
 - `opennori dashboard --root <repo>`: start a local visual dashboard over OpenNori state.
 - `opennori activity start|heartbeat|finish --root <repo>`: publish live agent activity for the dashboard; this is not evidence. Goal/gap may be inferred only when unique.
 - `opennori resume --root <repo>`: recover the current goal, current gap, completion answer, and intervention state.

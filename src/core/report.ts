@@ -460,7 +460,7 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
   if (ledger.status === "complete" && reviewRisks.length > 0) {
     const actions: string[] = [];
     if (acceptanceReview.status !== "clear") {
-      actions.push("Show acceptance_review findings to the user.");
+      actions.push("Show unresolved acceptance ambiguity to the user.");
       actions.push("Use nori-acceptance to ask the concrete missing acceptance questions, then revise the affected criteria, record explicit assumptions, or ask the user to accept the remaining review risk.");
     }
     if (health.status !== "clear") {

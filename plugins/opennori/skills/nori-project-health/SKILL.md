@@ -26,7 +26,7 @@ A fresh `opennori init` normally creates empty `.opennori/current`, `.opennori/d
 5. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, damaged current state, or legacy `.opennori/active` state, present the missing bundle part and the recovery action. When safe_next_command exists, run that preview first.
 6. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no approved current contract, then hand off to `nori-acceptance`.
 7. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, syncs plugin cache, or deletes state.
-8. After upgrade or repair, run `opennori check --root <repo> --json` and route soft review findings to the relevant Skill.
+8. After upgrade or repair, run `opennori check --root <repo> --json` for objective state health. If AC wording itself looks vague, implementation-centered, or too broad, route to `nori-acceptance`; do not wait for CLI quality findings.
 9. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live health activity while diagnosing or recovering bundle readiness for that current state: start before health work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-project-health --state working --summary "..." --json`. Do not invent activity for setup/init preview, no-current-goal state, or drafts.
 
 Useful state commands:
@@ -60,7 +60,7 @@ Useful state commands:
 - "Upgrade this project" -> upgrade dry run, confirm if approved, then check.
 - "Remove OpenNori" -> uninstall dry run; preserve `.opennori` state unless the user explicitly asks to delete it.
 - "State is broken" -> doctor, identify hard integrity failures, and propose recovery actions.
-- "Doctor shows review risks" -> route acceptance, evidence, profile, architecture, or build-vs-buy review to the responsible Skill.
+- "Doctor/check shows review risks" -> route evidence, profile, architecture, or build-vs-buy review to the responsible Skill; route subjective AC wording concerns to `nori-acceptance` based on agent judgment.
 
 ## State Writes
 
@@ -70,7 +70,7 @@ Must write live dashboard activity for health diagnosis or recovery when the das
 
 ## Handoffs
 
-- `acceptance_review` -> `nori-acceptance`.
+- AC wording is vague, implementation-centered, or too broad from the user's perspective -> `nori-acceptance`.
 - `evidence_health` -> `nori-evidence`.
 - `profile_review` -> `nori-capability-profile`.
 - `architecture_check` or stale baseline surface -> `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge`.

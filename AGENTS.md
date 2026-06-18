@@ -70,8 +70,16 @@ Keep hard validation and subjective review separate:
 
 - Code may hard-fail objective integrity problems: schema shape, protocol version, required fields, duplicate ids, contract/ledger mismatch, invalid enums, stale managed files, missing local artifacts, or destructive actions without explicit confirmation.
 - Code must not hard-fail subjective product judgments such as "this AC feels like implementation detail", "this evidence may be weak", or "this architecture may not be ideal".
-- Subjective findings belong in `acceptance_review`, `evidence_health`, `review_risks`, questions, assumptions, waivers, or human confirmation prompts.
-- The agent decides how to act on those review signals; the user remains the final judge of whether the goal is accepted.
+- Subjective AC quality belongs primarily in OpenNori Skills and the agent/user conversation, not in CLI validators or brittle unit tests.
+- `acceptance_review` may exist as a compatibility/review surface, but do not build product logic that depends on fixed word lists, fixed gap ids, or exact discovery question text.
+- The agent decides what AC questions to ask from the user's goal and project context; the user remains the final judge of whether the goal is accepted.
+
+Do not add tests that assert a natural-language AC must trigger a specific
+subjective quality gap such as missing fields, implementation detail, broad
+overview, project memory, or result-change scope. Tests should verify objective
+state behavior: drafts remain drafts until approval, check/report do not mutate
+contracts, invalid schemas fail, evidence drives status, and Skills contain the
+rules agents must follow.
 
 When changing Skill behavior, update package-local `plugins/opennori/skills/nori*/SKILL.md`, `plugins/opennori/.codex-plugin/plugin.json`, and marketplace metadata first.
 Do not add compatibility shims for old `adaw`, `nori`, `opennori skill export`, `install --skill`, or `refresh-skill` entry points.

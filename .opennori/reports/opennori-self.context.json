@@ -1,13 +1,13 @@
 {
   "schema_version": "opennori/context-export-v1",
-  "exported_at": "2026-06-14T09:18:33.559Z",
+  "exported_at": "2026-06-18T02:52:56.406Z",
   "root": "/Users/jarl/code/jarlone/opennori",
   "goal_id": "opennori-self",
   "goal": "让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收驱动产品；用户不仅能判断产品目标是否完成，也能判断交付物是否按确认过的优秀技术架构完成。",
   "acceptance_basis": {
     "status": "approved",
-    "summary": "Clarify AC-Z-19 as a first-time user installation criterion.",
-    "approved_at": "2026-06-14T09:17:47.678Z"
+    "summary": "User revised AC-P-12: existing-project AC quality review is Skill-driven, not a CLI word-list audit.",
+    "approved_at": "2026-06-18T02:45:57.612Z"
   },
   "workflow_status": "complete",
   "current_gap": null,
@@ -24,7 +24,7 @@
   },
   "acceptance_review": {
     "status": "clear",
-    "summary": "No underspecified acceptance gaps found.",
+    "summary": "Subjective acceptance quality is reviewed by OpenNori Skills and the user; CLI checks only report objective contract state.",
     "findings": []
   },
   "evidence_health": {
@@ -56,7 +56,21 @@
           "Dogfood may become a broad product audit; keep the next contract focused on the user-visible adoption result.",
           "Do not treat OpenNori's own passing report as evidence for external project adoption."
         ],
-        "source": "completion-context"
+        "source": "completion-context",
+        "draft_args": [
+          "draft",
+          "--from-next-candidate",
+          "opennori-adoption-dogfood",
+          "--source-goal",
+          "opennori-self",
+          "--language",
+          "en",
+          "--root",
+          ".",
+          "--json"
+        ],
+        "draft_command": "opennori draft --from-next-candidate \"opennori-adoption-dogfood\" --source-goal \"opennori-self\" --language \"en\" --root . --json",
+        "draft_rule": "This command creates a draft Nori Contract only. The user must approve or revise the draft before implementation or evidence can complete the next loop."
       },
       {
         "id": "failure-and-boundary-coverage",
@@ -71,7 +85,21 @@
           "Failure coverage can expand endlessly; ask which failures matter to user acceptance.",
           "Do not turn internal exception types or test names into Product AC."
         ],
-        "source": "completion-context"
+        "source": "completion-context",
+        "draft_args": [
+          "draft",
+          "--from-next-candidate",
+          "failure-and-boundary-coverage",
+          "--source-goal",
+          "opennori-self",
+          "--language",
+          "en",
+          "--root",
+          ".",
+          "--json"
+        ],
+        "draft_command": "opennori draft --from-next-candidate \"failure-and-boundary-coverage\" --source-goal \"opennori-self\" --language \"en\" --root . --json",
+        "draft_rule": "This command creates a draft Nori Contract only. The user must approve or revise the draft before implementation or evidence can complete the next loop."
       },
       {
         "id": "architecture-adherence",
@@ -86,7 +114,21 @@
           "Architecture guidance can become an implementation checklist; keep it separate from Product AC and completion gaps.",
           "Do not make a specific external tool or review surface drive the OpenNori loop."
         ],
-        "source": "completion-context"
+        "source": "completion-context",
+        "draft_args": [
+          "draft",
+          "--from-next-candidate",
+          "architecture-adherence",
+          "--source-goal",
+          "opennori-self",
+          "--language",
+          "en",
+          "--root",
+          ".",
+          "--json"
+        ],
+        "draft_command": "opennori draft --from-next-candidate \"architecture-adherence\" --source-goal \"opennori-self\" --language \"en\" --root . --json",
+        "draft_rule": "This command creates a draft Nori Contract only. The user must approve or revise the draft before implementation or evidence can complete the next loop."
       },
       {
         "id": "next-loop-usability",
@@ -101,7 +143,161 @@
           "Candidate goals are suggestions for the next contract, not approved acceptance criteria.",
           "If the user explicitly asked to continue, the agent may select the best candidate and draft a new contract, then ask for acceptance approval."
         ],
-        "source": "completion-context"
+        "source": "completion-context",
+        "draft_args": [
+          "draft",
+          "--from-next-candidate",
+          "next-loop-usability",
+          "--source-goal",
+          "opennori-self",
+          "--language",
+          "en",
+          "--root",
+          ".",
+          "--json"
+        ],
+        "draft_command": "opennori draft --from-next-candidate \"next-loop-usability\" --source-goal \"opennori-self\" --language \"en\" --root . --json",
+        "draft_rule": "This command creates a draft Nori Contract only. The user must approve or revise the draft before implementation or evidence can complete the next loop."
+      }
+    ]
+  },
+  "agent_next": {
+    "schema_version": "opennori/agent-next-v1",
+    "state": "ready_for_next_loop",
+    "recommended_skill": "nori-acceptance",
+    "summary": "This OpenNori goal is complete. If the user has asked to continue, choose or refine a candidate goal and start the next acceptance loop without waiting for another next-step prompt.",
+    "instruction": "If the user asked to continue, choose or refine one candidate next human-facing goal from candidate_goals, then create a draft Nori Contract using the candidate draft metadata when present. Do not treat candidates as approved AC.",
+    "user_visible_next": "Choose or refine the next OpenNori goal.",
+    "goal_id": "opennori-self",
+    "current_gap_id": null,
+    "needs_user": false,
+    "dashboard_activity": {
+      "recommended": true,
+      "target": {
+        "goal_id": "opennori-self",
+        "gap_id": null
+      },
+      "start_command": "opennori activity start --root <repo> --goal opennori-self --skill nori-acceptance --state thinking --summary \"This OpenNori goal is complete. If the user has asked to continue, choose or refine a candidate goal and start the next acceptance loop without waiting for another next-step prompt.\" --json",
+      "heartbeat_command": "opennori activity heartbeat --root <repo> --skill nori-acceptance --state thinking --summary \"This OpenNori goal is complete. If the user has asked to continue, choose or refine a candidate goal and start the next acceptance loop without waiting for another next-step prompt.\" --json",
+      "finish_command": "opennori activity finish --root <repo> --goal opennori-self --skill nori-acceptance --summary \"OpenNori activity finished.\" --json",
+      "note": "Optional live dashboard signal for Skills. Activity is not Product AC evidence, not a process log, and not completion proof."
+    },
+    "candidate_goals": [
+      {
+        "id": "opennori-adoption-dogfood",
+        "goal": "Run OpenNori through a non-OpenNori project and capture the adoption friction.",
+        "user_value": "Users can judge whether OpenNori works outside its own repository, from natural-language goal through report.",
+        "acceptance_directions": [
+          "As a user, I can start OpenNori in a non-OpenNori project from natural language and see a draft Nori Contract.",
+          "As a user, I can review the final report and understand goal status, current gap, evidence, and any review risks.",
+          "As a user, I can identify the first point where the OpenNori loop felt unclear, repetitive, or too CLI-heavy."
+        ],
+        "risks": [
+          "Dogfood may become a broad product audit; keep the next contract focused on the user-visible adoption result.",
+          "Do not treat OpenNori's own passing report as evidence for external project adoption."
+        ],
+        "source": "completion-context",
+        "draft_args": [
+          "draft",
+          "--from-next-candidate",
+          "opennori-adoption-dogfood",
+          "--source-goal",
+          "opennori-self",
+          "--language",
+          "en",
+          "--root",
+          ".",
+          "--json"
+        ],
+        "draft_command": "opennori draft --from-next-candidate \"opennori-adoption-dogfood\" --source-goal \"opennori-self\" --language \"en\" --root . --json",
+        "draft_rule": "This command creates a draft Nori Contract only. The user must approve or revise the draft before implementation or evidence can complete the next loop."
+      },
+      {
+        "id": "failure-and-boundary-coverage",
+        "goal": "Make the failure and boundary behavior around \"让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收...\" reviewable.",
+        "user_value": "Users can trust the completed result when inputs, permissions, persistence, or external conditions do not follow the happy path.",
+        "acceptance_directions": [
+          "As a user, I can trigger or review the important failure case and see the intended message or recovery behavior.",
+          "As a user, I can tell what inputs, roles, or states are supported and what is intentionally out of scope.",
+          "As a user, I can see evidence for the failure or boundary behavior instead of only a passing happy-path summary."
+        ],
+        "risks": [
+          "Failure coverage can expand endlessly; ask which failures matter to user acceptance.",
+          "Do not turn internal exception types or test names into Product AC."
+        ],
+        "source": "completion-context",
+        "draft_args": [
+          "draft",
+          "--from-next-candidate",
+          "failure-and-boundary-coverage",
+          "--source-goal",
+          "opennori-self",
+          "--language",
+          "en",
+          "--root",
+          ".",
+          "--json"
+        ],
+        "draft_command": "opennori draft --from-next-candidate \"failure-and-boundary-coverage\" --source-goal \"opennori-self\" --language \"en\" --root . --json",
+        "draft_rule": "This command creates a draft Nori Contract only. The user must approve or revise the draft before implementation or evidence can complete the next loop."
+      },
+      {
+        "id": "architecture-adherence",
+        "goal": "Review whether \"让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收...\" still follows the confirmed architecture baseline.",
+        "user_value": "Users can trust that the completed result followed the agreed architecture unless the agent raises a reviewable challenge.",
+        "acceptance_directions": [
+          "As a user, I can see which architecture baseline applies to the completed result.",
+          "As a user, I can see build-vs-buy evidence for any new infrastructure introduced by the work.",
+          "As a user, I can see an Architecture Challenge if project evidence conflicts with the confirmed baseline."
+        ],
+        "risks": [
+          "Architecture guidance can become an implementation checklist; keep it separate from Product AC and completion gaps.",
+          "Do not make a specific external tool or review surface drive the OpenNori loop."
+        ],
+        "source": "completion-context",
+        "draft_args": [
+          "draft",
+          "--from-next-candidate",
+          "architecture-adherence",
+          "--source-goal",
+          "opennori-self",
+          "--language",
+          "en",
+          "--root",
+          ".",
+          "--json"
+        ],
+        "draft_command": "opennori draft --from-next-candidate \"architecture-adherence\" --source-goal \"opennori-self\" --language \"en\" --root . --json",
+        "draft_rule": "This command creates a draft Nori Contract only. The user must approve or revise the draft before implementation or evidence can complete the next loop."
+      },
+      {
+        "id": "next-loop-usability",
+        "goal": "Choose the next human-facing outcome after \"让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收...\".",
+        "user_value": "Users can continue from a completed contract into the next acceptance loop without inventing the next prompt from scratch.",
+        "acceptance_directions": [
+          "As a user, I can review a small set of candidate next goals after confident completion.",
+          "As a user, I can ask the agent to use, combine, or revise a candidate before it becomes a new Nori Contract.",
+          "As a user, I can tell the candidates are not phases, task lists, or completion evidence."
+        ],
+        "risks": [
+          "Candidate goals are suggestions for the next contract, not approved acceptance criteria.",
+          "If the user explicitly asked to continue, the agent may select the best candidate and draft a new contract, then ask for acceptance approval."
+        ],
+        "source": "completion-context",
+        "draft_args": [
+          "draft",
+          "--from-next-candidate",
+          "next-loop-usability",
+          "--source-goal",
+          "opennori-self",
+          "--language",
+          "en",
+          "--root",
+          ".",
+          "--json"
+        ],
+        "draft_command": "opennori draft --from-next-candidate \"next-loop-usability\" --source-goal \"opennori-self\" --language \"en\" --root . --json",
+        "draft_rule": "This command creates a draft Nori Contract only. The user must approve or revise the draft before implementation or evidence can complete the next loop."
       }
     ]
   },
@@ -149,13 +345,13 @@
     {
       "id": "AC-P-2",
       "layer": "protocol",
-      "user_story": "作为用户，我运行 opennori check 后，能知道验收标准是否仍然需要人类视角复核，而不是被技术实现清单静默当成完成。",
+      "user_story": "作为用户，我运行 opennori check 后，能区分客观状态健康检查和需要 agent 与我复核的 AC 质量判断，而不是以为 CLI 会替我判断 AC 好坏。",
       "status": "passing",
       "confidence": "verified",
       "latest_evidence": {
-        "kind": "review-result",
+        "kind": "protocol-boundary-review",
         "basis": "tool-observation",
-        "summary": "OpenNori now keeps subjective product and architecture judgments out of hard contract rejection while surfacing them as review risks: acceptance_review, architecture_review, evidence_health, profile_review, and build_vs_buy affect completion confidence rather than rewriting Product AC.",
+        "summary": "OpenNori check now stays an objective state-health surface: runtime reviewAcceptanceQuality returns a non-authoritative clear compatibility surface, check describes contract structure/architecture/profile/evidence health, README/protocol/AGENTS and packaged Skills assign subjective AC quality to agent/user review, and npm run check passes.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
@@ -165,14 +361,9 @@
             "command": "npm run check"
           },
           {
-            "type": "command",
-            "label": "node ./bin/opennori.js check --root . --goal opennori-self --json",
-            "command": "node ./bin/opennori.js check --root . --goal opennori-self --json"
-          },
-          {
             "type": "artifact",
-            "label": "src/core/report.ts",
-            "path": "src/core/report.ts"
+            "label": "src/acceptance.ts",
+            "path": "src/acceptance.ts"
           },
           {
             "type": "artifact",
@@ -181,19 +372,44 @@
           },
           {
             "type": "artifact",
-            "label": "test/core.test.js",
-            "path": "test/core.test.js"
+            "label": "src/agent-next.ts",
+            "path": "src/agent-next.ts"
           },
           {
             "type": "artifact",
-            "label": ".opennori/protocol.md",
-            "path": ".opennori/protocol.md"
+            "label": "src/core/report.ts",
+            "path": "src/core/report.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "README.md",
+            "path": "README.md"
+          },
+          {
+            "type": "artifact",
+            "label": "AGENTS.md",
+            "path": "AGENTS.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+            "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+            "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori/SKILL.md",
+            "path": "plugins/opennori/skills/nori/SKILL.md"
           }
         ],
-        "reviewability": "Run npm run check and opennori check, then inspect report.ts/check.ts and the protocol section explaining review-risk versus hard validation.",
-        "limitations": "This proves the current OpenNori semantics locally; future new review surfaces still need the same boundary audit.",
+        "reviewability": "Rerun npm run check, inspect check JSON for objective acceptance_review summary, and read README/AGENTS plus nori/nori-acceptance/nori-reporting Skills for the agent-side AC quality rules.",
+        "limitations": "This proves the OpenNori code and packaged Skills no longer hard-code subjective AC-quality decisions. It does not mean every future agent will ask perfect questions; that remains Skill behavior and user review.",
         "gate": "accepted",
-        "created_at": "2026-06-14T01:35:42.092Z"
+        "created_at": "2026-06-18T02:52:27.180Z"
       }
     },
     {
@@ -559,13 +775,13 @@
     {
       "id": "AC-P-12",
       "layer": "protocol",
-      "user_story": "作为用户，我运行 opennori check 或让 agent 升级已使用 OpenNori 的项目后，能发现现有 active contract 里过于含糊的 AC，并知道这是需要讨论的 review risk，而不是协议硬拒绝。",
+      "user_story": "作为用户，我让 agent 升级或继续一个已经使用 OpenNori 的项目时，能看到 agent 会用 OpenNori Skills 复核旧 AC 是否仍足够可验收，但项目状态检查不会把主观 AC 质量写成硬编码 CLI 裁判。",
       "status": "passing",
       "confidence": "verified",
       "latest_evidence": {
-        "kind": "review-result",
+        "kind": "skill-boundary-review",
         "basis": "tool-observation",
-        "summary": "Existing contracts with vague or implementation-centered wording are now surfaced through acceptance_review warnings instead of invalid_acceptance hard failures: weak settings ACs produce missing-field-scope, validation, success, and failure review findings, while specific ACs stay clear and history is not rewritten.",
+        "summary": "Existing-project AC review is now Skill-driven rather than a CLI word-list audit: tests no longer assert natural-language ACs must trigger fixed gap ids/questions; discover tests only cover question-source state; project-health, acceptance, reporting, root Skills, AGENTS, README, and protocol tell agents to inspect vague old ACs and ask user-facing questions without mutating existing contracts.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
@@ -575,35 +791,55 @@
             "command": "npm run check"
           },
           {
-            "type": "command",
-            "label": "node ./bin/opennori.js check --root . --goal opennori-self --json",
-            "command": "node ./bin/opennori.js check --root . --goal opennori-self --json"
-          },
-          {
-            "type": "artifact",
-            "label": "src/acceptance.ts",
-            "path": "src/acceptance.ts"
-          },
-          {
-            "type": "artifact",
-            "label": "src/cli/commands/check.ts",
-            "path": "src/cli/commands/check.ts"
-          },
-          {
             "type": "artifact",
             "label": "test/core.test.js",
             "path": "test/core.test.js"
           },
           {
             "type": "artifact",
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+            "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+            "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+            "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori/SKILL.md",
+            "path": "plugins/opennori/skills/nori/SKILL.md"
+          },
+          {
+            "type": "artifact",
             "label": ".opennori/protocol.md",
             "path": ".opennori/protocol.md"
+          },
+          {
+            "type": "artifact",
+            "label": "README.md",
+            "path": "README.md"
+          },
+          {
+            "type": "artifact",
+            "label": "examples/opennori-self.json",
+            "path": "examples/opennori-self.json"
           }
         ],
-        "reviewability": "Run the test suite and inspect the acceptance_review fixtures plus protocol upgrade/check guidance.",
-        "limitations": "The review is heuristic by design; domain-specific AC quality remains an agent and user judgment, not a fixed adapter taxonomy.",
+        "reviewability": "Rerun npm run check, inspect discovery/check tests for objective assertions only, and read the packaged Skills to verify agent-side rules for reviewing vague existing ACs.",
+        "limitations": "This protects OpenNori from hard-coded subjective AC-quality tests and validators. Real old-project AC revision still depends on the agent loading the Skills and the user confirming the revised contract.",
         "gate": "accepted",
-        "created_at": "2026-06-14T00:58:27.545Z"
+        "created_at": "2026-06-18T02:52:39.807Z"
       }
     },
     {
@@ -653,37 +889,42 @@
       "status": "passing",
       "confidence": "verified",
       "latest_evidence": {
-        "kind": "review-result",
+        "kind": "acceptance-draft-guard-review",
         "basis": "tool-observation",
-        "summary": "Natural language goal entry is covered by draft/discover/brainstorm flows and nori-acceptance Skill, producing user-perspective acceptance drafts for user confirmation.",
+        "summary": "A natural-language goal no longer becomes a blindly approvable generic Nori Contract: generic draft output carries a discovery-required acceptance basis, and nori-acceptance instructs agents to show ACCEPTANCE-BASIS questions before asking for approval.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
+          {
+            "type": "command",
+            "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
+            "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
+          },
           {
             "type": "command",
             "label": "npm run check",
             "command": "npm run check"
           },
           {
-            "type": "command",
-            "label": "node ./bin/opennori.js check --root . --json",
-            "command": "node ./bin/opennori.js check --root . --json"
+            "type": "artifact",
+            "label": "src/acceptance.ts",
+            "path": "src/acceptance.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+            "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
           },
           {
             "type": "artifact",
             "label": "test/core.test.js",
             "path": "test/core.test.js"
-          },
-          {
-            "type": "artifact",
-            "label": ".opennori/protocol.md",
-            "path": ".opennori/protocol.md"
           }
         ],
-        "reviewability": "Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and generated report.",
-        "limitations": "This is local repository evidence for the current worktree; npm publishing and public site deployment are separate release steps.",
+        "reviewability": "Inspect the nori-acceptance Skill and run tests covering generic draft review findings.",
+        "limitations": "This does not generate a fully specific final contract by itself; it prevents premature approval and routes the agent back to discovery questions.",
         "gate": "accepted",
-        "created_at": "2026-06-12T03:14:15.645Z"
+        "created_at": "2026-06-15T08:20:44.764Z"
       }
     },
     {
@@ -1253,32 +1494,62 @@
       "status": "passing",
       "confidence": "verified",
       "latest_evidence": {
-        "kind": "review-result",
+        "kind": "status-no-current-recovery",
         "basis": "tool-observation",
-        "summary": "Doctor reports ready with checks for packaged Plugin Skills and manifest plugin state: plugin_manifest, plugin_skills, and manifest_plugin_state are passing alongside project structure, active goal recoverability, architecture, manifest, and build-vs-buy health.",
+        "summary": "OpenNori status/resume/report now return routeable no-current-goal or health recovery state instead of unexpected_error when a project has no current Nori Contract. In agent-workbench, status now returns ok true with status needs-action, reason no_current_goal, agent_next health_needs_recovery, failed checks for missing .opennori/current and .opennori/drafts, and a short TTY summary pointing to recovery.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
           {
             "type": "command",
-            "label": "node ./bin/opennori.js doctor --root . --json",
-            "command": "node ./bin/opennori.js doctor --root . --json"
+            "label": "node ./bin/opennori.js status --root /Users/jarl/code/jarlone/agent-workbench --json",
+            "command": "node ./bin/opennori.js status --root /Users/jarl/code/jarlone/agent-workbench --json"
+          },
+          {
+            "type": "command",
+            "label": "script -q /dev/null node ./bin/opennori.js status --root /Users/jarl/code/jarlone/agent-workbench",
+            "command": "script -q /dev/null node ./bin/opennori.js status --root /Users/jarl/code/jarlone/agent-workbench"
+          },
+          {
+            "type": "command",
+            "label": "npx vitest run test/cli-commands.test.js -t 'status commands return|status routes incomplete'",
+            "command": "npx vitest run test/cli-commands.test.js -t 'status commands return|status routes incomplete'"
+          },
+          {
+            "type": "command",
+            "label": "npx vitest run",
+            "command": "npx vitest run"
           },
           {
             "type": "artifact",
-            "label": "src/lifecycle/doctor/plugin-health.ts",
-            "path": "src/lifecycle/doctor/plugin-health.ts"
+            "label": "src/cli/runtime.ts",
+            "path": "src/cli/runtime.ts"
           },
           {
             "type": "artifact",
-            "label": ".opennori/manifest.json",
-            "path": ".opennori/manifest.json"
+            "label": "src/cli/command-tree.ts",
+            "path": "src/cli/command-tree.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/cli/human-output.ts",
+            "path": "src/cli/human-output.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
+          },
+          {
+            "type": "artifact",
+            "label": "test/core.test.js",
+            "path": "test/core.test.js"
           }
         ],
-        "reviewability": "Run doctor and inspect data.status, checks, recovery_actions, data.plugin, and active_goals.",
-        "limitations": "This validates current source checkout package assets; a broken published npm package would need package-level smoke testing before release.",
+        "reviewability": "Rerun the status command against a project with initialized but empty or incomplete .opennori state and confirm there is no unexpected_error; inspect agent_next.state and the TTY summary.",
+        "limitations": "This validates local source behavior. npm/global users receive it after the next publish or local plugin/CLI sync.",
         "gate": "accepted",
-        "created_at": "2026-06-13T10:27:35.542Z"
+        "created_at": "2026-06-17T07:52:23.659Z"
       }
     },
     {
@@ -1406,38 +1677,38 @@
       "layer": "productization",
       "user_story": "作为用户，我安装或获取 OpenNori 后，agent 能通过一组职责清晰的 OpenNori Plugin Skills，把自然语言请求稳定映射到验收发现、架构基线、证据、能力偏好、项目健康、报告和下一轮候选目标，而不需要我记住 Skill 名或 CLI 参数。",
       "status": "passing",
-      "confidence": "high",
+      "confidence": "verified",
       "latest_evidence": {
         "kind": "review-result",
-        "basis": "protocol-check",
-        "summary": "OpenNori packaged Skills were redesigned from command lists into agent behavior protocols. All 10 Skill files now include trigger-oriented descriptions plus Mission, Start Here, Natural-Language Mapping, State Writes, Handoffs, User Reply Shape, and Misuse Guards; README, protocol, plugin metadata, website copy, and tests now describe and enforce this boundary.",
+        "basis": "tool-observation",
+        "summary": "OpenNori report and context export now include data.agent_next alongside next_recommendation, so Skills and review tools can use the same deterministic routing surface instead of inferring next actions from report context.",
         "result": "passing",
-        "confidence": "high",
+        "confidence": "verified",
         "sources": [
           {
             "type": "command",
-            "label": "npm run check",
-            "command": "npm run check"
+            "label": "npm run typecheck",
+            "command": "npm run typecheck"
           },
           {
             "type": "command",
-            "label": "node ./bin/opennori.js doctor --root . --json",
-            "command": "node ./bin/opennori.js doctor --root . --json"
-          },
-          {
-            "type": "command",
-            "label": "rg -c '^## (Mission|Start Here|Natural-Language Mapping|State Writes|Handoffs|User Reply Shape|Misuse Guards)$' plugins/opennori/skills/*/SKILL.md",
-            "command": "rg -c '^## (Mission|Start Here|Natural-Language Mapping|State Writes|Handoffs|User Reply Shape|Misuse Guards)$' plugins/opennori/skills/*/SKILL.md"
+            "label": "npm test -- --run test/cli-commands.test.js test/core.test.js",
+            "command": "npm test -- --run test/cli-commands.test.js test/core.test.js"
           },
           {
             "type": "artifact",
-            "label": "plugins/opennori/skills",
-            "path": "plugins/opennori/skills"
+            "label": "src/cli/commands/reporting.ts",
+            "path": "src/cli/commands/reporting.ts"
           },
           {
             "type": "artifact",
-            "label": "plugins/opennori/.codex-plugin/plugin.json",
-            "path": "plugins/opennori/.codex-plugin/plugin.json"
+            "label": "src/lifecycle/context-export.ts",
+            "path": "src/lifecycle/context-export.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/types.ts",
+            "path": "src/types.ts"
           },
           {
             "type": "artifact",
@@ -1446,24 +1717,14 @@
           },
           {
             "type": "artifact",
-            "label": "README.md",
-            "path": "README.md"
-          },
-          {
-            "type": "artifact",
-            "label": ".opennori/protocol.md",
-            "path": ".opennori/protocol.md"
-          },
-          {
-            "type": "artifact",
-            "label": "../opennori-site/src/pages/index.astro",
-            "path": "../opennori-site/src/pages/index.astro"
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
           }
         ],
-        "reviewability": "Inspect the packaged Skill files to verify the behavior-protocol sections and natural-language routing; inspect test/core.test.js for regression assertions; rerun npm run check, doctor, and the rg section-count command to confirm packaged Plugin Skill health.",
-        "limitations": "This validates packaged Skill content, local package health, and website/README copy. A newly opened Codex session is still the correct way to observe live plugin-trigger behavior after installation.",
+        "reviewability": "Rerun the listed checks, then inspect opennori report --json and context export --json for data.agent_next matching the current completion route.",
+        "limitations": "This aligns JSON routing surfaces; external tools must still decide how to display or use agent_next without taking over Codex.",
         "gate": "accepted",
-        "created_at": "2026-06-14T07:50:48.355Z"
+        "created_at": "2026-06-15T12:22:55.433Z"
       }
     },
     {
@@ -1520,39 +1781,29 @@
       "latest_evidence": {
         "kind": "review-result",
         "basis": "tool-observation",
-        "summary": "Complete OpenNori goals now expose next_recommendation.candidate_goals in resume/status/next/report/context export. Candidate goals include goal, user_value, acceptance_directions, risks, and source; reports render them as starts for the next Nori Contract, not phases, task lists, approved AC, or evidence.",
+        "summary": "agent_next now carries candidate_goals for ready_for_next_loop, including draft_args, draft_command, and draft_rule, so Skills can continue from the deterministic routing surface without reconstructing flags or treating candidates as approved AC.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
           {
             "type": "command",
-            "label": "npm run check",
-            "command": "npm run check"
+            "label": "npm run typecheck",
+            "command": "npm run typecheck"
           },
           {
             "type": "command",
-            "label": "npx vitest run test/cli-commands.test.js -t 'next command module returns|next-loop candidates'",
-            "command": "npx vitest run test/cli-commands.test.js -t 'next command module returns|next-loop candidates'"
-          },
-          {
-            "type": "command",
-            "label": "node ./bin/opennori.js resume --root . --goal opennori-self --json",
-            "command": "node ./bin/opennori.js resume --root . --goal opennori-self --json"
+            "label": "npm test -- --run test/cli-commands.test.js test/core.test.js",
+            "command": "npm test -- --run test/cli-commands.test.js test/core.test.js"
           },
           {
             "type": "artifact",
-            "label": "src/core/report.ts",
-            "path": "src/core/report.ts"
+            "label": "src/agent-next.ts",
+            "path": "src/agent-next.ts"
           },
           {
             "type": "artifact",
             "label": "src/types.ts",
             "path": "src/types.ts"
-          },
-          {
-            "type": "artifact",
-            "label": "src/cli/commands/acceptance/runtime-status.ts",
-            "path": "src/cli/commands/acceptance/runtime-status.ts"
           },
           {
             "type": "artifact",
@@ -1571,14 +1822,19 @@
           },
           {
             "type": "artifact",
+            "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+            "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+          },
+          {
+            "type": "artifact",
             "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
             "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
           }
         ],
-        "reviewability": "Run npm run check, then run resume/status/next/report/context export on a complete goal and inspect next_recommendation.candidate_goals plus the Candidate Next Goals report section.",
-        "limitations": "Candidates are heuristic suggestions for the next Nori Contract; the agent or user must still choose or refine one and run acceptance discovery or draft before it becomes an approved contract.",
+        "reviewability": "Rerun the listed checks and inspect resume/status JSON for data.agent_next.state=ready_for_next_loop with candidate_goals and draft metadata.",
+        "limitations": "This exposes deterministic routing data for Skills; selecting, refining, and approving the next draft remains an agent/user judgment and candidates are not completion evidence.",
         "gate": "accepted",
-        "created_at": "2026-06-14T02:01:34.843Z"
+        "created_at": "2026-06-15T12:14:59.454Z"
       }
     },
     {
@@ -1626,23 +1882,23 @@
       "layer": "productization",
       "user_story": "作为用户，我通过 npm 获取 OpenNori 后，能用 opennori 或 npx opennori 这个短入口开始，而不需要理解 install、root、dry-run、confirm 或内部 Skill 参数。",
       "status": "passing",
-      "confidence": "verified",
+      "confidence": "high",
       "latest_evidence": {
-        "kind": "review-result",
+        "kind": "local-global-bin-link-fix",
         "basis": "tool-observation",
-        "summary": "The package exposes only the opennori bin, README shows short opennori and npx opennori entries, and bootstrap/install preview project-state writes before confirmed setup.",
+        "summary": "Dogfood found npm link created a global opennori command pointing at dist/bin/opennori.js, but the compiled dist file was not executable, so zsh reported permission denied. OpenNori package bin now points to the executable bin/opennori.js wrapper, which supports source checkouts and published packages; npm link now creates a PATH command that runs opennori init preview correctly.",
         "result": "passing",
-        "confidence": "verified",
+        "confidence": "high",
         "sources": [
           {
             "type": "command",
-            "label": "node ./bin/opennori.js --help",
-            "command": "node ./bin/opennori.js --help"
+            "label": "opennori init --json in a temporary directory",
+            "command": "opennori init --json in a temporary directory"
           },
           {
             "type": "command",
-            "label": "node ./bin/opennori.js bootstrap --root /tmp/opennori-bootstrap-smoke --json",
-            "command": "node ./bin/opennori.js bootstrap --root /tmp/opennori-bootstrap-smoke --json"
+            "label": "npm run check",
+            "command": "npm run check"
           },
           {
             "type": "artifact",
@@ -1651,13 +1907,8 @@
           },
           {
             "type": "artifact",
-            "label": "README.md",
-            "path": "README.md"
-          },
-          {
-            "type": "artifact",
-            "label": "src/cli/bootstrap.ts",
-            "path": "src/cli/bootstrap.ts"
+            "label": "package-lock.json",
+            "path": "package-lock.json"
           },
           {
             "type": "artifact",
@@ -1665,10 +1916,10 @@
             "path": "test/core.test.js"
           }
         ],
-        "reviewability": "Inspect package.json bin and README quickstart, then run help/bootstrap preview and bootstrap tests.",
-        "limitations": "npx behavior depends on npm registry propagation after publish; local CLI behavior is verified here.",
+        "reviewability": "Inspect package bin metadata and the refreshed npm link symlink; rerun opennori init --json from any temporary project to confirm preview works without writing.",
+        "limitations": "This verifies the local npm link development path on the current Node v22.19.0 environment; published npm behavior will be covered when the next package version is packed or published.",
         "gate": "accepted",
-        "created_at": "2026-06-13T15:02:53.058Z"
+        "created_at": "2026-06-15T06:05:06.857Z"
       }
     },
     {
@@ -1715,40 +1966,55 @@
       "latest_evidence": {
         "kind": "review-result",
         "basis": "tool-observation",
-        "summary": "OpenNori package bin now points to dist/bin/opennori.js, the built CLI can run doctor and read package-root skills/schemas/protocol assets through a shared package-root resolver, and tests cover the built dist bin export path.",
+        "summary": "OpenNori now routes agents to architecture review before non-trivial implementation when Product AC is ready but the Architecture Baseline is missing; after baseline confirmation, agent_next returns to the current Product AC evidence gap.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
+          {
+            "type": "command",
+            "label": "npx vitest run test/core.test.js test/cli-commands.test.js",
+            "command": "npx vitest run test/core.test.js test/cli-commands.test.js"
+          },
           {
             "type": "command",
             "label": "npm run check",
             "command": "npm run check"
           },
           {
-            "type": "command",
-            "label": "npm run build && node ./dist/bin/opennori.js doctor --root . --json",
-            "command": "npm run build && node ./dist/bin/opennori.js doctor --root . --json"
-          },
-          {
-            "type": "command",
-            "label": "npm pack --dry-run --json",
-            "command": "npm pack --dry-run --json"
+            "type": "artifact",
+            "label": "src/core/report.ts",
+            "path": "src/core/report.ts"
           },
           {
             "type": "artifact",
-            "label": "package.json",
-            "path": "package.json"
+            "label": "src/agent-next.ts",
+            "path": "src/agent-next.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/types.ts",
+            "path": "src/types.ts"
           },
           {
             "type": "artifact",
             "label": "test/core.test.js",
             "path": "test/core.test.js"
+          },
+          {
+            "type": "artifact",
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori/SKILL.md",
+            "path": "plugins/opennori/skills/nori/SKILL.md"
           }
         ],
-        "reviewability": "Run npm run check and the dist doctor command, then inspect package.json bin, src/package-root.js, and the built-dist regression test.",
-        "limitations": "The source code is still mostly JavaScript with allowJs; this slice only moves the publish/runtime entry toward built output and keeps the later citty command-module migration separate.",
+        "reviewability": "Run the targeted tests and inspect status/resume JSON for agent_next.state architecture_needs_review before baseline confirmation and work_on_current_gap after baseline confirmation.",
+        "limitations": "This verifies deterministic OpenNori state-layer routing; agent/user still decide whether a concrete task is trivial enough to waive architecture review.",
         "gate": "accepted",
-        "created_at": "2026-06-12T08:14:59.965Z"
+        "created_at": "2026-06-15T09:02:54.484Z"
       }
     },
     {
@@ -1759,36 +2025,51 @@
       "confidence": "verified",
       "latest_evidence": {
         "kind": "review-result",
-        "basis": "protocol-check",
-        "summary": "The confirmed Architecture Baseline now identifies Plugin Skills and .opennori state as the agent discovery surface: baseline agent_surfaces includes .codex-plugin/plugin.json and skills/nori-architecture-apply/SKILL.md, package nori Skill routes architecture apply/challenge/build-vs-buy, and .opennori/agent-guide.md remains in sync for project-local context.",
+        "basis": "tool-observation",
+        "summary": "Evidence add now returns next_recommendation and agent_next, so agents can route after recording evidence instead of guessing whether to continue a gap, review architecture, report completion risk, or start the next loop.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
           {
             "type": "command",
-            "label": "node ./bin/opennori.js architecture show --root . --json",
-            "command": "node ./bin/opennori.js architecture show --root . --json"
+            "label": "npx vitest run test/core.test.js -t 'high-risk criteria require strong evidence before passing'",
+            "command": "npx vitest run test/core.test.js -t 'high-risk criteria require strong evidence before passing'"
+          },
+          {
+            "type": "command",
+            "label": "npx vitest run test/cli-commands.test.js -t 'evidence add command module records flexible reviewable sources'",
+            "command": "npx vitest run test/cli-commands.test.js -t 'evidence add command module records flexible reviewable sources'"
+          },
+          {
+            "type": "command",
+            "label": "npx tsc --noEmit",
+            "command": "npx tsc --noEmit"
           },
           {
             "type": "artifact",
-            "label": ".opennori/architecture/baseline.json",
-            "path": ".opennori/architecture/baseline.json"
+            "label": "src/cli/commands/evidence/add.ts",
+            "path": "src/cli/commands/evidence/add.ts"
           },
           {
             "type": "artifact",
-            "label": ".opennori/architecture/baseline.md",
-            "path": ".opennori/architecture/baseline.md"
+            "label": "plugins/opennori/skills/nori-evidence/SKILL.md",
+            "path": "plugins/opennori/skills/nori-evidence/SKILL.md"
           },
           {
             "type": "artifact",
-            "label": ".opennori/agent-guide.md",
-            "path": ".opennori/agent-guide.md"
+            "label": "test/core.test.js",
+            "path": "test/core.test.js"
+          },
+          {
+            "type": "artifact",
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
           }
         ],
-        "reviewability": "Inspect baseline agent_surfaces, nori routing, architecture apply Skill, and architecture show output.",
-        "limitations": "This proves repo-local and package asset discoverability; it does not prove a fresh external Codex Plugin install until plugin installation is tested after publish.",
+        "reviewability": "Run the listed tests and inspect evidence add JSON for next_recommendation and data.agent_next after evidence writes.",
+        "limitations": "This verifies deterministic routing in the evidence command; downstream agents still need to follow the returned Skill.",
         "gate": "accepted",
-        "created_at": "2026-06-13T10:26:03.551Z"
+        "created_at": "2026-06-15T10:20:29.878Z"
       }
     },
     {
@@ -1800,19 +2081,39 @@
       "latest_evidence": {
         "kind": "review-result",
         "basis": "tool-observation",
-        "summary": "Architecture Profiles are reviewable before baseline confirmation: architecture profiles --json exposes built-in and project profile validity, suitable use cases, sources, principles, checks, preferred libraries, avoid boundaries, and build-vs-buy policy; tests cover built-in and project profiles.",
+        "summary": "Product AC evidence can now attach Architecture Apply context without letting architecture context prove the AC by itself. Tests show context-only evidence is downgraded, while real user-visible verification plus architecture apply context passes and renders both sources in report.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
           {
             "type": "command",
-            "label": "node ./bin/opennori.js architecture profiles --root . --json",
-            "command": "node ./bin/opennori.js architecture profiles --root . --json"
+            "label": "npx vitest run test/core.test.js -t 'product evidence can reference architecture apply context|architecture apply records do not count|evidence records flexible reviewable sources'",
+            "command": "npx vitest run test/core.test.js -t 'product evidence can reference architecture apply context|architecture apply records do not count|evidence records flexible reviewable sources'"
           },
           {
             "type": "command",
-            "label": "npx vitest run test/core.test.js -t 'architecture profiles|project architecture profiles'",
-            "command": "npx vitest run test/core.test.js -t 'architecture profiles|project architecture profiles'"
+            "label": "npx vitest run test/cli-commands.test.js -t 'evidence add command module records flexible reviewable sources'",
+            "command": "npx vitest run test/cli-commands.test.js -t 'evidence add command module records flexible reviewable sources'"
+          },
+          {
+            "type": "command",
+            "label": "npx tsc --noEmit",
+            "command": "npx tsc --noEmit"
+          },
+          {
+            "type": "artifact",
+            "label": "src/core/evidence.ts",
+            "path": "src/core/evidence.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/cli/commands/evidence/source-parsing.ts",
+            "path": "src/cli/commands/evidence/source-parsing.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-evidence/SKILL.md",
+            "path": "plugins/opennori/skills/nori-evidence/SKILL.md"
           },
           {
             "type": "artifact",
@@ -1821,24 +2122,14 @@
           },
           {
             "type": "artifact",
-            "label": "src/architecture/profile.ts",
-            "path": "src/architecture/profile.ts"
-          },
-          {
-            "type": "artifact",
-            "label": "src/cli/commands/architecture/profiles.ts",
-            "path": "src/cli/commands/architecture/profiles.ts"
-          },
-          {
-            "type": "artifact",
-            "label": ".opennori/architecture/decisions/architecture-profile-review-surface.json",
-            "path": ".opennori/architecture/decisions/architecture-profile-review-surface.json"
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
           }
         ],
-        "reviewability": "Run architecture profiles and targeted tests, then inspect the profile implementation and build-vs-buy decision.",
-        "limitations": "This validates the current built-in/project profile model; richer external registries would need a new build-vs-buy decision.",
+        "reviewability": "Run the listed tests; inspect report/status sources for architecture-apply role=context and command/product evidence side by side.",
+        "limitations": "This verifies evidence semantics and reporting; it does not prove a real external project flow until dogfood.",
         "gate": "accepted",
-        "created_at": "2026-06-13T15:03:35.283Z"
+        "created_at": "2026-06-15T10:10:01.782Z"
       }
     },
     {
@@ -2200,7 +2491,7 @@
       "latest_evidence": {
         "kind": "artifact-review",
         "basis": "tool-observation",
-        "summary": "README, Plugin metadata, package Skills, protocol, tests, and website now present OpenNori as one agent capability bundle: Plugin discovery, packaged Skills, opennori deterministic state layer, and .opennori project state work together. The old split-path language is removed, and nori/project-health Skills route missing bundle parts to doctor/health recovery instead of half-installed use.",
+        "summary": "README now explains that agent_next.candidate_goals is the Skill routing surface for completed-goal continuation, while next_recommendation.candidate_goals remains the fuller report/context explanation surface.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
@@ -2211,8 +2502,8 @@
           },
           {
             "type": "command",
-            "label": "rg -n 'Install OpenNori Capability Bundle|capability bundle|deterministic state layer|not a separate product path|Do not treat Plugin|Do not split OpenNori|half-installed|Install one OpenNori capability bundle|Advanced state-layer commands|Choose one path|Try CLI once|Pin CLI' README.md plugins/opennori/.codex-plugin/plugin.json plugins/opennori/skills/nori/SKILL.md plugins/opennori/skills/nori-project-health/SKILL.md .opennori/protocol.md test/core.test.js /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
-            "command": "rg -n 'Install OpenNori Capability Bundle|capability bundle|deterministic state layer|not a separate product path|Do not treat Plugin|Do not split OpenNori|half-installed|Install one OpenNori capability bundle|Advanced state-layer commands|Choose one path|Try CLI once|Pin CLI' README.md plugins/opennori/.codex-plugin/plugin.json plugins/opennori/skills/nori/SKILL.md plugins/opennori/skills/nori-project-health/SKILL.md .opennori/protocol.md test/core.test.js /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+            "label": "rg -n 'agent_next.candidate_goals|next_recommendation.candidate_goals|Context export|上下文导出' README.md .opennori/protocol.md plugins/opennori/skills",
+            "command": "rg -n 'agent_next.candidate_goals|next_recommendation.candidate_goals|Context export|上下文导出' README.md .opennori/protocol.md plugins/opennori/skills"
           },
           {
             "type": "artifact",
@@ -2221,8 +2512,8 @@
           },
           {
             "type": "artifact",
-            "label": "plugins/opennori/.codex-plugin/plugin.json",
-            "path": "plugins/opennori/.codex-plugin/plugin.json"
+            "label": ".opennori/protocol.md",
+            "path": ".opennori/protocol.md"
           },
           {
             "type": "artifact",
@@ -2231,29 +2522,19 @@
           },
           {
             "type": "artifact",
-            "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
-            "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+            "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+            "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
           },
           {
             "type": "artifact",
-            "label": ".opennori/protocol.md",
-            "path": ".opennori/protocol.md"
-          },
-          {
-            "type": "artifact",
-            "label": "test/core.test.js",
-            "path": "test/core.test.js"
-          },
-          {
-            "type": "artifact",
-            "label": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
-            "path": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+            "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+            "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
           }
         ],
-        "reviewability": "Read README Install/Quick Start, Plugin longDescription, nori and nori-project-health Skill frontmatter/body, protocol AC-Z-18, website Start section, and test/core.test.js public product surface assertions; rerun npm run check and the rg command.",
-        "limitations": "This proves source, packaged assets, tests, and local website source. Live Codex plugin behavior still depends on installing the updated package/plugin in a new session after publish.",
+        "reviewability": "Rerun npm run check and inspect README/protocol/Skills for the agent_next routing language.",
+        "limitations": "This is documentation alignment for the current source package; public website or npm publication are separate release steps.",
         "gate": "accepted",
-        "created_at": "2026-06-14T08:29:10.361Z"
+        "created_at": "2026-06-15T12:28:26.739Z"
       }
     },
     {
@@ -2263,51 +2544,31 @@
       "status": "passing",
       "confidence": "verified",
       "latest_evidence": {
-        "kind": "review-result",
+        "kind": "confirmed-init-routing-smoke",
         "basis": "tool-observation",
-        "summary": "OpenNori now provides one first-time setup path and a simple project init path: setup plan previews Codex Plugin marketplace/add, packaged Skills, global CLI install, project .opennori initialization, and doctor; init previews/creates project state; README, website, Plugin metadata, nori/project-health Skills, protocol, and tests use npx opennori setup plus opennori init as the user-facing path.",
+        "summary": "Confirmed opennori init on a fresh project creates .opennori state, leaves active goals empty, and returns initialized_no_active_contract with next guidance to turn the stated goal into human-centered AC rather than inspect empty directories or repeat setup.",
         "result": "passing",
         "confidence": "verified",
         "sources": [
           {
             "type": "command",
-            "label": "npm run test",
-            "command": "npm run test"
+            "label": "tmp=$(mktemp -d /tmp/opennori-step2-fix-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json",
+            "command": "tmp=$(mktemp -d /tmp/opennori-step2-fix-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json"
           },
           {
             "type": "command",
-            "label": "tmp=$(mktemp -d); node ./bin/opennori.js setup --root \"$tmp\" --json; node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json",
-            "command": "tmp=$(mktemp -d); node ./bin/opennori.js setup --root \"$tmp\" --json; node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json"
-          },
-          {
-            "type": "command",
-            "label": "cd /Users/jarl/code/jarlone/opennori-site && pnpm build",
-            "command": "cd /Users/jarl/code/jarlone/opennori-site && pnpm build"
+            "label": "npm run check",
+            "command": "npm run check"
           },
           {
             "type": "artifact",
-            "label": "src/lifecycle/setup.ts",
-            "path": "src/lifecycle/setup.ts"
+            "label": "src/agent-next.ts",
+            "path": "src/agent-next.ts"
           },
           {
             "type": "artifact",
-            "label": "src/cli/setup.ts",
-            "path": "src/cli/setup.ts"
-          },
-          {
-            "type": "artifact",
-            "label": "src/cli/init.ts",
-            "path": "src/cli/init.ts"
-          },
-          {
-            "type": "artifact",
-            "label": "src/cli/commands/setup.ts",
-            "path": "src/cli/commands/setup.ts"
-          },
-          {
-            "type": "artifact",
-            "label": "README.md",
-            "path": "README.md"
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
           },
           {
             "type": "artifact",
@@ -2316,14 +2577,424 @@
           },
           {
             "type": "artifact",
+            "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+            "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+          }
+        ],
+        "reviewability": "Rerun the smoke and confirm .opennori/active is empty but agent_next.state is initialized_no_active_contract with recommended_skill nori-acceptance.",
+        "limitations": "This validates local source behavior; published users need the next npm/plugin release to receive the updated routing text.",
+        "gate": "accepted",
+        "created_at": "2026-06-15T08:02:36.952Z"
+      }
+    },
+    {
+      "id": "AC-Z-20",
+      "layer": "productization",
+      "user_story": "作为用户，我让 agent 从已完成目标的 candidate_goals 继续生成下一份 Nori Contract 草案时，看到的不是空泛候选包装，而是能指导我怎么验收的用户动作、结果和通过标准。",
+      "status": "passing",
+      "confidence": "verified",
+      "latest_evidence": {
+        "kind": "behavior-test",
+        "basis": "protocol-check",
+        "summary": "Draft Nori Contracts now keep workflow status as draft until user approval; temporary project draft output and the Agent Workbench draft both show ledger.status=draft while AC rows remain unknown.",
+        "result": "passing",
+        "confidence": "verified",
+        "sources": [
+          {
+            "type": "command",
+            "label": "npx vitest run test/core.test.js -t 'draft requires user approval|next-loop candidates'",
+            "command": "npx vitest run test/core.test.js -t 'draft requires user approval|next-loop candidates'"
+          },
+          {
+            "type": "command",
+            "label": "tmp project: opennori draft reports ledger_status=draft and current_gap=ACCEPTANCE-BASIS",
+            "command": "tmp project: opennori draft reports ledger_status=draft and current_gap=ACCEPTANCE-BASIS"
+          },
+          {
+            "type": "artifact",
+            "label": "src/core/contract.ts",
+            "path": "src/core/contract.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/core/evidence.ts",
+            "path": "src/core/evidence.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "test/core.test.js",
+            "path": "test/core.test.js"
+          }
+        ],
+        "reviewability": "Inspect the listed files and rerun the targeted vitest command or create a temporary draft contract.",
+        "limitations": "This evidence covers draft workflow semantics, not the subjective quality of each drafted AC.",
+        "gate": "accepted",
+        "created_at": "2026-06-17T09:18:38.874Z"
+      }
+    },
+    {
+      "id": "AC-D-1",
+      "layer": "acceptance",
+      "user_story": "作为用户，我运行 opennori dashboard --root . 并打开本地页面后，能不用阅读 CLI 日志就看出当前由哪个 agent/Skill 在推进、目标是什么、当前验收缺口是什么、是否需要我介入、Architecture Baseline 是否有效，以及当前完成判断。",
+      "status": "passing",
+      "confidence": "high",
+      "latest_evidence": {
+        "kind": "dashboard-review",
+        "basis": "artifact-review",
+        "summary": "React dashboard now presents OpenNori as a local observation surface: desktop and mobile pages show agent activity, current gap, need user, decision, Architecture Baseline, latest event, evidence health, and completion authority, with no browser console errors.",
+        "result": "passing",
+        "confidence": "high",
+        "sources": [
+          {
+            "type": "command",
+            "label": "npm run check",
+            "command": "npm run check"
+          },
+          {
+            "type": "command",
+            "label": "node ./bin/opennori.js dashboard --root . --port 0 --no-open --once --json",
+            "command": "node ./bin/opennori.js dashboard --root . --port 0 --no-open --once --json"
+          },
+          {
+            "type": "artifact",
+            "label": "output/playwright/opennori-dashboard-desktop.png",
+            "path": "output/playwright/opennori-dashboard-desktop.png"
+          },
+          {
+            "type": "artifact",
+            "label": "output/playwright/opennori-dashboard-mobile.png",
+            "path": "output/playwright/opennori-dashboard-mobile.png"
+          },
+          {
+            "type": "artifact",
+            "label": "src/dashboard/src/App.tsx",
+            "path": "src/dashboard/src/App.tsx"
+          },
+          {
+            "type": "artifact",
+            "label": "src/dashboard/src/components/AcceptanceLoop.tsx",
+            "path": "src/dashboard/src/components/AcceptanceLoop.tsx"
+          },
+          {
+            "type": "artifact",
+            "label": "vite.dashboard.config.ts",
+            "path": "vite.dashboard.config.ts"
+          }
+        ],
+        "reviewability": "Run npm run check; run node ./bin/opennori.js dashboard --root . --port 0 --no-open --json, open the URL, and compare output/playwright/opennori-dashboard-desktop.png plus output/playwright/opennori-dashboard-mobile.png. Playwright console reported Total messages: 0 (Errors: 0, Warnings: 0).",
+        "limitations": "Dashboard is a read-only observation surface over /api/snapshot and /api/events; it does not replace status/report, evidence ledger, or completion authority. The visual check covered desktop 1440x980 and mobile 390x860.",
+        "gate": "accepted",
+        "created_at": "2026-06-16T06:46:56.158Z"
+      }
+    },
+    {
+      "id": "AC-D-2",
+      "layer": "acceptance",
+      "user_story": "作为用户，我打开 OpenNori dashboard 观察 agent 工作时，agent 使用 OpenNori Skill 推进当前验收缺口后，我能看到 live activity 显示 agent、Skill、目标、当前 gap、状态和摘要；如果有多个 active goals，agent 不会把活动误绑定到错误目标。",
+      "status": "passing",
+      "confidence": "verified",
+      "latest_evidence": {
+        "kind": "dashboard-activity-workflow",
+        "basis": "tool-observation",
+        "summary": "OpenNori now gives Skills a dashboard_activity routing surface, lets activity start/heartbeat/finish infer the unique current goal/gap, refuses ambiguous multi-goal activity, and keeps activity out of evidence/completion state.",
+        "result": "passing",
+        "confidence": "verified",
+        "sources": [
+          {
+            "type": "command",
+            "label": "npm run check",
+            "command": "npm run check"
+          },
+          {
+            "type": "command",
+            "label": "node ./bin/opennori.js status --root . --goal opennori-self --json",
+            "command": "node ./bin/opennori.js status --root . --goal opennori-self --json"
+          },
+          {
+            "type": "command",
+            "label": "tmp=$(mktemp -d /tmp/opennori-activity-smoke-XXXXXX); node ./bin/opennori.js draft --root \"$tmp\" --goal \"Ship dashboard activity\" --json >/dev/null; node ./bin/opennori.js approve --root \"$tmp\" --summary \"Approved\" --json >/dev/null; node ./bin/opennori.js activity start --root \"$tmp\" --skill nori-evidence --state verifying --summary \"Verifying the current gap\" --json",
+            "command": "tmp=$(mktemp -d /tmp/opennori-activity-smoke-XXXXXX); node ./bin/opennori.js draft --root \"$tmp\" --goal \"Ship dashboard activity\" --json >/dev/null; node ./bin/opennori.js approve --root \"$tmp\" --summary \"Approved\" --json >/dev/null; node ./bin/opennori.js activity start --root \"$tmp\" --skill nori-evidence --state verifying --summary \"Verifying the current gap\" --json"
+          },
+          {
+            "type": "artifact",
+            "label": "src/agent-next.ts",
+            "path": "src/agent-next.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/kernel/activity.ts",
+            "path": "src/kernel/activity.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/cli/commands/activity.ts",
+            "path": "src/cli/commands/activity.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/kernel/snapshot.ts",
+            "path": "src/kernel/snapshot.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori/SKILL.md",
+            "path": "plugins/opennori/skills/nori/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": ".opennori/protocol.md",
+            "path": ".opennori/protocol.md"
+          }
+        ],
+        "reviewability": "Rerun npm run check, inspect status agent_next.dashboard_activity for an explicit goal, run the temporary activity smoke to see inferred goal/gap in snapshot, and inspect tests that prove ambiguous multi-goal activity fails closed without writing evidence.",
+        "limitations": "This verifies the local CLI/Skill protocol and dashboard projection behavior. It does not prove a human watched a real long-running external project through the dashboard; that remains a broader dogfood scenario.",
+        "gate": "accepted",
+        "created_at": "2026-06-16T07:58:26.468Z"
+      }
+    },
+    {
+      "id": "AC-D-3",
+      "layer": "acceptance",
+      "user_story": "作为用户，我打开 OpenNori dashboard 观察 agent 执行时，首屏就能看出当前 agent 是否正在活动、使用哪个 Skill、正在推进哪个验收缺口，以及活动是否已经过期；我不需要展开详情面板或阅读事件日志才能判断当前执行态。",
+      "status": "passing",
+      "confidence": "verified",
+      "latest_evidence": {
+        "kind": "dashboard-execution-presence-review",
+        "basis": "tool-observation",
+        "summary": "Dashboard now gives live agent execution a first-screen visual presence: agent/state, Skill, freshness, activity summary, current gap, and live/idle status are visible without opening the detail panel or reading event logs. Browser screenshots on desktop and mobile show the active verifying state, and snapshot selection follows the explicit activity target when multiple goals exist.",
+        "result": "passing",
+        "confidence": "verified",
+        "sources": [
+          {
+            "type": "command",
+            "label": "npm run check",
+            "command": "npm run check"
+          },
+          {
+            "type": "command",
+            "label": "npx vitest run test/cli-commands.test.js -t 'dashboard snapshot follows|activity start refuses|activity commands infer|dashboard serves'",
+            "command": "npx vitest run test/cli-commands.test.js -t 'dashboard snapshot follows|activity start refuses|activity commands infer|dashboard serves'"
+          },
+          {
+            "type": "artifact",
+            "label": "output/playwright/opennori-dashboard-execution-desktop.png",
+            "path": "output/playwright/opennori-dashboard-execution-desktop.png"
+          },
+          {
+            "type": "artifact",
+            "label": "output/playwright/opennori-dashboard-execution-mobile.png",
+            "path": "output/playwright/opennori-dashboard-execution-mobile.png"
+          },
+          {
+            "type": "artifact",
+            "label": "src/dashboard/src/App.tsx",
+            "path": "src/dashboard/src/App.tsx"
+          },
+          {
+            "type": "artifact",
+            "label": "src/kernel/snapshot.ts",
+            "path": "src/kernel/snapshot.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
+          }
+        ],
+        "reviewability": "Run npm run check; start opennori dashboard --root . --goal opennori-self; publish activity start/heartbeat for AC-D-3; inspect the desktop and mobile screenshots for visible live state, Skill, summary, gap, stale/freshness, and completion boundary.",
+        "limitations": "Verified with local Chrome screenshots and API snapshots. The dashboard remains a read-only observation surface; it does not execute agent work, replace evidence, or certify completion. Long-running real project watching is still broader dogfood coverage.",
+        "gate": "accepted",
+        "created_at": "2026-06-16T08:31:23.288Z"
+      }
+    },
+    {
+      "id": "AC-D-4",
+      "layer": "acceptance",
+      "user_story": "作为用户，我在 OpenNori dashboard 看到需要用户介入时，页面只告诉我应该回到 agent 对话里确认、修改或豁免，而不会提供 dashboard 内的确认、拒绝、waive 或写状态按钮。",
+      "status": "passing",
+      "confidence": "verified",
+      "latest_evidence": {
+        "kind": "dashboard-observation-boundary",
+        "basis": "tool-observation",
+        "summary": "Dashboard now presents user intervention as an agent-conversation reply boundary, not an in-dashboard confirmation flow. The built React app shows Agent reply / Control boundary / reply in agent chat, packaged Skills and docs forbid dashboard confirmation controls, and dashboard HTTP rejects confirmation-style POST control paths with method_not_allowed.",
+        "result": "passing",
+        "confidence": "verified",
+        "sources": [
+          {
+            "type": "command",
+            "label": "npm run typecheck:dashboard && npm run build:dashboard && npx vitest run test/cli-commands.test.js -t \"dashboard rejects non-GET|dashboard exposes observation only|dashboard serves the built React app|dashboard command can start|dashboard SSE emits\"",
+            "command": "npm run typecheck:dashboard && npm run build:dashboard && npx vitest run test/cli-commands.test.js -t \"dashboard rejects non-GET|dashboard exposes observation only|dashboard serves the built React app|dashboard command can start|dashboard SSE emits\""
+          },
+          {
+            "type": "command",
+            "label": "npm run check",
+            "command": "npm run check"
+          },
+          {
+            "type": "artifact",
+            "label": "src/dashboard/src/App.tsx",
+            "path": "src/dashboard/src/App.tsx"
+          },
+          {
+            "type": "artifact",
+            "label": "src/dashboard/src/components/AcceptanceLoop.tsx",
+            "path": "src/dashboard/src/components/AcceptanceLoop.tsx"
+          },
+          {
+            "type": "artifact",
+            "label": "src/kernel/http/app.ts",
+            "path": "src/kernel/http/app.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
+          },
+          {
+            "type": "artifact",
+            "label": "README.md",
+            "path": "README.md"
+          },
+          {
+            "type": "artifact",
+            "label": "AGENTS.md",
+            "path": "AGENTS.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori/SKILL.md",
+            "path": "plugins/opennori/skills/nori/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+            "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+            "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/.codex-plugin/plugin.json",
+            "path": "plugins/opennori/.codex-plugin/plugin.json"
+          }
+        ],
+        "reviewability": "Run npm run check, inspect the dashboard bundle/source for Agent reply and reply in agent chat, and rerun the dashboard control-write tests to confirm POST confirmation endpoints are rejected.",
+        "limitations": "This verifies the current local dashboard and package assets. It does not add a browser screenshot for a forced need_user fixture, and future UI work must keep the same observation-only boundary.",
+        "gate": "accepted",
+        "created_at": "2026-06-16T10:12:26.488Z"
+      }
+    },
+    {
+      "id": "AC-Z-21",
+      "layer": "productization",
+      "user_story": "作为用户，我对 agent 说“验收标准用中文”或“write this contract in English”后，能在 agent 展示的发现问题、Nori Contract、status/report 摘要和下一轮候选目标中看到我要求的语言；如果我已经有一份批准过的契约，OpenNori 不会在我未确认时把它改成另一种语言。",
+      "status": "passing",
+      "confidence": "verified",
+      "latest_evidence": {
+        "kind": "language-preference-implementation",
+        "basis": "tool-observation",
+        "summary": "OpenNori now lets users request Chinese or English Contract presentation in natural language. Generated brainstorm, discovery, draft, report next candidates, and context/status surfaces preserve presentation.language for human-readable text; Skills document the natural-language mapping; legacy/current contracts keep their existing presentation during ordinary evidence/status/report/check writes and change only after explicit user approval with --no-from-draft --language.",
+        "result": "passing",
+        "confidence": "verified",
+        "sources": [
+          {
+            "type": "command",
+            "label": "npm run check (118 tests passed; doctor ready)",
+            "command": "npm run check (118 tests passed; doctor ready)"
+          },
+          {
+            "type": "command",
+            "label": "pnpm build in /Users/jarl/code/jarlone/opennori-site",
+            "command": "pnpm build in /Users/jarl/code/jarlone/opennori-site"
+          },
+          {
+            "type": "command",
+            "label": "language smoke: brainstorm/discover zh-CN and draft en",
+            "command": "language smoke: brainstorm/discover zh-CN and draft en"
+          },
+          {
+            "type": "command",
+            "label": "legacy smoke: evidence write keeps Language: en; approve --no-from-draft --language zh-CN switches to 语言: zh-CN",
+            "command": "legacy smoke: evidence write keeps Language: en; approve --no-from-draft --language zh-CN switches to 语言: zh-CN"
+          },
+          {
+            "type": "artifact",
+            "label": "src/language.ts",
+            "path": "src/language.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/acceptance.ts",
+            "path": "src/acceptance.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/core/contract.ts",
+            "path": "src/core/contract.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/core/report.ts",
+            "path": "src/core/report.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/cli/commands/acceptance/draft.ts",
+            "path": "src/cli/commands/acceptance/draft.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "src/cli/commands/acceptance/approval.ts",
+            "path": "src/cli/commands/acceptance/approval.ts"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+            "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "plugins/opennori/skills/nori/SKILL.md",
+            "path": "plugins/opennori/skills/nori/SKILL.md"
+          },
+          {
+            "type": "artifact",
+            "label": "README.md",
+            "path": "README.md"
+          },
+          {
+            "type": "artifact",
+            "label": "AGENTS.md",
+            "path": "AGENTS.md"
+          },
+          {
+            "type": "artifact",
+            "label": "test/core.test.js",
+            "path": "test/core.test.js"
+          },
+          {
+            "type": "artifact",
+            "label": "test/cli-commands.test.js",
+            "path": "test/cli-commands.test.js"
+          },
+          {
+            "type": "artifact",
             "label": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
             "path": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
           }
         ],
-        "reviewability": "Run npm run test, run setup/init in a temporary project, inspect setup_plan actions for codex plugin, packaged_skills, global_cli, project_state, and doctor, then read README/website/Skills for the same user path.",
-        "limitations": "Tests mock confirmed external Codex/npm setup writes; the temp smoke verifies preview and project init without mutating global Codex/npm state. A real first-time user will still need to approve setup in their own environment.",
+        "reviewability": "Rerun npm run check, inspect language tests and Skill/README/website text, then run the smoke commands for zh-CN/en generation and legacy current-contract approval.",
+        "limitations": "This verifies deterministic OpenNori surfaces and local website text; changing existing contract wording still requires the agent/user to revise visible prose, not an automatic translation adapter.",
         "gate": "accepted",
-        "created_at": "2026-06-14T09:18:09.079Z"
+        "created_at": "2026-06-17T10:39:36.322Z"
       }
     }
   ],
@@ -2353,21 +3024,22 @@
     },
     "issues": [],
     "open_challenges": [],
+    "apply_records": [],
     "build_vs_buy_decisions": [
       {
         "id": "acceptance-domain-将-acceptance-discovery-brainstorm-和-ac-quality",
         "schema_valid": true,
         "schema_errors": [],
         "area": "acceptance-domain",
-        "need": "将 acceptance discovery、brainstorm 和 AC quality audit 从 CLI 入口拆到领域模块",
+        "need": "将 acceptance discovery、brainstorm 和 draft generation 从 CLI 入口拆到领域模块，同时把主观 AC 质量审查留给 Skills 和用户确认",
         "recommendation": "self-build",
         "status": "active",
-        "summary": "Acceptance discovery、brainstorm 和 AC quality audit 是 OpenNori 的核心产品领域逻辑，当前由 src/acceptance.ts 承载，CLI command modules 只负责参数和状态读写。",
-        "current_project": "src/acceptance.ts 已拥有 BRAINSTORM_CANDIDATES、DEFAULT_CRITERIA、DISCOVERY_GAPS、auditAcceptanceQuality 等规则；src/cli/commands/acceptance.ts 负责命令入口；test/core.test.js 与 test/cli-commands.test.js 覆盖 discovery、brainstorm 和 quality audit。",
+        "summary": "Acceptance discovery、brainstorm 和 draft generation 是 OpenNori 的领域逻辑，当前由 src/acceptance.ts 承载；主观 AC 质量不再由 CLI 词表判定，而由 packaged Skills 要求 agent 与用户复核。",
+        "current_project": "src/acceptance.ts 承载 BRAINSTORM_CANDIDATES、DEFAULT_CRITERIA、DISCOVERY_GAPS 和 draft helpers；src/cli/commands/acceptance.ts 负责命令入口；test/core.test.js 与 test/cli-commands.test.js 只覆盖 discovery/brainstorm/draft 的客观状态读写，不测试自然语言 AC 质量判断。",
         "standard_library": "Node.js ESM 模块足够承载常量和纯函数；无需新增运行时依赖。",
         "official_sdk": "无官方 SDK 适用；这是 OpenNori 产品领域规则。",
-        "open_source": "成熟 NLP/validation 库会增加复杂度，且不能替代 OpenNori 对人类视角 AC 的产品判断；TK 参考强调 Skill/产品面和确定性核心分离。",
-        "self_build_reason": "规则小、可测试、属于 OpenNori 核心语义；抽成领域模块比新增依赖更直接，后续若规则复杂再重新评估 schema/NLP 库。",
+        "open_source": "成熟 NLP/validation 库会增加复杂度，也不能替代 agent/user 对人类视角 AC 的语义判断；TK 参考强调 Skill/产品面和确定性核心分离。",
+        "self_build_reason": "brainstorm/discover/draft 的结构化读写规则小且属于 OpenNori 核心语义；主观 AC 质量判断不在自研 CLI 范围内，应沉淀到 Skills 行为规则和用户确认。",
         "path": ".opennori/architecture/decisions/acceptance-domain-将-acceptance-discovery-brainstorm-和-ac-quality.json"
       },
       {
@@ -2437,6 +3109,60 @@
         "superseded_by": "",
         "superseded_reason": "",
         "path": ".opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.json"
+      },
+      {
+        "id": "dashboard-kernel-hono-transport",
+        "schema_valid": true,
+        "schema_errors": [],
+        "area": "dashboard-kernel",
+        "need": "Provide a local visual dashboard transport that observes OpenNori contract, gap, evidence, architecture, and live agent activity without becoming an agent runtime.",
+        "recommendation": "reuse",
+        "status": "active",
+        "summary": "Use Hono plus @hono/node-server for the local dashboard HTTP/SSE transport while keeping OpenNori's .opennori state, event ledger, activity, and snapshot projection as first-party domain modules.",
+        "current_project": "OpenNori already has TypeScript domain modules, citty CLI commands, dashboard static assets, and separate src/kernel/activity.ts, src/kernel/events.ts, and src/kernel/snapshot.ts modules. The previous hand-written HTTP server was becoming routing, static-file, SSE, and error-response infrastructure rather than OpenNori domain logic.",
+        "standard_library": "Node http, fs, path, url, and child_process can implement the transport, but keeping route matching, response handling, SSE framing, server startup, and error handling as custom code repeats solved infrastructure and makes later dashboard growth more expensive.",
+        "official_sdk": "@hono/node-server is Hono's official Node adapter and runs Hono apps on Node.js using web-standard Request/Response APIs. Hono's streamSSE helper provides a typed SSE response boundary; package-root static asset resolution remains OpenNori-owned because Hono's serve-static root is cwd-relative.",
+        "open_source": "Hono is a lightweight TypeScript web framework already used in mature agent-adjacent stacks such as opencode's TypeScript server layer. Express is older and heavier for this local kernel, while Fastify is better for larger API services but adds plugin/server architecture beyond the current observation surface.",
+        "self_build_reason": "",
+        "superseded_by": "",
+        "superseded_reason": "",
+        "path": ".opennori/architecture/decisions/dashboard-kernel-hono-transport.json"
+      },
+      {
+        "id": "dashboard-kernel-http-sse",
+        "schema_valid": true,
+        "schema_errors": [],
+        "area": "dashboard-kernel",
+        "need": "Provide a local visual dashboard that observes OpenNori contract, gap, evidence, architecture, and live agent activity without becoming an agent runtime.",
+        "recommendation": "self-build",
+        "status": "superseded",
+        "summary": "Use Node standard library HTTP plus Server-Sent Events for a local loopback observation kernel. OpenNori keeps .opennori as source of truth, emits a small durable JSONL event ledger, projects current snapshot JSON, and serves a static SVG dashboard. MCP remains a later structured agent tool surface, not the dashboard transport.",
+        "current_project": "OpenNori already has TypeScript domain modules, citty CLI commands, JSON .opennori state, manifest-managed lifecycle, and package-local static assets; no existing kernel/dashboard layer is present.",
+        "standard_library": "Node http, fs, path, url, and child_process are sufficient for a loopback server, JSON snapshot endpoint, static file serving, and SSE event stream.",
+        "official_sdk": "No official OpenNori SDK exists for dashboard transport. MCP is useful later for agent tool calls, but OpenAI/Codex Skills plus CLI already cover current agent state writes; MCP is not required to stream a human dashboard.",
+        "open_source": "Express/Fastify/Hono and frontend frameworks were considered, but the first dashboard is local, unauthenticated loopback, static, and has three endpoints; adding a server or SPA framework would increase package surface before routing complexity exists.",
+        "self_build_reason": "The self-built portion is intentionally small adapter glue around Node's standard library and OpenNori's own state semantics. External libraries would not replace the product-specific event, activity, and snapshot projection model.",
+        "superseded_by": "dashboard-kernel-hono-transport",
+        "superseded_reason": "OpenNori's dashboard transport should establish a long-term framework boundary early. Hono provides reusable routing, response, and SSE helpers while OpenNori keeps .opennori state, event ledger, activity, and snapshot projection as first-party domain logic.",
+        "path": ".opennori/architecture/decisions/dashboard-kernel-http-sse.json"
+      },
+      {
+        "id": "dashboard-web-react-vite-tailwind-radix-motion",
+        "schema_valid": true,
+        "schema_errors": [],
+        "area": "dashboard-web",
+        "need": "Provide a productized local visual dashboard that helps users observe OpenNori agent activity, current acceptance gap, user intervention, architecture health, and completion decision without becoming an agent runtime or process log.",
+        "recommendation": "reuse",
+        "status": "active",
+        "summary": "Use React, Vite, Tailwind CSS v4, Radix primitives, Motion, and Lucide React for the dashboard UI while keeping Hono as the local snapshot/SSE kernel and .opennori as the source of truth.",
+        "current_project": "OpenNori already has a Hono dashboard kernel, /api/snapshot, /api/events, TypeScript modules, and a small vanilla dashboard. The vanilla files prove the transport but are not a long-term UI architecture for live visual state, motion, responsive layout, or accessible overlays.",
+        "standard_library": "Browser DOM, CSS, SVG, and EventSource can render the dashboard, but hand-rolling component state, animation, responsive primitives, accessible dialogs/tooltips/tabs, and build output would repeat solved frontend infrastructure.",
+        "official_sdk": "No official OpenNori UI SDK exists. Vite is the official modern build path for React projects through @vitejs/plugin-react, and @tailwindcss/vite is Tailwind's Vite integration.",
+        "open_source": "React is a mature UI library used broadly in agent UI projects; Vite is a mature ESM build tool; Tailwind CSS v4 provides utility styling and tokens; Radix primitives provide accessible UI behavior without a heavy visual system; Motion provides React animation; Lucide React provides icons. TK references show mature agent UI projects separate daemon/kernel state from frontend UI and often use React/Vite/Tailwind-style stacks.",
+        "self_build_reason": "",
+        "superseded_by": "",
+        "superseded_reason": "",
+        "path": ".opennori/architecture/decisions/dashboard-web-react-vite-tailwind-radix-motion.json"
       },
       {
         "id": "editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark",
@@ -2564,9 +3290,9 @@
     "build_vs_buy": {
       "status": "clear",
       "summary": "Every recorded build-vs-buy decision includes reviewable reuse candidates and any self-build reason.",
-      "decision_count": 12,
-      "total_decision_count": 12,
-      "superseded_decision_count": 0,
+      "decision_count": 14,
+      "total_decision_count": 15,
+      "superseded_decision_count": 1,
       "findings": []
     },
     "agent_surface": {
@@ -2593,8 +3319,8 @@
     }
   },
   "paths": {
-    "acceptance": ".opennori/active/opennori-self.acceptance.md",
-    "evidence": ".opennori/active/opennori-self.evidence.json",
+    "acceptance": ".opennori/current/opennori-self.acceptance.md",
+    "evidence": ".opennori/current/opennori-self.evidence.json",
     "report": ".opennori/reports/opennori-self.report.md",
     "report_exists": true,
     "manifest": ".opennori/manifest.json"
@@ -2602,15 +3328,16 @@
   "manifest": {
     "schema_version": "opennori/manifest-v1",
     "protocol_version": "opennori/v1",
-    "opennori_version": "0.1.8",
+    "opennori_version": "0.1.9",
     "created_at": "2026-06-10T09:12:16.646Z",
-    "updated_at": "2026-06-14T09:18:33.306Z",
+    "updated_at": "2026-06-18T02:52:56.291Z",
     "capabilities": [
       "acceptance-contract",
       "evidence-ledger",
       "reviewable-evidence",
       "codex-plugin",
       "opennori-skills",
+      "plugin-sync",
       "setup",
       "brainstorm",
       "acceptance-discovery",
@@ -2661,7 +3388,13 @@
         "exists": true
       },
       {
-        "path": ".opennori/active",
+        "path": ".opennori/current",
+        "kind": "directory",
+        "required": true,
+        "exists": true
+      },
+      {
+        "path": ".opennori/drafts",
         "kind": "directory",
         "required": true,
         "exists": true
@@ -2736,17 +3469,55 @@
     "active_goals": [
       {
         "goal_id": "opennori-self",
+        "location": "current",
         "status": "complete",
         "current_gap": null,
-        "acceptance_path": ".opennori/active/opennori-self.acceptance.md",
-        "evidence_path": ".opennori/active/opennori-self.evidence.json",
+        "acceptance_path": ".opennori/current/opennori-self.acceptance.md",
+        "evidence_path": ".opennori/current/opennori-self.evidence.json",
         "recoverable": true
       }
     ],
+    "current_goal": {
+      "goal_id": "opennori-self",
+      "location": "current",
+      "status": "complete",
+      "current_gap": null,
+      "acceptance_path": ".opennori/current/opennori-self.acceptance.md",
+      "evidence_path": ".opennori/current/opennori-self.evidence.json",
+      "recoverable": true
+    },
+    "draft_goals": [
+      {
+        "goal_id": "opennori-self-opennori-adoption-dogfood",
+        "location": "drafts",
+        "status": "draft",
+        "current_gap": {
+          "id": "ACCEPTANCE-BASIS",
+          "user_story": "作为用户，我需要先确认或修改验收标准，才能让 agent 判断任务完成。",
+          "status": "unknown",
+          "reason": "Acceptance criteria have not been approved by the user yet."
+        },
+        "acceptance_path": ".opennori/drafts/opennori-self-opennori-adoption-dogfood.acceptance.md",
+        "evidence_path": ".opennori/drafts/opennori-self-opennori-adoption-dogfood.evidence.json",
+        "recoverable": true
+      }
+    ],
+    "history_goals": [
+      {
+        "goal_id": "opennori-build-vs-buy-maturity",
+        "location": "completed",
+        "status": "complete",
+        "current_gap": null,
+        "acceptance_path": ".opennori/completed/opennori-build-vs-buy-maturity.acceptance.md",
+        "evidence_path": ".opennori/completed/opennori-build-vs-buy-maturity.evidence.json",
+        "recoverable": true
+      }
+    ],
+    "legacy_active_goals": [],
     "plugin": {
       "schema_version": "opennori/plugin-v1",
       "name": "opennori",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "manifest_path": "plugins/opennori/.codex-plugin/plugin.json",
       "marketplace_path": ".agents/plugins/marketplace.json",
       "marketplace_name": "opennori",
@@ -2788,7 +3559,7 @@
         },
         {
           "name": "nori-architecture-apply",
-          "description": "Apply a confirmed OpenNori Architecture Baseline while implementing acceptance gaps. Use before non-trivial code changes when an active goal has architecture state, when resuming implementation in a new session, or when the agent must ensure Product AC work stays aligned with the baseline.",
+          "description": "Apply a confirmed OpenNori Architecture Baseline while implementing acceptance gaps. Use before non-trivial code changes when a current goal has architecture state, when resuming implementation in a new session, or when the agent must ensure Product AC work stays aligned with the baseline.",
           "path": "plugins/opennori/skills/nori-architecture-apply/SKILL.md",
           "source": "package"
         },
@@ -2806,7 +3577,7 @@
         },
         {
           "name": "nori-project-health",
-          "description": "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and active-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, or needs safe lifecycle actions with preview and explicit confirmation.",
+          "description": "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, or needs safe lifecycle actions with preview and explicit confirmation.",
           "path": "plugins/opennori/skills/nori-project-health/SKILL.md",
           "source": "package"
         },
@@ -2833,21 +3604,22 @@
       },
       "issues": [],
       "open_challenges": [],
+      "apply_records": [],
       "build_vs_buy_decisions": [
         {
           "id": "acceptance-domain-将-acceptance-discovery-brainstorm-和-ac-quality",
           "schema_valid": true,
           "schema_errors": [],
           "area": "acceptance-domain",
-          "need": "将 acceptance discovery、brainstorm 和 AC quality audit 从 CLI 入口拆到领域模块",
+          "need": "将 acceptance discovery、brainstorm 和 draft generation 从 CLI 入口拆到领域模块，同时把主观 AC 质量审查留给 Skills 和用户确认",
           "recommendation": "self-build",
           "status": "active",
-          "summary": "Acceptance discovery、brainstorm 和 AC quality audit 是 OpenNori 的核心产品领域逻辑，当前由 src/acceptance.ts 承载，CLI command modules 只负责参数和状态读写。",
-          "current_project": "src/acceptance.ts 已拥有 BRAINSTORM_CANDIDATES、DEFAULT_CRITERIA、DISCOVERY_GAPS、auditAcceptanceQuality 等规则；src/cli/commands/acceptance.ts 负责命令入口；test/core.test.js 与 test/cli-commands.test.js 覆盖 discovery、brainstorm 和 quality audit。",
+          "summary": "Acceptance discovery、brainstorm 和 draft generation 是 OpenNori 的领域逻辑，当前由 src/acceptance.ts 承载；主观 AC 质量不再由 CLI 词表判定，而由 packaged Skills 要求 agent 与用户复核。",
+          "current_project": "src/acceptance.ts 承载 BRAINSTORM_CANDIDATES、DEFAULT_CRITERIA、DISCOVERY_GAPS 和 draft helpers；src/cli/commands/acceptance.ts 负责命令入口；test/core.test.js 与 test/cli-commands.test.js 只覆盖 discovery/brainstorm/draft 的客观状态读写，不测试自然语言 AC 质量判断。",
           "standard_library": "Node.js ESM 模块足够承载常量和纯函数；无需新增运行时依赖。",
           "official_sdk": "无官方 SDK 适用；这是 OpenNori 产品领域规则。",
-          "open_source": "成熟 NLP/validation 库会增加复杂度，且不能替代 OpenNori 对人类视角 AC 的产品判断；TK 参考强调 Skill/产品面和确定性核心分离。",
-          "self_build_reason": "规则小、可测试、属于 OpenNori 核心语义；抽成领域模块比新增依赖更直接，后续若规则复杂再重新评估 schema/NLP 库。",
+          "open_source": "成熟 NLP/validation 库会增加复杂度，也不能替代 agent/user 对人类视角 AC 的语义判断；TK 参考强调 Skill/产品面和确定性核心分离。",
+          "self_build_reason": "brainstorm/discover/draft 的结构化读写规则小且属于 OpenNori 核心语义；主观 AC 质量判断不在自研 CLI 范围内，应沉淀到 Skills 行为规则和用户确认。",
           "path": ".opennori/architecture/decisions/acceptance-domain-将-acceptance-discovery-brainstorm-和-ac-quality.json"
         },
         {
@@ -2917,6 +3689,60 @@
           "superseded_by": "",
           "superseded_reason": "",
           "path": ".opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.json"
+        },
+        {
+          "id": "dashboard-kernel-hono-transport",
+          "schema_valid": true,
+          "schema_errors": [],
+          "area": "dashboard-kernel",
+          "need": "Provide a local visual dashboard transport that observes OpenNori contract, gap, evidence, architecture, and live agent activity without becoming an agent runtime.",
+          "recommendation": "reuse",
+          "status": "active",
+          "summary": "Use Hono plus @hono/node-server for the local dashboard HTTP/SSE transport while keeping OpenNori's .opennori state, event ledger, activity, and snapshot projection as first-party domain modules.",
+          "current_project": "OpenNori already has TypeScript domain modules, citty CLI commands, dashboard static assets, and separate src/kernel/activity.ts, src/kernel/events.ts, and src/kernel/snapshot.ts modules. The previous hand-written HTTP server was becoming routing, static-file, SSE, and error-response infrastructure rather than OpenNori domain logic.",
+          "standard_library": "Node http, fs, path, url, and child_process can implement the transport, but keeping route matching, response handling, SSE framing, server startup, and error handling as custom code repeats solved infrastructure and makes later dashboard growth more expensive.",
+          "official_sdk": "@hono/node-server is Hono's official Node adapter and runs Hono apps on Node.js using web-standard Request/Response APIs. Hono's streamSSE helper provides a typed SSE response boundary; package-root static asset resolution remains OpenNori-owned because Hono's serve-static root is cwd-relative.",
+          "open_source": "Hono is a lightweight TypeScript web framework already used in mature agent-adjacent stacks such as opencode's TypeScript server layer. Express is older and heavier for this local kernel, while Fastify is better for larger API services but adds plugin/server architecture beyond the current observation surface.",
+          "self_build_reason": "",
+          "superseded_by": "",
+          "superseded_reason": "",
+          "path": ".opennori/architecture/decisions/dashboard-kernel-hono-transport.json"
+        },
+        {
+          "id": "dashboard-kernel-http-sse",
+          "schema_valid": true,
+          "schema_errors": [],
+          "area": "dashboard-kernel",
+          "need": "Provide a local visual dashboard that observes OpenNori contract, gap, evidence, architecture, and live agent activity without becoming an agent runtime.",
+          "recommendation": "self-build",
+          "status": "superseded",
+          "summary": "Use Node standard library HTTP plus Server-Sent Events for a local loopback observation kernel. OpenNori keeps .opennori as source of truth, emits a small durable JSONL event ledger, projects current snapshot JSON, and serves a static SVG dashboard. MCP remains a later structured agent tool surface, not the dashboard transport.",
+          "current_project": "OpenNori already has TypeScript domain modules, citty CLI commands, JSON .opennori state, manifest-managed lifecycle, and package-local static assets; no existing kernel/dashboard layer is present.",
+          "standard_library": "Node http, fs, path, url, and child_process are sufficient for a loopback server, JSON snapshot endpoint, static file serving, and SSE event stream.",
+          "official_sdk": "No official OpenNori SDK exists for dashboard transport. MCP is useful later for agent tool calls, but OpenAI/Codex Skills plus CLI already cover current agent state writes; MCP is not required to stream a human dashboard.",
+          "open_source": "Express/Fastify/Hono and frontend frameworks were considered, but the first dashboard is local, unauthenticated loopback, static, and has three endpoints; adding a server or SPA framework would increase package surface before routing complexity exists.",
+          "self_build_reason": "The self-built portion is intentionally small adapter glue around Node's standard library and OpenNori's own state semantics. External libraries would not replace the product-specific event, activity, and snapshot projection model.",
+          "superseded_by": "dashboard-kernel-hono-transport",
+          "superseded_reason": "OpenNori's dashboard transport should establish a long-term framework boundary early. Hono provides reusable routing, response, and SSE helpers while OpenNori keeps .opennori state, event ledger, activity, and snapshot projection as first-party domain logic.",
+          "path": ".opennori/architecture/decisions/dashboard-kernel-http-sse.json"
+        },
+        {
+          "id": "dashboard-web-react-vite-tailwind-radix-motion",
+          "schema_valid": true,
+          "schema_errors": [],
+          "area": "dashboard-web",
+          "need": "Provide a productized local visual dashboard that helps users observe OpenNori agent activity, current acceptance gap, user intervention, architecture health, and completion decision without becoming an agent runtime or process log.",
+          "recommendation": "reuse",
+          "status": "active",
+          "summary": "Use React, Vite, Tailwind CSS v4, Radix primitives, Motion, and Lucide React for the dashboard UI while keeping Hono as the local snapshot/SSE kernel and .opennori as the source of truth.",
+          "current_project": "OpenNori already has a Hono dashboard kernel, /api/snapshot, /api/events, TypeScript modules, and a small vanilla dashboard. The vanilla files prove the transport but are not a long-term UI architecture for live visual state, motion, responsive layout, or accessible overlays.",
+          "standard_library": "Browser DOM, CSS, SVG, and EventSource can render the dashboard, but hand-rolling component state, animation, responsive primitives, accessible dialogs/tooltips/tabs, and build output would repeat solved frontend infrastructure.",
+          "official_sdk": "No official OpenNori UI SDK exists. Vite is the official modern build path for React projects through @vitejs/plugin-react, and @tailwindcss/vite is Tailwind's Vite integration.",
+          "open_source": "React is a mature UI library used broadly in agent UI projects; Vite is a mature ESM build tool; Tailwind CSS v4 provides utility styling and tokens; Radix primitives provide accessible UI behavior without a heavy visual system; Motion provides React animation; Lucide React provides icons. TK references show mature agent UI projects separate daemon/kernel state from frontend UI and often use React/Vite/Tailwind-style stacks.",
+          "self_build_reason": "",
+          "superseded_by": "",
+          "superseded_reason": "",
+          "path": ".opennori/architecture/decisions/dashboard-web-react-vite-tailwind-radix-motion.json"
         },
         {
           "id": "editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark",
@@ -3044,9 +3870,9 @@
       "build_vs_buy": {
         "status": "clear",
         "summary": "Every recorded build-vs-buy decision includes reviewable reuse candidates and any self-build reason.",
-        "decision_count": 12,
-        "total_decision_count": 12,
-        "superseded_decision_count": 0,
+        "decision_count": 14,
+        "total_decision_count": 15,
+        "superseded_decision_count": 1,
         "findings": []
       },
       "agent_surface": {

@@ -23,6 +23,12 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 
 `.opennori/agent-guide.md` is only a project-local supplementary guide. Do not depend on it for OpenNori discovery, and do not assume a fresh project has an Architecture Baseline or a current Nori Contract just because `.opennori/` directories exist.
 
+Subjective AC quality is an agent responsibility. The CLI can report objective
+state and may expose review surfaces, but it must not be treated as an oracle
+for whether AC are human-acceptable. When the user asks whether AC are good
+enough, route to `nori-acceptance` and reason from the user's goal, visible
+entrypoints, operations, outcomes, evidence needs, and boundaries.
+
 ## Start Here
 
 1. Identify the project root from the current workspace or the user's explicit path.
@@ -44,6 +50,7 @@ CLI JSON may include `data.agent_next`. Treat it as the deterministic routing su
 ## Natural-Language Mapping
 
 - "Use OpenNori for this goal", "turn this into AC", "the AC is wrong", "brainstorm first" -> hand off to `nori-acceptance`.
+- "Are these AC good enough", "this AC is too vague", "the goal is broad", or visible AC text lacks concrete user judgment -> hand off to `nori-acceptance`; do not wait for `opennori check` to flag it.
 - "验收标准用中文", "用中文写 Nori Contract", "write the AC in English", or any explicit Contract language request -> carry that preference to `nori-acceptance`; the child Skill records it as Contract presentation, not as Product AC.
 - "把现有契约改成中文/英文" -> hand off to `nori-acceptance`; changing an approved/current Contract language requires explicit user approval and must not happen as an automatic status/report side effect.
 - If the user already stated the goal before initialization, do not ask them to repeat it after `opennori init`; continue acceptance discovery for that stated goal.
@@ -99,6 +106,7 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not continue a half-installed mode when Plugin discovery, packaged Skills, CLI access, or `.opennori` state is missing; route to project health and recover the missing piece.
 - Do not present candidate goals as approved AC, evidence, phases, or task lists.
 - Do not answer confidently complete while required AC evidence, blocking profile items, architecture challenges, evidence health, or acceptance review risks remain unresolved or unaccepted.
+- Do not outsource AC quality judgment to CLI heuristics. The agent must inspect AC wording and ask the user the missing acceptance questions when the human judgment surface is vague.
 - Do not turn architecture, profile, build-vs-buy, Plugin, hook, or tool preferences into Product AC.
 - Do not treat dashboard activity, events, or snapshots as acceptance evidence.
 - Do not treat dashboard as a place for confirmation buttons or state-changing controls.

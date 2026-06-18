@@ -291,7 +291,7 @@ export function agentNextForRecommendation(
       recommendedSkill,
       summary: recommendation.summary,
       instruction: isAcceptanceReview
-        ? "Do not claim confident completion yet. Show the acceptance_review findings, ask the concrete missing acceptance questions, and revise the affected criteria or record explicit user-approved assumptions before evidence is treated as confidently complete."
+        ? "Do not claim confident completion yet. Explain the unresolved acceptance ambiguity, ask the concrete missing acceptance questions, and revise the affected criteria or record explicit user-approved assumptions before evidence is treated as confidently complete."
         : "Report objective completion separately from review risks and ask the user whether the remaining risk is acceptable.",
       userVisibleNext: recommendation.actions[0] ?? "Review completion risks before accepting the result.",
       goalId,

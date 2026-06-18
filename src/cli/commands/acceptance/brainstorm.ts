@@ -72,7 +72,7 @@ export async function runBrainstormCommand(rawArgs: string[]) {
 export const discoverCommand = defineCommand({
   meta: {
     name: "discover",
-    description: "Discover underspecified acceptance gaps before drafting a Nori Contract."
+    description: "Create a non-authoritative acceptance question source before drafting a Nori Contract."
   },
   args: {
     root: rootArg,

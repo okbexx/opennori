@@ -537,7 +537,7 @@ test("brainstorm command module creates selectable directions without a contract
   assert.match(fs.readFileSync(brainstorm.data.markdown_path, "utf8"), /不是计划、Nori Contract 或完成证据/);
 });
 
-test("discover command module finds acceptance gaps without creating an current goal", async () => {
+test("discover command module writes a question source without creating a current goal", async () => {
   const root = tempRoot();
   const discovery = await runDiscoverCommand([
     "--root", root,
@@ -552,15 +552,8 @@ test("discover command module finds acceptance gaps without creating an current 
   assert.equal(fs.existsSync(discovery.data.discovery_path), true);
   assert.equal(fs.existsSync(discovery.data.markdown_path), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "current")), false);
-  const gapIds = discovery.data.gaps.map((gap) => gap.id);
-  assert.equal(gapIds.includes("missing-user-entry"), true);
-  assert.equal(gapIds.includes("missing-field-scope"), true);
-  assert.equal(gapIds.includes("missing-validation-rule"), true);
-  assert.equal(gapIds.includes("missing-success-signal"), true);
-  assert.equal(gapIds.includes("missing-failure-case"), true);
-  assert.equal(gapIds.includes("missing-out-of-scope-boundary"), true);
-  assert.equal(gapIds.includes("missing-review-method"), true);
-  assert.equal(gapIds.includes("missing-persistence-scope"), false);
+  assert.equal(discovery.data.gaps.length > 0, true);
+  assert.equal(discovery.data.gaps.every((gap) => typeof gap.question === "string" && gap.question.length > 0), true);
   assert.equal(discovery.artifacts.some((artifact) => artifact.kind === "acceptance_discovery"), true);
   assert.match(fs.readFileSync(discovery.data.markdown_path, "utf8"), /不是 Nori Contract、过程计划或完成证据/);
 });

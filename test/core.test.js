@@ -5,7 +5,6 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { test } from "vitest";
-import { reviewAcceptanceQuality } from "../src/acceptance.ts";
 import { buildContractFromBrief, buildEvidenceLedger, renderAcceptanceMarkdown, validateContract } from "../src/core.ts";
 import { validateSchema } from "../src/validation.ts";
 
@@ -475,7 +474,7 @@ test("brainstorm creates selectable acceptance directions, not a process plan", 
   assert.equal(draft.data.criteria.every((criterion) => criterion.user_story.startsWith("作为用户")), true);
 });
 
-test("discover finds underspecified acceptance gaps before draft", () => {
+test("discover writes a non-contract question source before draft", () => {
   const root = tempRoot();
   const discovery = run([
     "discover",
@@ -491,15 +490,9 @@ test("discover finds underspecified acceptance gaps before draft", () => {
   assert.equal(fs.existsSync(discovery.data.markdown_path), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "active")), false);
 
-  const gapIds = discovery.data.gaps.map((gap) => gap.id);
-  assert.equal(gapIds.includes("missing-field-scope"), true);
-  assert.equal(gapIds.includes("missing-validation-rule"), true);
-  assert.equal(gapIds.includes("missing-success-signal"), true);
-  assert.equal(gapIds.includes("missing-persistence-scope"), false);
-  assert.equal(gapIds.includes("missing-failure-case"), true);
-  assert.equal(gapIds.includes("missing-out-of-scope-boundary"), true);
-  assert.equal(discovery.data.gaps.some((gap) => /哪些具体字段/.test(gap.question)), true);
-  assert.equal(discovery.data.gaps.some((gap) => /有效规则/.test(gap.question)), true);
+  assert.equal(discovery.data.gaps.length > 0, true);
+  assert.equal(discovery.data.gaps.every((gap) => typeof gap.question === "string" && gap.question.length > 0), true);
+  assert.equal(discovery.data.gaps.every((gap) => ["must-answer", "can-default"].includes(gap.priority)), true);
 
   const text = fs.readFileSync(discovery.data.markdown_path, "utf8");
   assert.match(text, /验收发现/);
@@ -581,15 +574,6 @@ test("discovery answers draft specific user-facing acceptance criteria", () => {
   assert.match(joined, /刷新页面/);
   assert.match(joined, /网络失败/);
   assert.match(joined, /保留表单中的用户输入/);
-
-  const check = run([
-    "check",
-    "--acceptance", draft.data.acceptance_path,
-    "--evidence", draft.data.evidence_path,
-    "--json"
-  ]);
-  assert.equal(check.data.acceptance_review.status, "clear");
-  assert.equal(check.warnings.some((warning) => warning.type === "acceptance_review"), false);
 });
 
 test("Nori Profile records required skills and blocks completion until satisfied", () => {
@@ -1286,7 +1270,9 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(acceptanceAsset, /already stated a goal/);
   assert.match(acceptanceAsset, /ask for the goal only when it is missing/);
   assert.match(acceptanceAsset, /ACCEPTANCE-BASIS/);
-  assert.match(acceptanceAsset, /generic starting point/);
+  assert.match(acceptanceAsset, /AC quality is a Skill responsibility/);
+  assert.match(acceptanceAsset, /scratch question source/);
+  assert.match(acceptanceAsset, /do not treat its gap ids or wording as\s+authoritative/);
 
   const evidenceAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-evidence", "SKILL.md"), "utf8");
   assert.match(evidenceAsset, /Do not force evidence into a fixed adapter taxonomy/);
@@ -1409,7 +1395,6 @@ test("public JSON Schemas validate persisted OpenNori state and separate structu
   evidence.contract.criteria[0].user_story = "Implementation detail only";
   assert.equal(validateSchema("evidence-payload", evidence).valid, true);
   assert.equal(validateContract(evidence.contract, evidence.ledger).some((issue) => issue.path === "criteria[0].user_story"), false);
-  assert.equal(reviewAcceptanceQuality(evidence.contract).status, "needs-user-review");
 });
 
 test("install creates project assets and skips existing user content by default", () => {
@@ -2509,116 +2494,20 @@ test("criterion add preserves contract and ledger consistency", () => {
   assert.match(duplicatePayload.error.message, /Criterion already exists/);
 });
 
-test("check reviews possible implementation details without rejecting the contract", () => {
-  const root = tempRoot();
-  const reviewBrief = path.join(root, "review.json");
-  fs.writeFileSync(reviewBrief, JSON.stringify({
-    goal_id: "review",
-    goal: "Review example",
-    criteria: [
-      {
-        id: "AC-1",
-        user_story: "作为用户，我能看到 evidence.json 文件。",
-        measurement: "检查文件",
-        threshold: "文件存在"
-      }
-    ]
-  }));
-
-  const payload = run(["draft", "--brief", reviewBrief, "--root", root, "--json"]);
-  assert.equal(payload.ok, true);
-
-  const check = run([
-    "check",
-    "--acceptance", payload.data.acceptance_path,
-    "--evidence", payload.data.evidence_path,
-    "--json"
-  ]);
-  assert.equal(check.ok, true);
-  assert.equal(check.data.acceptance_review.status, "needs-user-review");
-  assert.equal(check.warnings.some((warning) => warning.type === "acceptance_review" && warning.gap_id === "possible-implementation-detail"), true);
-  assert.equal(check.warnings.some((warning) => /技术词是否是用户实际会看到/.test(warning.message)), true);
-});
-
-test("check reviews weak measurement and threshold semantics without hard failure", () => {
-  const reviewRoot = tempRoot();
-  const reviewBrief = path.join(reviewRoot, "review-quality.json");
-  fs.writeFileSync(reviewBrief, JSON.stringify({
-    goal_id: "review-quality",
-    goal: "Review quality example",
-    criteria: [
-      {
-        id: "AC-1",
-        user_story: "作为用户，我能知道功能已经完成。",
-        measurement: "测试通过",
-        threshold: "字段存在"
-      }
-    ]
-  }));
-
-  const reviewPayload = run(["draft", "--brief", reviewBrief, "--root", reviewRoot, "--json"]);
-  assert.equal(reviewPayload.ok, true);
-  const reviewCheck = run([
-    "check",
-    "--acceptance", reviewPayload.data.acceptance_path,
-    "--evidence", reviewPayload.data.evidence_path,
-    "--json"
-  ]);
-  assert.equal(reviewCheck.data.acceptance_review.status, "needs-user-review");
-  assert.equal(reviewCheck.warnings.some((warning) => warning.gap_id === "measurement-review-method-unclear"), true);
-  assert.equal(reviewCheck.warnings.some((warning) => warning.gap_id === "threshold-user-outcome-unclear"), true);
-  assert.equal(reviewCheck.warnings.some((warning) => warning.gap_id === "implementation-only-completion-signal"), true);
-
-  const goodRoot = tempRoot();
-  const goodBrief = path.join(goodRoot, "good-quality.json");
-  fs.writeFileSync(goodBrief, JSON.stringify({
-    goal_id: "good-quality",
-    goal: "Good quality example",
-    criteria: [
-      {
-        id: "AC-1",
-        user_story: "作为用户，我运行 opennori report 后，能判断当前任务是否完成。",
-        measurement: "运行 opennori report 并查看 completion、current_gap 和 evidence summary。",
-        threshold: "报告显示完成状态、当前缺口和可复查证据；用户不需要阅读实现说明。"
-      }
-    ]
-  }));
-
-  const goodPayload = run(["draft", "--brief", goodBrief, "--root", goodRoot, "--json"]);
-  assert.equal(goodPayload.ok, true);
-  assert.equal(goodPayload.data.current_gap.id, "ACCEPTANCE-BASIS");
-});
-
-test("drafted generic goals keep acceptance discovery questions visible", () => {
+test("drafted generic goals stay blocked on acceptance approval", () => {
   const root = tempRoot();
   const draft = run(["draft", "--goal", "Ship a settings page where users edit profile details", "--root", root, "--json"]);
   assert.equal(draft.ok, true);
   assert.match(draft.data.acceptance_basis.summary, /generic acceptance discovery/);
-
-  const check = run([
-    "check",
-    "--acceptance", draft.data.acceptance_path,
-    "--evidence", draft.data.evidence_path,
-    "--json"
-  ]);
-  assert.equal(check.ok, true);
-  assert.equal(check.data.acceptance_review.status, "needs-user-review");
-  const gapIds = check.data.acceptance_review.findings.map((finding) => finding.gap_id);
-  assert.equal(gapIds.includes("missing-user-entry"), true);
-  assert.equal(gapIds.includes("missing-field-scope"), true);
-  assert.equal(gapIds.includes("missing-validation-rule"), true);
-  assert.equal(gapIds.includes("missing-success-signal"), true);
-  assert.equal(gapIds.includes("missing-failure-case"), true);
-  assert.equal(gapIds.includes("missing-out-of-scope-boundary"), true);
-  assert.equal(gapIds.includes("missing-review-method"), true);
-  assert.equal(check.warnings.some((warning) => warning.type === "acceptance_review" && warning.criterion_id === "ACCEPTANCE-BASIS"), true);
+  assert.equal(draft.data.acceptance_basis.status, "draft");
+  assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
 });
 
-test("check audits existing current contracts for underspecified acceptance quality without rewriting history", () => {
-  const weakRoot = tempRoot();
-  const weakBrief = path.join(weakRoot, "weak-contract.json");
-  fs.writeFileSync(weakBrief, JSON.stringify({
-    goal_id: "weak-contract",
+test("check does not rewrite existing contracts while reporting objective state", () => {
+  const root = tempRoot();
+  const brief = path.join(root, "existing-contract.json");
+  fs.writeFileSync(brief, JSON.stringify({
+    goal_id: "existing-contract",
     goal: "Settings page",
     acceptance_basis: { status: "approved", summary: "Existing project contract." },
     criteria: [
@@ -2631,117 +2520,14 @@ test("check audits existing current contracts for underspecified acceptance qual
     ]
   }));
 
-  const init = run(["draft", "--brief", weakBrief, "--root", weakRoot, "--json"]);
+  const init = run(["draft", "--brief", brief, "--root", root, "--json"]);
   const before = fs.readFileSync(init.data.evidence_path, "utf8");
-  const check = run([
-    "check",
-    "--acceptance", init.data.acceptance_path,
-    "--evidence", init.data.evidence_path,
-    "--json"
-  ]);
+  const check = run(["check", "--acceptance", init.data.acceptance_path, "--evidence", init.data.evidence_path, "--json"]);
   const after = fs.readFileSync(init.data.evidence_path, "utf8");
 
   assert.equal(check.ok, true);
-  assert.equal(check.data.acceptance_review.status, "needs-user-review");
-  assert.equal(check.warnings.some((warning) => warning.gap_id === "missing-field-scope"), true);
-  assert.equal(check.warnings.some((warning) => warning.gap_id === "missing-validation-rule"), true);
-  assert.equal(check.warnings.some((warning) => warning.gap_id === "missing-success-signal"), true);
-  assert.equal(check.warnings.some((warning) => warning.gap_id === "missing-failure-case"), true);
-  assert.equal(check.next_actions.some((action) => /acceptance_review/.test(action)), true);
+  assert.equal(check.data.acceptance_review.status, "clear");
+  assert.equal(check.warnings.some((warning) => warning.type === "acceptance_review"), false);
+  assert.equal(check.data.architecture_check.status, "needs-action");
   assert.equal(after, before);
-
-  const goodRoot = tempRoot();
-  const goodBrief = path.join(goodRoot, "specific-contract.json");
-  fs.writeFileSync(goodBrief, JSON.stringify({
-    goal_id: "specific-contract",
-    goal: "Settings page",
-    acceptance_basis: { status: "approved", summary: "Specific project contract." },
-    criteria: [
-      {
-        id: "AC-1",
-        user_story: "作为用户，我打开设置页后，能修改昵称、头像和简介，保存成功后看到成功反馈。",
-        measurement: "打开设置页，修改昵称、头像和简介，检查昵称必填、简介长度、头像文件类型和大小，点击保存，并查看报告或截图。",
-        threshold: "报告显示保存成功，刷新后昵称、头像和简介仍然存在；网络失败时保留原值并显示网络错误；邮箱和手机号本轮不在范围。"
-      }
-    ]
-  }));
-
-  const goodPayload = run(["draft", "--brief", goodBrief, "--root", goodRoot, "--json"]);
-  const goodCheck = run([
-    "check",
-    "--acceptance", goodPayload.data.acceptance_path,
-    "--evidence", goodPayload.data.evidence_path,
-    "--json"
-  ]);
-  assert.equal(goodCheck.data.acceptance_review.status, "clear");
-  assert.equal(goodCheck.warnings.some((warning) => warning.type === "acceptance_review"), false);
-  assert.equal(goodCheck.data.architecture_check.status, "needs-action");
-});
-
-test("check routes abstract product acceptance criteria back to acceptance discovery", () => {
-  const root = tempRoot();
-  const brief = path.join(root, "abstract-product-contract.json");
-  fs.writeFileSync(brief, JSON.stringify({
-    goal_id: "abstract-product-contract",
-    goal: "Ship a project workbench",
-    acceptance_basis: { status: "approved", summary: "User approved broad product contract." },
-    criteria: [
-      {
-        id: "AC-1",
-        user_story: "作为用户，我选择一个项目后，能看到这个项目的整体情况，而不是只看到单一能力列表或文件列表。",
-        measurement: "选择已初始化项目后，查看项目概览和右侧详情。",
-        threshold: "界面展示项目身份、路径、更新时间、仓库或环境绑定摘要、健康状态、索引状态、最近事件和下一步建议。"
-      },
-      {
-        id: "AC-2",
-        user_story: "作为用户，我能在工作台中查看项目的长期资产，长期包括多种资产类型。",
-        measurement: "在项目资产视图中查看 Markdown 文档和 HTML 原型。",
-        threshold: "每个资产能追溯来源、版本和状态。"
-      },
-      {
-        id: "AC-3",
-        user_story: "作为用户，我能看到项目记忆和历史事件，理解这个项目之前发生过什么、哪些结论或上下文值得后续 agent 复用。",
-        measurement: "查看项目记忆、时间线、上下文包、决策、约束或相关长期记录的入口和详情。",
-        threshold: "这些记忆不是只存在于一次 agent 对话里，并能关联来源资产或事件。"
-      },
-      {
-        id: "AC-4",
-        user_story: "作为用户，当 agent 操作项目后，我能回到工作台看到明确的结果变化和可追溯证据。",
-        measurement: "让 agent 更新资产、记忆、知识候选、能力记录或索引后，刷新项目视图。",
-        threshold: "工作台展示新增或更新的对象、时间线事件、审计信息和下一步建议。"
-      }
-    ]
-  }));
-
-  const draft = draftAndApprove(["--brief", brief, "--root", root, "--json"], {
-    summary: "User approved broad product contract."
-  });
-  const payload = JSON.parse(fs.readFileSync(draft.data.evidence_path, "utf8"));
-  for (const criterion of Object.keys(payload.ledger.criteria)) {
-    run([
-      "evidence", "add",
-      "--root", root,
-      "--criterion", criterion,
-      "--kind", "test-summary",
-      "--summary", `${criterion} has passing evidence, but the AC wording remains broad.`,
-      "--result", "passing",
-      "--source-command", "npm run check",
-      "--reviewability", "Reviewer can inspect the workbench screen and the OpenNori report.",
-      "--limitations", "The fixture intentionally uses broad product nouns to exercise acceptance review.",
-      "--json"
-    ]);
-  }
-
-  const check = run(["check", "--root", root, "--json"]);
-  assert.equal(check.data.workflow_status, "complete");
-  assert.equal(check.data.acceptance_review.status, "needs-user-review");
-  const gapIds = check.data.acceptance_review.findings.map((finding) => finding.gap_id);
-  assert.equal(gapIds.includes("broad-overview-scope"), true);
-  assert.equal(gapIds.includes("asset-scope-underspecified"), true);
-  assert.equal(gapIds.includes("memory-context-scope"), true);
-  assert.equal(gapIds.includes("result-change-scope"), true);
-  assert.equal(check.data.agent_next.state, "completion_needs_review");
-  assert.equal(check.data.agent_next.recommended_skill, "nori-acceptance");
-  assert.match(check.data.agent_next.instruction, /acceptance_review/);
-  assert.equal(check.next_actions.some((action) => /nori-acceptance/.test(action)), true);
 });
