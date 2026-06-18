@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-18T13:53:20.311Z",
+  "updated_at": "2026-06-18T15:18:36.086Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -322,6 +322,17 @@
         "summary": "Complete product acceptance expansion is implemented in packaged Skill behavior, local development Skills, protocol, README, website, and objective asset tests while keeping subjective AC quality out of CLI hard validators.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/ac-o-12-full-product-acceptance-surface.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "ac-o-13-autogoal-coverage-self-check",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-O-13",
+        "status": "aligned",
+        "summary": "Complete-product autogoal coverage self-check is implemented in packaged Skills, local development Skills, protocol, README, website, and objective asset tests without adding CLI subjective validators.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/ac-o-13-autogoal-coverage-self-check.json",
         "schema_valid": true,
         "schema_errors": []
       },

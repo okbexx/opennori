@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "ac-o-13-autogoal-coverage-self-check",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-O-13",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Complete-product autogoal coverage self-check is implemented in packaged Skills, local development Skills, protocol, README, website, and objective asset tests without adding CLI subjective validators.",
+  "fit": "Aligned with the TypeScript agent-state CLI baseline: Skills perform subjective coverage review and split broad user judgment surfaces; CLI remains a deterministic draft/state layer.",
+  "implementation_focus": "Packaged and local Skills now require coverage maps before complete-product draft approval; docs/site explain the behavior; tests verify asset coverage without judging natural-language quality.",
+  "evidence": "plugins/opennori/skills/nori/SKILL.md; plugins/opennori/skills/nori-acceptance/SKILL.md; plugins/opennori/skills/nori-autogoal/SKILL.md; README.md; .opennori/protocol.md; test/core.test.js; /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+  "limitations": "This ensures OpenNori capability assets instruct agents to self-check coverage. It does not hard-code AC quality scoring in the CLI and future behavior still depends on the loaded Skill and user approval.",
+  "created_at": "2026-06-18T15:11:57.988Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}
