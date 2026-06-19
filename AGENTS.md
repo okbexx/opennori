@@ -16,12 +16,15 @@ The user-facing install shape is:
 - `npx opennori setup` for first-time machine setup of the complete bundle.
 - `opennori init` for project-local `.opennori/` initialization after setup.
 - `opennori plugin sync` for local development or recovery when the installed Codex Plugin cache is stale.
+- `opennori plugin sync --local --confirm` for applying this source checkout's packaged Skills to the local Codex Plugin cache after a preview.
 
 Do not present manual `codex plugin ...`, `npm install -g ...`, or
 `opennori bootstrap` as parallel main user paths. They may exist only as
 advanced recovery implementation details behind OpenNori lifecycle commands.
 
 Do not implement project-local Skill copying, Skill Pack install/sync, or `.agents/skills` as product behavior. The product goal is for a user agent to get OpenNori through Codex Plugin/Skill discovery, then use the CLI only as the deterministic state layer. If Plugin discovery, packaged Skills, CLI access, or `.opennori` state is missing, route through doctor/project-health and recover the missing bundle part instead of continuing a half-installed workflow.
+
+Local packaged Skill changes must reach this machine by refreshing the Codex Plugin cache, not by manually copying `plugins/opennori/skills/nori*` into `/Users/jarl/code/jarlone/.agents/skills`, a user project `.agents/skills`, or any other repo-local Skill directory. For source checkout development, preview with `opennori plugin sync --local`, apply with `opennori plugin sync --local --confirm`, then open a new Codex session so the synced Plugin Skills are loaded.
 
 For agent routing, prefer CLI JSON `data.agent_next` over project-local prose files. `.opennori/agent-guide.md` may summarize project state, but it is not OpenNori's discovery mechanism and must not carry critical Skill behavior.
 

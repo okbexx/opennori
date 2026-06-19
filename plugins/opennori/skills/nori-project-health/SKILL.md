@@ -22,7 +22,7 @@ A fresh `opennori init` normally creates empty `.opennori/current`, `.opennori/d
 1. Run `opennori doctor --root <repo> --json` when the project may already use OpenNori.
 2. Run `opennori init --root <repo> --json` when the machine already has OpenNori and only project `.opennori` state is missing.
 3. Run `npx opennori setup` for first-time machine setup, missing global CLI, missing Codex Plugin discovery, missing packaged Skills, or unclear bundle readiness.
-4. Run `opennori plugin sync --json` when the installed Codex Plugin cache is stale but project `.opennori` state should not be touched; use `--local` only for source-checkout development.
+4. Run `opennori plugin sync --json` when the installed Codex Plugin cache is stale but project `.opennori` state should not be touched; use `opennori plugin sync --local --json` for source-checkout development, then `opennori plugin sync --local --confirm --json` only after the user confirms the preview.
 5. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, damaged current state, or legacy `.opennori/active` state, present the missing bundle part and the recovery action. When safe_next_command exists, run that preview first.
 6. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no approved current contract, then hand off to `nori-acceptance`.
 7. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, syncs plugin cache, or deletes state.
@@ -35,6 +35,7 @@ Useful state commands:
 - `npx opennori setup --confirm`
 - `opennori plugin sync --json`
 - `opennori plugin sync --confirm --json`
+- `opennori plugin sync --local --json`
 - `opennori plugin sync --local --confirm --json`
 - `opennori init --root <repo> --json`
 - `opennori init --root <repo> --confirm --json`
@@ -52,7 +53,7 @@ Useful state commands:
 ## Natural-Language Mapping
 
 - "Install OpenNori" or "set up OpenNori on this machine" -> setup preview, then confirm only after the user approves.
-- "Sync the local OpenNori plugin", "Codex Plugin cache is stale", or "local plugin should be latest" -> `opennori plugin sync --json`, then confirm only after the user approves. Use `--local` only when syncing from the current source checkout.
+- "Sync the local OpenNori plugin", "Codex Plugin cache is stale", or "local plugin should be latest" -> `opennori plugin sync --json`, then confirm only after the user approves. When the user is developing from the current OpenNori source checkout, use `opennori plugin sync --local --json` for the preview and `opennori plugin sync --local --confirm --json` after approval.
 - "Initialize OpenNori in this project" -> init preview, then confirm only after the user approves.
 - "Is OpenNori healthy" -> doctor and summarize ready, needs-action, or broken with recovery actions.
 - "The CLI works but Plugin/Skills are missing" or "Plugin is installed but .opennori is missing" -> diagnose bundle readiness and recover the missing part instead of treating the remainder as a separate user path.
@@ -111,7 +112,7 @@ Confirm initialization?
 
 ## Misuse Guards
 
-- Do not copy OpenNori Skills into the user project; packaged Plugin Skills are the agent discovery surface.
+- Do not copy OpenNori Skills into the user project, `/Users/jarl/code/jarlone/.agents/skills`, or any repo-local `.agents/skills`; packaged Plugin Skills are the agent discovery surface, and local Skill updates must go through plugin sync.
 - Do not present Plugin, Skills, CLI, or `.opennori` state as separate install choices; recover bundle readiness.
 - Do not continue in a half-installed state without surfacing the missing bundle part and a recovery action.
 - Do not treat empty `.opennori/current` or `.opennori/drafts` as broken after fresh init; no current contract is an acceptance-start state, not a repair state.
