@@ -7,7 +7,8 @@ import {
   Radio,
   RefreshCw,
   Terminal,
-  X
+  X,
+  Compass
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -305,42 +306,161 @@ export default function App() {
                   selectedNodeId={selectedNode?.id || null}
                 />
 
-                {/* 2. 简体中文：悬浮的 Co-Pilot 协同引导舱 */}
-                {snapshot?.need_user ? (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    className="absolute left-6 bottom-6 z-20 max-w-sm rounded-lg border border-[#fbbf24]/30 bg-[#121008]/85 p-4 shadow-2xl backdrop-blur-md"
-                  >
-                    <div className="flex items-start gap-2.5">
-                      <div className="grid h-6 w-6 place-items-center rounded bg-[#fbbf24]/20 text-[#fbbf24] font-bold text-xs">
-                        i
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <strong className="block text-sm font-semibold text-[#fde68a]">Co-Pilot Guide Boundary</strong>
-                        <p className="mt-1 text-xs leading-relaxed text-slate-300">
-                          {snapshot.user_action || "Waiting for user judgment in agent chat."}
-                        </p>
-                        <div className="mt-3 flex items-center gap-2 rounded border border-[#fbbf24]/20 bg-black/40 p-2">
-                          <code className="flex-1 truncate text-[10px] text-[#fbbf24]">
-                            {suggestedAgentReply}
-                          </code>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(suggestedAgentReply)}
-                            className="text-slate-400 hover:text-[#fbbf24] transition-colors"
-                            title="Copy agent reply"
-                          >
-                            {copied ? <Check size={14} /> : <Copy size={14} />}
-                          </button>
+                {/* 2. 简体中文：左侧悬浮式多维验收决策舱 (Acceptance Telemetry HUD Deck) */}
+                {snapshot && (
+                  <div className="absolute left-4 top-4 bottom-4 z-20 w-[min(340px,calc(100vw-2rem))] overflow-y-auto scrollbar-hover-visible flex flex-col gap-3 pointer-events-auto pr-1">
+                    {/* A. GOAL & DIRECTIVE 舱 */}
+                    {snapshot.goal && (
+                      <div className="rounded-lg border-l-[3.5px] border-l-[#00f0ff] border border-[rgba(0,240,255,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
+                        <div className="absolute top-0 right-0 px-2 py-0.5 bg-[rgba(0,240,255,0.06)] text-[8px] font-mono tracking-widest text-[#00f0ff]/80 border-b border-l border-[rgba(0,240,255,0.08)] rounded-bl">
+                          SYS.DIRECTIVE / GOAL
                         </div>
-                        <span className="mt-2 block text-[10px] text-slate-400 leading-normal">
-                          Actions cannot be executed on Dashboard. Please reply in agent chat.
+
+                        <div className="flex items-center gap-1.5 mb-1.5 flex-wrap mt-2.5">
+                          <span className="inline-flex items-center gap-1 rounded bg-[#00f0ff]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#00f0ff]">
+                            GOAL_ID: {snapshot.goal.id}
+                          </span>
+                          <span className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[9px] font-mono font-bold ${snapshot.goal.workflow_status === "complete" ? "bg-[#34d399]/10 text-[#34d399]" : "bg-[#fbbf24]/10 text-[#fbbf24]"}`}>
+                            STATUS: {snapshot.goal.workflow_status.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex items-start gap-1.5 mt-1">
+                          <div className="mt-0.5 text-[#00f0ff] shrink-0">
+                            <Compass size={13} />
+                          </div>
+                          <h2 className="text-[11px] font-bold leading-relaxed tracking-wide text-slate-200 break-words">
+                            {snapshot.goal.label}
+                          </h2>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* B. AGENT ACTIVITY 舱 */}
+                    <div className="rounded-lg border-l-[3.5px] border-l-[#34d399] border border-[rgba(52,211,153,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="inline-flex items-center gap-1 rounded bg-[#34d399]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#34d399]">
+                          AGENT ACTIVITY
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 text-[8.5px] font-mono font-bold text-slate-400">
+                          <span className={`h-1.5 w-1.5 rounded-full ${
+                            snapshot.agent.state === "working" ? "bg-[#34d399] animate-spin" :
+                            snapshot.agent.state === "thinking" ? "bg-[#00f0ff] animate-ping" :
+                            snapshot.agent.state === "verifying" ? "bg-[#bd93f9] animate-pulse" :
+                            "bg-slate-600"
+                          }`} style={{ animationDuration: "3s" }} />
+                          {snapshot.agent.state.toUpperCase()}
                         </span>
                       </div>
+                      <p className="text-[11px] leading-relaxed text-slate-300">
+                        {snapshot.agent.summary || "No recent activity."}
+                      </p>
+                      {snapshot.current_gap && (
+                        <div className="mt-2 border-t border-slate-800/80 pt-1.5">
+                          <span className="block text-[8px] font-mono font-bold text-[#ff00a0] uppercase tracking-wider">🎯 LOCKED GAP (CURRENT AC)</span>
+                          <div className="flex items-center gap-1 text-[10px] text-slate-300 font-semibold mt-0.5">
+                            <span className="text-[#ff00a0] font-mono shrink-0">[{snapshot.current_gap.id}]</span>
+                            <span className="truncate">{snapshot.current_gap.label}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </motion.div>
-                ) : null}
+
+                    {/* C. ARCHITECTURE COMPLIANCE 舱 */}
+                    <div className="rounded-lg border-l-[3.5px] border-l-[#bd93f9] border border-[rgba(189,147,249,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="inline-flex items-center gap-1 rounded bg-[#bd93f9]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#bd93f9]">
+                          ARCHITECTURE COMPLIANCE
+                        </span>
+                        <span className={`inline-flex items-center gap-1.5 text-[8.5px] font-mono font-bold ${
+                          snapshot.architecture.decision === "approved" ? "text-[#34d399]" :
+                          snapshot.architecture.decision === "challenged" ? "text-rose-400 animate-pulse" :
+                          "text-[#fbbf24]"
+                        }`}>
+                          {snapshot.architecture.decision.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-slate-300 leading-normal flex flex-col gap-1">
+                        <div>
+                          <span className="text-slate-500 font-mono text-[8px] block">ACTIVE PROFILE</span>
+                          <strong className="text-slate-200 font-bold">{snapshot.architecture.profile_title || snapshot.architecture.profile || "none"}</strong>
+                        </div>
+                        {Number(snapshot.architecture.open_challenges || 0) > 0 && (
+                          <div className="mt-1 rounded bg-rose-500/10 border border-rose-500/20 p-1.5 text-[9px] text-rose-400 font-semibold flex items-center gap-1.5">
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-ping" />
+                            <span>{snapshot.architecture.open_challenges} ACTIVE ARCHITECTURE CHALLENGES</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* D. COMPLETION AUDITOR 舱 */}
+                    <div className="rounded-lg border-l-[3.5px] border-l-[#fbbf24] border border-[rgba(251,191,36,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="inline-flex items-center gap-1 rounded bg-[#fbbf24]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#fbbf24]">
+                          COMPLETION AUDITOR
+                        </span>
+                        <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.2 text-[8.5px] font-mono font-bold ${
+                          snapshot.completion?.complete ? "bg-[#34d399]/15 text-[#34d399]" : "bg-rose-500/15 text-rose-400"
+                        }`}>
+                          {snapshot.completion?.complete ? "READY" : "INCOMPLETE"}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-slate-300 leading-normal">
+                        <span className="text-slate-500 font-mono text-[8px] block">AUDIT DECISION</span>
+                        <p className="text-slate-200 font-medium italic mt-0.5">"{snapshot.completion?.answer || "Pending final criteria audit."}"</p>
+
+                        {snapshot.completion?.confidence && (
+                          <div className="mt-1.5 flex items-center justify-between text-[9px] font-mono border-t border-slate-800/80 pt-1.5">
+                            <span className="text-slate-500">CONFIDENCE:</span>
+                            <span className={`font-bold ${
+                              snapshot.completion.confidence === "confident" ? "text-[#34d399]" :
+                              snapshot.completion.confidence === "review-risk" ? "text-[#fbbf24] animate-pulse" :
+                              "text-rose-400"
+                            }`}>
+                              {snapshot.completion.confidence.toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+
+                        {snapshot.completion?.review_risks && snapshot.completion.review_risks.length > 0 && (
+                          <div className="mt-2 rounded bg-[#fbbf24]/8 border border-[#fbbf24]/15 p-1.5 text-[8.5px] text-[#fbbf24] leading-normal font-semibold">
+                            ⚠️ {snapshot.completion.review_risks.length} REVIEW RISKS PENDING JUDGMENT
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* E. CO-PILOT DECISION 舱 */}
+                    {snapshot.need_user && (
+                      <div className="rounded-lg border border-[#fbbf24]/30 bg-[#121008]/85 p-3 shadow-2xl backdrop-blur-md text-left">
+                        <div className="flex items-start gap-2.5">
+                          <div className="grid h-5 w-5 place-items-center rounded bg-[#fbbf24]/20 text-[#fbbf24] font-mono font-bold text-[10px] shrink-0 mt-0.5">
+                            !
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <strong className="block text-[11px] font-semibold text-[#fde68a]">Co-Pilot Decision Needed</strong>
+                            <p className="mt-1 text-[10px] leading-relaxed text-slate-300">
+                              {snapshot.user_action || "Waiting for user judgment in agent chat."}
+                            </p>
+                            <div className="mt-2.5 flex items-center gap-2 rounded border border-[#fbbf24]/20 bg-black/40 p-1.5">
+                              <code className="flex-1 truncate text-[9px] text-[#fbbf24]">
+                                {suggestedAgentReply}
+                              </code>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(suggestedAgentReply)}
+                                className="text-slate-400 hover:text-[#fbbf24] transition-colors shrink-0"
+                                title="Copy reply command"
+                              >
+                                {copied ? <Check size={12} /> : <Copy size={12} />}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

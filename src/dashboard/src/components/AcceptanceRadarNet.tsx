@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { Activity, Compass, Cpu } from "lucide-react";
 import type { EvidenceRecord, NoriSnapshot } from "../types";
 
 /* 简体中文：定义节点类型以方便统一处理 */
@@ -13,6 +12,7 @@ export type RadarNode = {
   y: number;
   status: string;
   rawData: unknown;
+  radius?: number; /* 简体中文：增加可选的半径以支持每个节点个性化大小 */
 };
 
 type RadarLink = {
@@ -128,16 +128,16 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
     const passedAc = acList.filter((ac) => isPassed(ac.status));
     const unpassedAc = acList.filter((ac) => !isPassed(ac.status));
     const unpassedCount = unpassedAc.length;
+    const hasPassedGroup = passedAc.length > 0;
 
-    // 简体中文：根据物理尺寸动态自适应拉伸半径，彻底解决大屏幕空洞、小屏幕贴边问题
-    // 如果无未通过分支，Passed 节点与 Goal 的半径拉大至 baseSize * 0.38
-    const r1 = unpassedCount === 0 ? baseSize * 0.38 : baseSize * 0.26;
-    const r2 = baseSize * 0.42;
+    // 依据未通过节点数动态缩放 AC 圆圈大小，防节点多时拥挤
+    const acRadius = unpassedCount > 8 ? 26 : 34;
 
     // A. 简体中文：在左侧渲染单一大型 Passed 成功聚合节点，合并所有成功用例
-    if (passedAc.length > 0) {
+    if (hasPassedGroup) {
       const passedNodeId = "passed-group";
-      const passedX = centerX - r1; // 固定在正左侧 (angle = Math.PI)
+      const passedR = baseSize * 0.30; // 聚合球置于中轨，拉开间距
+      const passedX = centerX - passedR; // 固定在正左侧 (angle = Math.PI)
       const passedY = centerY;
 
       nodes.push({
@@ -148,6 +148,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
         x: passedX,
         y: passedY,
         status: "passed_group",
+        radius: 40,
         rawData: {
           title: "Passed Acceptance Criteria List",
           description: "All criteria that have already satisfied the acceptance conditions.",
@@ -176,21 +177,29 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
       });
     }
 
-    // B. 简体中文：在右侧弧形扇区舒展呈放未通过或验证中的 AC 节点
+    // B. 简体中文：在右侧大弧形扇区（若无Passed则全环）舒展交错排布未通过 AC 节点
     if (unpassedCount > 0) {
-      // 限制在右侧扇区，角度从 -Math.PI / 2.5 到 Math.PI / 2.5 (即围绕 0 弧度左右扩展)
-      const sectorStart = -Math.PI / 2.5;
-      const sectorEnd = Math.PI / 2.5;
-      const sectorRange = sectorEnd - sectorStart;
-
       unpassedAc.forEach((ac, acIdx) => {
-        let theta = 0; // 如果只有 1 个未通过，角度固定在正右侧
-        if (unpassedCount > 1) {
-          theta = sectorStart + (sectorRange * acIdx) / (unpassedCount - 1);
+        let theta = 0;
+        if (hasPassedGroup) {
+          // 245度超宽弧形扇区：自 -Math.PI * 0.68 至 Math.PI * 0.68，彻底扩展侧边可用空间
+          const sectorStart = -Math.PI * 0.68;
+          const sectorEnd = Math.PI * 0.68;
+          const sectorRange = sectorEnd - sectorStart;
+          theta = unpassedCount > 1
+            ? sectorStart + (sectorRange * acIdx) / (unpassedCount - 1)
+            : 0;
+        } else {
+          // 空载（无Passed）时，360度全环平铺
+          theta = (acIdx / unpassedCount) * Math.PI * 2;
         }
 
-        const acX = centerX + r1 * Math.cos(theta);
-        const acY = centerY + r1 * Math.sin(theta);
+        // 双轨交错：奇数项分配到外轨道，偶数项分配到内轨道，相邻节点错落在不同半径线上
+        const isOuter = acIdx % 2 === 1;
+        const currentAcR = isOuter ? baseSize * 0.35 : baseSize * 0.24;
+
+        const acX = centerX + currentAcR * Math.cos(theta);
+        const acY = centerY + currentAcR * Math.sin(theta);
         const acNodeId = `ac-${ac.id}`;
 
         nodes.push({
@@ -200,6 +209,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
           x: acX,
           y: acY,
           status: ac.status,
+          radius: acRadius,
           rawData: ac
         });
 
@@ -227,8 +237,11 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
               phi = theta - evSectorWidth / 2 + fraction * evSectorWidth;
             }
 
-            const evX = centerX + r2 * Math.cos(phi);
-            const evY = centerY + r2 * Math.sin(phi);
+            // Evidence 节点半径也交错外推，与 AC 的层级保持呼应，彻底拉开空间
+            const evR = isOuter ? baseSize * 0.46 : baseSize * 0.40;
+
+            const evX = centerX + evR * Math.cos(phi);
+            const evY = centerY + evR * Math.sin(phi);
             const evNodeId = `ev-${ac.id}-${evIdx}`;
 
             nodes.push({
@@ -238,6 +251,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
               x: evX,
               y: evY,
               status: ev.result || "unknown",
+              radius: 18, // 更加精致紧凑的小卡点
               rawData: ev
             });
 
@@ -273,37 +287,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
           top: centerY - sweepSize / 2
         }}
       />
-      {/* 简体中文：将 Active Goal 作为绝对定位浮动指令舱（Core Mission Command Module）放在雷达左上角，使雷达大屏能向上撑满整块画布 */}
-      {hasGoal && (
-        <div className="absolute top-4 left-4 z-20 max-w-xs lg:max-w-md rounded-lg border-l-[3.5px] border-l-[#00f0ff] border border-[rgba(0,240,255,0.08)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
-          <div className="absolute top-0 right-0 px-2 py-0.5 bg-[rgba(0,240,255,0.06)] text-[8px] font-mono tracking-widest text-[#00f0ff]/80 border-b border-l border-[rgba(0,240,255,0.08)] rounded-bl">
-            SYS.DIRECTIVE / GOAL
-          </div>
 
-          <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
-            <span className="inline-flex items-center gap-1 rounded bg-[#00f0ff]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#00f0ff]">
-              <Cpu size={10} className={isAgentActive ? "animate-spin" : ""} style={{ animationDuration: "8s" }} />
-              GOAL_ID: {snapshot.goal?.id || "none"}
-            </span>
-            <span className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[9px] font-mono font-bold ${snapshot?.goal?.workflow_status === "complete" ? "bg-[#34d399]/10 text-[#34d399]" : "bg-[#fbbf24]/10 text-[#fbbf24]"}`}>
-              <Activity size={10} />
-              STATUS: {snapshot?.goal?.workflow_status?.toUpperCase() || "ACTIVE"}
-            </span>
-            <span className="text-[9px] text-slate-500 font-mono">
-              | PROTOCOL: snapshot-v1
-            </span>
-          </div>
-
-          <div className="flex items-start gap-2">
-            <div className="mt-0.5 text-[#00f0ff]/80 shrink-0">
-              <Compass size={14} />
-            </div>
-            <h2 className="text-xs font-semibold leading-relaxed tracking-wide text-slate-200 break-words">
-              {snapshot?.goal?.label || "No active Nori Contract loaded."}
-            </h2>
-          </div>
-        </div>
-      )}
 
       <svg
         className="loop-board relative z-10 select-none h-full w-full max-h-full max-w-full"
@@ -405,9 +389,11 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
         {nodes.map((node) => {
           const isSelected = selectedNodeId === node.id;
           const isPassedGroup = node.id === "passed-group";
+          const currentGapId = snapshot?.current_gap?.id || null;
+          const isCurrentGap = node.type === "ac" && currentGapId && node.id === `ac-${currentGapId}`;
 
-          // 简体中文：整体成倍放大节点半径，提升视觉存在感与可读性
-          const radius = node.type === "goal" ? 46 : isPassedGroup ? 40 : node.type === "ac" ? 34 : 24;
+          // 简体中文：优先取节点中预设的自适应 radius，若无则使用默认半径
+          const radius = node.radius || (node.type === "goal" ? 46 : isPassedGroup ? 40 : node.type === "ac" ? 34 : 24);
           const nodeColor = getNodeColor(node.status, node.type);
           const pulseClass = getNodePulseClass(node.status, node.type, isAgentActive);
 
@@ -435,6 +421,33 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
                   style={{ pointerEvents: "none" }}
                 />
               ) : null}
+
+              {/* 锁定当前攻坚缺口 AC 的赛博洋红色旋转准星 (Target Lock Reticle) */}
+              {isCurrentGap && (
+                <>
+                  <circle
+                    r={radius + 6}
+                    className="fill-none stroke-[#ff00a0] opacity-80"
+                    strokeWidth="1.5"
+                    strokeDasharray="4 4"
+                    style={{
+                      transformOrigin: "0px 0px",
+                      animation: "radar-spin 12s linear infinite"
+                    }}
+                  />
+                  <circle
+                    r={radius + 10}
+                    className="fill-none stroke-[#ff00a0] opacity-60"
+                    strokeWidth="1"
+                    strokeDasharray="6 8"
+                    style={{
+                      transformOrigin: "0px 0px",
+                      animation: "radar-spin 6s linear infinite",
+                      animationDirection: "reverse"
+                    }}
+                  />
+                </>
+              )}
 
               {/* 节点外圆圈 */}
               <motion.circle
