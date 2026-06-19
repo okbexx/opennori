@@ -84,10 +84,15 @@ If the user and agent have already discussed a goal, candidate AC, assumptions, 
 After any Nori Contract Draft is generated, do not ask for blind approval.
 OpenNori Skills must first run AC Interpretation Review: for each AC, explain
 the agent's understanding of the user entry, user action or judgment, visible
-result, non-passing cases, and likely evidence type. This explanation is not an
-implementation plan, architecture decision, file list, task list, or evidence
-claim. If the explanation adds a completion condition or exposes a mismatch, the
-agent must revise the AC or assumptions before approval.
+result, non-passing cases, and likely evidence type. This explanation must be
+specific to the AC: name the actual page, route, command, object, field, state,
+message, boundary, failure example, and evidence object where relevant. Generic
+phrases such as "open the relevant page", "check the result", "handle failure",
+or "use a screenshot" are not enough. This explanation is not an implementation
+plan, architecture decision, file list, task list, or evidence claim. If the
+explanation adds a completion condition, exposes a mismatch, or cannot be made
+concrete from the draft, the agent must revise the AC or assumptions before
+approval.
 
 Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, or implementation tasks into user AC. They can influence Nori Profile, Architecture Baseline, evidence risk, or recovery guidance, but Product AC must remain human-visible operations or judgments.
 

@@ -125,7 +125,10 @@ should first explain its understanding of every AC: where the user enters, what
 the user does or judges, what result should be visible, what would not count as
 passing, and what type of evidence would support it. Approve only when both the
 AC text and the agent's interpretation are correct; otherwise ask the agent to
-revise the contract.
+revise the contract. This explanation must be concrete: it should name the
+actual screen, route, command, object, field, state, message, boundary, failure
+example, or evidence object for that AC. Generic wording such as "open the
+relevant page", "check the result", or "use a screenshot" is not enough.
 
 When the goal is a complete product, complete feature loop, full app, full
 dashboard, full workbench, or explicitly "not MVP", OpenNori should define the
@@ -299,17 +302,19 @@ map first, then separate AC for the independent surfaces the user must judge.
 
 A draft Nori Contract is not ready for approval until the agent explains its
 understanding of each AC. The explanation should stay at the human acceptance
-level:
+level and be specific to the AC:
 
-- user entry
-- user action or judgment
-- visible result
-- what does not count as passing
-- evidence type the agent would use later
+- exact screen, route, menu, command, or object list the user starts from
+- exact object, field, filter, button, state, or report the user acts on or judges
+- exact visible data, label, status, message, preview, persisted value, or report result
+- concrete wrong, missing, stale, failed, inaccessible, confusing, or out-of-scope cases
+- specific screenshot, browser run, command output, saved state, report, artifact path, or human confirmation that would prove the AC
 
 This is not an implementation plan, file list, architecture decision, or
 evidence claim. If the interpretation adds a new completion condition, the
-agent should revise the AC or assumptions before asking for approval.
+agent should revise the AC or assumptions before asking for approval. If the
+same interpretation could be copied unchanged to another AC or product, it is
+too generic.
 
 ### Contract Language Preference
 
@@ -730,7 +735,7 @@ opennori init
 
 autogoal 不是新的产物类型。它是打包 Skill 的一种收敛行为：读取项目上下文、保留用户完整意图、推断合理假设、只询问会改变完成定义的问题，最后写出的仍然是和手动多轮讨论一致的标准 Nori Contract Draft。它不能把大目标降级成 MVP、第一版、原型、阶段清单或任务列表。
 
-生成任何 draft 后，agent 不应直接要求用户盲目 approve。它应先逐条说明自己对 AC 的理解：用户从哪里进入、做什么操作或判断、应该看到什么结果、什么情况不算通过、后续会用什么类型的证据证明。只有当 AC 文本和 agent 的理解都正确时，用户才应该 approve；否则应要求 agent revise。
+生成任何 draft 后，agent 不应直接要求用户盲目 approve。它应先逐条说明自己对 AC 的理解：用户从哪里进入、做什么操作或判断、应该看到什么结果、什么情况不算通过、后续会用什么类型的证据证明。这个理解必须具体到该 AC 的实际页面、路由、命令、对象、字段、状态、提示、边界、失败样例或证据对象；“打开相关页面”“查看结果”“用截图证明”这类泛话不够。只有当 AC 文本和 agent 的理解都正确时，用户才应该 approve；否则应要求 agent revise。
 
 当用户要求完整产品、完整功能闭环、完整应用、完整 Dashboard、完整工作台，或明确说“不要 MVP”时，OpenNori 应先定义完整验收面，而不是默认生成 3-5 条启动版 AC。完整验收面可以覆盖用户角色、入口与导航、核心工作流、状态转换、数据规则、权限与边界、失败与恢复、持久化、可见界面的 UI/UX、报告或审查方式。AC 数量可以随真实产品面增加；后续执行仍然按 current gap 一条条推进。只有用户明确选择原型、MVP、第一版或缩小范围，agent 才能缩小完成定义。
 
@@ -831,15 +836,15 @@ Nori 倡导对于“修改字段”或“抛出错误提示”等含糊不清的
 
 ### AC 理解确认 (AC Interpretation Review)
 
-Nori Contract Draft 生成后，agent 必须在请求 approve 前逐条解释自己对 AC 的理解。解释应保持在人类验收层面：
+Nori Contract Draft 生成后，agent 必须在请求 approve 前逐条解释自己对 AC 的理解。解释应保持在人类验收层面，并且具体到该 AC：
 
-- 用户入口
-- 用户操作或判断
-- 用户应该看到的结果
-- 什么情况不算通过
-- 后续会使用的证据类型
+- 用户从哪个具体页面、路由、菜单、命令或对象列表进入
+- 用户操作或判断哪个具体对象、字段、筛选器、按钮、状态或报告
+- 用户看到哪些具体数据、标签、状态、提示、预览、持久化结果或报告结论
+- 哪些具体错误、缺失、过期、失败、不可访问、难以理解或越界情况不算通过
+- 哪个具体截图、浏览器运行、命令输出、保存状态、报告、制品路径或人工确认能证明该 AC
 
-这不是实现计划、文件清单、架构决策或完成证据。如果解释里出现了新的完成条件，agent 应先修订 AC 或假设，再请求用户批准。
+这不是实现计划、文件清单、架构决策或完成证据。如果解释里出现了新的完成条件，agent 应先修订 AC 或假设，再请求用户批准。如果同一段理解可以原封不动套到另一个 AC 或另一个项目，它就太泛。
 
 ### 契约语言偏好 (Contract Language Preference)
 

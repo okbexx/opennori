@@ -37,8 +37,11 @@ After writing the standard draft, autogoal must perform the same AC
 Interpretation Review as ordinary acceptance work. Explain each AC in human
 terms before asking for approval: user entry, user action or judgment, expected
 visible result, non-passing cases, and the type of evidence that would support
-it. If this interpretation exposes a missing or changed completion condition,
-revise the draft instead of asking for approval.
+it. The review must be specific to that AC: name the actual screen, route,
+command, object, field, state, message, boundary, or artifact. If the same text
+could be copied to another AC or another product, it is too generic. If this
+interpretation exposes a missing or changed completion condition, revise the
+draft instead of asking for approval.
 
 ## Start Here
 
@@ -57,7 +60,7 @@ revise the draft instead of asking for approval.
 13. Convert reasonable inferences into assumptions instead of making the user answer a long questionnaire.
 14. Ask the user only questions that would change the completion definition. Do not ask implementation, library, file, architecture, or sequencing questions here.
 15. When enough information exists, create a temporary NoriBrief JSON and run `opennori draft --brief <brief.json> --root <repo> --json`. The resulting artifact is a standard draft Nori Contract.
-16. Show the draft using the standard `nori-acceptance` reply shape, include a compact "Coverage checked" section for complete-product goals, and include AC Interpretation Review for every AC. Ask the user to approve or revise only after they can judge whether the agent understood the AC correctly. Do not ask the user to approve autogoal notes.
+16. Show the draft using the standard `nori-acceptance` reply shape, include a compact "Coverage checked" section for complete-product goals, and include concrete AC Interpretation Review for every AC. Ask the user to approve or revise only after they can judge whether the agent understood the specific objects, fields, states, boundaries, and evidence for each AC correctly. Do not ask the user to approve autogoal notes.
 
 Useful state commands:
 
@@ -104,7 +107,7 @@ The user should never need to prepare this JSON. The Skill prepares it from the 
 - "完整产品", "完整功能闭环", "完整应用", "完整 Dashboard", "完整工作台", "full app", "full dashboard", or "not MVP" -> create a standard Nori Contract Draft with a full acceptance surface, even if that means more AC than a minimal starter contract. First show or internally maintain a coverage map, then split independent user judgment surfaces into separate criteria. Ask the user to narrow scope only when they intentionally want a prototype, MVP, first version, or smaller product closure.
 - "Why are there so few AC", "these AC are too broad", "为什么 AC 这么少", or a draft combines multiple product surfaces into a few broad criteria -> do not defend the draft. Explain that it failed coverage review, regenerate or revise with a coverage map, and keep the result draft-only until the user approves.
 - "整理我们刚才讨论的 AC", "take over the AC we just discussed", or "不要开始实现，先给我确认" -> hand off to `nori-acceptance`; this is conversation adoption, not rough-idea autogoal.
-- "approve" after an autogoal draft -> if AC Interpretation Review has not been shown in this conversation, first explain your understanding of every AC and ask the user to confirm or revise; otherwise run `opennori approve`, then follow returned `agent_next`; for non-trivial work this usually hands off to `nori-architecture-brainstorm`.
+- "approve" after an autogoal draft -> if concrete AC Interpretation Review has not been shown in this conversation, first explain your understanding of every AC with named objects, fields, states, failure examples, and evidence types, then ask the user to confirm or revise; otherwise run `opennori approve`, then follow returned `agent_next`; for non-trivial work this usually hands off to `nori-architecture-brainstorm`.
 - "revise: ..." after an autogoal draft -> revise the standard Nori Contract draft, not a separate autogoal artifact.
 
 ## State Writes
@@ -144,11 +147,11 @@ Open questions:
 - ...
 My understanding:
 - AC-1:
-  User enters: ...
-  User does or judges: ...
-  User should see: ...
-  Does not pass if: ...
-  Evidence I would use: ...
+  User enters: exact screen, route, menu, command, or object list the user starts from.
+  User does or judges: exact object, field, filter, button, state, or report the user acts on or evaluates.
+  User should see: exact visible data, label, status, message, preview, persisted value, or report result.
+  Does not pass if: concrete wrong, missing, stale, failed, inaccessible, confusing, or out-of-scope cases.
+  Evidence I would use: specific screenshot, browser run, command output, saved state, report, artifact path, or human confirmation that would prove this AC.
 Decision:
 Reply approve only if this Nori Contract and my interpretation are both correct, or revise: ...
 ```
@@ -169,11 +172,11 @@ For `presentation.language: zh-CN`, use:
 - ...
 我的理解：
 - AC-1：
-  用户入口：...
-  用户操作或判断：...
-  用户应该看到：...
-  不算通过：...
-  我会使用的证据类型：...
+  用户入口：用户从哪个具体页面、路由、菜单、命令或对象列表进入。
+  用户操作或判断：用户操作或判断哪个具体对象、字段、筛选器、按钮、状态或报告。
+  用户应该看到：用户看到的具体数据、标签、状态、提示、预览、持久化结果或报告结论。
+  不算通过：哪些具体错误、缺失、过期、失败、不可访问、难以理解或越界情况不算通过。
+  我会使用的证据类型：能证明该 AC 的具体截图、浏览器运行、命令输出、保存状态、报告、制品路径或人工确认。
 决定：
 只有当这份 Nori Contract 和我的理解都正确时，回复 approve；否则回复 revise: ...
 ```
@@ -188,6 +191,7 @@ Keep any autogoal notes short and clearly secondary. The user is approving the N
 - Do not compress a complete-product idea into a small default AC set. Full product closure may require AC for roles, entry/navigation, primary workflows, states, data rules, permissions, persistence, failure/recovery, UI/UX, reporting/review, and boundaries.
 - Do not write a complete-product draft before doing a coverage self-check. If the draft has a few broad criteria that each bundle several unrelated user judgments, treat it as a failed draft and revise before asking for approval.
 - Do not ask for blind approval immediately after writing an autogoal draft. First show AC Interpretation Review so the user can catch whether the agent misunderstood any AC.
+- Do not give generic AC Interpretation Review. It must name the actual page, route, command, object, field, status, message, boundary, failure example, and evidence object where relevant to that AC.
 - Do not let AC Interpretation Review add hidden requirements. If the explanation changes the completion definition, revise the draft before approval.
 - Do not turn AC Interpretation Review into an implementation plan, file plan, task list, architecture decision, or evidence claim.
 - Do not use AC count as the target, but do use coverage as the target. A complete dashboard/workbench often needs separate criteria for project selection, overview, asset list, asset detail, read-only preview, memory, capability status, external knowledge candidates, search/index state, timeline/audit, security boundary, state feedback, persistence, and failure recovery.

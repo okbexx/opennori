@@ -32,8 +32,12 @@ entrypoints, operations, outcomes, evidence needs, and boundaries.
 Draft approval requires AC Interpretation Review. After a draft exists, the
 agent must explain its understanding of each AC before asking the user to
 approve: user entry, user action or judgment, expected result, non-passing
-cases, and likely evidence type. If that explanation changes the completion
-definition, route back to `nori-acceptance` for revision before approval.
+cases, and likely evidence type. This explanation must be concrete to the AC:
+name the actual page, route, command, object, field, state, message, boundary,
+failure example, or evidence object. If it could be copied unchanged to another
+AC or product, route back to `nori-acceptance` for revision before approval. If
+that explanation changes the completion definition, route back to
+`nori-acceptance` for revision before approval.
 
 ## Start Here
 
@@ -60,7 +64,7 @@ definition, route back to `nori-acceptance` for revision before approval.
 - "Use OpenNori to take over the AC we just discussed", "整理我们刚才讨论的 AC", "把上面的 AC 收敛成 Nori Contract Draft", or "不要开始实现，先给我确认" -> hand off to `nori-acceptance` with the already discussed goal, candidate AC, assumptions, and unresolved questions. This is conversation adoption into a draft, not autogoal.
 - "autogoal", "自动帮我把 idea 变成 goal/AC", "I only have a rough idea", or "用 OpenNori autogoal" -> hand off to `nori-autogoal`; it must converge to a standard Nori Contract Draft, not a special autogoal artifact.
 - "Are these AC good enough", "this AC is too vague", "the goal is broad", or visible AC text lacks concrete user judgment -> hand off to `nori-acceptance`; do not wait for `opennori check` to flag it.
-- "Approve this draft", "approve these AC", "这些 AC 可以 approve 吗", or a draft exists but the agent has not explained its understanding of each AC -> hand off to `nori-acceptance` for AC Interpretation Review before approval.
+- "Approve this draft", "approve these AC", "这些 AC 可以 approve 吗", or a draft exists but the agent has not explained its concrete understanding of each AC -> hand off to `nori-acceptance` for AC Interpretation Review before approval.
 - "complete product", "complete feature", "full app", "full dashboard", "完整产品", "完整功能闭环", "完整应用", "完整 Dashboard", "完整工作台", or "不要 MVP" -> hand off to `nori-acceptance` or `nori-autogoal` with an explicit full-acceptance-surface instruction. The child Skill should preserve the complete user closure, not compress the Nori Contract into a compact MVP-style AC set unless the user explicitly narrows scope.
 - "Why are there so few AC", "these AC are too broad", "为什么 AC 这么少", "AC 太粗", or a complete-product draft has broad bundled criteria -> hand off to `nori-acceptance` for coverage review and revision. The child Skill should show missing coverage surfaces, split independent user judgments, and keep the result draft-only until user approval.
 - "The UI/UX AC is missing", "this is a page/app/dashboard/desktop/workbench/form", "the interface must feel usable", or a visible interface goal has only data/status/function AC -> hand off to `nori-acceptance` to add user-experience acceptance checks for navigation, information hierarchy, states, feedback, readability, consistency, recovery, and UI boundaries.
@@ -130,6 +134,7 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not answer confidently complete while required AC evidence, blocking profile items, architecture challenges, evidence health, or acceptance review risks remain unresolved or unaccepted.
 - Do not outsource AC quality judgment to CLI heuristics. The agent must inspect AC wording and ask the user the missing acceptance questions when the human judgment surface is vague.
 - Do not ask for blind approval of a draft. The agent must explain its understanding of each AC and revise any mismatch before approval.
+- Do not accept generic AC Interpretation Review. The agent must name the concrete objects, fields, states, boundaries, failure examples, and evidence objects that make each AC reviewable.
 - Do not let AC Interpretation Review become implementation planning or hidden requirements; it is only a user-facing semantic confirmation before approval.
 - Do not accept visible interface goals with only functional/data AC. The agent must check whether the user can navigate, scan, understand state, get feedback, recover from failure, and judge visual/interaction consistency.
 - Do not turn architecture, profile, build-vs-buy, Plugin, hook, or tool preferences into Product AC.

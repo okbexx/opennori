@@ -545,7 +545,8 @@ test("status with draft contracts routes agents to AC interpretation before appr
   assert.equal(status.data.status, "no_current_goal");
   assert.equal(status.data.agent_next.state, "initialized_no_active_contract");
   assert.match(status.data.agent_next.instruction, /AC Interpretation Review/);
-  assert.match(status.data.agent_next.user_visible_next, /understanding of every AC/);
+  assert.match(status.data.agent_next.instruction, /exact entries, objects, fields, states/);
+  assert.match(status.data.agent_next.user_visible_next, /concrete understanding of every AC/);
 });
 
 test("status routes incomplete project state to health recovery instead of unexpected errors", async () => {
@@ -686,6 +687,7 @@ test("draft command module creates contracts only from Skill-prepared briefs", a
   assert.equal(draft.data.criteria.some((criterion) => /2-30 个字符/.test(`${criterion.user_story} ${criterion.measurement}`)), true);
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
   assert.match(draft.next_actions.join("\n"), /AC Interpretation Review/);
+  assert.match(draft.next_actions.join("\n"), /exact entry, object or field, visible state\/result/);
 });
 
 test("draft command module stores Skill-prepared draft contracts", async () => {
@@ -705,6 +707,7 @@ test("draft command module stores Skill-prepared draft contracts", async () => {
   assert.match(draft.data.acceptance_basis.summary, /Skill-prepared acceptance brief/);
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
   assert.match(draft.next_actions.join("\n"), /AC Interpretation Review/);
+  assert.match(draft.next_actions.join("\n"), /specific evidence object/);
   assert.equal(fs.existsSync(draft.data.acceptance_path), true);
   assert.equal(fs.existsSync(draft.data.evidence_path), true);
   assert.equal(draft.artifacts.some((artifact) => artifact.kind === "draft_acceptance_contract"), true);

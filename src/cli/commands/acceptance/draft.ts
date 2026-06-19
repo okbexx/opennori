@@ -84,7 +84,9 @@ export const draftCommand = defineCommand({
         { kind: "evidence_ledger", path: paths.evidencePath }
       ],
       [],
-      ["Show AC Interpretation Review for every criterion, then ask the user to approve or revise before implementation."]
+      [
+        "Show concrete AC Interpretation Review for every criterion: exact entry, object or field, visible state/result, non-passing examples, and specific evidence object. Then ask the user to approve or revise before implementation."
+      ]
     );
   }
 });

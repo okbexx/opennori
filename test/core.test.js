@@ -1632,6 +1632,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /UI\/UX|visible interface/i);
   assert.match(noriAsset, /AC Interpretation Review/);
   assert.match(noriAsset, /blind approval/);
+  assert.match(noriAsset, /actual page, route, command, object, field, state/);
+  assert.match(noriAsset, /concrete objects, fields, states, boundaries/);
   assert.doesNotMatch(noriAsset, /skill export/);
   assert.doesNotMatch(noriAsset, /process steps/);
 
@@ -1655,6 +1657,10 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(acceptanceAsset, /User enters|用户入口/);
   assert.match(acceptanceAsset, /Evidence I would use|我会使用的证据类型/);
   assert.match(acceptanceAsset, /Do not ask for blind approval/);
+  assert.match(acceptanceAsset, /If the explanation could be copied unchanged to another AC/);
+  assert.match(acceptanceAsset, /actual page/);
+  assert.match(acceptanceAsset, /object\/field\/state\/message\/failure\/evidence/);
+  assert.match(acceptanceAsset, /exact screen, route, menu, command, or object list/);
 
   const evidenceAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-evidence", "SKILL.md"), "utf8");
   assert.match(evidenceAsset, /Do not force evidence into a fixed adapter taxonomy/);
@@ -1675,6 +1681,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(autogoalAsset, /visible interface goals/);
   assert.match(autogoalAsset, /AC Interpretation Review/);
   assert.match(autogoalAsset, /blind approval/);
+  assert.match(autogoalAsset, /If the same text\s+could be copied to another AC/);
+  assert.match(autogoalAsset, /actual page, route, command, object, field/);
 
   const healthAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-project-health", "SKILL.md"), "utf8");
   assert.match(healthAsset, /safe_next_command/);
