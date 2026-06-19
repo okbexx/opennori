@@ -379,7 +379,7 @@ test("autogoal brief drafts a standard Nori Contract with assumptions and open q
   assert.equal(draft.data.state, "draft");
   assert.equal(draft.data.acceptance_basis.source, "autogoal");
   assert.equal(draft.data.criteria[0].id, "AC-1");
-  assert.match(draft.next_actions.join("\n"), /AC Interpretation Review/);
+  assert.match(draft.next_actions.join("\n"), /one-AC-at-a-time AC Review Loop/);
   const acceptance = fs.readFileSync(draft.data.acceptance_path, "utf8");
   assert.match(acceptance, /# autogoal-delivery-completion 验收契约/);
   assert.match(acceptance, /假设:/);
@@ -433,7 +433,7 @@ test("conversation adoption brief stays a draft Nori Contract awaiting user appr
   assert.equal(draft.data.acceptance_basis.status, "draft");
   assert.equal(draft.data.acceptance_basis.source, "conversation");
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
-  assert.match(draft.next_actions.join("\n"), /AC Interpretation Review/);
+  assert.match(draft.next_actions.join("\n"), /one-AC-at-a-time AC Review Loop/);
   assert.match(draft.data.acceptance_path, /\.opennori\/drafts\/settings-discussion-adoption\.acceptance\.md$/);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "current", "settings-discussion-adoption.acceptance.md")), false);
 
@@ -1630,10 +1630,11 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /full acceptance surface/);
   assert.match(noriAsset, /coverage map|coverage review/);
   assert.match(noriAsset, /UI\/UX|visible interface/i);
-  assert.match(noriAsset, /AC Interpretation Review/);
+  assert.match(noriAsset, /one-AC-at-a-time AC Review Loop/);
   assert.match(noriAsset, /blind approval/);
   assert.match(noriAsset, /actual page, route, command, object, field, state/);
   assert.match(noriAsset, /concrete objects, fields, states, boundaries/);
+  assert.match(noriAsset, /every AC has been confirmed one by one/);
   assert.doesNotMatch(noriAsset, /skill export/);
   assert.doesNotMatch(noriAsset, /process steps/);
 
@@ -1653,11 +1654,14 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(acceptanceAsset, /coverage map|coverage review/);
   assert.match(acceptanceAsset, /bundles unrelated surfaces/);
   assert.match(acceptanceAsset, /Visible interface experience/);
-  assert.match(acceptanceAsset, /AC Interpretation Review/);
+  assert.match(acceptanceAsset, /AC Review Loop/);
+  assert.match(acceptanceAsset, /confirm AC-1/);
+  assert.match(acceptanceAsset, /revise AC-1/);
   assert.match(acceptanceAsset, /User enters|用户入口/);
   assert.match(acceptanceAsset, /Evidence I would use|我会使用的证据类型/);
   assert.match(acceptanceAsset, /Do not ask for blind approval/);
-  assert.match(acceptanceAsset, /If the explanation could be copied unchanged to another AC/);
+  assert.match(acceptanceAsset, /If the explanation could be copied unchanged\s+to another AC/);
+  assert.match(acceptanceAsset, /Do not dump all AC interpretations/);
   assert.match(acceptanceAsset, /actual page/);
   assert.match(acceptanceAsset, /object\/field\/state\/message\/failure\/evidence/);
   assert.match(acceptanceAsset, /exact screen, route, menu, command, or object list/);
@@ -1679,7 +1683,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(autogoalAsset, /coverage self-check/);
   assert.match(autogoalAsset, /independent user judgment/);
   assert.match(autogoalAsset, /visible interface goals/);
-  assert.match(autogoalAsset, /AC Interpretation Review/);
+  assert.match(autogoalAsset, /AC Review Loop/);
+  assert.match(autogoalAsset, /confirm AC-1/);
   assert.match(autogoalAsset, /blind approval/);
   assert.match(autogoalAsset, /If the same text\s+could be copied to another AC/);
   assert.match(autogoalAsset, /actual page, route, command, object, field/);
@@ -1735,10 +1740,11 @@ test("public product surfaces present OpenNori as one capability bundle", () => 
   assert.match(health, /half-installed/);
   assert.match(health, /opennori init/);
   assert.match(protocol, /Direct CLI use\s+is an advanced, automation, or debugging route/);
-  assert.match(readme, /AC Interpretation Review/);
-  assert.match(readme, /AC 理解确认/);
+  assert.match(readme, /AC Review Loop/);
+  assert.match(readme, /AC 逐条确认循环/);
   assert.match(protocol, /AC-O-14/);
-  assert.match(protocol, /AC Interpretation Review/);
+  assert.match(protocol, /one AC at a time/);
+  assert.match(protocol, /confirmed one by one/);
 
   for (const text of [readme, protocol]) {
     assert.doesNotMatch(text, /Choose one path/);

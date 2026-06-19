@@ -114,10 +114,10 @@ export function agentNextForBootstrap(data: Pick<BootstrapData, "status" | "root
         ? "OpenNori is initialized with draft contracts, but no current Nori Contract is approved yet."
         : "OpenNori is initialized, and no current Nori Contract exists yet.",
       instruction: draftCount > 0
-        ? "Show the draft Nori Contract plus concrete AC Interpretation Review for every AC, naming exact entries, objects, fields, states, non-passing examples, and evidence objects before asking the user to approve or revise. Do not treat drafts as executable current goals."
+        ? "Do not implement yet. Show a compact draft Nori Contract overview, then start the one-AC-at-a-time AC Review Loop. Review only the first unconfirmed AC with exact entries, objects, fields, states, non-passing examples, and evidence objects. Ask for final approve only after every AC is confirmed one by one."
         : "Use the user's already stated natural-language goal if the current conversation includes one; otherwise ask for the goal. Then run acceptance discovery or draft human-centered acceptance criteria before implementation.",
       userVisibleNext: draftCount > 0
-        ? "Review the draft and the agent's concrete understanding of every AC before approval."
+        ? "Review and confirm the draft one AC at a time before final approval."
         : "Continue with acceptance discovery for the stated goal, or ask for the goal if it was not provided.",
       needsUser: true,
       commands: [`opennori doctor --root ${data.root} --json`]
@@ -175,10 +175,10 @@ export function agentNextForDoctor(root: string, doctor: DoctorState): AgentNext
         ? "OpenNori is ready with draft contracts, but no current Nori Contract is approved yet."
         : "OpenNori is ready, and no current Nori Contract exists yet.",
       instruction: draftCount > 0
-        ? "Do not implement yet. Show the draft Nori Contract plus concrete AC Interpretation Review for every AC, naming exact entries, objects, fields, states, non-passing examples, and evidence objects before asking for approval or revision."
+        ? "Do not implement yet. Show a compact draft Nori Contract overview, then start the one-AC-at-a-time AC Review Loop. Review only the first unconfirmed AC with exact entries, objects, fields, states, non-passing examples, and evidence objects. Ask for final approve only after every AC is confirmed one by one."
         : "Do not implement yet. Use the user's already stated goal if available; otherwise ask for the goal. Run acceptance discovery or draft a Nori Contract before implementation.",
       userVisibleNext: draftCount > 0
-        ? "Review the draft and the agent's concrete understanding of every AC before approval."
+        ? "Review and confirm the draft one AC at a time before final approval."
         : "Turn the stated goal into human-centered acceptance criteria, or ask for the goal if it was not provided.",
       needsUser: true,
       commands: [`opennori doctor --root ${root} --json`]
@@ -231,8 +231,8 @@ export function agentNextForRecommendation(
       state: "acceptance_needs_user",
       recommendedSkill: "nori-acceptance",
       summary: recommendation.summary,
-      instruction: "Show the draft acceptance criteria plus concrete AC Interpretation Review for every AC. Name exact entries, objects, fields, states, non-passing examples, and evidence objects. Ask the user to approve only when both the AC text and the agent's interpretation are correct; otherwise revise before implementation.",
-      userVisibleNext: "Review the draft and the agent's concrete understanding of every AC before approval.",
+      instruction: "Show a compact draft acceptance overview, then start the one-AC-at-a-time AC Review Loop. For the current AC only, name exact entries, objects, fields, states, non-passing examples, and evidence objects. Ask the user to confirm or revise that AC, and ask for final approve only after every AC is confirmed one by one.",
+      userVisibleNext: "Review and confirm the draft one AC at a time before final approval.",
       goalId,
       currentGapId: gap?.id ?? recommendation.focus,
       needsUser: true

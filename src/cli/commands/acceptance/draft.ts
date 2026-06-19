@@ -85,7 +85,7 @@ export const draftCommand = defineCommand({
       ],
       [],
       [
-        "Show concrete AC Interpretation Review for every criterion: exact entry, object or field, visible state/result, non-passing examples, and specific evidence object. Then ask the user to approve or revise before implementation."
+        "Show a compact draft overview, then start the one-AC-at-a-time AC Review Loop. Review only the current AC with exact entry, object or field, visible state/result, non-passing examples, and specific evidence object. Ask for final approve only after every AC is confirmed one by one."
       ]
     );
   }

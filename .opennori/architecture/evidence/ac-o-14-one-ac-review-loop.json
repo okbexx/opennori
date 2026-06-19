@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "ac-o-14-one-ac-review-loop",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-O-14",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "AC-O-14 keeps draft approval semantics in packaged Skills and documentation while CLI only routes agents toward the one-AC-at-a-time review loop.",
+  "fit": "The change follows the TypeScript agent-state CLI baseline: packaged Skills own subjective user confirmation behavior; src/agent-next.ts and draft next_actions expose deterministic routing hints; .opennori state stores AC and evidence without adding a natural-language validator.",
+  "implementation_focus": "Replace batch AC interpretation approval with AC Review Loop across nori, nori-acceptance, nori-autogoal, docs, agent_next, draft next_actions, tests, and website copy.",
+  "evidence": "Review plugins/opennori/skills/nori*.md, src/agent-next.ts, src/cli/commands/acceptance/draft.ts, README.md, AGENTS.md, .opennori/protocol.md, test/core.test.js, test/cli-commands.test.js, and opennori-site/src/pages/index.astro.",
+  "limitations": "This alignment record is architecture context only; product acceptance still requires reviewable evidence that the visible Skill/docs/CLI surfaces enforce one-AC-at-a-time confirmation.",
+  "created_at": "2026-06-19T14:45:36.790Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

@@ -36,24 +36,26 @@ user judgments such as project overview, assets, memory, external knowledge,
 capabilities, search, audit, UI state, persistence, and recovery. Run a coverage
 self-check, then split unrelated surfaces before asking for approval.
 
-After any draft is generated, run an AC Interpretation Review before asking for
-approval. For each AC, explain your understanding in human terms: where the user
-enters, what the user does or judges, what result they should see, what would
-not count as passing, and what kind of evidence would support it. This review is
-not an implementation plan and not a second contract. The review must be
-concrete enough for the user to catch a wrong interpretation: name the actual
-screen, route, command, object, field, state, message, boundary, or artifact
-from that AC. If the explanation could be copied unchanged to another AC or
-another project, it is too generic. If you cannot make the interpretation
-specific from the draft and conversation, revise the AC or ask the missing
-completion-changing question before asking for approval.
+After any draft is generated, run an AC Review Loop before asking for final
+approval. First show a compact contract and coverage overview so the user knows
+the whole draft shape. Then review only one AC at a time: explain your
+understanding in human terms for the current AC, ask the user to confirm that AC
+or revise it, and move to the next AC only after confirmation. Final `approve`
+is only valid after every AC has been confirmed in this loop. The review is not
+an implementation plan and not a second contract. Each current-AC explanation
+must be concrete enough for the user to catch a wrong interpretation: name the
+actual screen, route, command, object, field, state, message, boundary, failure
+example, or artifact from that AC. If the explanation could be copied unchanged
+to another AC or another project, it is too generic. If you cannot make the
+interpretation specific from the draft and conversation, revise the AC or ask
+the missing completion-changing question before continuing the loop.
 
 ## Start Here
 
 1. Read current OpenNori state with doctor/list/resume/status when a goal may already exist, and follow `data.agent_next` when present.
 2. If `agent_next.state` is `initialized_no_active_contract`, use the user's natural-language goal from the current conversation when present; ask for the goal only when it is missing; then begin discovery/draft.
 3. If the user is still exploring an idea, create brainstorm candidates before drafting a contract.
-4. If the user asks to "take over", "capture", "adopt", "整理我们刚才讨论的 AC", or otherwise indicates the AC discussion is already in progress, collect the current conversation's goal, candidate AC, assumptions, and open questions into a temporary NoriBrief and run `opennori draft --brief <brief.json> --root <repo> --json`. Keep `acceptance_basis.status: "draft"` and use `acceptance_basis.source: "conversation"`. Show the standard draft plus AC Interpretation Review; ask for approve/revise only after the user can judge whether the agent understood each AC correctly. Do not start implementation.
+4. If the user asks to "take over", "capture", "adopt", "整理我们刚才讨论的 AC", or otherwise indicates the AC discussion is already in progress, collect the current conversation's goal, candidate AC, assumptions, and open questions into a temporary NoriBrief and run `opennori draft --brief <brief.json> --root <repo> --json`. Keep `acceptance_basis.status: "draft"` and use `acceptance_basis.source: "conversation"`. Show the standard draft overview, then start the one-AC-at-a-time AC Review Loop from the first unconfirmed AC. Ask for final approve only after the user has confirmed every AC. Do not start implementation.
 5. If the user has a goal but the completion surface is vague, ask the missing
    acceptance questions yourself; optionally use `opennori discover` as a
    scratch question source, but do not treat its gap ids or wording as
@@ -79,9 +81,9 @@ completion-changing question before asking for approval.
 9. If the draft came from a generic goal or has `ACCEPTANCE-BASIS`, show the
    user the missing acceptance questions before asking for approval; the draft
    is still a starting point.
-10. Before asking the user to approve a draft, explain every AC through a concrete AC Interpretation Review. Name the exact user entry, target object or field, visible state/message/result, non-passing examples, and reviewable evidence object for that AC. If the interpretation is generic, the draft is not ready for approval. If the user says an interpretation is wrong, revise the AC or ask the missing completion-changing question. If the explanation reveals hidden assumptions, put them into the draft assumptions or AC wording instead of leaving them only in prose.
+10. Before asking the user to approve a draft, run the AC Review Loop. Show a compact list of all AC first, then review only the current AC with a concrete AC Interpretation Review: exact user entry, target object or field, visible state/message/result, non-passing examples, and reviewable evidence object for that AC. Ask the user to reply `confirm AC-<n>` to continue, or `revise AC-<n>: ...` to correct it. If the interpretation is generic, the draft is not ready for approval. If the user says an interpretation is wrong, revise the AC or ask the missing completion-changing question before moving on. If the explanation reveals hidden assumptions, put them into the draft assumptions or AC wording instead of leaving them only in prose.
 11. If `agent_next.state` is `completion_needs_review` and `agent_next.recommended_skill` is `nori-acceptance`, treat existing passing evidence as provisional: explain the unresolved acceptance ambiguity, ask only the missing questions that affect user judgment, then revise criteria or record explicit user-approved assumptions. Do not ask the user to simply accept risk before making the missing acceptance surface understandable.
-12. If the user has approved or revised AC after understanding the interpretation, persist that decision before implementation continues.
+12. If the user has confirmed every AC in the review loop and then approves the Nori Contract, persist that decision before implementation continues. If the user replies `approve` before all ACs were reviewed one by one, do not run `opennori approve`; continue from the first unconfirmed AC.
 13. After `opennori approve`, read the returned `data.agent_next`. If it says `architecture_requirement_needs_decision`, hand off to `nori-architecture-brainstorm` to decide and record required/not_required/waived before implementation or evidence work. If it says `architecture_needs_review`, hand off to the recommended architecture Skill before non-trivial implementation continues.
 14. If `agent_next.state` is `ready_for_next_loop` and the user asked to continue, use the completed contract context and the user's latest intent to identify the next human-facing outcome. Prepare a full NoriBrief yourself and run `opennori draft --brief <brief.json> --root <repo> --json`. Do not expect the CLI to invent product candidate goals.
 15. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live acceptance activity while drafting or revising: start before acceptance work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-acceptance --state thinking --summary "..." --json` and let the CLI infer the unique current goal/gap.
@@ -109,11 +111,13 @@ Useful state commands:
 - "Change this existing contract to Chinese/English" -> explain that existing approved/current contracts are not silently translated; revise any visible wording that needs translation, then ask for approval and use `approve --no-from-draft --language ...`.
 - "Brainstorm this idea" -> produce selectable acceptance directions; ask which direction should become the contract.
 - "This AC is too vague" -> ask only questions that change completion judgment.
-- User answers discovery questions -> convert the answers into a complete NoriBrief with concrete Product AC, run `opennori draft --brief`, then show the draft plus AC Interpretation Review before approval.
-- "Approve these AC" -> if you have not already shown concrete AC Interpretation Review in this conversation, first explain your understanding of each AC with named objects, fields, states, failure examples, and evidence types, then ask the user to confirm or revise; otherwise write approval, read `agent_next`, and route to architecture review, evidence, or reporting from that returned state.
+- User answers discovery questions -> convert the answers into a complete NoriBrief with concrete Product AC, run `opennori draft --brief`, then show the draft overview and start the one-AC-at-a-time AC Review Loop before final approval.
+- "confirm AC-1", "AC-1 对", "确认 AC-1" -> mark that AC as conversation-confirmed and continue the AC Review Loop with the next unconfirmed AC. Do not run `opennori approve` until every AC has been confirmed.
+- "revise AC-1: ...", "AC-1 应该是..." -> revise that criterion or the draft assumptions, then restart review for the changed AC before continuing.
+- "Approve these AC" -> if every AC has not already been confirmed one by one in this conversation, do not approve yet. Start or continue the AC Review Loop from the first unconfirmed AC. Only after all ACs are confirmed should you write approval, read `agent_next`, and route to architecture review, evidence, or reporting from that returned state.
 - "Change AC-2 to mean..." -> update that criterion and treat older evidence for it as stale.
-- Complete goal with `agent_next.state: ready_for_next_loop` -> infer or ask for the next human-facing outcome, prepare a complete NoriBrief, run `opennori draft --brief`, then show the draft and AC Interpretation Review with concrete Measure / Passes when text.
-- Drafted brief output -> inspect the draft yourself, ask missing acceptance questions first, explain your concrete understanding of each AC, and do not ask for blind approval.
+- Complete goal with `agent_next.state: ready_for_next_loop` -> infer or ask for the next human-facing outcome, prepare a complete NoriBrief, run `opennori draft --brief`, then show the draft overview and start the AC Review Loop with concrete Measure / Passes when text.
+- Drafted brief output -> inspect the draft yourself, ask missing acceptance questions first, then start the one-AC-at-a-time AC Review Loop. Do not ask for blind approval and do not dump every AC interpretation as the approval surface.
 - `completion_needs_review` with `recommended_skill: nori-acceptance` -> explain that the contract is objectively evidenced but not confidently acceptable yet; identify the unresolved ambiguity from the AC text and user context, ask concrete missing questions, and revise AC before reporting confident completion.
 
 Discovery answer shape for agent-created temporary files:
@@ -219,29 +223,32 @@ Must write live dashboard activity while acceptance work is happening and the da
 
 ## User Reply Shape
 
-Show the draft as a compact list of user-facing checks, followed by AC
-Interpretation Review:
+Show the draft as a compact list of user-facing checks, then start the AC
+Review Loop for the current AC only:
 
 ```text
 Goal: ...
-Acceptance checks:
+Acceptance checks overview:
 - AC-1: As a user, ...
   Measure: ...
   Passes when: ...
-My understanding:
-- AC-1:
-  User enters: exact screen, route, menu, command, or object list the user starts from.
-  User does or judges: exact object, field, filter, button, state, or report the user acts on or evaluates.
-  User should see: exact visible data, label, status, message, preview, persisted value, or report result.
-  Does not pass if: concrete wrong, missing, stale, failed, inaccessible, confusing, or out-of-scope cases.
-  Evidence I would use: specific screenshot, browser run, command output, saved state, report, artifact path, or human confirmation that would prove this AC.
 Open questions:
 - ...
+Review progress: AC 1/N
+Reviewing AC-1:
+  AC text: ...
+  My concrete understanding:
+    User enters: exact screen, route, menu, command, or object list the user starts from.
+    User does or judges: exact object, field, filter, button, state, or report the user acts on or evaluates.
+    User should see: exact visible data, label, status, message, preview, persisted value, or report result.
+    Does not pass if: concrete wrong, missing, stale, failed, inaccessible, confusing, or out-of-scope cases.
+    Evidence I would use: specific screenshot, browser run, command output, saved state, report, artifact path, or human confirmation that would prove this AC.
 Decision:
-Reply approve only if these AC and my interpretation are both correct, or reply revise: ...
+Reply `confirm AC-1` to continue to AC-2, or `revise AC-1: ...` to correct this AC.
+Only reply `approve` after every AC has been confirmed one by one.
 ```
 
-Ask for approval or specific revision. Do not include implementation steps unless the user explicitly asks for implementation detail.
+Ask for current-AC confirmation or a specific revision. Do not include implementation steps unless the user explicitly asks for implementation detail.
 
 Match the reply language to the Nori Contract presentation language when it is known. For `presentation.language: zh-CN`, show `目标`, `验收标准`, `衡量方式`, `通过条件`, and `我的理解` in Chinese; for `en`, use the English shape above.
 
@@ -249,21 +256,24 @@ For Chinese presentation, use this shape:
 
 ```text
 目标：...
-验收标准：
+验收标准概览：
 - AC-1：作为用户，...
   衡量方式：...
   通过条件：...
-我的理解：
-- AC-1：
-  用户入口：用户从哪个具体页面、路由、菜单、命令或对象列表进入。
-  用户操作或判断：用户操作或判断哪个具体对象、字段、筛选器、按钮、状态或报告。
-  用户应该看到：用户看到的具体数据、标签、状态、提示、预览、持久化结果或报告结论。
-  不算通过：哪些具体错误、缺失、过期、失败、不可访问、难以理解或越界情况不算通过。
-  我会使用的证据类型：能证明该 AC 的具体截图、浏览器运行、命令输出、保存状态、报告、制品路径或人工确认。
 开放问题：
 - ...
+确认进度：AC 1/N
+正在确认 AC-1：
+  AC 文本：...
+  我的具体理解：
+    用户入口：用户从哪个具体页面、路由、菜单、命令或对象列表进入。
+    用户操作或判断：用户操作或判断哪个具体对象、字段、筛选器、按钮、状态或报告。
+    用户应该看到：用户看到的具体数据、标签、状态、提示、预览、持久化结果或报告结论。
+    不算通过：哪些具体错误、缺失、过期、失败、不可访问、难以理解或越界情况不算通过。
+    我会使用的证据类型：能证明该 AC 的具体截图、浏览器运行、命令输出、保存状态、报告、制品路径或人工确认。
 决定：
-只有当这些 AC 和我的理解都正确时，回复 approve；否则回复 revise: ...
+回复 `confirm AC-1` 继续确认 AC-2，或回复 `revise AC-1: ...` 修正这一条。
+只有全部 AC 逐条确认后，才回复 `approve`。
 ```
 
 ## Misuse Guards
@@ -273,7 +283,9 @@ For Chinese presentation, use this shape:
 - Do not accept a compact starter AC set for complete product, complete feature loop, full app, full dashboard, or full workbench goals unless the user explicitly chooses a prototype, MVP, first version, or narrower scope. AC count is not the quality target; complete user-judgable coverage is.
 - Do not accept a complete-product draft where one AC bundles unrelated surfaces such as overview, assets, memory, capabilities, external knowledge, search, audit, UI states, persistence, and recovery. Split it before asking for approval.
 - Do not accept interface goals that only cover data, backend state, or happy-path function. Visible UI goals also need user-experience acceptance for navigation, hierarchy, states, feedback, readability, consistency, and recovery unless the user explicitly declares those out of scope.
-- Do not ask for blind approval immediately after creating a draft. First explain your understanding of each AC so the user can catch mismatches before approval.
+- Do not ask for blind approval immediately after creating a draft. Start the one-AC-at-a-time AC Review Loop so the user can catch mismatches before final approval.
+- Do not dump all AC interpretations as the approval surface when a draft has many AC. A compact overview is allowed, but confirmation happens one AC at a time.
+- Do not treat a bulk overview, batch interpretation, or the user's early `approve` as final approval before every AC has been confirmed one by one.
 - Do not give generic AC Interpretation Review. Phrases like "the user opens the relevant page", "checks the result", "sees it works", "failure is handled", or "I would test it" are not enough unless they name the actual page/object/field/state/message/failure/evidence for that AC.
 - Do not let AC Interpretation Review add hidden requirements. If the explanation changes what "done" means, revise the AC or assumptions before asking for approval.
 - Do not turn AC Interpretation Review into an implementation plan, file plan, task list, technology choice, or evidence claim.

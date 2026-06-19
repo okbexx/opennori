@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-19T14:03:50.961Z",
+  "updated_at": "2026-06-19T14:45:53.917Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -371,6 +371,17 @@
         "summary": "Complete-product autogoal coverage self-check is implemented in packaged Skills, local development Skills, protocol, README, website, and objective asset tests without adding CLI subjective validators.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/ac-o-13-autogoal-coverage-self-check.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "ac-o-14-one-ac-review-loop",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-O-14",
+        "status": "aligned",
+        "summary": "AC-O-14 keeps draft approval semantics in packaged Skills and documentation while CLI only routes agents toward the one-AC-at-a-time review loop.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/ac-o-14-one-ac-review-loop.json",
         "schema_valid": true,
         "schema_errors": []
       },
