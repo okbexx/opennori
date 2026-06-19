@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opennori.dev/schemas/architecture-requirement.schema.json",
+  "title": "OpenNori Architecture Requirement",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "goal_id",
+    "status",
+    "reason",
+    "recorded"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "const": "opennori/architecture-requirement-v1" },
+    "goal_id": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["unknown", "required", "not_required", "waived"]
+    },
+    "reason": { "type": "string", "minLength": 1 },
+    "decided_by": { "type": "string", "minLength": 1 },
+    "decided_at": { "type": "string", "minLength": 1 },
+    "source": { "type": "string" },
+    "limitations": { "type": "string" },
+    "recorded": { "type": "boolean" },
+    "path": { "type": "string" }
+  }
+}

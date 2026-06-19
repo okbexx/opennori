@@ -8,6 +8,7 @@ function renderArchitectureReportSection(root: string, goalId: string | undefine
     "## Architecture Baseline",
     "",
     `Architecture decision: ${state.decision}`,
+    `Requirement: ${state.requirement.status}${state.requirement.reason ? ` - ${state.requirement.reason}` : ""}`,
     `Baseline: ${state.baseline ? `${state.baseline.profile} (${state.baseline.status})` : "<missing>"}`,
     `Technical baseline: ${state.baseline?.technical_baseline_summary
       ? `${state.baseline.technical_baseline_summary.runtime_topology_count} runtime, ${state.baseline.technical_baseline_summary.module_boundary_count} module, ${state.baseline.technical_baseline_summary.contract_surface_count} contract, ${state.baseline.technical_baseline_summary.data_flow_count} flow, ${state.baseline.technical_baseline_summary.dependency_decision_count} dependency, ${state.baseline.technical_baseline_summary.reference_mapping_count} reference items`

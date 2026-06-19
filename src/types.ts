@@ -401,6 +401,7 @@ export type NextRecommendation = {
   status:
     | "user-intervention-required"
     | "acceptance-approval-required"
+    | "architecture-requirement-required"
     | "architecture-review-required"
     | "work-on-current-gap"
     | "evidence-review-required"
@@ -424,6 +425,7 @@ export type AgentNext = {
     | "health_needs_recovery"
     | "work_on_current_gap"
     | "acceptance_needs_user"
+    | "architecture_requirement_needs_decision"
     | "architecture_needs_review"
     | "evidence_ready_for_recording"
     | "evidence_needs_review"
@@ -759,10 +761,26 @@ export type BuildVsBuyHealth = {
   findings: BuildVsBuyFinding[];
 };
 
+export type ArchitectureRequirementStatus = "unknown" | "required" | "not_required" | "waived";
+
+export type ArchitectureRequirement = {
+  schema_version: "opennori/architecture-requirement-v1";
+  goal_id?: string;
+  status: ArchitectureRequirementStatus;
+  reason: string;
+  decided_by?: string;
+  decided_at?: string;
+  source?: string;
+  limitations?: string;
+  recorded: boolean;
+  path?: string;
+};
+
 export type ArchitectureState = {
   schema_version: "opennori/architecture-state-v1";
   decision: "missing" | "invalid" | "draft" | "valid" | "challenged";
   required_for_goal: boolean;
+  requirement: ArchitectureRequirement;
   baseline: {
     status: ArchitectureBaseline["status"];
     profile: string;

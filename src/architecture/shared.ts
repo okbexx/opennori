@@ -4,8 +4,9 @@ import type { PathPair } from "../types.ts";
 export const ARCHITECTURE_BASELINE_SCHEMA_VERSION = "opennori/architecture-baseline-v1";
 export const ARCHITECTURE_CHALLENGE_SCHEMA_VERSION = "opennori/architecture-challenge-v1";
 export const ARCHITECTURE_APPLY_SCHEMA_VERSION = "opennori/architecture-apply-v1";
+export const ARCHITECTURE_REQUIREMENT_SCHEMA_VERSION = "opennori/architecture-requirement-v1";
 export const BUILD_VS_BUY_SCHEMA_VERSION = "opennori/build-vs-buy-v1";
-export const REQUIRED_ARCHITECTURE_DIRS = ["profiles", "challenges", "decisions", "evidence"];
+export const REQUIRED_ARCHITECTURE_DIRS = ["profiles", "challenges", "decisions", "evidence", "requirements"];
 export const AGENT_ROUTE_START = "<!-- opennori:agent-route:start -->";
 export const AGENT_ROUTE_END = "<!-- opennori:agent-route:end -->";
 
@@ -51,6 +52,10 @@ export function architectureApplyPath(root: string, applyId: string): PathPair {
     jsonPath: path.join(architectureDir(root), "evidence", `${applyId}.json`),
     markdownPath: path.join(architectureDir(root), "evidence", `${applyId}.md`)
   };
+}
+
+export function architectureRequirementPath(root: string, goalId: string): string {
+  return path.join(architectureDir(root), "requirements", `${goalId}.json`);
 }
 
 export function agentGuidePath(root: string): string {

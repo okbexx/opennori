@@ -39,28 +39,42 @@ export const checkCommand = defineCommand({
       : [];
     const architecture = architectureState(root, contract.goal_id);
     const architectureWarnings: JsonObject[] = [];
-    if (architecture.decision === "missing") {
+    if (architecture.requirement.status === "unknown") {
+      architectureWarnings.push({
+        type: "architecture_requirement",
+        message: "Architecture requirement has not been decided for this goal.",
+        recovery: "Use nori-architecture-brainstorm to decide required, not_required, or waived, then record the decision with opennori architecture requirement."
+      });
+    }
+    if (architecture.requirement.status === "waived") {
+      architectureWarnings.push({
+        type: "architecture_requirement",
+        message: `Architecture review was waived: ${architecture.requirement.reason}`,
+        recovery: "Ask the user whether the remaining architecture review risk is acceptable, or revise the requirement to required/not_required with a reason."
+      });
+    }
+    if (architecture.required_for_goal && architecture.decision === "missing") {
       architectureWarnings.push({
         type: "architecture",
-        message: "Active goal has no Architecture Baseline.",
+        message: "This goal requires Architecture Baseline review, but no Architecture Baseline is recorded.",
         recovery: "Preview an Architecture Baseline, show it to the user, then rerun opennori architecture baseline --root <project> --goal <goal> --confirm --json after confirmation."
       });
     }
-    if (architecture.decision === "draft") {
+    if (architecture.required_for_goal && architecture.decision === "draft") {
       architectureWarnings.push({
         type: "architecture",
         message: "Architecture Baseline is still draft.",
         recovery: "Ask the user to confirm or revise the baseline before implementation."
       });
     }
-    if (architecture.decision === "invalid") {
+    if (architecture.required_for_goal && architecture.decision === "invalid") {
       architectureWarnings.push({
         type: "architecture",
         message: "Architecture Baseline is invalid.",
         recovery: "Inspect .opennori/architecture/baseline.json, fix the reported issues, then rerun opennori check."
       });
     }
-    if (architecture.decision === "challenged") {
+    if (architecture.required_for_goal && architecture.decision === "challenged") {
       architectureWarnings.push({
         type: "architecture",
         message: "Architecture Baseline has open challenges.",
@@ -75,14 +89,16 @@ export const checkCommand = defineCommand({
       });
     }
     const architectureStatus = architectureWarnings.length > 0 ? "needs-action" : "clear";
-    const buildVsBuyWarnings = architecture.build_vs_buy.findings.map((finding: JsonObject) => ({
+    const buildVsBuyWarnings = (architecture.required_for_goal || architecture.build_vs_buy_decisions.length > 0)
+      ? architecture.build_vs_buy.findings.map((finding: JsonObject) => ({
       type: "build_vs_buy",
       decision_id: finding.decision_id,
       severity: finding.severity,
       issue: finding.issue,
       message: finding.message,
       recovery: finding.recovery
-    }));
+    }))
+      : [];
     const health = evidenceHealth(contract, ledger, { root });
     const evidenceHealthWarnings = health.findings.map((finding: JsonObject) => ({
       type: "evidence_health",
@@ -102,10 +118,12 @@ export const checkCommand = defineCommand({
       recovery: "Record profile evidence, waive the preference, or ask the user whether the remaining profile risk is acceptable."
     }));
     const combinedWarnings = [...warnings, ...architectureWarnings, ...buildVsBuyWarnings, ...evidenceHealthWarnings, ...profileWarnings];
-    if (architectureStatus === "needs-action") {
+    if (architecture.requirement.status === "unknown") {
+      nextActions.push("Record an architecture requirement decision before implementation: required, not_required, or waived with a reason.");
+    } else if (architectureStatus === "needs-action") {
       nextActions.push("Resolve architecture_check warnings before treating this goal as architecture-complete.");
     }
-    if (architecture.build_vs_buy.status !== "clear") {
+    if (buildVsBuyWarnings.length > 0) {
       nextActions.push("Resolve build_vs_buy warnings before treating custom infrastructure as mature.");
     }
     if (health.status !== "clear") {

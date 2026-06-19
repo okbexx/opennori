@@ -7,6 +7,14 @@ description: Establish a reviewable OpenNori Architecture Baseline before non-tr
 
 Give the agent a confirmed technical direction before it implements Product AC, while keeping architecture separate from user acceptance criteria.
 
+Before proposing a baseline, decide whether this goal needs Architecture Baseline review at all. The CLI must not infer "non-trivial" from the presence of a goal or from natural-language wording. The agent/user records one of:
+
+- `required`: non-trivial implementation, infrastructure, runtime/state/module/dependency/contract boundary, or architecture preference needs a baseline.
+- `not_required`: the current goal is simple enough that Product AC evidence can proceed without architecture review.
+- `waived`: the user explicitly accepts the architecture review risk for this goal.
+
+If the status is unknown, record the requirement decision with a reason before implementation. Only `required` proceeds to baseline preview/confirmation.
+
 The baseline answers "what architecture should guide this work", not "what steps will the agent perform". It must include both:
 
 - Architecture Charter: product boundary, agent behavior constraints, challenge rule, and build-vs-buy policy.
@@ -16,19 +24,24 @@ If a baseline only says "use good architecture", "prefer existing patterns", or 
 
 ## Start Here
 
-1. Read the current goal and Product AC from resume/status.
+1. Read the current goal, Product AC, and `data.architecture.requirement` from resume/status.
 2. Read Nori Profile for required Skills, preferred stacks, avoid rules, and install policy.
 3. Inspect existing project architecture, dependencies, package/module layout, state model, command/API/MCP/IPC surfaces, tests, docs, and user-supplied references.
-4. Compare mature references and current project evidence before proposing self-built infrastructure.
-5. List available architecture profiles and select or create the best fit.
-6. Ensure the selected profile has a concrete `technical_baseline` with runtime topology, source-of-truth model, module boundaries, contract surfaces, data flows, dependency decisions, reference mappings, and verification.
-7. Preview the baseline and ask the user to confirm before implementation.
-8. After confirmed baseline write, read the returned `data.agent_next` and route to the recommended next Skill.
-9. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish architecture activity while reviewing or confirming the baseline: start before baseline work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-brainstorm --state thinking --summary "..." --json`.
+4. Decide requirement status from project evidence and user intent:
+   - If simple and no architecture boundary is touched, record `not_required` with a reason and return to the current Product AC/evidence loop.
+   - If the user waives architecture review, record `waived` with the user's reason and limitations; report it as review risk.
+   - If non-trivial, record `required` with a reason before previewing the baseline.
+5. Compare mature references and current project evidence before proposing self-built infrastructure.
+6. List available architecture profiles and select or create the best fit.
+7. Ensure the selected profile has a concrete `technical_baseline` with runtime topology, source-of-truth model, module boundaries, contract surfaces, data flows, dependency decisions, reference mappings, and verification.
+8. Preview the baseline and ask the user to confirm before implementation.
+9. After confirmed baseline write, read the returned `data.agent_next` and route to the recommended next Skill.
+10. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish architecture activity while reviewing or confirming the requirement/baseline: start before architecture work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-brainstorm --state thinking --summary "..." --json`.
 
 Useful state commands:
 
 - `opennori architecture profiles --root <repo> --json`
+- `opennori architecture requirement --root <repo> --goal-id <goal-id> --status <required|not_required|waived> --reason "..." --json`
 - `opennori architecture profile --root <repo> --from <profile.json> --json`
 - `opennori architecture baseline --root <repo> --goal "<goal>" --profile <profile-id> --json`
 - `opennori architecture baseline --root <repo> --goal "<goal>" --goal-id <goal-id> --profile <profile-id> --confirm --json`
@@ -42,11 +55,12 @@ Useful state commands:
 - "Use OpenNori's built-in good architecture" -> show the relevant built-in profile, including sources, principles, checks, preferred libraries, avoid rules, and build-vs-buy policy.
 - "The architecture feels vague" -> split the answer into Architecture Charter and Technical Architecture Baseline; fill the missing runtime, state, module, contract, flow, dependency, reference, and verification decisions.
 - "This is a simple change" -> decide whether baseline is needed; if non-trivial implementation or infrastructure is involved, create one.
+- `agent_next.state: architecture_requirement_needs_decision` -> decide and record `required`, `not_required`, or `waived` with a reason. Do not jump straight to baseline because a goal exists.
 - "The product is done but architecture is missing" -> treat baseline work as architecture review cleanup, not Product AC failure.
 
 ## State Writes
 
-May write project architecture profiles and confirmed Architecture Baseline files under `.opennori/architecture/`. Do not write Product AC, acceptance evidence, or implementation tasks.
+May write Architecture Requirement decisions, project architecture profiles, and confirmed Architecture Baseline files under `.opennori/architecture/`. Do not write Product AC, acceptance evidence, or implementation tasks.
 
 Must write live dashboard activity for baseline review when the dashboard is observed and a current goal/gap exists. Activity is not baseline confirmation, not build-vs-buy evidence, and not Product AC evidence.
 
@@ -83,6 +97,8 @@ Needs confirmation: yes
 - Do not turn architecture choices, profiles, libraries, or Architecture Checks into Product AC.
 - Do not confirm a baseline that is only product boundary, governance principle, or broad preference; it must also include the concrete Technical Architecture Baseline.
 - Do not start non-trivial implementation before the baseline is confirmed or explicitly waived by the user.
+- Do not force simple goals through Architecture Baseline. Record `not_required` with a concrete reason when architecture review is unnecessary.
+- Do not let CLI or fixed text rules decide non-triviality. The agent/user owns that judgment and records the decision.
 - Do not silently replace a confirmed baseline; use an Architecture Challenge.
 - Do not self-build infrastructure before build-vs-buy evidence exists.
 - Do not copy process-centered workflow models into OpenNori architecture decisions.

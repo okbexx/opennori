@@ -364,12 +364,16 @@ open-source libraries, and documented reference projects:
 opennori architecture build-vs-buy --root <project> --area "<area>" --need "<need>" --recommendation <reuse|buy|self-build> --summary "<decision>" --json
 ```
 
-Architecture state affects completion confidence, not Product AC shape. When every required Product
-AC is `passing` or `waived` but the current goal has a missing/draft/invalid/challenged baseline,
-stale agent-readable architecture surface, or unhealthy build-vs-buy decisions, OpenNori reports
-`objective_complete: true` with `confidence: review-risk`. It must not create synthetic ARCH
-acceptance criteria or replace `current_gap` unless a real Product AC or blocking Profile item is
-still incomplete.
+Architecture state affects completion confidence, not Product AC shape. The agent/user first records
+Architecture Requirement as `unknown`, `required`, `not_required`, or `waived`; CLI must not infer
+non-triviality from the existence of a goal or from natural-language text. When every required
+Product AC is `passing` or `waived` but the requirement is still `unknown`, OpenNori reports
+`architecture_requirement` review risk. When requirement is `required` and the goal has a
+missing/draft/invalid/challenged baseline, stale agent-readable architecture surface, or unhealthy
+build-vs-buy decisions, OpenNori reports `architecture_review` or `build_vs_buy` review risk. When
+requirement is `waived`, OpenNori reports `architecture_waived` with the recorded reason. It must
+not create synthetic ARCH acceptance criteria or replace `current_gap` unless a real Product AC or
+blocking Profile item is still incomplete.
 
 ## Status Model
 
@@ -381,8 +385,9 @@ still incomplete.
 
 The workflow ledger is complete only when every required criterion is `passing` or `waived`.
 The user-facing completion answer is not confidently complete while `evidence_health` has review
-findings, `profile_review` is unresolved, `architecture_review` remains, or `build_vs_buy` is
-unhealthy, even if the ledger status is already `complete`.
+findings, `profile_review` is unresolved, `architecture_requirement`, `architecture_review`, or
+`architecture_waived` remains, or `build_vs_buy` is unhealthy, even if the ledger status is already
+`complete`.
 
 When a goal is confidently complete, `next_recommendation` may include `candidate_goals`.
 These candidates help the agent continue when the user has asked to keep going. Each candidate

@@ -69,7 +69,7 @@ self-check, then split unrelated surfaces before asking for approval.
    is still a starting point.
 10. If `agent_next.state` is `completion_needs_review` and `agent_next.recommended_skill` is `nori-acceptance`, treat existing passing evidence as provisional: explain the unresolved acceptance ambiguity, ask only the missing questions that affect user judgment, then revise criteria or record explicit user-approved assumptions. Do not ask the user to simply accept risk before making the missing acceptance surface understandable.
 11. If the user has approved or revised AC, persist that decision before implementation continues.
-12. After `opennori approve`, read the returned `data.agent_next`. If it says `architecture_needs_review`, hand off to `nori-architecture-brainstorm` before implementation or evidence work.
+12. After `opennori approve`, read the returned `data.agent_next`. If it says `architecture_requirement_needs_decision`, hand off to `nori-architecture-brainstorm` to decide and record required/not_required/waived before implementation or evidence work. If it says `architecture_needs_review`, hand off to the recommended architecture Skill before non-trivial implementation continues.
 13. If `agent_next.state` is `ready_for_next_loop` and the user asked to continue, select or refine one `agent_next.candidate_goals` item, then create a draft from it; prefer the candidate's `draft_args` or `draft_command` when present instead of reconstructing CLI flags. Do not ask the user to invent the next prompt from scratch. After drafting, show concrete measurement and passing thresholds for approval; do not show a candidate-direction wrapper as if it were enough.
 14. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live acceptance activity while drafting or revising: start before acceptance work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-acceptance --state thinking --summary "..." --json` and let the CLI infer the unique current goal/gap.
 15. Preserve the user's Contract language preference. Infer it from the goal and conversation by default; if the user explicitly asks for Chinese, Simplified Chinese, English, or similar wording, pass `--language zh-CN` or `--language en` to brainstorm/discover/draft. Do not ask the user to remember this CLI flag.
@@ -204,7 +204,7 @@ Must write live dashboard activity while acceptance work is happening and the da
 
 ## Handoffs
 
-- After AC approval for non-trivial work, hand off to `nori-architecture-brainstorm`.
+- After AC approval, if `agent_next` says architecture requirement must be decided, hand off to `nori-architecture-brainstorm`. Non-triviality is an agent/user judgment recorded as Architecture Requirement state, not a CLI hardcoded rule.
 - After implementation needs evidence, hand off to `nori-evidence`.
 - If the user states required Skills, stacks, or avoided tools while defining AC, hand off that part to `nori-capability-profile`.
 - If `acceptance_review` remains after required AC are objectively passing, stay in `nori-acceptance` while the user is clarifying or revising AC. Hand off to `nori-reporting` only after the user explicitly accepts the remaining review risk or the AC findings are resolved.

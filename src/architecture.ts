@@ -2,12 +2,14 @@ export {
   AGENT_ROUTE_END,
   AGENT_ROUTE_START,
   ARCHITECTURE_CHALLENGE_SCHEMA_VERSION,
+  ARCHITECTURE_REQUIREMENT_SCHEMA_VERSION,
   BUILD_VS_BUY_SCHEMA_VERSION,
   REQUIRED_ARCHITECTURE_DIRS,
   agentGuidePath,
   architectureBaselinePaths,
   architectureChallengePath,
   architectureDir,
+  architectureRequirementPath,
   buildVsBuyPath
 } from "./architecture/shared.ts";
 export {
@@ -38,6 +40,11 @@ export {
   renderArchitectureApplyMarkdown,
   writeArchitectureApplyRecord
 } from "./architecture/apply.ts";
+export {
+  readArchitectureRequirement,
+  unknownArchitectureRequirement,
+  writeArchitectureRequirement
+} from "./architecture/requirement.ts";
 export {
   architectureState
 } from "./architecture/state.ts";

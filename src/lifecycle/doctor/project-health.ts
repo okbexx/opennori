@@ -91,7 +91,7 @@ export function architectureHealthChecks(architecture: ArchitectureState, baseli
     "architecture_baseline",
     !baselineRequired || architecture.decision === "valid" || architecture.decision === "challenged",
     !baselineRequired
-      ? "No current goal requires an Architecture Baseline yet."
+      ? `Architecture Baseline is not currently required by recorded requirement state (${architecture.requirement.status}).`
       : architecture.baseline
         ? `Architecture Baseline decision is ${architecture.decision}.`
         : "Current goal has no Architecture Baseline.",
@@ -100,7 +100,7 @@ export function architectureHealthChecks(architecture: ArchitectureState, baseli
   ));
   checks.push(doctorCheck(
     "build_vs_buy_health",
-    architecture.build_vs_buy.status === "clear",
+    (!baselineRequired && architecture.build_vs_buy_decisions.length === 0) || architecture.build_vs_buy.status === "clear",
     architecture.build_vs_buy.summary,
     "Run opennori architecture build-vs-buy with current project, standard library, official SDK, open-source candidates, and self-build reason where needed.",
     architecture.build_vs_buy.status === "broken" ? "broken" : "needs-action"

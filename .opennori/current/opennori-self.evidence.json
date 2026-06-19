@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User required complete-product autogoal to perform coverage self-check and split independent user judgment surfaces before drafting.",
-      "approved_at": "2026-06-18T15:06:32.441Z"
+      "summary": "User added AC-A-11.",
+      "approved_at": "2026-06-19T02:42:46.186Z"
     },
     "criteria": [
       {
@@ -558,6 +558,15 @@
         "threshold": "Skills 明确要求完整产品类 autogoal 在 draft 前执行 coverage self-check，覆盖用户角色、入口/导航、项目列表与切换、核心对象列表与详情、只读预览、状态与空态/加载/错误/成功、来源/审计、记忆、能力、外部知识库、检索、权限/安全边界、持久化、失败恢复和最终 review/report；如果一条 AC 混入多个独立用户判断面，agent 必须拆分或标为需修订；旧的压缩 draft 不能被 approve，应重新生成。该规则仍属于 Skill 行为协议、用户确认和资产测试，不写成 CLI hard validator 或自然语言质量词表。",
         "required": true,
         "risk": "medium"
+      },
+      {
+        "id": "AC-A-11",
+        "layer": "architecture",
+        "user_story": "作为用户，我让 agent 处理一个 OpenNori goal 时，能看到 Architecture Baseline 是否需要由 agent/user 明确判断并记录，而不是 CLI 因为存在 goal 就默认所有 AC 都必须走架构 review。",
+        "measurement": "分别用简单 goal、非平凡 goal 和用户 waiver 场景检查 status/check/agent_next、architecture show、README/Skills 和测试；确认简单 goal 可以记录 architecture not_required 并直接进入 evidence，非平凡 goal 记录 required 后才路由 baseline，waiver 有明确 reason 和 review 风险表达。",
+        "threshold": "OpenNori 提供 architecture requirement 状态（unknown/required/not_required/waived）和记录入口；Skill 要求 agent 判断非平凡性并写入该状态；CLI 不再用 Boolean(goalId) 作为是否需要 baseline 的依据，只根据已记录 requirement、baseline、challenge、build-vs-buy 和 evidence 状态做确定性路由；该机制不把技术架构写成 Product AC，也不让 CLI 通过自然语言硬判非平凡。",
+        "required": true,
+        "risk": "medium"
       }
     ]
   },
@@ -565,7 +574,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-18T15:18:18.106Z",
+    "updated_at": "2026-06-19T03:21:27.488Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -6557,6 +6566,79 @@
             "limitations": "This proves OpenNori capability assets and local plugin cache now instruct agents to run coverage self-check and split complete-product AC before approval. It intentionally does not add CLI subjective AC quality scoring, and future draft quality still depends on the loaded Skill and user approval.",
             "gate": "accepted",
             "created_at": "2026-06-18T15:18:18.106Z"
+          }
+        ]
+      },
+      "AC-A-11": {
+        "status": "passing",
+        "confidence": "verified",
+        "required": true,
+        "risk": "medium",
+        "evidence": [
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "OpenNori now records Architecture Requirement as explicit agent/user state and no longer treats Boolean(goalId) as requiring Architecture Baseline. Unknown routes to architecture_requirement_needs_decision; required routes to baseline review or current-gap work when baseline is valid; not_required routes to Product AC evidence; waived continues with review risk. Packaged Skills, README, protocol, AGENTS, schema, check/doctor/status/report/agent_next, and tests were updated.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "architecture-apply",
+                "label": "ac-a-11-architecture-requirement-routing",
+                "path": "/Users/jarl/code/jarlone/opennori/.opennori/architecture/evidence/ac-a-11-architecture-requirement-routing.json",
+                "role": "context",
+                "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+              },
+              {
+                "type": "command",
+                "label": "npm run typecheck",
+                "command": "npm run typecheck"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js --testNamePattern 'architecture|requirement|doctor|schema|high-risk|build-vs-buy|context export'",
+                "command": "npx vitest run test/core.test.js --testNamePattern 'architecture|requirement|doctor|schema|high-risk|build-vs-buy|context export'"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js test/core.test.js --testNamePattern '^(?!.*human output summarizes doctor check status report and dashboard).*(architecture|requirement|doctor|schema|check command module|resume command module|status command module|report command module|high-risk|build-vs-buy|context export).*'",
+                "command": "npx vitest run test/cli-commands.test.js test/core.test.js --testNamePattern '^(?!.*human output summarizes doctor check status report and dashboard).*(architecture|requirement|doctor|schema|check command module|resume command module|status command module|report command module|high-risk|build-vs-buy|context export).*'"
+              },
+              {
+                "type": "artifact",
+                "label": "src/architecture/requirement.ts",
+                "path": "src/architecture/requirement.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/architecture/requirement.ts",
+                "path": "src/cli/commands/architecture/requirement.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "schemas/architecture-requirement.schema.json",
+                "path": "schemas/architecture-requirement.schema.json"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md",
+                "path": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              }
+            ],
+            "reviewability": "Inspect the new requirement state schema/module/CLI, run status/check on required/not_required/waived fixtures, and rerun the listed typecheck and Vitest commands.",
+            "limitations": "Full npm run check may still fail in this sandbox if tests attempt to bind the local dashboard server to 127.0.0.1; the relevant non-dashboard targeted suites passed.",
+            "gate": "accepted",
+            "created_at": "2026-06-19T03:21:27.488Z"
           }
         ]
       }

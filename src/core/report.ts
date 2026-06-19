@@ -36,6 +36,12 @@ function profileReviewRisks(ledger: EvidenceLedger): string[] {
 function architectureReviewRisks(architecture: ArchitectureState | undefined): string[] {
   if (!architecture) return [];
   const risks: string[] = [];
+  if (architecture.requirement.status === "unknown" && architecture.requirement.goal_id) {
+    risks.push("architecture_requirement");
+  }
+  if (architecture.requirement.status === "waived") {
+    risks.push("architecture_waived");
+  }
   if (architecture.required_for_goal && architecture.decision !== "valid") {
     risks.push("architecture_review");
   }
@@ -49,6 +55,7 @@ function architectureReviewRisks(architecture: ArchitectureState | undefined): s
 }
 
 function architectureReviewSkill(architecture: ArchitectureState): AgentSkill {
+  if (architecture.requirement.status === "unknown") return "nori-architecture-brainstorm";
   if (architecture.decision === "challenged") return "nori-architecture-challenge";
   if (architecture.build_vs_buy.status !== "clear") return "nori-build-vs-buy";
   if (architecture.decision === "valid") return "nori-architecture-apply";
@@ -56,6 +63,18 @@ function architectureReviewSkill(architecture: ArchitectureState): AgentSkill {
 }
 
 function architectureReviewActions(architecture: ArchitectureState): string[] {
+  if (architecture.requirement.status === "unknown") {
+    return [
+      "Decide whether this goal needs Architecture Baseline review before the current acceptance gap is implemented.",
+      "Record required, not_required, or waived with a reason; do not let CLI infer this from the goal text."
+    ];
+  }
+  if (architecture.requirement.status === "waived") {
+    return [
+      `Architecture review was waived: ${architecture.requirement.reason}`,
+      "Continue Product AC evidence, but report this waiver as a review risk unless the user accepts it."
+    ];
+  }
   if (architecture.decision === "missing") {
     return [
       "Preview an Architecture Baseline from the current goal, Product AC, Nori Profile, project evidence, and available profiles.",
@@ -409,6 +428,22 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
     gap
     && gap.id !== "ACCEPTANCE-BASIS"
     && architecture
+    && architecture.requirement.status === "unknown"
+    && architecture.requirement.goal_id
+  ) {
+    return {
+      status: "architecture-requirement-required",
+      focus: gap.id,
+      recommended_skill: "nori-architecture-brainstorm",
+      summary: "Product AC is ready, but the agent/user has not recorded whether this goal needs Architecture Baseline review.",
+      actions: architectureReviewActions(architecture)
+    };
+  }
+
+  if (
+    gap
+    && gap.id !== "ACCEPTANCE-BASIS"
+    && architecture
     && architecture.required_for_goal
     && (architecture.decision !== "valid" || architecture.build_vs_buy.status !== "clear")
   ) {
@@ -474,6 +509,14 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
     if (architecture && architectureReviewRisks(architecture).includes("architecture_review")) {
       actions.push("Review architecture_check warnings.");
       actions.push("Confirm, repair, or challenge the Architecture Baseline before reporting confidently complete.");
+    }
+    if (architecture && architectureReviewRisks(architecture).includes("architecture_requirement")) {
+      actions.push("Decide whether the completed goal required Architecture Baseline review.");
+      actions.push("Record required, not_required, or waived with a reason before reporting confidently complete.");
+    }
+    if (architecture && architectureReviewRisks(architecture).includes("architecture_waived")) {
+      actions.push("Review the recorded architecture waiver and its reason.");
+      actions.push("Ask the user whether the remaining architecture review risk is acceptable.");
     }
     if (architecture && architectureReviewRisks(architecture).includes("build_vs_buy")) {
       actions.push("Review build_vs_buy findings.");

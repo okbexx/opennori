@@ -36,6 +36,7 @@ Useful state commands:
 - "Use the architecture apply record as context" -> attach it with `--architecture-apply`, but still record a user-visible verification source for passing evidence.
 - "This evidence is stale" -> prune stale evidence and make the AC eligible to become the current gap again.
 - "Why is AC-2 passing" -> summarize latest supporting evidence, basis, sources, confidence, and limitations.
+- `agent_next.state: architecture_requirement_needs_decision` after evidence -> hand off to `nori-architecture-brainstorm` to record required, not_required, or waived with a reason.
 - `agent_next.state: architecture_needs_review` after evidence -> hand off to `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge` as recommended.
 - `agent_next.state: completion_needs_review` after evidence -> hand off to `nori-reporting`.
 - `agent_next.state: ready_for_next_loop` after evidence -> do not invent more evidence; report completion and use candidate goals only if the user asked to continue.

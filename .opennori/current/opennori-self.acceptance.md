@@ -11,7 +11,7 @@ Language: en
 ## Acceptance Basis
 
 Status: approved
-Summary: User required complete-product autogoal to perform coverage self-check and split independent user judgment surfaces before drafting.
+Summary: User added AC-A-11.
 
 ## Nori Profile
 
@@ -82,6 +82,7 @@ Summary: User required complete-product autogoal to perform coverage self-check 
 | AC-O-11 | operator | 作为用户，我给 agent 一个包含页面、应用、Dashboard、Desktop、工作台、表单或其他可见交互界面的目标时，OpenNori 能引导 agent 自动挖掘 UI/UX 体验验收，而不是只生成数据、状态或功能完成 AC。 | 阅读 nori、nori-acceptance、nori-autogoal packaged Skills、OpenNori protocol、README 和自验收报告，并用界面类目标检查 agent 应追问或补齐哪些体验维度。 | Skills 明确要求界面类目标覆盖入口与导航、信息层级、空态/加载/错误/成功状态、操作反馈、可读性、视觉一致性、恢复路径和不应暴露的 UI 边界；这些要求以 agent 行为协议和用户确认表达，不写成 CLI hard validator 或固定词表测试。 | passing |
 | AC-O-12 | operator | 作为用户，我告诉 agent 要做完整产品、完整功能闭环、完整应用、完整 Dashboard 或完整工作台时，OpenNori 会让 agent 充分展开用户可验收 AC，而不是默认压缩成少量 MVP、第一版或 happy-path AC。 | 阅读 nori、nori-acceptance、nori-autogoal packaged Skills、本机 OpenNori 开发 Skills、OpenNori protocol、README、官网和自验收报告；用完整产品类目标检查 agent 是否会覆盖足够的验收面，并让用户显式确认保留完整闭环或缩小范围。 | Skills 明确要求完整产品类目标默认展开完整验收面，包括用户角色、入口与导航、核心工作流、状态转换、数据规则、权限与边界、失败与恢复、持久化、UI/UX、报告或审查方式；AC 数量可以按目标需要增加，执行仍按当前缺口推进；只有用户明确要求原型、MVP、第一版或缩小范围时，agent 才能压缩完成定义；该规则只写入 Skill 行为协议、文档、用户确认和资产测试，不写成 CLI hard validator 或固定自然语言词表。 | passing |
 | AC-O-13 | operator | 作为用户，我用 OpenNori autogoal 定义完整产品、完整 Dashboard 或完整工作台时，agent 在写入 Nori Contract Draft 前会先做验收面覆盖自检，并把独立用户判断面拆成独立 AC，而不是把项目概览、资产、记忆、能力、知识库、检索、审计、UI 状态和恢复路径压进少量大 AC。 | 阅读 nori、nori-acceptance、nori-autogoal packaged Skills、本机开发 Skills、OpenNori protocol、README、官网和测试资产；用 AW 完整项目工作台提示词检查 agent 是否会先列出 coverage map，再生成足够细分的标准 Nori Contract Draft。 | Skills 明确要求完整产品类 autogoal 在 draft 前执行 coverage self-check，覆盖用户角色、入口/导航、项目列表与切换、核心对象列表与详情、只读预览、状态与空态/加载/错误/成功、来源/审计、记忆、能力、外部知识库、检索、权限/安全边界、持久化、失败恢复和最终 review/report；如果一条 AC 混入多个独立用户判断面，agent 必须拆分或标为需修订；旧的压缩 draft 不能被 approve，应重新生成。该规则仍属于 Skill 行为协议、用户确认和资产测试，不写成 CLI hard validator 或自然语言质量词表。 | passing |
+| AC-A-11 | architecture | 作为用户，我让 agent 处理一个 OpenNori goal 时，能看到 Architecture Baseline 是否需要由 agent/user 明确判断并记录，而不是 CLI 因为存在 goal 就默认所有 AC 都必须走架构 review。 | 分别用简单 goal、非平凡 goal 和用户 waiver 场景检查 status/check/agent_next、architecture show、README/Skills 和测试；确认简单 goal 可以记录 architecture not_required 并直接进入 evidence，非平凡 goal 记录 required 后才路由 baseline，waiver 有明确 reason 和 review 风险表达。 | OpenNori 提供 architecture requirement 状态（unknown/required/not_required/waived）和记录入口；Skill 要求 agent 判断非平凡性并写入该状态；CLI 不再用 Boolean(goalId) 作为是否需要 baseline 的依据，只根据已记录 requirement、baseline、challenge、build-vs-buy 和 evidence 状态做确定性路由；该机制不把技术架构写成 Product AC，也不让 CLI 通过自然语言硬判非平凡。 | passing |
 
 ## Rule
 

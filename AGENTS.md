@@ -32,16 +32,28 @@ full deterministic payload for agents and automation.
 
 `opennori dashboard` is a local visual observation surface over the acceptance loop. It must not become an agent runtime, process log, chat log, completion authority, or confirmation surface. Do not add dashboard controls that approve AC, confirm Architecture Baselines, waive risks, accept reports, or write Product AC/evidence/profile/architecture/report state. When user input is needed, the dashboard may show what decision is needed and should direct the user back to the agent conversation; the agent records the decision through OpenNori Skills and CLI. `opennori activity` only publishes live agent state for the dashboard; it is not Product AC evidence. When the dashboard is observed and a current goal/gap exists, Skills that draft, change, implement, verify, or record OpenNori state must publish activity: start before work, heartbeat only during longer work, and finish when the turn ends. Skills should prefer `data.agent_next.dashboard_activity` command templates when present, otherwise use low-parameter activity commands and let the CLI infer the unique current goal/gap. If no current goal/gap exists, do not bind activity to drafts or setup/init previews. If `.opennori/current` contains multiple goals, treat that as broken state and route to doctor/project-health instead of guessing.
 
-Before implementing a non-trivial change, read:
+Before implementing, first inspect OpenNori status and Architecture Requirement:
 
 - `.opennori/current/*.acceptance.md`
+- `.opennori/architecture/requirements/*.json` when present
+- `opennori status --root . --json` or `opennori architecture show --root . --json`
+
+Do not let CLI or file existence decide whether the goal is non-trivial. The
+agent/user must record Architecture Requirement as `required`, `not_required`,
+or `waived` with a reason. Only `required` makes Architecture Baseline review a
+blocking architecture route. `not_required` returns to Product AC evidence, and
+`waived` remains a review risk with a recorded reason.
+
+Before implementing a goal whose Architecture Requirement is `required`, read:
+
 - `.opennori/architecture/baseline.md`
 - `.opennori/agent-guide.md`
 - `plugins/opennori/skills/nori*/SKILL.md`
 - `plugins/opennori/.codex-plugin/plugin.json`
 - `.agents/plugins/marketplace.json`
 
-Follow the Architecture Baseline while completing Product AC.
+Follow the Architecture Baseline while completing Product AC only when
+Architecture Requirement is `required`.
 If the baseline conflicts with project evidence, create an Architecture Challenge instead of silently replacing it.
 An Architecture Baseline is incomplete if it only states product boundaries,
 governance principles, or preferred libraries. For non-trivial implementation it

@@ -73,7 +73,7 @@ Must write live dashboard activity for health diagnosis or recovery when the das
 - AC wording is vague, implementation-centered, or too broad from the user's perspective -> `nori-acceptance`.
 - `evidence_health` -> `nori-evidence`.
 - `profile_review` -> `nori-capability-profile`.
-- `architecture_check` or stale baseline surface -> `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge`.
+- `architecture_requirement` or `architecture_check` -> `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge` as recommended. Requirement unknown means decide required/not_required/waived first; it is not lifecycle repair.
 - `build_vs_buy` findings -> `nori-build-vs-buy`.
 - Healthy status or user-facing summary -> `nori-reporting`.
 

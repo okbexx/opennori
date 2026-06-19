@@ -37,6 +37,7 @@ entrypoints, operations, outcomes, evidence needs, and boundaries.
    - `health_needs_recovery` or `setup_preview_needs_confirmation` -> hand off to `nori-project-health`.
    - `initialized_no_active_contract` -> if drafts exist, show them for approval or revision; otherwise use the user's already stated goal if the current conversation includes one, or ask for the natural-language goal; then hand off to `nori-acceptance`.
    - `ready_with_current_goal` -> run resume/status as directed.
+   - `architecture_requirement_needs_decision` -> hand off to `nori-architecture-brainstorm` to decide and record whether this goal needs Architecture Baseline review. This is an agent/user judgment, not a CLI inference from the existence of a goal.
    - `architecture_needs_review` -> follow `recommended_skill` (`nori-architecture-brainstorm`, `nori-architecture-challenge`, or `nori-build-vs-buy`) before non-trivial implementation continues.
    - `work_on_current_gap` -> work only on the current acceptance gap and hand off to `nori-evidence` after verification.
    - `completion_needs_review`, `evidence_needs_review`, or `acceptance_needs_user` -> use reporting/evidence/acceptance as directed and involve the user when `needs_user` is true.
@@ -64,6 +65,7 @@ entrypoints, operations, outcomes, evidence needs, and boundaries.
 - "Record this verification", "use this screenshot/report/test as evidence", "that evidence is stale", "waive this" -> hand off to `nori-evidence`.
 - "Must use this Skill", "prefer Radix UI", "avoid this tool", "ask before installing" -> hand off to `nori-capability-profile`.
 - "Decide architecture first", "use a better architecture", "follow the baseline", "challenge the baseline" -> use `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge`.
+- `agent_next.state: architecture_requirement_needs_decision` -> decide whether the current goal is simple enough to record `not_required`, non-trivial enough to record `required`, or explicitly waived by the user. Record the decision with a reason before implementation.
 - "Before self-building this parser/installer/schema/storage/UI primitive" -> hand off to `nori-build-vs-buy`.
 - "Install", "upgrade", "uninstall", "doctor", "state is broken", "sync local OpenNori plugin", or "Codex Plugin cache is stale" -> hand off to `nori-project-health`.
 - "Show me the dashboard", "watch OpenNori run", "I want live status" -> run or suggest `opennori dashboard --root <repo>` and keep completion judgment plus user confirmations in conversation and status/report.
@@ -121,6 +123,7 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not outsource AC quality judgment to CLI heuristics. The agent must inspect AC wording and ask the user the missing acceptance questions when the human judgment surface is vague.
 - Do not accept visible interface goals with only functional/data AC. The agent must check whether the user can navigate, scan, understand state, get feedback, recover from failure, and judge visual/interaction consistency.
 - Do not turn architecture, profile, build-vs-buy, Plugin, hook, or tool preferences into Product AC.
+- Do not let the CLI decide whether a goal is non-trivial. The agent/user records Architecture Requirement status; CLI only routes from that recorded state.
 - Do not treat dashboard activity, events, or snapshots as acceptance evidence.
 - Do not treat dashboard as a place for confirmation buttons or state-changing controls.
 - Do not suggest copying or syncing OpenNori Skills into the user project; Skills come from the installed OpenNori Plugin, and the CLI only manages `.opennori` state.

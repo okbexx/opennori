@@ -30,7 +30,7 @@ function shellArg(value: string): string {
 function activityStateFor(input: AgentNextInput): string {
   if (input.needsUser) return "waiting_user";
   if (input.state === "evidence_ready_for_recording" || input.state === "evidence_needs_review") return "verifying";
-  if (input.state === "architecture_needs_review") return "thinking";
+  if (input.state === "architecture_needs_review" || input.state === "architecture_requirement_needs_decision") return "thinking";
   if (input.state === "ready_for_next_loop") return "thinking";
   if (input.state === "state_needs_reconcile" || input.state === "health_needs_recovery") return "blocked";
   return "working";
@@ -267,6 +267,19 @@ export function agentNextForRecommendation(
       goalId,
       currentGapId: gap?.id ?? recommendation.focus,
       needsUser: true
+    });
+  }
+
+  if (recommendation.status === "architecture-requirement-required") {
+    return agentNext({
+      state: "architecture_requirement_needs_decision",
+      recommendedSkill: recommendation.recommended_skill ?? "nori-architecture-brainstorm",
+      summary: recommendation.summary,
+      instruction: "Decide whether the current goal needs Architecture Baseline review based on project context and user intent, then record required, not_required, or waived with a reason. Do not infer this from CLI existence of a goal.",
+      userVisibleNext: recommendation.actions[0] ?? "Decide whether Architecture Baseline review is needed before implementation.",
+      goalId,
+      currentGapId: gap?.id ?? recommendation.focus,
+      needsUser: false
     });
   }
 

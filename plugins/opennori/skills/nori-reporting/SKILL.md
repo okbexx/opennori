@@ -13,7 +13,7 @@ Reporting is not an implementation diary.
 
 1. Run the narrowest status command that answers the user.
 2. Prefer resume/status for current state, report for a durable human report, changes for diff grouping, and context export when another tool needs review context.
-3. Read completion, current_gap, evidence_health, profile_review, architecture decision, build_vs_buy health, agent_next, and next_recommendation. Read `acceptance_review` when present, but remember that subjective AC quality is primarily a Skill/user review responsibility.
+3. Read completion, current_gap, evidence_health, profile_review, architecture requirement, architecture decision, build_vs_buy health, agent_next, and next_recommendation. Read `acceptance_review` when present, but remember that subjective AC quality is primarily a Skill/user review responsibility.
 4. If the user asked to continue, follow `agent_next` routing and its `candidate_goals` instead of stopping at a status dump.
 5. If the AC wording is vague from the user perspective, do not present this as normal completion acceptance even when CLI state is objectively complete. Say the evidence may be complete but the AC needs user review, state the ambiguity in human terms, and hand off to `nori-acceptance`.
 6. If the user wants a visual live view, use `opennori dashboard --root <repo>` as an observation surface, but keep the completion answer based on status/report data.
@@ -40,6 +40,8 @@ Useful state commands:
 - "Export for review" -> use context export and state what the reviewer can inspect.
 - "Open dashboard" or "watch it run" -> start the local dashboard and explain that it observes activity, current gap, architecture, user-intervention needs, and completion judgment without certifying completion or hosting confirmation controls.
 - AC quality or acceptance meaning is unclear -> lead with "objectively evidenced, not confidently acceptable yet" only when evidence is complete; then route to AC revision instead of asking for a blind risk acceptance.
+- `architecture_requirement` review risk -> explain that the agent/user has not recorded whether this goal needed Architecture Baseline review; hand off to `nori-architecture-brainstorm` to record required/not_required/waived.
+- `architecture_waived` review risk -> explain the recorded waiver reason and ask whether the remaining architecture risk is acceptable.
 
 ## State Writes
 

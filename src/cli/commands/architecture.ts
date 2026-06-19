@@ -11,6 +11,10 @@ export {
   runArchitectureBaselineCommand
 } from "./architecture/baseline.ts";
 export {
+  architectureRequirementCommand,
+  runArchitectureRequirementCommand
+} from "./architecture/requirement.ts";
+export {
   architectureApplyCommand,
   runArchitectureApplyCommand
 } from "./architecture/apply.ts";

@@ -46,6 +46,10 @@ export const criterionAddCommand = defineCommand({
       description: "Whether this criterion is required.",
       default: true
     },
+    layer: {
+      type: "string",
+      description: "Optional criterion layer such as protocol, operator, productization, architecture, or acceptance."
+    },
     summary: {
       type: "string",
       description: "Human revision summary."
@@ -62,7 +66,7 @@ export const criterionAddCommand = defineCommand({
 
     const criterion: AcceptanceCriterion = {
       id: criterionId,
-      layer: inferCriterionLayer(criterionId),
+      layer: args.layer ? String(args.layer) : inferCriterionLayer(criterionId),
       user_story: String(args.userStory || "").trim(),
       measurement: String(args.measurement || "").trim(),
       threshold: String(args.threshold || "").trim(),

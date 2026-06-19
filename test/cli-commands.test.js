@@ -6,7 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "vitest";
 import { runApproveCommand, runBrainstormCommand, runCriterionAddCommand, runCriterionUpdateCommand, runDiscoverCommand, runDraftCommand, runEvaluateCommand, runInitCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../src/cli/commands/acceptance.ts";
-import { runArchitectureApplyCommand, runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand } from "../src/cli/commands/architecture.ts";
+import { runArchitectureApplyCommand, runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand, runArchitectureRequirementCommand } from "../src/cli/commands/architecture.ts";
 import { runActivityFinishCommand, runActivityHeartbeatCommand, runActivityShowCommand, runActivityStartCommand } from "../src/cli/commands/activity.ts";
 import { runCheckCommand } from "../src/cli/commands/check.ts";
 import { runChangesCommand } from "../src/cli/commands/changes.ts";
@@ -26,7 +26,7 @@ import { printHumanResult } from "../src/cli/human-output.ts";
 import { resolveCliCommand, runCliCommand } from "../src/cli/command-tree.ts";
 import { runUninstallCommand } from "../src/cli/commands/uninstall.ts";
 import { runUpgradeCommand } from "../src/cli/commands/upgrade.ts";
-import { buildArchitectureBaseline, renderAgentGuideMarkdown, writeArchitectureBaseline } from "../src/architecture.ts";
+import { buildArchitectureBaseline, renderAgentGuideMarkdown, writeArchitectureBaseline, writeArchitectureRequirement } from "../src/architecture.ts";
 import { loadPair } from "../src/cli/runtime.ts";
 import { addEvidence, appendEvent, buildEvidenceLedger, readEvents, refreshSnapshot, snapshotPath, writeJson } from "../src/core.ts";
 import { startDashboardServer } from "../src/kernel/server.ts";
@@ -798,8 +798,8 @@ test("check command module reports acceptance architecture and evidence health",
   assert.equal(checked.data.architecture_check.status, "needs-action");
   assert.equal(checked.data.architecture_check.decision, "missing");
   assert.equal(checked.data.evidence_health.status, "clear");
-  assert.equal(checked.warnings.some((warning) => warning.type === "architecture"), true);
-  assert.equal(checked.next_actions.some((action) => /architecture_check/.test(action)), true);
+  assert.equal(checked.warnings.some((warning) => warning.type === "architecture_requirement"), true);
+  assert.equal(checked.next_actions.some((action) => /architecture requirement/.test(action) || /opennori architecture requirement/.test(action)), true);
 });
 
 test("architecture build-vs-buy command module records reviewable decisions", async () => {
@@ -835,6 +835,11 @@ test("architecture build-vs-buy command module records reviewable decisions", as
 
 test("architecture challenge command module records baseline challenges", async () => {
   const root = tempRoot();
+  writeArchitectureRequirement(root, {
+    goalId: "module-goal",
+    status: "required",
+    reason: "This fixture challenges a required Architecture Baseline."
+  });
   writeArchitectureBaseline(root, buildArchitectureBaseline(root, {
     goal: "Keep architecture reviewable",
     goalId: "module-goal",
@@ -866,6 +871,11 @@ test("architecture challenge command module records baseline challenges", async 
 
 test("architecture apply command module records baseline alignment without Product AC evidence", async () => {
   const root = tempRoot();
+  writeArchitectureRequirement(root, {
+    goalId: "module-goal",
+    status: "required",
+    reason: "This fixture applies a required Architecture Baseline."
+  });
   writeArchitectureBaseline(root, buildArchitectureBaseline(root, {
     goal: "Keep architecture aligned",
     goalId: "module-goal",
@@ -910,6 +920,11 @@ test("architecture apply command module records baseline alignment without Produ
 
 test("architecture apply routes conflicts to architecture challenge", async () => {
   const root = tempRoot();
+  writeArchitectureRequirement(root, {
+    goalId: "module-goal",
+    status: "required",
+    reason: "This fixture applies a required Architecture Baseline and records a challenge path."
+  });
   writeArchitectureBaseline(root, buildArchitectureBaseline(root, {
     goal: "Keep architecture aligned",
     goalId: "module-goal",
@@ -1015,6 +1030,11 @@ test("architecture baseline command module previews before confirmed write", asy
   fs.mkdirSync(activeDir, { recursive: true });
   fs.writeFileSync(activeAcceptancePath, "# Module goal\n");
   writeJson(activeEvidencePath, { contract, ledger });
+  writeArchitectureRequirement(root, {
+    goalId: "module-goal",
+    status: "required",
+    reason: "This fixture confirms a required Architecture Baseline."
+  });
 
   const preview = await runArchitectureBaselineCommand([
     "--root", root,
@@ -1137,7 +1157,7 @@ test("profile add and evidence modules update compliance and workflow state", as
   assert.equal(JSON.parse(fs.readFileSync(evidencePath, "utf8")).ledger.capability_profile.items.length, 1);
 });
 
-test("next command module routes approved gaps through architecture review when baseline is missing", async () => {
+test("next command module asks for architecture requirement before baseline review", async () => {
   const root = tempRoot();
   const contract = {
     goal_id: "module-goal",
@@ -1158,11 +1178,55 @@ test("next command module routes approved gaps through architecture review when 
   assert.equal(next.data.goal_id, "module-goal");
   assert.equal(next.data.current_gap.id, "AC-1");
   assert.equal(next.data.complete, false);
-  assert.equal(next.data.next_recommendation.status, "architecture-review-required");
-  assert.equal(next.data.agent_next.state, "architecture_needs_review");
+  assert.equal(next.data.next_recommendation.status, "architecture-requirement-required");
+  assert.equal(next.data.agent_next.state, "architecture_requirement_needs_decision");
   assert.equal(next.data.agent_next.recommended_skill, "nori-architecture-brainstorm");
   assert.equal(next.data.agent_next.current_gap_id, "AC-1");
-  assert.equal(next.next_actions.some((action) => /Architecture Baseline/.test(action)), true);
+  assert.equal(next.next_actions.some((action) => /required, not_required, or waived/.test(action)), true);
+});
+
+test("architecture requirement command records decisions and controls baseline routing", async () => {
+  const root = tempRoot();
+  writeActiveGoalWithId(root, "module-goal");
+
+  const notRequired = await runArchitectureRequirementCommand([
+    "--root", root,
+    "--goal-id", "module-goal",
+    "--status", "not_required",
+    "--reason", "Single documentation copy edit with no runtime, state, dependency, or module boundary change.",
+    "--json"
+  ]);
+  assert.equal(notRequired.ok, true);
+  assert.equal(notRequired.data.requirement.status, "not_required");
+  assert.equal(notRequired.data.architecture.required_for_goal, false);
+  assert.equal(notRequired.data.agent_next.state, "work_on_current_gap");
+  assert.equal(notRequired.data.agent_next.recommended_skill, "nori-evidence");
+
+  const required = await runArchitectureRequirementCommand([
+    "--root", root,
+    "--goal-id", "module-goal",
+    "--status", "required",
+    "--reason", "Implementation touches command modules and project state boundaries.",
+    "--json"
+  ]);
+  assert.equal(required.data.requirement.status, "required");
+  assert.equal(required.data.architecture.required_for_goal, true);
+  assert.equal(required.data.next_recommendation.status, "architecture-review-required");
+  assert.equal(required.data.agent_next.state, "architecture_needs_review");
+
+  const waived = await runArchitectureRequirementCommand([
+    "--root", root,
+    "--goal-id", "module-goal",
+    "--status", "waived",
+    "--reason", "User explicitly accepts architecture review risk for this small follow-up.",
+    "--decided-by", "user",
+    "--limitations", "No baseline is confirmed for later non-trivial changes.",
+    "--json"
+  ]);
+  assert.equal(waived.data.requirement.status, "waived");
+  assert.equal(waived.warnings.some((warning) => warning.type === "architecture_requirement"), true);
+  assert.equal(waived.data.agent_next.state, "work_on_current_gap");
+  assert.equal(waived.data.agent_next.recommended_skill, "nori-evidence");
 });
 
 test("resume command module includes completion, health, architecture, and next actions", async () => {
@@ -1184,7 +1248,7 @@ test("resume command module includes completion, health, architecture, and next 
   assert.equal(resume.data.completion.complete, true);
   assert.equal(resume.data.completion.objective_complete, true);
   assert.equal(resume.data.completion.confidence, "review-risk");
-  assert.equal(resume.data.completion.review_risks.includes("architecture_review"), true);
+  assert.equal(resume.data.completion.review_risks.includes("architecture_requirement"), true);
   assert.equal(resume.data.acceptance_review.status, "clear");
   assert.equal(resume.data.evidence_health.status, "clear");
   assert.equal(resume.data.architecture.decision, "missing");
@@ -1192,7 +1256,7 @@ test("resume command module includes completion, health, architecture, and next 
   assert.equal(resume.data.agent_next.state, "completion_needs_review");
   assert.equal(resume.data.agent_next.recommended_skill, "nori-reporting");
   assert.equal(resume.data.acceptance_path, acceptancePath);
-  assert.equal(resume.next_actions.some((action) => /architecture_check/.test(action)), true);
+  assert.equal(resume.next_actions.some((action) => /Architecture Baseline review/.test(action)), true);
 });
 
 test("resume command module suggests next-loop candidates for confidently complete goals", async () => {
@@ -1206,6 +1270,11 @@ test("resume command module suggests next-loop candidates for confidently comple
     acceptance_basis: { status: "approved" }
   };
   const ledger = { status: "complete", criteria: {}, capability_profile: { items: [], evidence: [] } };
+  writeArchitectureRequirement(root, {
+    goalId: contract.goal_id,
+    status: "required",
+    reason: "This fixture verifies confident completion with an active baseline."
+  });
   writeArchitectureBaseline(root, buildArchitectureBaseline(root, {
     goal: contract.goal,
     goalId: contract.goal_id,
@@ -1260,13 +1329,13 @@ test("status command module includes criteria and completion state", async () =>
   assert.equal(status.data.acceptance_review.status, "clear");
   assert.equal(status.data.evidence_health.status, "clear");
   assert.equal(status.data.architecture.decision, "missing");
-  assert.equal(status.data.next_recommendation.status, "architecture-review-required");
-  assert.equal(status.data.agent_next.state, "architecture_needs_review");
+  assert.equal(status.data.next_recommendation.status, "architecture-requirement-required");
+  assert.equal(status.data.agent_next.state, "architecture_requirement_needs_decision");
   assert.equal(status.data.agent_next.recommended_skill, "nori-architecture-brainstorm");
   assert.equal(status.data.agent_next.current_gap_id, "AC-1");
   assert.equal(status.data.criteria.length, 1);
   assert.equal(status.data.criteria[0].id, "AC-1");
-  assert.equal(status.next_actions.some((action) => /Architecture Baseline/.test(action)), true);
+  assert.equal(status.next_actions.some((action) => /required, not_required, or waived/.test(action)), true);
 });
 
 test("report command module renders a report artifact", async () => {
@@ -1289,7 +1358,7 @@ test("report command module renders a report artifact", async () => {
   assert.equal(report.data.completion.complete, true);
   assert.equal(report.data.completion.objective_complete, true);
   assert.equal(report.data.completion.confidence, "review-risk");
-  assert.equal(report.data.completion.review_risks.includes("architecture_review"), true);
+  assert.equal(report.data.completion.review_risks.includes("architecture_requirement"), true);
   assert.equal(report.data.acceptance_review.status, "clear");
   assert.equal(report.data.evidence_health.status, "clear");
   assert.equal(report.data.architecture.decision, "missing");
@@ -1837,11 +1906,11 @@ test("approve command module routes approved non-trivial gaps to architecture re
   assert.equal(approved.ok, true);
   assert.equal(approved.data.current_gap.id, "AC-1");
   assert.equal(approved.data.architecture.decision, "missing");
-  assert.equal(approved.data.next_recommendation.status, "architecture-review-required");
-  assert.equal(approved.data.agent_next.state, "architecture_needs_review");
+  assert.equal(approved.data.next_recommendation.status, "architecture-requirement-required");
+  assert.equal(approved.data.agent_next.state, "architecture_requirement_needs_decision");
   assert.equal(approved.data.agent_next.recommended_skill, "nori-architecture-brainstorm");
   assert.equal(approved.data.agent_next.current_gap_id, "AC-1");
-  assert.equal(approved.next_actions.some((action) => /Architecture Baseline/.test(action)), true);
+  assert.equal(approved.next_actions.some((action) => /required, not_required, or waived/.test(action)), true);
 });
 
 test("criterion update command module clears stale evidence after a user revision", async () => {

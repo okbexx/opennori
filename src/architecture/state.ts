@@ -10,11 +10,13 @@ import { architectureApplySummaries } from "./apply.ts";
 import { validateArchitectureBaseline } from "./baseline.ts";
 import { buildVsBuyDecisionSummaries, buildVsBuyHealth } from "./build-vs-buy.ts";
 import { architectureChallengeSummaries } from "./challenge.ts";
+import { readArchitectureRequirement } from "./requirement.ts";
 import { architectureBaselinePaths, errorMessage, relativeTo } from "./shared.ts";
 
 export function architectureState(root: string, goalId: string | undefined = undefined): ArchitectureState {
   const paths = architectureBaselinePaths(root);
   const surface = architectureSurfaceState(root);
+  const requirement = readArchitectureRequirement(root, goalId);
   const challenges = architectureChallengeSummaries(root);
   const openChallenges = challenges.filter((challenge) => challenge.status !== "resolved");
   const decisions = buildVsBuyDecisionSummaries(root);
@@ -42,7 +44,8 @@ export function architectureState(root: string, goalId: string | undefined = und
   return {
     schema_version: "opennori/architecture-state-v1",
     decision,
-    required_for_goal: Boolean(goalId),
+    required_for_goal: requirement.status === "required",
+    requirement,
     baseline: baseline ? {
       status: baseline.status,
       profile: baseline.profile,

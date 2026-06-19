@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "ac-a-11-architecture-requirement-routing",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-11",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Architecture Requirement routing keeps subjective non-trivial judgment in Skills and agent-user review, then stores explicit requirement state for deterministic CLI routing.",
+  "fit": "The implementation follows the confirmed TypeScript agent-state CLI baseline: domain state lives in src/architecture, CLI commands are citty modules, schemas cover persisted state, and Skills own subjective judgment.",
+  "implementation_focus": "Add explicit requirement state and route status/check/doctor/report/agent_next from it without natural-language hard validators.",
+  "evidence": "Reviewed the architecture baseline, implemented requirement state, updated Skills/docs/tests, and ran typecheck plus targeted Vitest suites.",
+  "limitations": "",
+  "created_at": "2026-06-19T03:19:42.163Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

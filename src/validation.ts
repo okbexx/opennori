@@ -9,6 +9,7 @@ const SCHEMA_FILES = {
   "evidence-payload": "evidence-payload.schema.json",
   manifest: "manifest.schema.json",
   "architecture-baseline": "architecture-baseline.schema.json",
+  "architecture-requirement": "architecture-requirement.schema.json",
   "architecture-apply": "architecture-apply.schema.json",
   "build-vs-buy": "build-vs-buy.schema.json"
 } as const;

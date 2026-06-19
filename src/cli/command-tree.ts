@@ -1,7 +1,7 @@
 import type { CommandDef, SubCommandsDef } from "citty";
 import { defineCommand, runCommand } from "citty";
 import { approveCommand, brainstormCommand, criterionAddCommand, criterionUpdateCommand, discoverCommand, draftCommand, evaluateCommand, initCommand, nextCommand, resumeCommand, statusCommand } from "./commands/acceptance.ts";
-import { architectureApplyCommand, architectureBaselineCommand, architectureBuildVsBuyCommand, architectureChallengeCommand, architectureProfileCommand, architectureProfilesCommand, architectureShowCommand } from "./commands/architecture.ts";
+import { architectureApplyCommand, architectureBaselineCommand, architectureBuildVsBuyCommand, architectureChallengeCommand, architectureProfileCommand, architectureProfilesCommand, architectureRequirementCommand, architectureShowCommand } from "./commands/architecture.ts";
 import { activityFinishCommand, activityHeartbeatCommand, activityShowCommand, activityStartCommand } from "./commands/activity.ts";
 import { bootstrapCommand } from "./commands/bootstrap.ts";
 import { changesCommand } from "./commands/changes.ts";
@@ -74,6 +74,7 @@ function asCommand(command: unknown): AnyCommand {
 const architectureCommand = groupCommand("architecture", "Review and manage OpenNori Architecture Baselines.", {
   profiles: asCommand(architectureProfilesCommand),
   profile: withPolicy(asCommand(architectureProfileCommand), { commandResult: true }),
+  requirement: withPolicy(asCommand(architectureRequirementCommand), { commandResult: true }),
   baseline: asCommand(architectureBaselineCommand),
   apply: asCommand(architectureApplyCommand),
   show: asCommand(architectureShowCommand),

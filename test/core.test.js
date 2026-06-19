@@ -59,6 +59,18 @@ function draftAndApprove(args, options = {}) {
   };
 }
 
+function recordArchitectureRequirement(root, goalId, status, reason, extra = []) {
+  return run([
+    "architecture", "requirement",
+    "--root", root,
+    "--goal-id", goalId,
+    "--status", status,
+    "--reason", reason,
+    ...extra,
+    "--json"
+  ]);
+}
+
 function runInteractiveSetup(root, answer) {
   const script = `
 import { main } from ${JSON.stringify(CLI_MODULE)};
@@ -464,11 +476,19 @@ test("resume and status recover the current goal from repository files", () => {
   assert.equal(resume.data.goal_id, "opennori-self");
   assert.equal(resume.data.current_gap.id, "AC-P-1");
   assert.equal(resume.data.completion.complete, false);
-  assert.equal(resume.data.next_recommendation.status, "architecture-review-required");
-  assert.equal(resume.data.agent_next.state, "architecture_needs_review");
+  assert.equal(resume.data.next_recommendation.status, "architecture-requirement-required");
+  assert.equal(resume.data.agent_next.state, "architecture_requirement_needs_decision");
   assert.equal(resume.data.agent_next.recommended_skill, "nori-architecture-brainstorm");
   assert.equal(resume.data.next_recommendation.focus, "AC-P-1");
-  assert.equal(resume.next_actions.some((action) => /Architecture Baseline/.test(action)), true);
+  assert.equal(resume.next_actions.some((action) => /required, not_required, or waived/.test(action)), true);
+
+  const requirement = recordArchitectureRequirement(
+    root,
+    "opennori-self",
+    "required",
+    "The self goal changes OpenNori protocol, state, and routing behavior."
+  );
+  assert.equal(requirement.data.agent_next.state, "architecture_needs_review");
 
   run([
     "architecture", "baseline",
@@ -835,6 +855,12 @@ test("evidence can drive the workflow to complete and render a human report", ()
   ]);
   assert.equal(evaluated.data.workflow_status, "complete");
 
+  recordArchitectureRequirement(
+    root,
+    ledger.contract.goal_id,
+    "required",
+    "This report rendering fixture verifies a confirmed architecture section."
+  );
   run([
     "architecture", "baseline",
     "--root", root,
@@ -988,6 +1014,12 @@ test("blocked criteria produce a concrete intervention answer", () => {
 test("high-risk criteria require strong evidence before passing", () => {
   const root = tempRoot();
   const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
+  recordArchitectureRequirement(
+    root,
+    init.data.goal_id,
+    "not_required",
+    "This fixture isolates evidence risk gating and does not evaluate architecture."
+  );
 
   const weak = run([
     "evidence", "add",
@@ -1005,8 +1037,8 @@ test("high-risk criteria require strong evidence before passing", () => {
   assert.equal(weak.data.gate, "downgraded_high_risk_requires_strong_evidence");
   assert.equal(weak.data.workflow_status, "active");
   assert.equal(weak.data.current_gap.id, "AC-P-4");
-  assert.equal(weak.data.next_recommendation.status, "architecture-review-required");
-  assert.equal(weak.data.agent_next.state, "architecture_needs_review");
+  assert.equal(weak.data.next_recommendation.status, "work-on-current-gap");
+  assert.equal(weak.data.agent_next.state, "work_on_current_gap");
 
   const strong = run([
     "evidence", "add",
@@ -1498,6 +1530,12 @@ test("public JSON Schemas validate persisted OpenNori state and separate structu
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   const current = draftAndApprove(["--goal", "Ship schema-backed OpenNori state", "--root", root, "--json"]);
+  recordArchitectureRequirement(
+    root,
+    current.data.goal_id,
+    "required",
+    "Schema-backed OpenNori state touches protocol, manifest, and architecture evidence files."
+  );
   run([
     "architecture", "baseline",
     "--root", root,
@@ -1534,12 +1572,14 @@ test("public JSON Schemas validate persisted OpenNori state and separate structu
 
   const manifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "manifest.json"), "utf8"));
   const evidence = JSON.parse(fs.readFileSync(current.data.evidence_path, "utf8"));
+  const requirement = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "requirements", "ship-schema-backed-opennori-state.json"), "utf8"));
   const baseline = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.json"), "utf8"));
   const decision = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "decisions", "schema-validation.json"), "utf8"));
   const applyRecord = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "evidence", "ship-schema-backed-opennori-state-ac-1-aligned.json"), "utf8"));
 
   assert.equal(validateSchema("manifest", manifest).valid, true);
   assert.equal(validateSchema("evidence-payload", evidence).valid, true);
+  assert.equal(validateSchema("architecture-requirement", requirement).valid, true);
   assert.equal(validateSchema("architecture-baseline", baseline).valid, true);
   assert.equal(validateSchema("build-vs-buy", decision).valid, true);
   assert.equal(validateSchema("architecture-apply", applyRecord).valid, true);
@@ -1706,7 +1746,16 @@ test("doctor reports ready, needs-action, and broken project health", () => {
   assert.equal(ready.data.architecture.decision, "missing");
   assert.equal(ready.data.checks.find((check) => check.name === "architecture_baseline").ok, true);
 
-  draftAndApprove(["--goal", "Ship a non-trivial architecture-aware goal", "--root", readyRoot, "--json"]);
+  const nonTrivial = draftAndApprove(["--goal", "Ship a non-trivial architecture-aware goal", "--root", readyRoot, "--json"]);
+  const unknownRequirement = run(["doctor", "--root", readyRoot, "--json"]);
+  assert.equal(unknownRequirement.data.checks.find((check) => check.name === "architecture_baseline").ok, true);
+  assert.equal(unknownRequirement.data.architecture.requirement.status, "unknown");
+  recordArchitectureRequirement(
+    readyRoot,
+    nonTrivial.data.goal_id,
+    "required",
+    "This fixture marks the goal as non-trivial after agent review."
+  );
   const needsBaseline = run(["doctor", "--root", readyRoot, "--json"]);
   assert.equal(needsBaseline.data.status, "needs-action");
   assert.equal(needsBaseline.data.checks.find((check) => check.name === "architecture_baseline").ok, false);
@@ -1938,6 +1987,21 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   run(["install", "--root", root, "--json"]);
   const draft = draftAndApprove(["--goal", "Refactor OpenNori into a TypeScript agent state CLI product", "--root", root, "--json"]);
 
+  const requirementCheck = run(["check", "--root", root, "--json"]);
+  assert.equal(requirementCheck.data.architecture_check.status, "needs-action");
+  assert.equal(requirementCheck.data.architecture_check.architecture.requirement.status, "unknown");
+  assert.equal(requirementCheck.warnings.some((warning) => warning.type === "architecture_requirement"), true);
+  assert.equal(requirementCheck.data.agent_next.state, "architecture_requirement_needs_decision");
+
+  const requirement = recordArchitectureRequirement(
+    root,
+    draft.data.goal_id,
+    "required",
+    "This goal changes OpenNori's TypeScript CLI, state layer, architecture routing, and manifest behavior."
+  );
+  assert.equal(requirement.data.requirement.status, "required");
+  assert.equal(requirement.data.agent_next.state, "architecture_needs_review");
+
   const missingBaselineCheck = run(["check", "--root", root, "--json"]);
   assert.equal(missingBaselineCheck.data.architecture_check.status, "needs-action");
   assert.equal(missingBaselineCheck.data.architecture_check.decision, "missing");
@@ -2093,6 +2157,12 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
 test("missing architecture baseline is a completion review risk, not a product AC gap", () => {
   const root = tempRoot();
   const draft = draftAndApprove(["--goal", "Ship an architecture-aware user outcome", "--root", root, "--json"]);
+  recordArchitectureRequirement(
+    root,
+    draft.data.goal_id,
+    "required",
+    "This fixture explicitly requires architecture review while omitting the baseline."
+  );
 
   const payload = JSON.parse(fs.readFileSync(draft.data.evidence_path, "utf8"));
   for (const criterion of Object.keys(payload.ledger.criteria)) {
@@ -2129,6 +2199,12 @@ test("missing architecture baseline is a completion review risk, not a product A
 test("architecture apply records do not count as Product AC evidence", () => {
   const root = tempRoot();
   const draft = draftAndApprove(["--goal", "Ship an architecture-guided user outcome", "--root", root, "--json"]);
+  recordArchitectureRequirement(
+    root,
+    draft.data.goal_id,
+    "required",
+    "This fixture verifies architecture apply records under a confirmed required baseline."
+  );
   run([
     "architecture", "baseline",
     "--root", root,
@@ -2171,6 +2247,12 @@ test("architecture apply records do not count as Product AC evidence", () => {
 test("product evidence can reference architecture apply context without treating it as proof", () => {
   const root = tempRoot();
   const draft = draftAndApprove(["--goal", "Ship architecture-context evidence", "--root", root, "--json"]);
+  recordArchitectureRequirement(
+    root,
+    draft.data.goal_id,
+    "required",
+    "This fixture verifies Product evidence with architecture context under a required baseline."
+  );
   run([
     "architecture", "baseline",
     "--root", root,
@@ -2237,6 +2319,12 @@ test("product evidence can reference architecture apply context without treating
 test("project architecture profiles can be added and used for baselines", () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
+  recordArchitectureRequirement(
+    root,
+    "ship-under-team-architecture",
+    "required",
+    "The goal explicitly tests a project Architecture Profile baseline."
+  );
 
   const sourcePath = path.join(root, "preferred-architecture.json");
   fs.writeFileSync(sourcePath, `${JSON.stringify({
@@ -2299,6 +2387,7 @@ test("project architecture profiles can be added and used for baselines", () => 
     "architecture", "baseline",
     "--root", root,
     "--goal", "Ship under team architecture",
+    "--goal-id", "ship-under-team-architecture",
     "--profile", "team-cli",
     "--confirm",
     "--json"
@@ -2355,6 +2444,12 @@ test("build-vs-buy health surfaces missing reuse review before self-build", () =
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   const draft = draftAndApprove(["--goal", "Ship a reusable infrastructure choice", "--root", root, "--json"]);
+  recordArchitectureRequirement(
+    root,
+    draft.data.goal_id,
+    "required",
+    "This fixture verifies build-vs-buy health under a required architecture baseline."
+  );
   const payload = JSON.parse(fs.readFileSync(draft.data.evidence_path, "utf8"));
   for (const criterion of Object.keys(payload.ledger.criteria)) {
     run([
@@ -2480,7 +2575,13 @@ test("superseded build-vs-buy decisions stay reviewable without blocking current
 
 test("context export exposes goal AC profile evidence and report paths for review tools", () => {
   const root = tempRoot();
-  draftAndApprove(["--goal", "Ship a reviewable workflow", "--root", root, "--json"]);
+  const draft = draftAndApprove(["--goal", "Ship a reviewable workflow", "--root", root, "--json"]);
+  recordArchitectureRequirement(
+    root,
+    draft.data.goal_id,
+    "required",
+    "This fixture verifies context export with a confirmed architecture baseline."
+  );
   run([
     "profile", "add",
     "--root", root,

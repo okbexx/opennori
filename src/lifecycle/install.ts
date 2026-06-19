@@ -6,7 +6,8 @@ import {
   agentGuidePath,
   renderAgentGuideMarkdown,
   renderAgentRouteMarkdown,
-  renderAgentRouteSectionMarkdown
+  renderAgentRouteSectionMarkdown,
+  REQUIRED_ARCHITECTURE_DIRS
 } from "../architecture.ts";
 import {
   ensureDir,
@@ -31,10 +32,7 @@ export function installActions(root: string, { dryRun = false, force = false, me
     ensureDir(path.join(root, ".opennori", "reports"), { dryRun }),
     ensureDir(path.join(root, ".opennori", "brainstorms"), { dryRun }),
     ensureDir(path.join(root, ".opennori", "architecture"), { dryRun }),
-    ensureDir(path.join(root, ".opennori", "architecture", "profiles"), { dryRun }),
-    ensureDir(path.join(root, ".opennori", "architecture", "challenges"), { dryRun }),
-    ensureDir(path.join(root, ".opennori", "architecture", "decisions"), { dryRun }),
-    ensureDir(path.join(root, ".opennori", "architecture", "evidence"), { dryRun }),
+    ...REQUIRED_ARCHITECTURE_DIRS.map((dir) => ensureDir(path.join(root, ".opennori", "architecture", dir), { dryRun })),
     writeIfSafe(path.join(root, ".opennori", "protocol.md"), protocolTemplate(), { dryRun, force, kind: "protocol" }),
     writeIfSafe(agentGuidePath(root), renderAgentGuideMarkdown(), { dryRun, force, kind: "agent-guide" })
   ];

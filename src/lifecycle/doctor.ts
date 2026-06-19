@@ -17,7 +17,7 @@ export function doctor(root: string): DoctorState {
   const manifest = inspectManifestHealth(root, active.details);
 
   checks.push(...projectHealthChecks(root));
-  checks.push(...architectureHealthChecks(architecture, active.details.length > 0));
+  checks.push(...architectureHealthChecks(architecture, architecture.required_for_goal));
   checks.push(...manifest.checks);
   checks.push(doctorCheck(
     "current_goal_recoverable",
