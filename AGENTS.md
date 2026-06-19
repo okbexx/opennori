@@ -81,6 +81,14 @@ Complete product autogoal must also include coverage self-check before draft app
 
 If the user and agent have already discussed a goal, candidate AC, assumptions, or open questions, and the user asks OpenNori to take over that discussion, route to `nori-acceptance`, not `nori-autogoal`. Preserve the discussed material as a standard draft Nori Contract with `acceptance_basis.source: "conversation"`, keep it under `.opennori/drafts/`, and ask the user to approve or revise before implementation or evidence recording.
 
+After any Nori Contract Draft is generated, do not ask for blind approval.
+OpenNori Skills must first run AC Interpretation Review: for each AC, explain
+the agent's understanding of the user entry, user action or judgment, visible
+result, non-passing cases, and likely evidence type. This explanation is not an
+implementation plan, architecture decision, file list, task list, or evidence
+claim. If the explanation adds a completion condition or exposes a mismatch, the
+agent must revise the AC or assumptions before approval.
+
 Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, or implementation tasks into user AC. They can influence Nori Profile, Architecture Baseline, evidence risk, or recovery guidance, but Product AC must remain human-visible operations or judgments.
 
 For user-visible interface goals, OpenNori Skills must discover UI/UX acceptance, not only functional completion. Pages, apps, dashboards, desktop tools, workbenches, forms, settings screens, and admin consoles need user-facing checks for entry/navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability, visual and interaction consistency, recovery paths, and UI boundaries. Keep this in Skill behavior and user confirmation; do not implement it as a CLI hard validator or fixed word-list test.

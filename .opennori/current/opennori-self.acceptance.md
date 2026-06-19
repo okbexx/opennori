@@ -11,7 +11,7 @@ Language: en
 ## Acceptance Basis
 
 Status: approved
-Summary: Revise AC-P-4 to preserve objective evidence state while surfacing review risk.
+Summary: Add AC-O-14 for draft interpretation review before approval.
 
 ## Nori Profile
 
@@ -84,6 +84,7 @@ Summary: Revise AC-P-4 to preserve objective evidence state while surfacing revi
 | AC-O-13 | operator | 作为用户，我用 OpenNori autogoal 定义完整产品、完整 Dashboard 或完整工作台时，agent 在写入 Nori Contract Draft 前会先做验收面覆盖自检，并把独立用户判断面拆成独立 AC，而不是把项目概览、资产、记忆、能力、知识库、检索、审计、UI 状态和恢复路径压进少量大 AC。 | 阅读 nori、nori-acceptance、nori-autogoal packaged Skills、本机开发 Skills、OpenNori protocol、README、官网和测试资产；用 AW 完整项目工作台提示词检查 agent 是否会先列出 coverage map，再生成足够细分的标准 Nori Contract Draft。 | Skills 明确要求完整产品类 autogoal 在 draft 前执行 coverage self-check，覆盖用户角色、入口/导航、项目列表与切换、核心对象列表与详情、只读预览、状态与空态/加载/错误/成功、来源/审计、记忆、能力、外部知识库、检索、权限/安全边界、持久化、失败恢复和最终 review/report；如果一条 AC 混入多个独立用户判断面，agent 必须拆分或标为需修订；旧的压缩 draft 不能被 approve，应重新生成。该规则仍属于 Skill 行为协议、用户确认和资产测试，不写成 CLI hard validator 或自然语言质量词表。 | passing |
 | AC-A-11 | architecture | 作为用户，我让 agent 处理一个 OpenNori goal 时，能看到 Architecture Baseline 是否需要由 agent/user 明确判断并记录，而不是 CLI 因为存在 goal 就默认所有 AC 都必须走架构 review。 | 分别用简单 goal、非平凡 goal 和用户 waiver 场景检查 status/check/agent_next、architecture show、README/Skills 和测试；确认简单 goal 可以记录 architecture not_required 并直接进入 evidence，非平凡 goal 记录 required 后才路由 baseline，waiver 有明确 reason 和 review 风险表达。 | OpenNori 提供 architecture requirement 状态（unknown/required/not_required/waived）和记录入口；Skill 要求 agent 判断非平凡性并写入该状态；CLI 不再用 Boolean(goalId) 作为是否需要 baseline 的依据，只根据已记录 requirement、baseline、challenge、build-vs-buy 和 evidence 状态做确定性路由；该机制不把技术架构写成 Product AC，也不让 CLI 通过自然语言硬判非平凡。 | passing |
 | AC-A-12 | architecture | 作为用户，我让 agent 用 OpenNori 起草、追问、记录证据或继续下一轮目标时，CLI 不会用内置自然语言模板、词表或候选目标替我判断主观产品语义；这些判断由 packaged Skills、agent 和用户确认完成。 | 用户或评审者检查 opennori draft/discover/brainstorm/status/report/context export、CLI 源码、测试和 OpenNori Skills。 | CLI 只校验和保存 contract/evidence/profile/architecture/report 的客观结构、状态一致性和 review risk；不再内置默认 Product AC、固定 discovery gap 词表、固定 brainstorm 候选、完成后自动生成下一轮产品目标，或把高风险证据强弱直接硬改为主观完成裁判；Skills 明确负责生成/复核 AC、候选目标和证据充分性。 | passing |
+| AC-O-14 | operator | 作为用户，我在 agent 生成 Nori Contract Draft 后，能先看到 agent 对每条 AC 的理解，再决定 approve 或 revise。 | 阅读 nori、nori-acceptance、nori-autogoal packaged Skills、README、protocol、AGENTS 和 agent_next 输出，检查 draft 后是否要求逐条解释 AC 理解。 | agent 在请求 approve 前必须展示 AC Interpretation Review：用户入口、用户操作或判断、用户应看到结果、不算通过的情况和后续证据类型；如果解释新增完成条件或暴露误解，必须 revise draft；该规则只在 Skill 行为协议、文档、agent_next 提示和资产测试中表达，不写成 CLI 主观 validator、实现计划或证据声明。 | passing |
 
 ## Rule
 

@@ -84,7 +84,7 @@ export const draftCommand = defineCommand({
         { kind: "evidence_ledger", path: paths.evidencePath }
       ],
       [],
-      ["Ask the user to approve or revise these acceptance criteria before implementation."]
+      ["Show AC Interpretation Review for every criterion, then ask the user to approve or revise before implementation."]
     );
   }
 });

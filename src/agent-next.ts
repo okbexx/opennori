@@ -114,10 +114,10 @@ export function agentNextForBootstrap(data: Pick<BootstrapData, "status" | "root
         ? "OpenNori is initialized with draft contracts, but no current Nori Contract is approved yet."
         : "OpenNori is initialized, and no current Nori Contract exists yet.",
       instruction: draftCount > 0
-        ? "Show the draft Nori Contract to the user and ask them to approve or revise it before implementation. Do not treat drafts as executable current goals."
+        ? "Show the draft Nori Contract plus AC Interpretation Review for every AC, then ask the user to approve or revise before implementation. Do not treat drafts as executable current goals."
         : "Use the user's already stated natural-language goal if the current conversation includes one; otherwise ask for the goal. Then run acceptance discovery or draft human-centered acceptance criteria before implementation.",
       userVisibleNext: draftCount > 0
-        ? "Approve or revise a draft Nori Contract before implementation."
+        ? "Review the draft and the agent's understanding of every AC before approval."
         : "Continue with acceptance discovery for the stated goal, or ask for the goal if it was not provided.",
       needsUser: true,
       commands: [`opennori doctor --root ${data.root} --json`]
@@ -175,10 +175,10 @@ export function agentNextForDoctor(root: string, doctor: DoctorState): AgentNext
         ? "OpenNori is ready with draft contracts, but no current Nori Contract is approved yet."
         : "OpenNori is ready, and no current Nori Contract exists yet.",
       instruction: draftCount > 0
-        ? "Do not implement yet. Show the draft Nori Contract to the user and ask for approval or revision before promoting it to current."
+        ? "Do not implement yet. Show the draft Nori Contract plus AC Interpretation Review for every AC, then ask for approval or revision before promoting it to current."
         : "Do not implement yet. Use the user's already stated goal if available; otherwise ask for the goal. Run acceptance discovery or draft a Nori Contract before implementation.",
       userVisibleNext: draftCount > 0
-        ? "Approve or revise a draft Nori Contract before implementation."
+        ? "Review the draft and the agent's understanding of every AC before approval."
         : "Turn the stated goal into human-centered acceptance criteria, or ask for the goal if it was not provided.",
       needsUser: true,
       commands: [`opennori doctor --root ${root} --json`]
@@ -231,8 +231,8 @@ export function agentNextForRecommendation(
       state: "acceptance_needs_user",
       recommendedSkill: "nori-acceptance",
       summary: recommendation.summary,
-      instruction: "Show the draft acceptance criteria and ask the user to approve or revise them before implementation.",
-      userVisibleNext: "Approve or revise the Nori Contract acceptance criteria.",
+      instruction: "Show the draft acceptance criteria plus AC Interpretation Review for every AC. Ask the user to approve only when both the AC text and the agent's interpretation are correct; otherwise revise before implementation.",
+      userVisibleNext: "Review the draft and the agent's understanding of every AC before approval.",
       goalId,
       currentGapId: gap?.id ?? recommendation.focus,
       needsUser: true

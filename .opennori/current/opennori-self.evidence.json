@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "Revise AC-P-4 to preserve objective evidence state while surfacing review risk.",
-      "approved_at": "2026-06-19T04:20:29.424Z"
+      "summary": "Add AC-O-14 for draft interpretation review before approval.",
+      "approved_at": "2026-06-19T10:57:20.567Z"
     },
     "criteria": [
       {
@@ -576,6 +576,15 @@
         "threshold": "CLI 只校验和保存 contract/evidence/profile/architecture/report 的客观结构、状态一致性和 review risk；不再内置默认 Product AC、固定 discovery gap 词表、固定 brainstorm 候选、完成后自动生成下一轮产品目标，或把高风险证据强弱直接硬改为主观完成裁判；Skills 明确负责生成/复核 AC、候选目标和证据充分性。",
         "required": true,
         "risk": "high"
+      },
+      {
+        "id": "AC-O-14",
+        "layer": "operator",
+        "user_story": "作为用户，我在 agent 生成 Nori Contract Draft 后，能先看到 agent 对每条 AC 的理解，再决定 approve 或 revise。",
+        "measurement": "阅读 nori、nori-acceptance、nori-autogoal packaged Skills、README、protocol、AGENTS 和 agent_next 输出，检查 draft 后是否要求逐条解释 AC 理解。",
+        "threshold": "agent 在请求 approve 前必须展示 AC Interpretation Review：用户入口、用户操作或判断、用户应看到结果、不算通过的情况和后续证据类型；如果解释新增完成条件或暴露误解，必须 revise draft；该规则只在 Skill 行为协议、文档、agent_next 提示和资产测试中表达，不写成 CLI 主观 validator、实现计划或证据声明。",
+        "required": true,
+        "risk": "high"
       }
     ]
   },
@@ -583,7 +592,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-19T05:15:50.768Z",
+    "updated_at": "2026-06-19T11:04:30.249Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -6835,6 +6844,155 @@
             "limitations": "This evidence verifies CLI boundaries and objective tests. It does not prove every future agent will ask ideal AC questions; that remains packaged Skill behavior and user approval.",
             "gate": "accepted",
             "created_at": "2026-06-19T05:15:50.768Z"
+          }
+        ]
+      },
+      "AC-O-14": {
+        "status": "passing",
+        "confidence": "high",
+        "required": true,
+        "risk": "high",
+        "evidence": [
+          {
+            "kind": "asset-review",
+            "basis": "artifact_review",
+            "summary": "OpenNori now requires AC Interpretation Review after draft generation and before approval across packaged Skills, root routing, README/protocol/AGENTS, agent_next hints, and asset tests.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-autogoal/SKILL.md",
+                "path": "plugins/opennori/skills/nori-autogoal/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/protocol.md",
+                "path": ".opennori/protocol.md"
+              },
+              {
+                "type": "artifact",
+                "label": "AGENTS.md",
+                "path": "AGENTS.md"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/draft.ts",
+                "path": "src/cli/commands/acceptance/draft.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              }
+            ],
+            "reviewability": "Review the referenced files for AC Interpretation Review wording and run the targeted tests to confirm the rule is locked as Skill/documentation behavior rather than a CLI hard validator.",
+            "limitations": "This evidence verifies product assets and routing prompts; real-world quality still depends on the active agent following the packaged Skill during an actual draft conversation.",
+            "gate": "accepted",
+            "created_at": "2026-06-19T10:57:30.818Z"
+          },
+          {
+            "kind": "asset-review",
+            "basis": "artifact_review",
+            "summary": "OpenNori requires AC Interpretation Review after every draft and before approval across packaged Skills, routing hints, README/protocol/AGENTS, tests, and the public website. The review explains each AC in human acceptance terms before the user approves or revises.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "command",
+                "label": "pnpm build in /Users/jarl/code/jarlone/opennori-site",
+                "command": "pnpm build in /Users/jarl/code/jarlone/opennori-site"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-autogoal/SKILL.md",
+                "path": "plugins/opennori/skills/nori-autogoal/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/protocol.md",
+                "path": ".opennori/protocol.md"
+              },
+              {
+                "type": "artifact",
+                "label": "AGENTS.md",
+                "path": "AGENTS.md"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/draft.ts",
+                "path": "src/cli/commands/acceptance/draft.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+                "path": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+              }
+            ],
+            "reviewability": "Review the referenced Skills, docs, routing hints, tests, and website copy. Run npm run check in OpenNori and pnpm build in opennori-site.",
+            "limitations": "This verifies the product assets and deterministic routing hints. Real draft quality still depends on the active agent loading and following the packaged Skill; no CLI subjective AC validator was added.",
+            "gate": "accepted",
+            "created_at": "2026-06-19T11:04:30.249Z"
           }
         ]
       }

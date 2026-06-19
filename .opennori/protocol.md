@@ -79,6 +79,7 @@ The operator layer proves that Codex can actually use OpenNori as the work proto
 | AC-O-7 | Codex conversation | Ask OpenNori to brainstorm a fuzzy idea | The user sees selectable acceptance directions without remembering CLI syntax. | Brainstorm candidates describe user value, observable acceptance direction, and risk; they are not treated as a contract or completion evidence. |
 | AC-O-8 | Codex conversation | State required Skills, preferred stacks, avoided tools, or execution constraints | The agent records a Nori Profile without making the user remember CLI syntax. | Must/avoid profile items are shown in contract and report; unsatisfied must items or violated avoid items block completion unless waived. |
 | AC-O-9 | Codex conversation | Ask OpenNori to use a good architecture for a non-trivial goal | The user sees Product AC and an Architecture Baseline before implementation starts. | The baseline is not a plan; it names the architecture profile, boundaries, build-vs-buy policy, and challenge rule. |
+| AC-O-14 | Codex conversation | Review a newly generated Nori Contract Draft | The user can tell whether the agent understood every AC before approving. | After draft generation and before approval, the agent shows AC Interpretation Review for each AC: user entry, user action or judgment, visible result, non-passing cases, and likely evidence type; if the explanation adds or changes completion meaning, the draft is revised instead of approved. |
 
 ### L3 Productization AC
 

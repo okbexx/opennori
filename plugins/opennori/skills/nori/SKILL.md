@@ -29,13 +29,19 @@ for whether AC are human-acceptable. When the user asks whether AC are good
 enough, route to `nori-acceptance` and reason from the user's goal, visible
 entrypoints, operations, outcomes, evidence needs, and boundaries.
 
+Draft approval requires AC Interpretation Review. After a draft exists, the
+agent must explain its understanding of each AC before asking the user to
+approve: user entry, user action or judgment, expected result, non-passing
+cases, and likely evidence type. If that explanation changes the completion
+definition, route back to `nori-acceptance` for revision before approval.
+
 ## Start Here
 
 1. Identify the project root from the current workspace or the user's explicit path.
 2. If readiness is unknown, run `opennori doctor --root <repo> --json`.
 3. If the JSON has `data.agent_next`, follow it:
    - `health_needs_recovery` or `setup_preview_needs_confirmation` -> hand off to `nori-project-health`.
-   - `initialized_no_active_contract` -> if drafts exist, show them for approval or revision; otherwise use the user's already stated goal if the current conversation includes one, or ask for the natural-language goal; then hand off to `nori-acceptance`.
+   - `initialized_no_active_contract` -> if drafts exist, show them with AC Interpretation Review before approval or revision; otherwise use the user's already stated goal if the current conversation includes one, or ask for the natural-language goal; then hand off to `nori-acceptance`.
    - `ready_with_current_goal` -> run resume/status as directed.
    - `architecture_requirement_needs_decision` -> hand off to `nori-architecture-brainstorm` to decide and record whether this goal needs Architecture Baseline review. This is an agent/user judgment, not a CLI inference from the existence of a goal.
    - `architecture_needs_review` -> follow `recommended_skill` (`nori-architecture-brainstorm`, `nori-architecture-challenge`, or `nori-build-vs-buy`) before non-trivial implementation continues.
@@ -54,6 +60,7 @@ entrypoints, operations, outcomes, evidence needs, and boundaries.
 - "Use OpenNori to take over the AC we just discussed", "整理我们刚才讨论的 AC", "把上面的 AC 收敛成 Nori Contract Draft", or "不要开始实现，先给我确认" -> hand off to `nori-acceptance` with the already discussed goal, candidate AC, assumptions, and unresolved questions. This is conversation adoption into a draft, not autogoal.
 - "autogoal", "自动帮我把 idea 变成 goal/AC", "I only have a rough idea", or "用 OpenNori autogoal" -> hand off to `nori-autogoal`; it must converge to a standard Nori Contract Draft, not a special autogoal artifact.
 - "Are these AC good enough", "this AC is too vague", "the goal is broad", or visible AC text lacks concrete user judgment -> hand off to `nori-acceptance`; do not wait for `opennori check` to flag it.
+- "Approve this draft", "approve these AC", "这些 AC 可以 approve 吗", or a draft exists but the agent has not explained its understanding of each AC -> hand off to `nori-acceptance` for AC Interpretation Review before approval.
 - "complete product", "complete feature", "full app", "full dashboard", "完整产品", "完整功能闭环", "完整应用", "完整 Dashboard", "完整工作台", or "不要 MVP" -> hand off to `nori-acceptance` or `nori-autogoal` with an explicit full-acceptance-surface instruction. The child Skill should preserve the complete user closure, not compress the Nori Contract into a compact MVP-style AC set unless the user explicitly narrows scope.
 - "Why are there so few AC", "these AC are too broad", "为什么 AC 这么少", "AC 太粗", or a complete-product draft has broad bundled criteria -> hand off to `nori-acceptance` for coverage review and revision. The child Skill should show missing coverage surfaces, split independent user judgments, and keep the result draft-only until user approval.
 - "The UI/UX AC is missing", "this is a page/app/dashboard/desktop/workbench/form", "the interface must feel usable", or a visible interface goal has only data/status/function AC -> hand off to `nori-acceptance` to add user-experience acceptance checks for navigation, information hierarchy, states, feedback, readability, consistency, recovery, and UI boundaries.
@@ -87,6 +94,7 @@ Use one child Skill at a time and carry forward only the relevant state:
 - Any user statement that changes completion meaning.
 - Any rough idea or autogoal instruction that should become a standard Nori Contract Draft.
 - Any already discussed AC material that should be adopted into a standard draft without approval, implementation, or evidence.
+- Any draft that needs AC Interpretation Review before approval.
 - Any architecture/profile constraint that affects how the agent may proceed.
 - Any evidence source, limitation, or human confirmation the user just supplied.
 
@@ -121,6 +129,8 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not expect OpenNori CLI to generate candidate product goals. Next-loop goal selection is a Skill/user judgment that becomes a standard draft through `opennori draft --brief`.
 - Do not answer confidently complete while required AC evidence, blocking profile items, architecture challenges, evidence health, or acceptance review risks remain unresolved or unaccepted.
 - Do not outsource AC quality judgment to CLI heuristics. The agent must inspect AC wording and ask the user the missing acceptance questions when the human judgment surface is vague.
+- Do not ask for blind approval of a draft. The agent must explain its understanding of each AC and revise any mismatch before approval.
+- Do not let AC Interpretation Review become implementation planning or hidden requirements; it is only a user-facing semantic confirmation before approval.
 - Do not accept visible interface goals with only functional/data AC. The agent must check whether the user can navigate, scan, understand state, get feedback, recover from failure, and judge visual/interaction consistency.
 - Do not turn architecture, profile, build-vs-buy, Plugin, hook, or tool preferences into Product AC.
 - Do not let the CLI decide whether a goal is non-trivial. The agent/user records Architecture Requirement status; CLI only routes from that recorded state.

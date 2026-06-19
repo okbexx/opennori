@@ -529,6 +529,25 @@ test("status commands return routeable no-current-goal state instead of unexpect
   assert.match(renderHuman(status, ["status"]), /OpenNori has no current goal/);
 });
 
+test("status with draft contracts routes agents to AC interpretation before approval", async () => {
+  const root = tempRoot();
+  await runInitCommand(["--root", root, "--confirm", "--json"]);
+  const briefPath = writeBriefFile(root, "Ship a reviewable draft", {
+    goalId: "draft-needs-interpretation",
+    language: "en"
+  });
+  await runDraftCommand(["--root", root, "--brief", briefPath, "--json"]);
+
+  const resolved = await resolveCliCommand(["status", "--root", root, "--json"]);
+  assert.equal(resolved.ok, true);
+  const status = await runCliCommand(resolved);
+  assert.equal(status.ok, true);
+  assert.equal(status.data.status, "no_current_goal");
+  assert.equal(status.data.agent_next.state, "initialized_no_active_contract");
+  assert.match(status.data.agent_next.instruction, /AC Interpretation Review/);
+  assert.match(status.data.agent_next.user_visible_next, /understanding of every AC/);
+});
+
 test("status routes incomplete project state to health recovery instead of unexpected errors", async () => {
   const root = tempRoot();
   await runInitCommand(["--root", root, "--confirm", "--json"]);
@@ -666,6 +685,7 @@ test("draft command module creates contracts only from Skill-prepared briefs", a
   assert.equal(draft.data.criteria.some((criterion) => /Account Settings/.test(criterion.user_story)), true);
   assert.equal(draft.data.criteria.some((criterion) => /2-30 个字符/.test(`${criterion.user_story} ${criterion.measurement}`)), true);
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.match(draft.next_actions.join("\n"), /AC Interpretation Review/);
 });
 
 test("draft command module stores Skill-prepared draft contracts", async () => {
@@ -684,6 +704,7 @@ test("draft command module stores Skill-prepared draft contracts", async () => {
   assert.equal(draft.data.acceptance_basis.status, "draft");
   assert.match(draft.data.acceptance_basis.summary, /Skill-prepared acceptance brief/);
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.match(draft.next_actions.join("\n"), /AC Interpretation Review/);
   assert.equal(fs.existsSync(draft.data.acceptance_path), true);
   assert.equal(fs.existsSync(draft.data.evidence_path), true);
   assert.equal(draft.artifacts.some((artifact) => artifact.kind === "draft_acceptance_contract"), true);
@@ -794,6 +815,7 @@ test("draft command module creates current Nori Contracts from brief files", asy
   assert.equal(drafted.ok, true);
   assert.equal(drafted.data.goal_id, "module-brief-goal");
   assert.equal(drafted.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.match(drafted.next_actions.join("\n"), /AC Interpretation Review/);
   assert.equal(fs.existsSync(drafted.data.acceptance_path), true);
   assert.equal(fs.existsSync(drafted.data.evidence_path), true);
   assert.equal(drafted.artifacts.some((artifact) => artifact.kind === "draft_acceptance_contract"), true);
