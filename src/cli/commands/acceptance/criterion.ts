@@ -193,7 +193,7 @@ export const criterionUpdateCommand = defineCommand({
         error: {
           type: "invalid_acceptance",
           message: "Updated criterion failed validation",
-          fix: "Rewrite the criterion from the user's perspective"
+          fix: "Provide id, user story, measurement, threshold, and matching ledger structure"
         },
         issues
       };

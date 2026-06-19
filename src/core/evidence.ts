@@ -23,25 +23,8 @@ import { profileCompliance } from "./profile.ts";
 import { inferCriterionLayer, nowIso } from "./shared.ts";
 
 export const VALID_EVIDENCE_RESULTS = new Set(["failing", "passing", "blocked", "waived"]);
-export const STRONG_EVIDENCE_KINDS = new Set([
-  "test-summary",
-  "screenshot",
-  "artifact",
-  "review-result",
-  "human-confirmation",
-  "protocol-v1"
-]);
-export const STRONG_CONFIDENCE = new Set(["verified", "reviewed", "human-confirmed"]);
-
-const STRONG_EVIDENCE_BASIS = new Set(["human-confirmation", "tool-observation", "artifact-review", "protocol-check"]);
-const PRODUCT_EVIDENCE_SOURCE_TYPES = new Set(["command", "artifact", "url"]);
 const CONTEXT_SOURCE_TYPES = new Set(["architecture-apply"]);
 const EVIDENCE_HEALTH_STALE_DAYS = 14;
-const BULK_EVIDENCE_PATTERNS = [
-  /is covered by the OpenNori .*implementation/i,
-  /self contract refresh, tests, and reviewable artifacts/i,
-  /covered by .* tests, and reviewable artifacts/i
-];
 
 function basisForEvidenceKind(kind: string): EvidenceInput["basis"] {
   if (kind === "human-confirmation") return "human-confirmation";
@@ -98,7 +81,14 @@ function sourceIsContext(source: EvidenceSource): boolean {
 
 function sourceIsProductEvidence(source: EvidenceSource): boolean {
   if (sourceIsContext(source)) return false;
-  return PRODUCT_EVIDENCE_SOURCE_TYPES.has(source.type || "");
+  return Boolean(
+    source.command ||
+    source.path ||
+    source.url ||
+    source.label ||
+    source.summary ||
+    (source.type && source.type !== "reference")
+  );
 }
 
 function sourceIsInspectable(source: EvidenceSource): boolean {
@@ -117,22 +107,22 @@ export function addEvidence(contract: NoriContract, ledger: EvidenceLedger, crit
   const state = ledger.criteria[criterionId];
   if (!state) throw new Error(`Evidence ledger state not found: ${criterionId}`);
   const normalized = normalizeEvidence(evidence);
-  const gated = applyRiskGate(criterion, normalized);
+  const accepted = applyRiskGate(criterion, normalized);
   state.evidence.push({
     kind: normalized.kind,
     basis: normalized.basis,
     summary: normalized.summary,
-    result: gated.result,
-    confidence: gated.confidence,
+    result: accepted.result,
+    confidence: accepted.confidence,
     path: normalized.path,
     sources: normalized.sources,
     reviewability: normalized.reviewability,
     limitations: normalized.limitations,
-    gate: gated.gate,
+    gate: accepted.gate,
     created_at: nowIso()
   });
-  state.status = gated.result;
-  state.confidence = gated.confidence;
+  state.status = accepted.result;
+  state.confidence = accepted.confidence;
   ledger.updated_at = nowIso();
   recomputeWorkflowStatus(contract, ledger);
   return ledger;
@@ -155,30 +145,7 @@ export function applyRiskGate(criterion: AcceptanceCriterion, evidence: Normaliz
       gate: "downgraded_context_only_requires_product_evidence"
     };
   }
-  if (requestedResult !== "passing" || criterion.risk !== "high") {
-    return { result: requestedResult, confidence, gate: "accepted" };
-  }
-
-  const hasReviewableSource = Array.isArray(evidence.sources)
-    && evidence.sources.some((source) => sourceIsProductEvidence(source));
-  const hasStrongEvidence = STRONG_EVIDENCE_KINDS.has(evidence.kind)
-    || STRONG_EVIDENCE_BASIS.has(evidence.basis)
-    || (evidence.confidence ? STRONG_CONFIDENCE.has(evidence.confidence) : false)
-    || hasReviewableSource;
-
-  if (hasStrongEvidence) {
-    return {
-      result: "passing",
-      confidence: evidence.confidence || "verified",
-      gate: "accepted"
-    };
-  }
-
-  return {
-    result: "failing",
-    confidence: "strong-evidence-required",
-    gate: "downgraded_high_risk_requires_strong_evidence"
-  };
+  return { result: requestedResult, confidence, gate: "accepted" };
 }
 
 export function confidenceForEvidence(risk: RiskLevel | undefined, result: EvidenceResult): string {
@@ -421,11 +388,6 @@ function evidenceHasReviewability(evidence: EvidenceRecord | null | undefined): 
   return value.length > 0 && value !== "summary-only";
 }
 
-function evidenceSummaryLooksBulk(evidence: EvidenceRecord | null | undefined): boolean {
-  const summary = String(evidence?.summary || "");
-  return BULK_EVIDENCE_PATTERNS.some((pattern) => pattern.test(summary));
-}
-
 export function evidenceHealth(contract: NoriContract, ledger: EvidenceLedger, { now = Date.now(), staleDays = EVIDENCE_HEALTH_STALE_DAYS, root = process.cwd() } = {}): EvidenceHealth {
   const findings: EvidenceHealthFinding[] = [];
   for (const criterion of contract.criteria || []) {
@@ -500,13 +462,13 @@ export function evidenceHealth(contract: NoriContract, ledger: EvidenceLedger, {
       });
     }
 
-    if (evidenceSummaryLooksBulk(latest)) {
+    if (criterion.risk === "high" && latest.result === "passing" && latest.basis === "agent-observation") {
       findings.push({
         criterion_id: criterion.id,
         severity: "review",
-        issue: "bulk-evidence-summary",
-        message: "Latest passing evidence looks like a broad batch summary rather than criterion-specific proof.",
-        recovery: "Replace or supplement it with criterion-specific evidence."
+        issue: "high-risk-agent-observation",
+        message: "Latest high-risk passing evidence is based on agent observation.",
+        recovery: "Review whether this needs a tool-observation, artifact-review, human-confirmation, explicit limitation, or user-approved waiver before claiming confident completion."
       });
     }
   }

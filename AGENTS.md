@@ -86,7 +86,7 @@ Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, 
 For user-visible interface goals, OpenNori Skills must discover UI/UX acceptance, not only functional completion. Pages, apps, dashboards, desktop tools, workbenches, forms, settings screens, and admin consoles need user-facing checks for entry/navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability, visual and interaction consistency, recovery paths, and UI boundaries. Keep this in Skill behavior and user confirmation; do not implement it as a CLI hard validator or fixed word-list test.
 
 Contract language preference is presentation metadata, not Product AC. New
-brainstorms, discoveries, drafts, reports, and next-loop candidates may infer
+Skill-prepared brainstorms, discoveries, drafts, reports, and next-loop briefs may infer
 or explicitly preserve `presentation.language` (`zh-CN` or `en`) for
 human-readable surfaces while keeping protocol field names stable English.
 Existing current or approved contracts must not be silently translated during

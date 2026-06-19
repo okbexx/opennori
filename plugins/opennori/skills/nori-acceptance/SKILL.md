@@ -1,6 +1,6 @@
 ---
 name: nori-acceptance
-description: Discover, draft, approve, and revise human-centered OpenNori acceptance criteria from natural-language goals, fuzzy ideas, brainstorm candidates, or user corrections. Use when completion meaning is unclear, AC quality is being discussed, or candidate goals need to become a Nori Contract.
+description: Discover, draft, approve, and revise human-centered OpenNori acceptance criteria from natural-language goals, fuzzy ideas, Skill-prepared brainstorm directions, next outcomes, or user corrections. Use when completion meaning is unclear, AC quality is being discussed, or a human-facing outcome needs to become a Nori Contract.
 ---
 
 ## Mission
@@ -70,20 +70,16 @@ self-check, then split unrelated surfaces before asking for approval.
 10. If `agent_next.state` is `completion_needs_review` and `agent_next.recommended_skill` is `nori-acceptance`, treat existing passing evidence as provisional: explain the unresolved acceptance ambiguity, ask only the missing questions that affect user judgment, then revise criteria or record explicit user-approved assumptions. Do not ask the user to simply accept risk before making the missing acceptance surface understandable.
 11. If the user has approved or revised AC, persist that decision before implementation continues.
 12. After `opennori approve`, read the returned `data.agent_next`. If it says `architecture_requirement_needs_decision`, hand off to `nori-architecture-brainstorm` to decide and record required/not_required/waived before implementation or evidence work. If it says `architecture_needs_review`, hand off to the recommended architecture Skill before non-trivial implementation continues.
-13. If `agent_next.state` is `ready_for_next_loop` and the user asked to continue, select or refine one `agent_next.candidate_goals` item, then create a draft from it; prefer the candidate's `draft_args` or `draft_command` when present instead of reconstructing CLI flags. Do not ask the user to invent the next prompt from scratch. After drafting, show concrete measurement and passing thresholds for approval; do not show a candidate-direction wrapper as if it were enough.
+13. If `agent_next.state` is `ready_for_next_loop` and the user asked to continue, use the completed contract context and the user's latest intent to identify the next human-facing outcome. Prepare a full NoriBrief yourself and run `opennori draft --brief <brief.json> --root <repo> --json`. Do not expect the CLI to invent product candidate goals.
 14. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live acceptance activity while drafting or revising: start before acceptance work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-acceptance --state thinking --summary "..." --json` and let the CLI infer the unique current goal/gap.
 15. Preserve the user's Contract language preference. Infer it from the goal and conversation by default; if the user explicitly asks for Chinese, Simplified Chinese, English, or similar wording, pass `--language zh-CN` or `--language en` to brainstorm/discover/draft. Do not ask the user to remember this CLI flag.
 16. Do not silently translate an already approved or current Nori Contract. If the user explicitly asks to change its presentation language, revise the visible contract as needed and record the user's approval with `opennori approve --no-from-draft --language zh-CN|en --summary "<approval>" --root <repo> --json`.
 
 Useful state commands:
 
-- `opennori brainstorm --idea "<idea>" --root <repo> --json`
-- `opennori discover --goal "<goal>" --root <repo> --json`
-- `opennori draft --from-discovery <id> --answers <answers.json> --root <repo> --json`
-- `opennori draft --goal "<goal>" --root <repo> --json`
+- `opennori brainstorm --idea "<idea>" --candidates '<candidates.json>' --root <repo> --json`
+- `opennori discover --goal "<goal>" --questions '<questions.json>' --root <repo> --json`
 - `opennori draft --brief <brief.json> --root <repo> --json`
-- `opennori draft --from-brainstorm <id> --candidate <candidate> --root <repo> --json`
-- `opennori draft --from-next-candidate <candidate-id> --source-goal <completed-goal-id> --root <repo> --json`
 - `opennori approve --root <repo> --summary "<approval>" --json`
 - `opennori approve --no-from-draft --language zh-CN|en --root <repo> --summary "<approval>" --json`
 - `opennori criterion update --root <repo> --criterion <id> --user-story "..." --measurement "..." --threshold "..." --json`
@@ -96,16 +92,15 @@ Useful state commands:
 - "Why are there so few AC", "these AC are too broad", "为什么 AC 这么少", "这几条 AC 太粗", or a complete-product draft bundles many surfaces into a few broad criteria -> explain that the draft failed coverage review, show the missing surfaces, and revise or regenerate the draft before approval.
 - "Use OpenNori autogoal", "用 OpenNori autogoal", or "I only have a rough idea" -> hand off to `nori-autogoal` for Skill-driven convergence into a standard Nori Contract Draft.
 - "Use OpenNori to take over the AC we just discussed", "整理我们刚才讨论的 AC", "把上面的 AC 收敛成 Nori Contract Draft", or "不要开始实现，先给我确认" -> adopt the in-progress conversation into a standard draft Nori Contract with `acceptance_basis.source: "conversation"`; ask for approve/revise before implementation.
-- "Use Chinese AC", "验收标准用中文", "write this contract in English" -> keep the user-visible goal, discovery questions, AC, and next-candidate draft in that language by passing the matching `--language`; protocol field names remain stable English.
+- "Use Chinese AC", "验收标准用中文", "write this contract in English" -> keep the user-visible goal, discovery questions, AC, and next-loop draft in that language by passing the matching `--language`; protocol field names remain stable English.
 - "Change this existing contract to Chinese/English" -> explain that existing approved/current contracts are not silently translated; revise any visible wording that needs translation, then ask for approval and use `approve --no-from-draft --language ...`.
 - "Brainstorm this idea" -> produce selectable acceptance directions; ask which direction should become the contract.
 - "This AC is too vague" -> ask only questions that change completion judgment.
-- User answers discovery questions -> summarize the answers into a JSON object keyed by discovery gap id, run `draft --from-discovery`, then show the concrete Product AC for approval.
+- User answers discovery questions -> convert the answers into a complete NoriBrief with concrete Product AC, run `opennori draft --brief`, then show the draft for approval.
 - "Approve these AC" -> write approval, read `agent_next`, and route to architecture review, evidence, or reporting from that returned state.
 - "Change AC-2 to mean..." -> update that criterion and treat older evidence for it as stale.
-- Complete goal with `agent_next.candidate_goals` -> choose or refine the strongest human-facing candidate, use its `draft_args` or `draft_command` when present, then show the draft for user approval with concrete Measure / Passes when text.
-- Generic `draft --goal` output -> inspect the draft yourself, ask missing
-  acceptance questions first, and do not ask for blind approval.
+- Complete goal with `agent_next.state: ready_for_next_loop` -> infer or ask for the next human-facing outcome, prepare a complete NoriBrief, run `opennori draft --brief`, then show the draft for user approval with concrete Measure / Passes when text.
+- Drafted brief output -> inspect the draft yourself, ask missing acceptance questions first, and do not ask for blind approval.
 - `completion_needs_review` with `recommended_skill: nori-acceptance` -> explain that the contract is objectively evidenced but not confidently acceptable yet; identify the unresolved ambiguity from the AC text and user context, ask concrete missing questions, and revise AC before reporting confident completion.
 
 Discovery answer shape for agent-created temporary files:
@@ -235,12 +230,12 @@ Match the reply language to the Nori Contract presentation language when it is k
 - Do not accept a complete-product draft where one AC bundles unrelated surfaces such as overview, assets, memory, capabilities, external knowledge, search, audit, UI states, persistence, and recovery. Split it before asking for approval.
 - Do not accept interface goals that only cover data, backend state, or happy-path function. Visible UI goals also need user-experience acceptance for navigation, hierarchy, states, feedback, readability, consistency, and recovery unless the user explicitly declares those out of scope.
 - Do not make tests, modules, files, commands, Skills, libraries, architecture, or build-vs-buy decisions into Product AC.
-- Do not treat brainstorm output, discovery questions, candidate goals, or agent assumptions as a Nori Contract.
+- Do not treat brainstorm output, discovery questions, next-loop suggestions, or agent assumptions as a Nori Contract.
 - Do not treat autogoal output as a different contract type. If autogoal is used, the user still approves or revises a standard Nori Contract Draft.
 - Do not route an already discussed AC set through autogoal just because the user asks OpenNori to take over. Preserve the discussion as a draft and show the remaining assumptions/open questions.
 - Do not move conversation-adopted drafts into current/active state, start implementation, or attach evidence before user approval.
-- Do not accept a draft from a candidate if its measurement or threshold only says to follow the candidate direction; revise it into user actions, visible results, report/evidence review, or friction judgment before asking for approval.
-- Do not use `draft --from-next-candidate` unless the source goal is already `ready-for-next-loop`; if the command returns completion or evidence review risk, handle that risk before continuing.
+- Do not create a draft whose measurement or threshold only says to follow a suggested direction; revise it into user actions, visible results, report/evidence review, or friction judgment before asking for approval.
+- Do not wait for CLI-generated next candidates. When continuing after completion, the Skill prepares the next NoriBrief from context and user intent.
 - Do not claim completion from AC quality alone; completion still requires reviewable evidence.
 - Do not treat dashboard activity, events, or snapshots as acceptance approval or evidence.
 - Do not silently translate an already approved or current Nori Contract. Revise and ask for approval if the user wants the contract presentation language changed.

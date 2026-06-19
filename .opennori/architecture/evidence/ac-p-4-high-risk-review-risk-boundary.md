@@ -1,0 +1,31 @@
+# OpenNori Architecture Apply Record
+
+Status: aligned
+Goal: opennori-self
+Criterion: AC-P-4
+Baseline: typescript-agent-state-cli
+Accepted at: 2026-06-18T09:43:44.184Z
+
+## Summary
+
+High-risk evidence handling now preserves objective evidence results while surfacing confidence and evidence_health review risks; the CLI does not use fixed strong/weak natural-language evidence lists to rewrite subjective sufficiency.
+
+## Fit
+
+Aligned with the TypeScript Agent State CLI baseline: objective ledger status, evidence health, and report confidence remain deterministic state outputs; subjective sufficiency stays in Skills, agent review, and user confirmation.
+
+## Implementation Focus
+
+src/core/evidence.ts, src/core/report.ts, README, protocol, packaged nori-evidence Skill, and tests around high-risk agent observation and flexible reviewable evidence sources.
+
+## Evidence
+
+<none>
+
+## Limitations
+
+Full npm run check is still evaluated separately because user-owned dashboard visual files may have lint/whitespace changes outside this boundary slice.
+
+## Rule
+
+This record documents architecture alignment for an acceptance gap. It is not Product AC evidence by itself.

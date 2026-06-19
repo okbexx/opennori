@@ -37,6 +37,48 @@ function tempRoot() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "nori-command-test-"));
 }
 
+function skillBrief(goal, options = {}) {
+  const language = options.language || (/[\u3400-\u9fff]/.test(goal) ? "zh-CN" : "en");
+  const zh = language === "zh-CN";
+  return {
+    goal_id: options.goalId,
+    goal,
+    presentation: { language },
+    acceptance_basis: {
+      status: "draft",
+      summary: "Skill-prepared acceptance brief for command test."
+    },
+    criteria: options.criteria || (zh
+      ? [
+          {
+            id: "AC-1",
+            layer: "operator",
+            user_story: "作为用户，我能从正常入口打开结果并看到当前状态。",
+            measurement: "打开用户入口并查看结果状态。",
+            threshold: "界面或报告显示目标结果、当前状态和是否可接受。"
+          }
+        ]
+      : [
+          {
+            id: "AC-1",
+            layer: "operator",
+            user_story: "As a user, I can open the result from the normal entrypoint and see the current state.",
+            measurement: "Open the user-facing entrypoint and review the result state.",
+            threshold: "The page or report shows the target result, current state, and whether it is acceptable."
+          }
+        ])
+  };
+}
+
+function writeBriefFile(root, goal, options = {}) {
+  const dir = path.join(root, ".opennori-test-briefs");
+  fs.mkdirSync(dir, { recursive: true });
+  const brief = skillBrief(goal, options);
+  const briefPath = path.join(dir, `${brief.goal_id || "brief"}.json`);
+  writeJson(briefPath, brief);
+  return briefPath;
+}
+
 function writeGoal(root, location = "current") {
   const contract = {
     schema_version: "opennori/contract-v1",
@@ -520,9 +562,22 @@ test("list command module reports current goal gaps without CLI dispatch", async
 
 test("brainstorm command module creates selectable directions without a contract", async () => {
   const root = tempRoot();
+  const candidates = JSON.stringify({
+    candidates: [
+      {
+        id: "A",
+        title: "头脑风暴验收入口",
+        user_value: "用户能从粗略想法看到可选择的验收方向。",
+        suggested_goal_template: "让 OpenNori 支持头脑风暴入口。",
+        acceptance_directions: ["作为用户，我能看到候选方向并选择或改写。"],
+        risks: ["候选方向仍需转成 NoriBrief 后才能 draft。"]
+      }
+    ]
+  });
   const brainstorm = await runBrainstormCommand([
     "--root", root,
     "--idea", "我想让 OpenNori 支持头脑风暴",
+    "--candidates", candidates,
     "--json"
   ]);
 
@@ -530,7 +585,7 @@ test("brainstorm command module creates selectable directions without a contract
   assert.equal(brainstorm.data.status, "draft-source");
   assert.equal(brainstorm.data.presentation.language, "zh-CN");
   assert.equal(brainstorm.data.is_acceptance_contract, false);
-  assert.equal(brainstorm.data.candidates.length, 3);
+  assert.equal(brainstorm.data.candidates.length, 1);
   assert.equal(fs.existsSync(brainstorm.data.brainstorm_path), true);
   assert.equal(fs.existsSync(brainstorm.data.markdown_path), true);
   assert.equal(brainstorm.artifacts.some((artifact) => artifact.kind === "brainstorm_source"), true);
@@ -539,9 +594,19 @@ test("brainstorm command module creates selectable directions without a contract
 
 test("discover command module writes a question source without creating a current goal", async () => {
   const root = tempRoot();
+  const questions = JSON.stringify({
+    gaps: [
+      {
+        id: "field-scope",
+        question: "哪些字段可以修改，哪些字段只读？",
+        why: "用户需要知道设置页的可编辑范围。"
+      }
+    ]
+  });
   const discovery = await runDiscoverCommand([
     "--root", root,
     "--goal", "做一个设置页，用户可以修改个人资料，保存后刷新仍然生效，失败时有提示。",
+    "--questions", questions,
     "--json"
   ]);
 
@@ -558,31 +623,36 @@ test("discover command module writes a question source without creating a curren
   assert.match(fs.readFileSync(discovery.data.markdown_path, "utf8"), /不是 Nori Contract、过程计划或完成证据/);
 });
 
-test("draft command module creates concrete contracts from discovery answers", async () => {
+test("draft command module creates contracts only from Skill-prepared briefs", async () => {
   const root = tempRoot();
-  const discovery = await runDiscoverCommand([
-    "--root", root,
-    "--goal", "Ship a settings page where users edit profile details",
-    "--id", "module-settings-profile",
-    "--json"
-  ]);
-  const answersPath = path.join(root, "answers.json");
-  writeJson(answersPath, {
-    "missing-user-entry": "用户从顶部导航打开 Account Settings，再进入 Profile 标签页查看结果。",
-    "missing-field-scope": "本轮可编辑昵称、头像和简介；邮箱、手机号和密码不在范围内。",
-    "missing-validation-rule": "昵称必填且 2-30 个字符；简介最多 160 个字符；头像只允许 PNG/JPEG 且不超过 2MB。",
-    "missing-success-signal": "保存成功后显示成功提示，并在 Profile 标签页立即看到更新后的昵称、头像和简介。",
-    "missing-persistence-scope": "刷新页面、关闭后重新打开项目时，昵称、头像和简介仍然保持保存后的值。",
-    "missing-failure-case": "网络失败时显示网络错误提示，保留表单中的用户输入，不覆盖旧资料。",
-    "missing-out-of-scope-boundary": "本轮不支持修改邮箱、手机号、密码、通知偏好或隐私设置。",
-    "missing-review-method": "评审者用浏览器打开设置页，执行成功保存、刷新持久化和网络失败场景，并保存截图或报告作为证据。"
+  const missing = await runDraftCommand(["--root", root, "--json"]);
+  assert.equal(missing.ok, false);
+  assert.equal(missing.error.type, "brief_required");
+
+  const briefPath = writeBriefFile(root, "Ship a settings page where users edit profile details", {
+    goalId: "module-settings-contract",
+    language: "zh-CN",
+    criteria: [
+      {
+        id: "AC-1",
+        layer: "operator",
+        user_story: "作为用户，我能从顶部导航打开 Account Settings 并进入 Profile 标签页。",
+        measurement: "打开 Account Settings，再进入 Profile 标签页查看资料表单。",
+        threshold: "Profile 标签页显示昵称、头像和简介字段，邮箱、手机号和密码显示为只读或不在本轮编辑范围。"
+      },
+      {
+        id: "AC-2",
+        layer: "operator",
+        user_story: "作为用户，我能按规则编辑昵称、头像和简介。",
+        measurement: "输入 2-30 个字符的昵称、最多 160 个字符的简介，并选择不超过 2MB 的 PNG/JPEG 头像。",
+        threshold: "合法输入可以提交；不合法昵称、过长简介或错误头像格式会显示可理解的校验提示。"
+      }
+    ]
   });
 
   const draft = await runDraftCommand([
     "--root", root,
-    "--from-discovery", discovery.data.discovery_id,
-    "--answers", answersPath,
-    "--goal-id", "module-settings-contract",
+    "--brief", briefPath,
     "--language", "zh-CN",
     "--json"
   ]);
@@ -591,49 +661,35 @@ test("draft command module creates concrete contracts from discovery answers", a
   assert.equal(draft.data.goal_id, "module-settings-contract");
   assert.equal(draft.data.presentation.language, "zh-CN");
   assert.equal(draft.data.acceptance_basis.status, "draft");
-  assert.match(draft.data.acceptance_basis.summary, /验收发现答案/);
-  assert.equal(draft.data.criteria.length, 6);
+  assert.match(draft.data.acceptance_basis.summary, /Skill-prepared acceptance brief/);
+  assert.equal(draft.data.criteria.length, 2);
   assert.equal(draft.data.criteria.some((criterion) => /Account Settings/.test(criterion.user_story)), true);
   assert.equal(draft.data.criteria.some((criterion) => /2-30 个字符/.test(`${criterion.user_story} ${criterion.measurement}`)), true);
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
 });
 
-test("draft command module creates current Nori Contracts from goals and brainstorm candidates", async () => {
+test("draft command module stores Skill-prepared draft contracts", async () => {
   const root = tempRoot();
+  const briefPath = writeBriefFile(root, "Ship an OpenNori-backed task", {
+    goalId: "module-goal",
+    language: "en"
+  });
   const draft = await runDraftCommand([
     "--root", root,
-    "--goal", "Ship an OpenNori-backed task",
-    "--goal-id", "module-goal",
+    "--brief", briefPath,
     "--json"
   ]);
   assert.equal(draft.ok, true);
   assert.equal(draft.data.goal_id, "module-goal");
   assert.equal(draft.data.acceptance_basis.status, "draft");
-  assert.match(draft.data.acceptance_basis.summary, /generic acceptance discovery/);
+  assert.match(draft.data.acceptance_basis.summary, /Skill-prepared acceptance brief/);
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
   assert.equal(fs.existsSync(draft.data.acceptance_path), true);
   assert.equal(fs.existsSync(draft.data.evidence_path), true);
   assert.equal(draft.artifacts.some((artifact) => artifact.kind === "draft_acceptance_contract"), true);
-
-  const brainstorm = await runBrainstormCommand([
-    "--root", root,
-    "--idea", "我想让 OpenNori 支持头脑风暴",
-    "--id", "module-brainstorm",
-    "--json"
-  ]);
-  const fromBrainstorm = await runDraftCommand([
-    "--root", root,
-    "--from-brainstorm", brainstorm.data.brainstorm_id,
-    "--candidate", "A",
-    "--json"
-  ]);
-  assert.equal(fromBrainstorm.ok, true);
-  assert.equal(fromBrainstorm.data.acceptance_basis.status, "draft");
-  assert.equal(fromBrainstorm.data.current_gap.id, "ACCEPTANCE-BASIS");
-  assert.equal(fromBrainstorm.data.criteria.every((criterion) => criterion.user_story.startsWith("作为用户")), true);
 });
 
-test("draft command module creates draft contracts from completed goal candidates", async () => {
+test("ready completed goals route Skills to prepare the next brief instead of CLI candidates", async () => {
   const root = tempRoot();
   const contract = {
     schema_version: "opennori/contract-v1",
@@ -669,6 +725,11 @@ test("draft command module creates draft contracts from completed goal candidate
   fs.mkdirSync(activeDir, { recursive: true });
   writeJson(path.join(activeDir, "module-goal.evidence.json"), { contract, ledger });
   fs.writeFileSync(path.join(activeDir, "module-goal.acceptance.md"), "# Module goal\n");
+  writeArchitectureRequirement(root, {
+    goalId: contract.goal_id,
+    status: "required",
+    reason: "This command-module fixture verifies ready-for-next-loop routing with an active baseline."
+  });
   writeArchitectureBaseline(root, buildArchitectureBaseline(root, {
     goal: contract.goal,
     goalId: contract.goal_id,
@@ -676,46 +737,14 @@ test("draft command module creates draft contracts from completed goal candidate
   }));
   fs.writeFileSync(path.join(root, ".opennori", "agent-guide.md"), renderAgentGuideMarkdown());
 
-  const drafted = await runDraftCommand([
-    "--root", root,
-    "--source-goal", "module-goal",
-    "--from-next-candidate", "real-user-validation",
-    "--goal-id", "candidate-module-goal",
-    "--json"
-  ]);
-
-  assert.equal(drafted.ok, true);
-  assert.equal(drafted.data.goal_id, "candidate-module-goal");
-  assert.equal(drafted.data.acceptance_basis.status, "draft");
-  assert.equal(drafted.data.acceptance_basis.source_goal_id, "module-goal");
-  assert.equal(drafted.data.acceptance_basis.candidate_id, "real-user-validation");
-  assert.match(drafted.data.acceptance_basis.summary, /completed goal candidate/);
-  assert.match(drafted.data.acceptance_basis.rule, /not approved acceptance criteria/);
-  assert.equal(drafted.data.current_gap.id, "ACCEPTANCE-BASIS");
-  assert.equal(drafted.data.criteria.every((criterion) => /^As a user/.test(criterion.user_story)), true);
-  const draftedText = drafted.data.criteria.map((criterion) => `${criterion.measurement}\n${criterion.threshold}`).join("\n");
-  assert.match(draftedText, /normal user entrypoint/);
-  assert.match(draftedText, /core operation/);
-  assert.match(draftedText, /evidence source, and limitations/);
-  assert.doesNotMatch(draftedText, /按这条候选方向检查新的目标结果/);
-
-  const notReady = await runDraftCommand([
-    "--root", root,
-    "--source-goal", "candidate-module-goal",
-    "--from-next-candidate", "real-user-validation",
-    "--json"
-  ]);
-  assert.equal(notReady.ok, false);
-  assert.equal(notReady.error.type, "next_candidate_source_unavailable");
-
-  const missing = await runDraftCommand([
-    "--root", root,
-    "--source-goal", "module-goal",
-    "--from-next-candidate", "missing-candidate",
-    "--json"
-  ]);
-  assert.equal(missing.ok, false);
-  assert.equal(missing.error.type, "next_candidate_not_found");
+  const resume = await runResumeCommand(["--root", root, "--json"], { loadPair: (args = {}) => loadPair({ root, ...args }) });
+  assert.equal(resume.ok, true);
+  assert.equal(resume.data.next_recommendation.status, "ready-for-next-loop");
+  assert.equal(resume.data.agent_next.state, "ready_for_next_loop");
+  assert.equal(resume.data.agent_next.candidate_goals, undefined);
+  assert.equal(resume.data.next_recommendation.candidate_goals, undefined);
+  assert.match(resume.data.agent_next.instruction, /prepare the next human-facing NoriBrief/);
+  assert.match(resume.data.next_recommendation.actions.join("\n"), /opennori draft --brief/);
 });
 
 test("init command module initializes project state with preview safety", async () => {
@@ -1259,7 +1288,7 @@ test("resume command module includes completion, health, architecture, and next 
   assert.equal(resume.next_actions.some((action) => /Architecture Baseline review/.test(action)), true);
 });
 
-test("resume command module suggests next-loop candidates for confidently complete goals", async () => {
+test("resume command module returns next-loop handoff without CLI candidate goals", async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -1291,17 +1320,10 @@ test("resume command module suggests next-loop candidates for confidently comple
   assert.equal(resume.data.next_recommendation.status, "ready-for-next-loop");
   assert.equal(resume.data.agent_next.state, "ready_for_next_loop");
   assert.equal(resume.data.agent_next.recommended_skill, "nori-acceptance");
-  assert.equal(resume.data.agent_next.candidate_goals.length, 4);
-  assert.equal(resume.data.agent_next.candidate_goals[0].id, "real-user-validation");
-  assert.match(resume.data.agent_next.candidate_goals[0].draft_command, /opennori draft --from-next-candidate "real-user-validation"/);
-  assert.equal(resume.data.next_recommendation.candidate_goals.length, 4);
-  assert.equal(resume.data.next_recommendation.candidate_goals[0].id, "real-user-validation");
-  assert.equal(resume.data.next_recommendation.candidate_goals[0].goal.length < 140, true);
-  assert.match(resume.data.next_recommendation.candidate_goals[0].draft_command, /opennori draft --from-next-candidate "real-user-validation"/);
-  assert.equal(resume.data.next_recommendation.candidate_goals[0].draft_args.includes("--source-goal"), true);
-  assert.match(resume.data.next_recommendation.candidate_goals[0].draft_rule, /draft Nori Contract only/);
-  assert.equal(resume.data.next_recommendation.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), false);
-  assert.equal(resume.next_actions.some((action) => /candidate_goals/.test(action)), true);
+  assert.equal(resume.data.agent_next.candidate_goals, undefined);
+  assert.equal(resume.data.next_recommendation.candidate_goals, undefined);
+  assert.match(resume.data.agent_next.instruction, /prepare the next human-facing NoriBrief/);
+  assert.equal(resume.next_actions.some((action) => /candidate_goals/.test(action)), false);
 });
 
 test("status command module includes criteria and completion state", async () => {
@@ -1476,8 +1498,8 @@ test("activity commands infer the unique current gap for dashboard publishing on
 test("activity start ignores drafts and requires a current goal before publishing dashboard state", async () => {
   const root = tempRoot();
   await runInitCommand(["--root", root, "--confirm", "--json"]);
-  await runDraftCommand(["--root", root, "--goal", "Ship first goal", "--goal-id", "first-goal", "--json"]);
-  await runDraftCommand(["--root", root, "--goal", "Ship second goal", "--goal-id", "second-goal", "--json"]);
+  await runDraftCommand(["--root", root, "--brief", writeBriefFile(root, "Ship first goal", { goalId: "first-goal" }), "--json"]);
+  await runDraftCommand(["--root", root, "--brief", writeBriefFile(root, "Ship second goal", { goalId: "second-goal" }), "--json"]);
 
   const doctor = await runDoctorCommand(["--root", root, "--json"]);
   assert.equal(doctor.ok, true);

@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-19T03:21:41.367Z",
+  "updated_at": "2026-06-19T05:15:59.629Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -220,7 +220,7 @@
       },
       {
         "name": "nori-acceptance",
-        "description": "Discover, draft, approve, and revise human-centered OpenNori acceptance criteria from natural-language goals, fuzzy ideas, brainstorm candidates, or user corrections. Use when completion meaning is unclear, AC quality is being discussed, or candidate goals need to become a Nori Contract.",
+        "description": "Discover, draft, approve, and revise human-centered OpenNori acceptance criteria from natural-language goals, fuzzy ideas, Skill-prepared brainstorm directions, next outcomes, or user corrections. Use when completion meaning is unclear, AC quality is being discussed, or a human-facing outcome needs to become a Nori Contract.",
         "path": "plugins/opennori/skills/nori-acceptance/SKILL.md",
         "source": "package"
       },
@@ -320,6 +320,17 @@
         "schema_errors": []
       },
       {
+        "id": "ac-a-12-skill-owned-subjective-semantics",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-12",
+        "status": "aligned",
+        "summary": "Acceptance discovery, brainstorm, draft, AC quality review, and next-loop handoff now use Skill-prepared inputs and agent/user judgment; the CLI only validates objective state shape and stores provided data.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/ac-a-12-skill-owned-subjective-semantics.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
         "id": "ac-a-3-technical-baseline-sections",
         "goal_id": "opennori-self",
         "criterion_id": "AC-A-3",
@@ -371,6 +382,28 @@
         "summary": "Autogoal was implemented as packaged Skill-driven convergence into the existing Nori Contract Draft path, without adding a separate Autogoal Contract or MVP workflow.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/ac-o-9-autogoal-standard-contract-draft.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "ac-p-4-high-risk-review-risk-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-P-4",
+        "status": "aligned",
+        "summary": "High-risk evidence handling now preserves objective evidence results while surfacing confidence and evidence_health review risks; the CLI does not use fixed strong/weak natural-language evidence lists to rewrite subjective sufficiency.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/ac-p-4-high-risk-review-risk-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-ac-a-12-aligned",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-12",
+        "status": "aligned",
+        "summary": "CLI boundary audit kept subjective product semantics in Skills and narrowed hard validation to objective contract, ledger, evidence, architecture, lifecycle, and schema integrity.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-a-12-aligned.json",
         "schema_valid": true,
         "schema_errors": []
       },

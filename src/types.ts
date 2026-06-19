@@ -99,7 +99,7 @@ export type NormalizedEvidence = Omit<EvidenceInput, "kind" | "basis" | "sources
 export type RiskGateResult = {
   result: EvidenceResult;
   confidence: string;
-  gate: "accepted" | "downgraded_high_risk_requires_strong_evidence" | (string & {});
+  gate: "accepted" | "downgraded_context_only_requires_product_evidence" | (string & {});
 };
 
 export type EvidenceRecord = {
@@ -223,18 +223,6 @@ export type CompletionAnswer = {
   confidence: "confident" | "review-risk" | "not-complete" | (string & {});
   review_risks: string[];
   answer: string;
-};
-
-export type NextGoalCandidate = {
-  id: string;
-  goal: string;
-  user_value: string;
-  acceptance_directions: string[];
-  risks: string[];
-  source: "completion-context" | string;
-  draft_args?: string[];
-  draft_command?: string;
-  draft_rule?: string;
 };
 
 export type AgentSkill =
@@ -412,7 +400,6 @@ export type NextRecommendation = {
   focus: string | null;
   summary: string;
   actions: string[];
-  candidate_goals?: NextGoalCandidate[];
   recommended_skill?: AgentSkill;
 };
 
@@ -453,7 +440,6 @@ export type AgentNext = {
     finish_command?: string;
     note: string;
   };
-  candidate_goals?: NextGoalCandidate[];
 };
 
 export type EvidenceView = {

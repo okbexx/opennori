@@ -28,6 +28,86 @@ function tempRoot() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "nori-test-"));
 }
 
+function skillBrief(goal, options = {}) {
+  const goalId = options.goalId;
+  const language = options.language || (/[\u3400-\u9fff]/.test(goal) ? "zh-CN" : "en");
+  const zh = language === "zh-CN";
+  return {
+    goal_id: goalId,
+    goal,
+    presentation: { language },
+    acceptance_basis: {
+      status: "draft",
+      summary: "Skill-prepared acceptance brief for test."
+    },
+    criteria: options.criteria || (zh
+      ? [
+          {
+            id: "AC-1",
+            layer: "protocol",
+            user_story: "作为用户，我能从正常入口打开结果并看到当前交付状态。",
+            measurement: "打开用户入口并查看结果状态。",
+            threshold: "页面或报告明确显示目标结果、当前状态和是否可接受。"
+          },
+          {
+            id: "AC-2",
+            layer: "operator",
+            user_story: "作为用户，我能执行核心操作并看到成功反馈。",
+            measurement: "按目标路径执行一次核心操作。",
+            threshold: "操作完成后显示成功反馈，并且结果与用户预期一致。"
+          },
+          {
+            id: "AC-3",
+            layer: "operator",
+            user_story: "作为用户，我能在失败或边界场景看到可理解的提示。",
+            measurement: "触发一个失败或边界场景。",
+            threshold: "系统显示可理解的失败原因或恢复方式，不要求用户阅读实现日志。"
+          }
+        ]
+      : [
+          {
+            id: "AC-1",
+            layer: "protocol",
+            user_story: "As a user, I can open the result from the normal entrypoint and see the current delivery status.",
+            measurement: "Open the user-facing entrypoint and review the result status.",
+            threshold: "The page or report shows the target result, current state, and whether it is acceptable."
+          },
+          {
+            id: "AC-2",
+            layer: "operator",
+            user_story: "As a user, I can perform the core operation and see success feedback.",
+            measurement: "Run the core operation through the intended user path.",
+            threshold: "The operation completes with success feedback and a result that matches the user expectation."
+          },
+          {
+            id: "AC-3",
+            layer: "operator",
+            user_story: "As a user, I can understand failure or boundary feedback.",
+            measurement: "Trigger one failure or boundary scenario.",
+            threshold: "The system shows an understandable reason or recovery path without requiring implementation logs."
+          }
+        ])
+  };
+}
+
+function writeBriefFile(root, goal, options = {}) {
+  const dir = path.join(root, ".opennori-test-briefs");
+  fs.mkdirSync(dir, { recursive: true });
+  const brief = skillBrief(goal, options);
+  const filename = `${brief.goal_id || goal.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "brief"}.json`;
+  const briefPath = path.join(dir, filename);
+  fs.writeFileSync(briefPath, JSON.stringify(brief, null, 2));
+  return briefPath;
+}
+
+function draftArgsFromGoal(root, goal, options = {}) {
+  const briefPath = writeBriefFile(root, goal, options);
+  const args = ["--brief", briefPath, "--root", root];
+  if (options.language) args.push("--language", options.language);
+  args.push("--json");
+  return args;
+}
+
 function argValue(args, name) {
   const flag = name.startsWith("--") ? name : `--${name}`;
   const index = args.indexOf(flag);
@@ -36,6 +116,16 @@ function argValue(args, name) {
 }
 
 function draftAndApprove(args, options = {}) {
+  const rootFromArgs = options.root || argValue(args, "root");
+  const goal = argValue(args, "goal");
+  const goalId = argValue(args, "goal-id");
+  const language = argValue(args, "language");
+  if (goal) {
+    if (!rootFromArgs) {
+      throw new Error("draftAndApprove requires --root when using --goal");
+    }
+    args = draftArgsFromGoal(rootFromArgs, goal, { goalId, language });
+  }
   const draft = run(["draft", ...args]);
   const root = options.root || argValue(args, "root");
   if (!root) {
@@ -137,6 +227,18 @@ test("published package uses built dist bin while local source bin remains avail
   assert.equal(fs.existsSync(path.join(ROOT, "bin", "opennori.ts")), true);
   assert.equal(fs.readFileSync(path.join(ROOT, "bin", "opennori.js"), "utf8").includes("process.features?.typescript"), true);
   assert.equal(fs.readFileSync(path.join(ROOT, "bin", "opennori.ts"), "utf8").includes("../src/cli.ts"), true);
+});
+
+test("contract integrity validation stays structural and does not hard-fail subjective process wording", () => {
+  const contract = buildContractFromBrief(skillBrief("Ship a contract boundary check"));
+  const ledger = buildEvidenceLedger(contract);
+  contract.plan = "Agent-private planning is not a Product AC.";
+  contract.steps = ["Use a Skill to judge whether this is appropriate."];
+
+  const issues = validateContract(contract, ledger);
+
+  assert.equal(issues.some((issue) => issue.path === "plan"), false);
+  assert.equal(issues.some((issue) => issue.path === "steps"), false);
 });
 
 test("CLI entrypoint delegates command dispatch to the citty command tree", () => {
@@ -409,9 +511,8 @@ test("existing contract language changes only through explicit current approval"
   const root = tempRoot();
   run([
     "draft",
-    "--goal", "交付设置页",
+    "--brief", writeBriefFile(root, "交付设置页", { goalId: "legacy-current-language", language: "zh-CN" }),
     "--language", "zh-CN",
-    "--goal-id", "legacy-current-language",
     "--root", root,
     "--json"
   ]);
@@ -526,7 +627,7 @@ test("resume and status recover the current goal from repository files", () => {
 
 test("draft requires user approval before completion evidence can finish the workflow", () => {
   const root = tempRoot();
-  const draft = run(["draft", "--goal", "Ship an OpenNori-backed task", "--root", root, "--json"]);
+  const draft = run(["draft", ...draftArgsFromGoal(root, "Ship an OpenNori-backed task")]);
   assert.equal(draft.data.acceptance_basis.status, "draft");
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
 
@@ -569,16 +670,29 @@ test("draft requires user approval before completion evidence can finish the wor
 
 test("brainstorm creates selectable acceptance directions, not a process plan", () => {
   const root = tempRoot();
+  const candidates = JSON.stringify({
+    candidates: [
+      {
+        id: "A",
+        title: "头脑风暴验收入口",
+        user_value: "用户能从粗略想法看到可选择的验收方向。",
+        suggested_goal_template: "让 OpenNori 支持头脑风暴入口。",
+        acceptance_directions: ["作为用户，我能看到候选方向并选择或改写。"],
+        risks: ["候选方向仍需转成 NoriBrief 后才能 draft。"]
+      }
+    ]
+  });
   const brainstorm = run([
     "brainstorm",
     "--idea", "我想让 OpenNori 支持头脑风暴",
+    "--candidates", candidates,
     "--root", root,
     "--json"
   ]);
 
   assert.equal(brainstorm.data.status, "draft-source");
   assert.equal(brainstorm.data.is_acceptance_contract, false);
-  assert.equal(brainstorm.data.candidates.length, 3);
+  assert.equal(brainstorm.data.candidates.length, 1);
   assert.equal(brainstorm.data.presentation.language, "zh-CN");
   assert.equal(fs.existsSync(brainstorm.data.brainstorm_path), true);
   assert.equal(fs.existsSync(brainstorm.data.markdown_path), true);
@@ -589,13 +703,10 @@ test("brainstorm creates selectable acceptance directions, not a process plan", 
   assert.doesNotMatch(text, /Implementation plan/);
   assert.doesNotMatch(text, /Step 1/);
 
-  const draft = run([
-    "draft",
-    "--from-brainstorm", brainstorm.data.brainstorm_id,
-    "--candidate", "A",
-    "--root", root,
-    "--json"
-  ]);
+  const draft = run(["draft", ...draftArgsFromGoal(root, "让 OpenNori 支持头脑风暴入口", {
+    language: "zh-CN",
+    goalId: "brainstorm-contract"
+  })]);
   assert.equal(draft.data.acceptance_basis.status, "draft");
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
   assert.equal(draft.data.criteria.every((criterion) => criterion.user_story.startsWith("作为用户")), true);
@@ -603,9 +714,24 @@ test("brainstorm creates selectable acceptance directions, not a process plan", 
 
 test("discover writes a non-contract question source before draft", () => {
   const root = tempRoot();
+  const questions = JSON.stringify({
+    gaps: [
+      {
+        id: "field-scope",
+        question: "哪些字段可以修改，哪些字段只读？",
+        why: "用户需要知道设置页的可编辑范围。"
+      },
+      {
+        id: "failure-case",
+        question: "保存失败时用户应该看到什么？",
+        why: "失败反馈会影响用户判断功能是否完成。"
+      }
+    ]
+  });
   const discovery = run([
     "discover",
     "--goal", "做一个设置页，用户可以修改个人资料，保存后刷新仍然生效，失败时有提示。",
+    "--questions", questions,
     "--root", root,
     "--json"
   ]);
@@ -631,7 +757,7 @@ test("draft preserves explicit contract language preference for human-readable g
   const root = tempRoot();
   const zhDraft = run([
     "draft",
-    "--goal", "Ship a settings page",
+    "--brief", writeBriefFile(root, "Ship a settings page", { language: "zh-CN" }),
     "--language", "zh-CN",
     "--root", root,
     "--json"
@@ -644,10 +770,9 @@ test("draft preserves explicit contract language preference for human-readable g
 
   const enDraft = run([
     "draft",
-    "--goal", "交付设置页",
+    "--brief", writeBriefFile(root, "交付设置页", { language: "en", goalId: "settings-page-en" }),
     "--language", "en",
     "--root", root,
-    "--goal-id", "settings-page-en",
     "--json"
   ]);
   assert.equal(enDraft.data.presentation.language, "en");
@@ -657,45 +782,74 @@ test("draft preserves explicit contract language preference for human-readable g
   assert.match(enMarkdown, /Language: en/);
 });
 
-test("discovery answers draft specific user-facing acceptance criteria", () => {
+test("Skill-prepared brief drafts specific user-facing acceptance criteria", () => {
   const root = tempRoot();
-  const discovery = run([
-    "discover",
-    "--goal", "Ship a settings page where users edit profile details",
-    "--root", root,
-    "--id", "settings-profile",
-    "--json"
-  ]);
-  const answersPath = path.join(root, "answers.json");
-  fs.writeFileSync(answersPath, JSON.stringify({
-    "missing-user-entry": "用户从顶部导航打开 Account Settings，再进入 Profile 标签页查看结果。",
-    "missing-field-scope": "本轮可编辑昵称、头像和简介；邮箱、手机号和密码不在范围内。",
-    "missing-validation-rule": "昵称必填且 2-30 个字符；简介最多 160 个字符；头像只允许 PNG/JPEG 且不超过 2MB。",
-    "missing-success-signal": "保存成功后显示成功提示，并在 Profile 标签页立即看到更新后的昵称、头像和简介。",
-    "missing-persistence-scope": "刷新页面、关闭后重新打开项目时，昵称、头像和简介仍然保持保存后的值。",
-    "missing-failure-case": "网络失败时显示网络错误提示，保留表单中的用户输入，不覆盖旧资料。",
-    "missing-out-of-scope-boundary": "本轮不支持修改邮箱、手机号、密码、通知偏好或隐私设置。",
-    "missing-review-method": "评审者用浏览器打开设置页，执行成功保存、刷新持久化和网络失败场景，并保存截图或报告作为证据。"
-  }));
+  const briefPath = writeBriefFile(root, "Ship a settings page where users edit profile details", {
+    language: "zh-CN",
+    goalId: "settings-profile",
+    criteria: [
+      {
+        id: "AC-1",
+        layer: "operator",
+        user_story: "作为用户，我能从顶部导航打开 Account Settings 并进入 Profile 标签页。",
+        measurement: "打开 Account Settings，再进入 Profile 标签页查看资料表单。",
+        threshold: "Profile 标签页显示昵称、头像和简介字段，邮箱、手机号和密码显示为只读或不在本轮编辑范围。"
+      },
+      {
+        id: "AC-2",
+        layer: "operator",
+        user_story: "作为用户，我能按规则编辑昵称、头像和简介。",
+        measurement: "输入 2-30 个字符的昵称、最多 160 个字符的简介，并选择不超过 2MB 的 PNG/JPEG 头像。",
+        threshold: "合法输入可以提交；不合法昵称、过长简介或错误头像格式会显示可理解的校验提示。"
+      },
+      {
+        id: "AC-3",
+        layer: "operator",
+        user_story: "作为用户，我保存成功后能立即确认资料已更新。",
+        measurement: "修改昵称、头像和简介后点击保存。",
+        threshold: "页面显示成功提示，并在 Profile 标签页立即看到更新后的昵称、头像和简介。"
+      },
+      {
+        id: "AC-4",
+        layer: "operator",
+        user_story: "作为用户，我刷新或重新打开页面后仍能看到保存后的资料。",
+        measurement: "保存后刷新页面，或关闭后重新打开 Account Settings 的 Profile 标签页。",
+        threshold: "昵称、头像和简介仍然保持保存后的值。"
+      },
+      {
+        id: "AC-5",
+        layer: "operator",
+        user_story: "作为用户，我在网络失败时能看到失败提示且输入不丢失。",
+        measurement: "模拟保存请求失败后点击保存。",
+        threshold: "页面显示网络错误提示，保留表单中的用户输入，不覆盖旧资料。"
+      },
+      {
+        id: "AC-6",
+        layer: "protocol",
+        user_story: "作为评审者，我能用浏览器证据复查设置页是否完成。",
+        measurement: "执行成功保存、刷新持久化和网络失败场景，并保存截图或报告。",
+        threshold: "证据能说明入口、字段范围、规则、成功反馈、持久化、失败恢复和未覆盖范围。"
+      }
+    ]
+  });
 
   const draft = run([
     "draft",
+    "--brief", briefPath,
     "--root", root,
-    "--from-discovery", discovery.data.discovery_id,
-    "--answers", answersPath,
     "--language", "zh-CN",
     "--json"
   ]);
 
   assert.equal(draft.data.acceptance_basis.status, "draft");
   assert.equal(draft.data.presentation.language, "zh-CN");
-  assert.match(draft.data.acceptance_basis.summary, /验收发现答案/);
+  assert.match(draft.data.acceptance_basis.summary, /Skill-prepared acceptance brief/);
   assert.equal(draft.data.criteria.length, 6);
   const joined = draft.data.criteria.map((criterion) => `${criterion.user_story}\n${criterion.measurement}\n${criterion.threshold}`).join("\n");
   assert.match(joined, /Account Settings/);
   assert.match(joined, /Profile/);
   assert.match(joined, /昵称、头像和简介/);
-  assert.match(joined, /邮箱、手机号和密码不在范围/);
+  assert.match(joined, /邮箱、手机号和密码显示为只读或不在本轮编辑范围/);
   assert.match(joined, /2-30 个字符/);
   assert.match(joined, /PNG\/JPEG/);
   assert.match(joined, /刷新页面/);
@@ -888,18 +1042,16 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.ok(report.data.architecture);
   assert.equal(report.data.architecture.decision, "valid");
   assert.equal(report.data.agent_next.state, "ready_for_next_loop");
-  assert.equal(report.data.agent_next.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), true);
+  assert.equal(report.data.agent_next.candidate_goals, undefined);
   assert.match(text, /## Decision Summary/);
   assert.ok(text.indexOf("## Decision Summary") < text.indexOf("## Acceptance Status"));
   assert.match(text, /Completion: Complete: all required acceptance criteria have passing or waived evidence\./);
   assert.match(text, /Current gap: None\. All required acceptance criteria/);
   assert.match(text, /User intervention: No user intervention is currently required\./);
   assert.match(text, /Recommended next action: This OpenNori goal is complete/);
-  assert.match(text, /## Candidate Next Goals/);
-  assert.match(text, /not approved acceptance criteria, implementation phases, or completion evidence/);
-  assert.match(text, /Draft command: opennori draft --from-next-candidate/);
-  assert.match(text, /Draft rule: 这个命令只创建 draft Nori Contract/);
-  assert.match(text, /opennori-adoption-dogfood/);
+  assert.doesNotMatch(text, /## Candidate Next Goals/);
+  assert.doesNotMatch(text, /Draft command: opennori draft --from-next-candidate/);
+  assert.match(text, /prepare the next human-facing NoriBrief/);
   assert.match(text, /Current status: complete/);
   assert.match(text, /AC-Z-5/);
   assert.match(text, /None\. All required acceptance criteria/);
@@ -914,19 +1066,12 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.equal(resume.data.next_recommendation.status, "ready-for-next-loop");
   assert.equal(resume.data.agent_next.state, "ready_for_next_loop");
   assert.equal(resume.data.agent_next.recommended_skill, "nori-acceptance");
-  assert.equal(resume.data.agent_next.candidate_goals.length, 4);
-  assert.equal(resume.data.agent_next.candidate_goals[0].id, "opennori-adoption-dogfood");
-  assert.equal(resume.data.agent_next.candidate_goals.every((candidate) => candidate.draft_args?.includes("--from-next-candidate")), true);
-  assert.equal(resume.data.next_recommendation.candidate_goals.length, 4);
-  assert.equal(resume.data.next_recommendation.candidate_goals[0].id, "opennori-adoption-dogfood");
-  assert.equal(resume.data.next_recommendation.candidate_goals[0].acceptance_directions.length > 0, true);
-  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => candidate.goal && candidate.user_value), true);
-  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => candidate.draft_args?.includes("--from-next-candidate")), true);
-  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => /opennori draft --from-next-candidate/.test(candidate.draft_command)), true);
-  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => candidate.draft_args?.includes("--language")), true);
-  assert.equal(resume.data.next_recommendation.candidate_goals.every((candidate) => /只创建 draft Nori Contract|draft Nori Contract only/.test(candidate.draft_rule)), true);
+  assert.equal(resume.data.agent_next.candidate_goals, undefined);
+  assert.equal(resume.data.next_recommendation.candidate_goals, undefined);
+  assert.match(resume.data.agent_next.instruction, /prepare the next human-facing NoriBrief/);
+  assert.match(resume.data.next_recommendation.actions.join("\n"), /opennori draft --brief/);
   assert.equal(resume.data.evidence_health.status, "clear");
-  assert.equal(resume.next_actions.some((action) => /candidate_goals/.test(action)), true);
+  assert.equal(resume.next_actions.some((action) => /candidate_goals/.test(action)), false);
 
   const next = run([
     "next",
@@ -936,7 +1081,7 @@ test("evidence can drive the workflow to complete and render a human report", ()
     "--json"
   ]);
   assert.equal(next.data.next_recommendation.status, "ready-for-next-loop");
-  assert.equal(next.data.next_recommendation.candidate_goals.length, 4);
+  assert.equal(next.data.next_recommendation.candidate_goals, undefined);
 
   const exported = run([
     "context", "export",
@@ -947,47 +1092,8 @@ test("evidence can drive the workflow to complete and render a human report", ()
   ]);
   assert.equal(exported.data.next_recommendation.status, "ready-for-next-loop");
   assert.equal(exported.data.agent_next.state, "ready_for_next_loop");
-  assert.equal(exported.data.agent_next.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), true);
-  assert.equal(exported.data.next_recommendation.candidate_goals.some((candidate) => candidate.id === "opennori-adoption-dogfood"), true);
-  assert.equal(exported.data.next_recommendation.candidate_goals.some((candidate) => candidate.draft_command?.includes("--source-goal")), true);
-
-  const nextDraft = run([
-    "draft",
-    "--from-next-candidate", "next-loop-usability",
-    "--source-goal", init.data.goal_id,
-    "--goal-id", "next-loop-usability-contract",
-    "--root", root,
-    "--json"
-  ]);
-  assert.equal(nextDraft.data.goal_id, "next-loop-usability-contract");
-  assert.equal(nextDraft.data.acceptance_basis.status, "draft");
-  assert.match(nextDraft.data.acceptance_basis.summary, /候选下一轮目标|completed goal candidate/);
-  assert.equal(nextDraft.data.acceptance_basis.source_goal_id, init.data.goal_id);
-  assert.equal(nextDraft.data.acceptance_basis.candidate_id, "next-loop-usability");
-  assert.match(nextDraft.data.acceptance_basis.rule, /不是已批准的验收标准|not approved acceptance criteria/);
-  assert.equal(nextDraft.data.current_gap.id, "ACCEPTANCE-BASIS");
-  assert.equal(nextDraft.data.criteria.some((criterion) => /候选|candidate/.test(criterion.user_story.toLowerCase())), true);
-  assert.equal(nextDraft.data.criteria.some((criterion) => /resume、status、next 或 context export/.test(criterion.measurement)), true);
-  assert.equal(nextDraft.data.criteria.some((criterion) => /phase、task list 或 completion evidence/.test(criterion.threshold)), true);
-  assert.equal(nextDraft.data.criteria.some((criterion) => /按这条候选方向检查新的目标结果/.test(criterion.measurement)), false);
-  const nextDraftLedger = JSON.parse(fs.readFileSync(nextDraft.data.evidence_path, "utf8"));
-  assert.equal(nextDraftLedger.ledger.status, "draft");
-  assert.equal(nextDraftLedger.ledger.criteria["AC-1"].status, "unknown");
-
-  const dogfoodDraft = run([
-    "draft",
-    "--from-next-candidate", "opennori-adoption-dogfood",
-    "--source-goal", init.data.goal_id,
-    "--goal-id", "opennori-adoption-dogfood-contract",
-    "--root", root,
-    "--json"
-  ]);
-  assert.equal(dogfoodDraft.data.goal_id, "opennori-adoption-dogfood-contract");
-  const dogfoodDraftText = dogfoodDraft.data.criteria.map((criterion) => `${criterion.measurement}\n${criterion.threshold}`).join("\n");
-  assert.match(dogfoodDraftText, /非 OpenNori 仓库/);
-  assert.match(dogfoodDraftText, /首次卡住、重复、CLI 过重或半安装/);
-  assert.match(dogfoodDraftText, /不会把 OpenNori 自身通过状态当作外部采用证明/);
-  assert.doesNotMatch(dogfoodDraftText, /按这条候选方向检查新的目标结果/);
+  assert.equal(exported.data.agent_next.candidate_goals, undefined);
+  assert.equal(exported.data.next_recommendation.candidate_goals, undefined);
 });
 
 test("blocked criteria produce a concrete intervention answer", () => {
@@ -1011,7 +1117,7 @@ test("blocked criteria produce a concrete intervention answer", () => {
   assert.match(status.data.intervention.action, /Choose whether OpenNori should pause/);
 });
 
-test("high-risk criteria require strong evidence before passing", () => {
+test("high-risk agent observation stays objective passing but surfaces review risk", () => {
   const root = tempRoot();
   const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
   recordArchitectureRequirement(
@@ -1032,13 +1138,21 @@ test("high-risk criteria require strong evidence before passing", () => {
     "--json"
   ]);
 
-  assert.equal(weak.data.criterion_status, "failing");
-  assert.equal(weak.data.confidence, "strong-evidence-required");
-  assert.equal(weak.data.gate, "downgraded_high_risk_requires_strong_evidence");
+  assert.equal(weak.data.criterion_status, "passing");
+  assert.equal(weak.data.confidence, "review-required");
+  assert.equal(weak.data.gate, "accepted");
   assert.equal(weak.data.workflow_status, "active");
-  assert.equal(weak.data.current_gap.id, "AC-P-4");
-  assert.equal(weak.data.next_recommendation.status, "work-on-current-gap");
-  assert.equal(weak.data.agent_next.state, "work_on_current_gap");
+  assert.notEqual(weak.data.current_gap.id, "AC-P-4");
+
+  const health = run([
+    "check",
+    "--acceptance", init.data.acceptance_path,
+    "--evidence", init.data.evidence_path,
+    "--root", root,
+    "--json"
+  ]);
+  assert.equal(health.data.evidence_health.status, "review");
+  assert.equal(health.warnings.some((warning) => warning.type === "evidence_health" && warning.issue === "high-risk-agent-observation"), true);
 
   const strong = run([
     "evidence", "add",
@@ -1048,6 +1162,7 @@ test("high-risk criteria require strong evidence before passing", () => {
     "--kind", "review-result",
     "--summary", "Reviewer verified recovery from repository files.",
     "--result", "passing",
+    "--confidence", "verified",
     "--json"
   ]);
 
@@ -1066,6 +1181,7 @@ test("high-risk criteria require strong evidence before passing", () => {
     "--source-command", "opennori doctor --root . --json",
     "--source-path", ".opennori/reports/opennori-self.report.md",
     "--result", "passing",
+    "--confidence", "verified",
     "--json"
   ]);
 
@@ -1076,7 +1192,7 @@ test("high-risk criteria require strong evidence before passing", () => {
 
 test("evidence records flexible reviewable sources without fixed adapters", () => {
   const root = tempRoot();
-  run(["draft", "--goal", "Ship a reviewable OpenNori task", "--root", root, "--json"]);
+  run(["draft", ...draftArgsFromGoal(root, "Ship a reviewable OpenNori task")]);
   run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
 
   const added = run([
@@ -1125,9 +1241,68 @@ test("evidence records flexible reviewable sources without fixed adapters", () =
   assert.match(text, /Browser-specific visual review was not performed/);
 });
 
+test("evidence health accepts custom non-context source shapes as reviewable", () => {
+  const root = tempRoot();
+  draftAndApprove([
+    "--brief", writeBriefFile(root, "Ship with custom review sources", {
+      criteria: [
+        {
+          id: "AC-1",
+          user_story: "As a user, I can inspect a screenshot-backed result.",
+          measurement: "Open the referenced screenshot review source.",
+          threshold: "The evidence health report accepts the screenshot source as reviewable.",
+          risk: "medium"
+        },
+        {
+          id: "AC-2",
+          user_story: "As a user, I can inspect a diff-backed result.",
+          measurement: "Open the referenced diff review source.",
+          threshold: "The evidence health report accepts the diff source as reviewable.",
+          risk: "medium"
+        },
+        {
+          id: "AC-3",
+          user_story: "As a user, I can inspect a log-backed result.",
+          measurement: "Open the referenced log review source.",
+          threshold: "The evidence health report accepts the log source as reviewable.",
+          risk: "medium"
+        }
+      ]
+    }),
+    "--root", root,
+    "--json"
+  ], { summary: "User approved custom source shape test." });
+
+  const customSources = [
+    ["AC-1", "{\"type\":\"screenshot\",\"label\":\"settings-failure.png\",\"path\":\"https://example.com/settings-failure.png\"}"],
+    ["AC-2", "{\"type\":\"diff\",\"label\":\"git diff -- src/settings.tsx\",\"summary\":\"Review the changed settings UI diff.\"}"],
+    ["AC-3", "{\"type\":\"log\",\"label\":\"server error log excerpt\",\"summary\":\"Review the failed-save error log excerpt.\"}"]
+  ];
+  for (const [criterion, source] of customSources) {
+    run([
+      "evidence", "add",
+      "--root", root,
+      "--criterion", criterion,
+      "--kind", "review-result",
+      "--basis", "artifact-review",
+      "--summary", `${criterion} has a custom reviewable source.`,
+      "--result", "passing",
+      "--confidence", "verified",
+      "--source", source,
+      "--reviewability", "Inspect the custom evidence source.",
+      "--limitations", "This fixture checks source shape handling, not business behavior.",
+      "--json"
+    ]);
+  }
+
+  const check = run(["check", "--root", root, "--json"]);
+  assert.equal(check.data.evidence_health.status, "clear");
+  assert.equal(check.warnings.some((warning) => warning.type === "evidence_health" && warning.issue === "missing-reviewable-source"), false);
+});
+
 test("concurrent evidence writes preserve every reviewable record", async () => {
   const root = tempRoot();
-  const current = draftAndApprove(["--goal", "Ship concurrent evidence safely", "--root", root, "--json"]);
+  const current = draftAndApprove(draftArgsFromGoal(root, "Ship concurrent evidence safely"));
   const lockPath = path.join(root, ".opennori", ".locks", "active-goal.write.lock");
   fs.mkdirSync(lockPath, { recursive: true });
 
@@ -1167,10 +1342,35 @@ test("concurrent evidence writes preserve every reviewable record", async () => 
   );
 });
 
-test("check surfaces evidence health without forcing adapter taxonomy", () => {
+test("check surfaces high-risk agent-observation evidence health without forcing adapter taxonomy", () => {
   const weakRoot = tempRoot();
   draftAndApprove([
-    "--goal", "Ship with weak evidence",
+    "--brief", writeBriefFile(weakRoot, "Ship with weak evidence", {
+      criteria: [
+        {
+          id: "AC-1",
+          layer: "operator",
+          user_story: "As a user, I can review a high-risk completion claim.",
+          measurement: "Open the report and inspect the evidence for the high-risk result.",
+          threshold: "The report exposes review risks when the claim is only an agent observation.",
+          risk: "high"
+        },
+        {
+          id: "AC-2",
+          layer: "operator",
+          user_story: "As a user, I can review a supporting command result.",
+          measurement: "Run status and inspect the output.",
+          threshold: "The output shows reviewable evidence."
+        },
+        {
+          id: "AC-3",
+          layer: "operator",
+          user_story: "As a user, I can review a supporting report artifact.",
+          measurement: "Open the report artifact.",
+          threshold: "The artifact explains what was verified."
+        }
+      ]
+    }),
     "--root", weakRoot,
     "--json"
   ], { summary: "User approved evidence health test." });
@@ -1178,10 +1378,10 @@ test("check surfaces evidence health without forcing adapter taxonomy", () => {
     "evidence", "add",
     "--root", weakRoot,
     "--criterion", "AC-1",
-    "--kind", "manual",
-    "--summary", "AC-1 is covered by the OpenNori 0.1.3 single-bin CLI implementation, self contract refresh, tests, and reviewable artifacts.",
+    "--kind", "agent-observation",
+    "--basis", "agent-observation",
+    "--summary", "Agent says AC-1 is complete.",
     "--result", "passing",
-    "--confidence", "verified",
     "--json"
   ]);
   for (const criterion of ["AC-2", "AC-3"]) {
@@ -1202,7 +1402,7 @@ test("check surfaces evidence health without forcing adapter taxonomy", () => {
 
   const weakCheck = run(["check", "--root", weakRoot, "--json"]);
   assert.equal(weakCheck.data.evidence_health.status, "review");
-  assert.equal(weakCheck.warnings.some((warning) => warning.type === "evidence_health" && warning.issue === "bulk-evidence-summary"), true);
+  assert.equal(weakCheck.warnings.some((warning) => warning.type === "evidence_health" && warning.issue === "high-risk-agent-observation"), true);
   assert.equal(weakCheck.warnings.some((warning) => warning.type === "evidence_health" && warning.issue === "missing-reviewable-source"), true);
   assert.equal(weakCheck.next_actions.some((action) => /evidence_health/.test(action)), true);
 
@@ -1242,7 +1442,7 @@ test("check surfaces evidence health without forcing adapter taxonomy", () => {
 
 test("missing local artifact evidence is pruned and does not occupy report or context export", () => {
   const root = tempRoot();
-  const current = draftAndApprove(["--goal", "Ship without stale evidence", "--root", root, "--json"]);
+  const current = draftAndApprove(draftArgsFromGoal(root, "Ship without stale evidence"));
 
   const stalePath = "docs/removed-proof.md";
   const added = run([
@@ -1285,7 +1485,7 @@ test("missing local artifact evidence is pruned and does not occupy report or co
 
 test("agent can explicitly prune obsolete evidence before recording fresh proof", () => {
   const root = tempRoot();
-  draftAndApprove(["--goal", "Refresh obsolete evidence", "--root", root, "--json"]);
+  draftAndApprove(draftArgsFromGoal(root, "Refresh obsolete evidence"));
 
   run([
     "evidence", "add",
@@ -1529,7 +1729,7 @@ test("public product surfaces present OpenNori as one capability bundle", () => 
 test("public JSON Schemas validate persisted OpenNori state and separate structure from semantics", () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
-  const current = draftAndApprove(["--goal", "Ship schema-backed OpenNori state", "--root", root, "--json"]);
+  const current = draftAndApprove(draftArgsFromGoal(root, "Ship schema-backed OpenNori state"));
   recordArchitectureRequirement(
     root,
     current.data.goal_id,
@@ -1746,7 +1946,7 @@ test("doctor reports ready, needs-action, and broken project health", () => {
   assert.equal(ready.data.architecture.decision, "missing");
   assert.equal(ready.data.checks.find((check) => check.name === "architecture_baseline").ok, true);
 
-  const nonTrivial = draftAndApprove(["--goal", "Ship a non-trivial architecture-aware goal", "--root", readyRoot, "--json"]);
+  const nonTrivial = draftAndApprove(draftArgsFromGoal(readyRoot, "Ship a non-trivial architecture-aware goal"));
   const unknownRequirement = run(["doctor", "--root", readyRoot, "--json"]);
   assert.equal(unknownRequirement.data.checks.find((check) => check.name === "architecture_baseline").ok, true);
   assert.equal(unknownRequirement.data.architecture.requirement.status, "unknown");
@@ -1820,7 +2020,7 @@ test("doctor reports ready, needs-action, and broken project health", () => {
   assert.equal(broken.data.recovery_actions.some((action) => action.check === "active_goal_issue" && action.goal_id === "broken" && /broken\.evidence\.json/.test(action.action)), true);
 
   const schemaBrokenRoot = tempRoot();
-  const schemaBroken = draftAndApprove(["--goal", "Ship schema validation diagnostics", "--root", schemaBrokenRoot, "--json"]);
+  const schemaBroken = draftAndApprove(draftArgsFromGoal(schemaBrokenRoot, "Ship schema validation diagnostics"));
   const evidencePath = schemaBroken.data.evidence_path;
   const evidencePayload = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
   delete evidencePayload.ledger.criteria;
@@ -1985,7 +2185,7 @@ test("profile check automatically checks local Skills and package stacks without
 test("architecture baseline loop is agent-readable sticky and challengeable", () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
-  const draft = draftAndApprove(["--goal", "Refactor OpenNori into a TypeScript agent state CLI product", "--root", root, "--json"]);
+  const draft = draftAndApprove(draftArgsFromGoal(root, "Refactor OpenNori into a TypeScript agent state CLI product"));
 
   const requirementCheck = run(["check", "--root", root, "--json"]);
   assert.equal(requirementCheck.data.architecture_check.status, "needs-action");
@@ -2097,8 +2297,7 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   const secondDraft = run([
     "draft",
     "--root", root,
-    "--goal", "Capture follow-up adoption friction",
-    "--goal-id", "adoption-follow-up",
+    "--brief", writeBriefFile(root, "Capture follow-up adoption friction", { goalId: "adoption-follow-up" }),
     "--json"
   ]);
   assert.equal(secondDraft.data.goal_id, "adoption-follow-up");
@@ -2156,7 +2355,7 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
 
 test("missing architecture baseline is a completion review risk, not a product AC gap", () => {
   const root = tempRoot();
-  const draft = draftAndApprove(["--goal", "Ship an architecture-aware user outcome", "--root", root, "--json"]);
+  const draft = draftAndApprove(draftArgsFromGoal(root, "Ship an architecture-aware user outcome"));
   recordArchitectureRequirement(
     root,
     draft.data.goal_id,
@@ -2198,7 +2397,7 @@ test("missing architecture baseline is a completion review risk, not a product A
 
 test("architecture apply records do not count as Product AC evidence", () => {
   const root = tempRoot();
-  const draft = draftAndApprove(["--goal", "Ship an architecture-guided user outcome", "--root", root, "--json"]);
+  const draft = draftAndApprove(draftArgsFromGoal(root, "Ship an architecture-guided user outcome"));
   recordArchitectureRequirement(
     root,
     draft.data.goal_id,
@@ -2246,7 +2445,7 @@ test("architecture apply records do not count as Product AC evidence", () => {
 
 test("product evidence can reference architecture apply context without treating it as proof", () => {
   const root = tempRoot();
-  const draft = draftAndApprove(["--goal", "Ship architecture-context evidence", "--root", root, "--json"]);
+  const draft = draftAndApprove(draftArgsFromGoal(root, "Ship architecture-context evidence"));
   recordArchitectureRequirement(
     root,
     draft.data.goal_id,
@@ -2443,7 +2642,7 @@ test("project architecture profiles without technical verification are not usabl
 test("build-vs-buy health surfaces missing reuse review before self-build", () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
-  const draft = draftAndApprove(["--goal", "Ship a reusable infrastructure choice", "--root", root, "--json"]);
+  const draft = draftAndApprove(draftArgsFromGoal(root, "Ship a reusable infrastructure choice"));
   recordArchitectureRequirement(
     root,
     draft.data.goal_id,
@@ -2575,7 +2774,7 @@ test("superseded build-vs-buy decisions stay reviewable without blocking current
 
 test("context export exposes goal AC profile evidence and report paths for review tools", () => {
   const root = tempRoot();
-  const draft = draftAndApprove(["--goal", "Ship a reviewable workflow", "--root", root, "--json"]);
+  const draft = draftAndApprove(draftArgsFromGoal(root, "Ship a reviewable workflow"));
   recordArchitectureRequirement(
     root,
     draft.data.goal_id,
@@ -2821,9 +3020,9 @@ test("criterion add preserves contract and ledger consistency", () => {
 
 test("drafted generic goals stay blocked on acceptance approval", () => {
   const root = tempRoot();
-  const draft = run(["draft", "--goal", "Ship a settings page where users edit profile details", "--root", root, "--json"]);
+  const draft = run(["draft", ...draftArgsFromGoal(root, "Ship a settings page where users edit profile details")]);
   assert.equal(draft.ok, true);
-  assert.match(draft.data.acceptance_basis.summary, /generic acceptance discovery/);
+  assert.match(draft.data.acceptance_basis.summary, /Skill-prepared acceptance brief/);
   assert.equal(draft.data.acceptance_basis.status, "draft");
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
 });

@@ -11,7 +11,7 @@ Language: en
 ## Acceptance Basis
 
 Status: approved
-Summary: User added AC-A-11.
+Summary: Revise AC-P-4 to preserve objective evidence state while surfacing review risk.
 
 ## Nori Profile
 
@@ -24,7 +24,7 @@ Summary: User added AC-A-11.
 | AC-P-1 | protocol | 作为用户，我在编辑器或文件浏览器里打开 active Nori Contract 后，能在 60 秒内看懂目标、分层验收标准、每条状态和当前缺口。 | 打开 .opennori/active/<goal>.acceptance.md 并阅读。 | 不读聊天历史、不读实现说明，60 秒内能判断任务在验收层面的状态和下一条缺口。 | passing |
 | AC-P-2 | protocol | 作为用户，我运行 opennori check 后，能区分客观状态健康检查和需要 agent 与我复核的 AC 质量判断，而不是以为 CLI 会替我判断 AC 好坏。 | 对当前 active goal 运行 opennori check --json，并查看 README、AGENTS.md 和 OpenNori packaged Skills 对 AC 质量边界的说明。 | check 只报告 contract/ledger 结构、Architecture Baseline、Profile、build-vs-buy 和 evidence health 等客观状态；不会因为某句自然语言像“修改字段”或“失败时有提示”就生成固定 quality gap；nori / nori-acceptance / nori-reporting Skills 明确要求 agent 自行审查 AC 文字并向用户追问缺失的验收问题。 | passing |
 | AC-P-3 | protocol | 作为用户，我运行 opennori next 或 opennori status 后，看到的是当前验收缺口和完成判断，而不是任务步骤列表。 | 运行 opennori next/status 并查看返回的 current_gap、completion 和 intervention。 | 输出默认回答“当前差哪条 AC、是否完成、是否需要人类动作”，不把过程任务当作主线。 | passing |
-| AC-P-4 | protocol | 作为用户，我查看高风险 AC 的状态时，能看到弱证据不能让它变成 passing。 | 给 high risk AC 添加弱 passing 证据，再查看 status 或 report。 | 高风险 passing 不能只由 agent 自我总结证明；缺少强证据时必须保持 failing、unknown 或 blocked。 | passing |
+| AC-P-4 | protocol | 作为用户，我查看高风险 AC 的状态时，能看到 agent 自我总结或弱证据即使被记录为 passing，也不会让 OpenNori 给出无风险的确信完成结论。 | 给 high risk AC 添加只有 agent summary 的 passing 证据，再查看 status、check 或 report。 | 高风险 AC 的证据记录保持 agent 提交的客观 result，但 CLI 必须暴露 review risk、confidence 或 evidence_health 警告，让用户知道还需要可复查来源、人类确认、限制说明或 waiver；CLI 不用硬编码强弱词表直接替用户裁判主观充分性。 | passing |
 | AC-P-5 | protocol | 作为用户，我运行 opennori report 后，能看到目标、分层 AC 状态、证据摘要、当前缺口、是否需要我介入和结论。 | 运行 opennori report 或让 Codex 生成 OpenNori 报告。 | 报告默认围绕验收状态和证据组织，不把过程任务当作主线。 | passing |
 | AC-P-6 | protocol | 作为用户，我查看 OpenNori 报告时，能知道每条通过、阻塞或豁免的 AC 是基于什么证据判断的。 | 给 AC 添加不同来源的证据后运行 opennori report 或 opennori status。 | 报告或状态输出展示证据摘要、判断基础、证据强度和剩余限制；不会只显示 agent 自我结论。 | passing |
 | AC-P-7 | protocol | 作为用户，我不需要限制 agent 使用哪种取证工具，但我能复查 agent 引用的证据来源。 | 让 agent 用任意验证方式完成一条 AC，并查看该 AC 的证据来源。 | 证据来源可以是命令、产物、URL、截图、diff、人类确认或其他引用；每个来源都包含用户可理解的 label 或复查线索。 | passing |
@@ -83,6 +83,7 @@ Summary: User added AC-A-11.
 | AC-O-12 | operator | 作为用户，我告诉 agent 要做完整产品、完整功能闭环、完整应用、完整 Dashboard 或完整工作台时，OpenNori 会让 agent 充分展开用户可验收 AC，而不是默认压缩成少量 MVP、第一版或 happy-path AC。 | 阅读 nori、nori-acceptance、nori-autogoal packaged Skills、本机 OpenNori 开发 Skills、OpenNori protocol、README、官网和自验收报告；用完整产品类目标检查 agent 是否会覆盖足够的验收面，并让用户显式确认保留完整闭环或缩小范围。 | Skills 明确要求完整产品类目标默认展开完整验收面，包括用户角色、入口与导航、核心工作流、状态转换、数据规则、权限与边界、失败与恢复、持久化、UI/UX、报告或审查方式；AC 数量可以按目标需要增加，执行仍按当前缺口推进；只有用户明确要求原型、MVP、第一版或缩小范围时，agent 才能压缩完成定义；该规则只写入 Skill 行为协议、文档、用户确认和资产测试，不写成 CLI hard validator 或固定自然语言词表。 | passing |
 | AC-O-13 | operator | 作为用户，我用 OpenNori autogoal 定义完整产品、完整 Dashboard 或完整工作台时，agent 在写入 Nori Contract Draft 前会先做验收面覆盖自检，并把独立用户判断面拆成独立 AC，而不是把项目概览、资产、记忆、能力、知识库、检索、审计、UI 状态和恢复路径压进少量大 AC。 | 阅读 nori、nori-acceptance、nori-autogoal packaged Skills、本机开发 Skills、OpenNori protocol、README、官网和测试资产；用 AW 完整项目工作台提示词检查 agent 是否会先列出 coverage map，再生成足够细分的标准 Nori Contract Draft。 | Skills 明确要求完整产品类 autogoal 在 draft 前执行 coverage self-check，覆盖用户角色、入口/导航、项目列表与切换、核心对象列表与详情、只读预览、状态与空态/加载/错误/成功、来源/审计、记忆、能力、外部知识库、检索、权限/安全边界、持久化、失败恢复和最终 review/report；如果一条 AC 混入多个独立用户判断面，agent 必须拆分或标为需修订；旧的压缩 draft 不能被 approve，应重新生成。该规则仍属于 Skill 行为协议、用户确认和资产测试，不写成 CLI hard validator 或自然语言质量词表。 | passing |
 | AC-A-11 | architecture | 作为用户，我让 agent 处理一个 OpenNori goal 时，能看到 Architecture Baseline 是否需要由 agent/user 明确判断并记录，而不是 CLI 因为存在 goal 就默认所有 AC 都必须走架构 review。 | 分别用简单 goal、非平凡 goal 和用户 waiver 场景检查 status/check/agent_next、architecture show、README/Skills 和测试；确认简单 goal 可以记录 architecture not_required 并直接进入 evidence，非平凡 goal 记录 required 后才路由 baseline，waiver 有明确 reason 和 review 风险表达。 | OpenNori 提供 architecture requirement 状态（unknown/required/not_required/waived）和记录入口；Skill 要求 agent 判断非平凡性并写入该状态；CLI 不再用 Boolean(goalId) 作为是否需要 baseline 的依据，只根据已记录 requirement、baseline、challenge、build-vs-buy 和 evidence 状态做确定性路由；该机制不把技术架构写成 Product AC，也不让 CLI 通过自然语言硬判非平凡。 | passing |
+| AC-A-12 | architecture | 作为用户，我让 agent 用 OpenNori 起草、追问、记录证据或继续下一轮目标时，CLI 不会用内置自然语言模板、词表或候选目标替我判断主观产品语义；这些判断由 packaged Skills、agent 和用户确认完成。 | 用户或评审者检查 opennori draft/discover/brainstorm/status/report/context export、CLI 源码、测试和 OpenNori Skills。 | CLI 只校验和保存 contract/evidence/profile/architecture/report 的客观结构、状态一致性和 review risk；不再内置默认 Product AC、固定 discovery gap 词表、固定 brainstorm 候选、完成后自动生成下一轮产品目标，或把高风险证据强弱直接硬改为主观完成裁判；Skills 明确负责生成/复核 AC、候选目标和证据充分性。 | passing |
 
 ## Rule
 

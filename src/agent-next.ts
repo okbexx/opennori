@@ -20,7 +20,6 @@ type AgentNextInput = {
   needsUser?: boolean;
   safeNextCommand?: string;
   commands?: string[];
-  candidateGoals?: NextRecommendation["candidate_goals"];
 };
 
 function shellArg(value: string): string {
@@ -74,7 +73,6 @@ function agentNext(input: AgentNextInput): AgentNext {
   if (input.commands?.length) next.commands = input.commands;
   const dashboardActivity = dashboardActivityFor(input);
   if (dashboardActivity) next.dashboard_activity = dashboardActivity;
-  if (input.candidateGoals?.length) next.candidate_goals = input.candidateGoals;
   return next;
 }
 
@@ -288,7 +286,7 @@ export function agentNextForRecommendation(
       state: "evidence_needs_review",
       recommendedSkill: "nori-evidence",
       summary: recommendation.summary,
-      instruction: "Review stale or weak evidence with the user; record stronger evidence, a limitation, or a waiver.",
+      instruction: "Review evidence health findings with the user; record fresher evidence, a more reviewable source, a limitation, or a waiver.",
       userVisibleNext: recommendation.actions[0] ?? "Review evidence before accepting completion.",
       goalId,
       currentGapId: gap?.id ?? recommendation.focus,
@@ -318,12 +316,11 @@ export function agentNextForRecommendation(
       state: "ready_for_next_loop",
       recommendedSkill: "nori-acceptance",
       summary: recommendation.summary,
-      instruction: "If the user asked to continue, choose or refine one candidate next human-facing goal from candidate_goals, then create a draft Nori Contract using the candidate draft metadata when present. Do not treat candidates as approved AC.",
-      userVisibleNext: "Choose or refine the next OpenNori goal.",
+      instruction: "If the user asked to continue, use OpenNori Skills to prepare the next human-facing NoriBrief from current context and user intent, then run opennori draft --brief. Do not expect the CLI to invent product candidate goals.",
+      userVisibleNext: "Ask the agent to prepare the next Nori Contract draft from your intended next outcome.",
       goalId,
       currentGapId: null,
-      needsUser: false,
-      candidateGoals: recommendation.candidate_goals
+      needsUser: false
     });
   }
 

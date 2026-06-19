@@ -14,7 +14,7 @@ Reporting is not an implementation diary.
 1. Run the narrowest status command that answers the user.
 2. Prefer resume/status for current state, report for a durable human report, changes for diff grouping, and context export when another tool needs review context.
 3. Read completion, current_gap, evidence_health, profile_review, architecture requirement, architecture decision, build_vs_buy health, agent_next, and next_recommendation. Read `acceptance_review` when present, but remember that subjective AC quality is primarily a Skill/user review responsibility.
-4. If the user asked to continue, follow `agent_next` routing and its `candidate_goals` instead of stopping at a status dump.
+4. If the user asked to continue, follow `agent_next` routing. For `ready_for_next_loop`, hand off to `nori-acceptance` so the next human-facing goal becomes a Skill-prepared NoriBrief, not a CLI-generated candidate.
 5. If the AC wording is vague from the user perspective, do not present this as normal completion acceptance even when CLI state is objectively complete. Say the evidence may be complete but the AC needs user review, state the ambiguity in human terms, and hand off to `nori-acceptance`.
 6. If the user wants a visual live view, use `opennori dashboard --root <repo>` as an observation surface, but keep the completion answer based on status/report data.
 
@@ -36,7 +36,7 @@ Useful state commands:
 - "What do I need to do" -> report user intervention only, not implementation chores.
 - "What changed" -> group OpenNori acceptance artifacts separately from implementation files.
 - "Generate report" -> create/read the OpenNori report and summarize the decision.
-- "Continue" after a complete goal -> inspect `agent_next.candidate_goals`, choose or refine the strongest human-facing next goal, then hand off to `nori-acceptance`.
+- "Continue" after a complete goal -> use the completed context and user's intent to identify the next human-facing outcome, then hand off to `nori-acceptance` to draft it through a Skill-prepared NoriBrief.
 - "Export for review" -> use context export and state what the reviewer can inspect.
 - "Open dashboard" or "watch it run" -> start the local dashboard and explain that it observes activity, current gap, architecture, user-intervention needs, and completion judgment without certifying completion or hosting confirmation controls.
 - AC quality or acceptance meaning is unclear -> lead with "objectively evidenced, not confidently acceptable yet" only when evidence is complete; then route to AC revision instead of asking for a blind risk acceptance.
@@ -56,7 +56,7 @@ May start the local dashboard as an observation surface. Do not write Product AC
 - Profile risk remains -> `nori-capability-profile`.
 - Architecture or build-vs-buy risk remains -> architecture Skills or `nori-build-vs-buy`.
 - Project is unhealthy -> `nori-project-health`.
-- Ready for next loop -> `nori-acceptance` with a selected candidate goal.
+- Ready for next loop -> `nori-acceptance` with the inferred or user-stated next human-facing outcome.
 
 ## User Reply Shape
 
@@ -77,7 +77,7 @@ Then add short evidence or risk bullets only when they affect acceptance.
 - Do not report confident completion unless required AC are passing or waived, blocking profile items are satisfied or waived, evidence health is clear or accepted, and architecture/build-vs-buy review risks are clear or accepted.
 - Do not merge Product decision and Architecture decision.
 - Do not describe implementation details as the main progress signal.
-- Do not treat candidate goals as approved AC, phases, task lists, or evidence.
+- Do not treat next-loop suggestions as approved AC, phases, task lists, evidence, or CLI-generated product candidates.
 - Do not hide review-risk completion behind a simple "done".
 - Do not rely on `opennori check` to decide AC quality for you. If the report looks complete but the AC is vague from a human perspective, say that clearly and route to `nori-acceptance`.
 - Do not ask the user to accept an AC quality risk before showing the concrete missing acceptance questions and offering revision through `nori-acceptance`.

@@ -39,7 +39,7 @@ Useful state commands:
 - `agent_next.state: architecture_requirement_needs_decision` after evidence -> hand off to `nori-architecture-brainstorm` to record required, not_required, or waived with a reason.
 - `agent_next.state: architecture_needs_review` after evidence -> hand off to `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge` as recommended.
 - `agent_next.state: completion_needs_review` after evidence -> hand off to `nori-reporting`.
-- `agent_next.state: ready_for_next_loop` after evidence -> do not invent more evidence; report completion and use candidate goals only if the user asked to continue.
+- `agent_next.state: ready_for_next_loop` after evidence -> do not invent more evidence or CLI candidate goals; report completion and prepare the next NoriBrief only if the user asked to continue.
 
 ## Evidence Quality
 

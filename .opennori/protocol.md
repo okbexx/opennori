@@ -55,7 +55,7 @@ current gap, risk gate, and report.
 | AC-P-1 | Editor / file browser | Open the current Nori Contract | The user understands goal, layered ACs, each status, and the current gap. | No chat history or implementation explanation required; understandable within 60 seconds. |
 | AC-P-2 | CLI | Run `opennori check` | The user can reject technical implementation details masquerading as ACs. | Files, fields, commands, tests, or modules cannot be accepted as user ACs by themselves. |
 | AC-P-3 | CLI | Run `opennori next` or `opennori status` | The user sees the current acceptance gap and completion answer, not a process-step list. | Output answers which AC is missing, whether complete, and whether human action is required. |
-| AC-P-4 | CLI / report | Inspect a high-risk AC | The user sees that weak evidence cannot make it passing. | High-risk passing cannot rely only on agent self-summary. |
+| AC-P-4 | CLI / report | Inspect a high-risk AC | The user sees review risk when high-risk passing evidence is only an agent observation. | CLI preserves the submitted objective result but exposes confidence and evidence_health review warnings instead of pretending agent self-summary is confidently complete. |
 | AC-P-5 | CLI / Codex | Trigger `opennori report` | The user sees goal, layered AC statuses, evidence summaries, current gap, intervention, and conclusion. | Report is organized by acceptance state and evidence, not process steps. |
 | AC-P-6 | CLI / report | Inspect evidence basis | The user can tell what evidence supports passing, blocked, or waived ACs. | Report/status shows evidence summary, basis, confidence, and limitations, not only an agent conclusion. |
 | AC-P-7 | CLI / report | Review evidence sources | The user can review evidence sources without constraining how the agent gathered them. | Sources can be commands, artifacts, URLs, screenshots, diffs, human confirmations, or other reviewable references. |
@@ -98,7 +98,7 @@ a durable workflow asset.
 | AC-Z-9 | CLI | Preview install with `opennori install --dry-run` | The user can judge what OpenNori would create, skip, update, or overwrite before writing to the project. | Install plan lists action, kind, managed status, write intent, destructive flag, and reason; dry-run reports zero actual writes. |
 | AC-Z-10 | CLI | Apply force install | The user must preview and explicitly confirm destructive install actions before files are overwritten. | Real `opennori install --force` fails without confirmation; dry-run previews destructive overwrites; confirmed force install may write. |
 | AC-Z-11 | CLI | Preview and apply uninstall | The user can uninstall OpenNori entry assets without losing acceptance state by default. | Uninstall plan shows removals and preserved state; real uninstall requires confirmation; `.opennori` state is deleted only with `--include-state --confirm`. |
-| AC-Z-12 | Codex Plugin / Codex Skills | Use OpenNori Plugin Skills | The agent gets focused OpenNori Skills for acceptance, evidence, Nori Profile, architecture, project health, reporting, and next-loop candidates while the user keeps using natural language. | The npm package ships `.agents/plugins/marketplace.json`, `plugins/opennori/.codex-plugin/plugin.json`, and `plugins/opennori/skills/nori*/SKILL.md`; each Skill is an agent behavior protocol with trigger semantics, state reading, natural-language mapping, state write boundaries, handoffs, user reply shape, and misuse guards; install does not copy Skills into the project; manifest records `plugin`; doctor detects missing packaged Plugin Skills. |
+| AC-Z-12 | Codex Plugin / Codex Skills | Use OpenNori Plugin Skills | The agent gets focused OpenNori Skills for acceptance, evidence, Nori Profile, architecture, project health, reporting, and next-loop handoff while the user keeps using natural language. | The npm package ships `.agents/plugins/marketplace.json`, `plugins/opennori/.codex-plugin/plugin.json`, and `plugins/opennori/skills/nori*/SKILL.md`; each Skill is an agent behavior protocol with trigger semantics, state reading, natural-language mapping, state write boundaries, handoffs, user reply shape, and misuse guards; install does not copy Skills into the project; manifest records `plugin`; doctor detects missing packaged Plugin Skills. |
 | AC-Z-13 | CLI / project file browser | Establish an Architecture Baseline | The user can see what architecture the agent must follow while implementing Product AC. | `.opennori/architecture/baseline.json`, `.opennori/architecture/baseline.md`, and `.opennori/agent-guide.md` expose the baseline to agents and reviewers. |
 | AC-Z-14 | CLI / project file browser | Add a project Architecture Profile | The user can extend built-in profiles with a reviewed project profile. | `opennori architecture profile --from <profile.json>` writes `.opennori/architecture/profiles/<id>.json`; `architecture profiles` lists it before built-ins. |
 | AC-Z-15 | CLI / report | Challenge a baseline | The user can review evidence before an agent changes architecture. | `opennori architecture challenge` records current baseline, conflict evidence, recommendation, and user confirmation requirement. |
@@ -389,43 +389,28 @@ findings, `profile_review` is unresolved, `architecture_requirement`, `architect
 `architecture_waived` remains, or `build_vs_buy` is unhealthy, even if the ledger status is already
 `complete`.
 
-When a goal is confidently complete, `next_recommendation` may include `candidate_goals`.
-These candidates help the agent continue when the user has asked to keep going. Each candidate
-names a possible next human-facing goal, the user value, acceptance directions, and risks.
-Candidates are not phases, task lists, approved acceptance criteria, or completion evidence. The
-agent must turn a selected or revised candidate into a new draft Nori Contract before using it for
-completion judgment.
-That draft must contain concrete user measurement and passing thresholds for the next outcome, not
-only repeat the candidate direction. It still requires user approval or revision before any evidence
-can complete the next loop.
-For Skill routing, `agent_next.state: ready_for_next_loop` should carry the same
-`candidate_goals` with draft metadata. Skills should prefer `agent_next.candidate_goals` for the
-next action and use `next_recommendation.candidate_goals` as the fuller report/context surface.
+When a goal is confidently complete, `agent_next.state` becomes `ready_for_next_loop`.
+OpenNori CLI does not invent product candidate goals. If the user asks to continue, the Skill uses
+the completed contract context, project evidence, and user intent to prepare the next
+human-facing NoriBrief, then stores it with `opennori draft --brief`.
+Next-loop suggestions are not phases, task lists, approved acceptance criteria, or completion
+evidence. A new loop starts only after the Skill creates a standard draft Nori Contract and the user
+approves or revises it.
 
 ## Risk Gate
 
-OpenNori separates acceptance status from evidence strength.
+OpenNori separates objective acceptance status from confidence and review risk.
 
-For `high` risk criteria, weak evidence cannot make an AC `passing`. If an agent submits
-`passing` evidence with a weak kind, OpenNori downgrades the criterion to `failing` with
-`confidence: strong-evidence-required`.
+If an agent submits `passing` evidence for a high-risk criterion, the CLI preserves the objective
+result that was submitted. It does not use a hard-coded strong/weak evidence word list to rewrite
+subjective sufficiency. Instead, `confidence` and `evidence_health` surface risk: high-risk passing
+evidence based only on `agent-observation`, missing reviewable sources, missing reviewability, or
+missing limitations makes completion objectively complete with review risk rather than confidently
+complete.
 
-Strong evidence kinds:
-
-- `test-summary`
-- `screenshot`
-- `artifact`
-- `review-result`
-- `human-confirmation`
-- `protocol-v1`
-
-Strong explicit confidence values:
-
-- `verified`
-- `reviewed`
-- `human-confirmed`
-
-This keeps high-risk completion from relying on agent self-summary.
+The only downgrade in the core state layer is objective: architecture/context-only sources cannot
+prove Product AC by themselves, so passing evidence made only of context sources is downgraded to
+product-evidence-required. Product evidence sufficiency remains an agent/user review judgment.
 
 ## Free Evidence Structure
 
@@ -446,23 +431,23 @@ When the agent submits evidence, the user-facing record should explain:
 The shape is intentionally open. OpenNori should preserve arbitrary source metadata instead of forcing
 all evidence through a narrow adapter taxonomy.
 `evidence_health` audits that reviewability surface without forcing an adapter taxonomy: it warns
-about missing sources, missing reviewability, missing limitations, stale timestamps, and broad batch
-summaries.
+about missing sources, missing reviewability, missing limitations, stale timestamps, missing local
+artifacts, and high-risk passing evidence based only on agent observation.
 
 ## Agent Rule
 
 On every turn:
 
-1. If the user gives a fuzzy goal or candidate AC, run `opennori discover --goal "<goal>" --root <repo> --json` before drafting.
+1. If the user gives a fuzzy goal or candidate AC, use `nori-acceptance` to inspect the goal and prepare the missing acceptance questions. Optionally store those Skill-prepared questions with `opennori discover --goal "<goal>" --questions '<questions.json>' --root <repo> --json` before drafting.
 1a. If the user asks for autogoal or wants fewer clarification rounds from a rough idea, use `nori-autogoal`: the Skill reads context, preserves the full user intent, infers assumptions, asks only completion-changing questions, and creates a standard Nori Contract Draft through `opennori draft --brief`. Autogoal is not a new contract type and must not shrink a broad idea into MVP, first version, prototype, phases, or task lists.
 1b. If the user asks for a complete product, complete feature loop, full app, full dashboard, full workbench, or explicitly says not MVP, the Skill must define the full acceptance surface before approval instead of compressing the goal into a compact starter AC set. Cover user roles, entry/navigation, core workflows, state transitions, data rules, permissions and boundaries, failure/recovery, persistence, UI/UX when visible, and report/review method. AC count may grow with the real product surface; execution still advances one current gap at a time. Only shrink the completion definition when the user explicitly chooses a prototype, MVP, first version, or narrower scope.
 1b-i. For complete-product autogoal or draft revision, the Skill must run a coverage self-check before asking for approval. It should map product surfaces to planned AC boundaries and split unrelated user judgments instead of bundling them into a few broad AC. Typical separate surfaces include project selection, overview, object list/detail, read-only preview, source/version/audit, memory, capabilities, external knowledge, search/index, timeline/audit, permissions/security boundary, state feedback, persistence, failure recovery, and final review/report. This remains Skill/user review behavior, not a CLI hard validator or natural-language quality test.
 1c. If the goal includes a visible interface such as a page, app, Dashboard, Desktop, workbench, form, settings screen, or admin console, the Skill must discover UI/UX acceptance as Product AC. It should cover entry/navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability, visual and interaction consistency, recovery paths, and UI boundaries. This is Skill/user review behavior, not a CLI hard validator.
 2. Ask only the discovery questions that affect completion judgment. Do not turn discovery gaps into implementation tasks or completion evidence.
-3. If the user wants to discuss, brainstorm, explore, or is not ready to define acceptance criteria, run `opennori brainstorm --idea "<idea>" --root <repo> --json`.
+3. If the user wants to discuss, brainstorm, explore, or is not ready to define acceptance criteria, prepare candidate directions as the Skill and optionally store them with `opennori brainstorm --idea "<idea>" --candidates '<candidates.json>' --root <repo> --json`.
 4. Show only candidate acceptance directions and ask the user to choose or revise a direction. Brainstorm output is not a contract or completion evidence.
-5. If the user chooses a candidate, run `opennori draft --from-brainstorm <brainstorm-id> --candidate <A|B|C> --root <repo> --json`.
-6. If the user starts with "use OpenNori" / "用 OpenNori 跑这个任务" and discovery gaps are answered or explicitly accepted as assumptions, run `opennori draft --goal "<goal>" --root <repo> --json`.
+5. If the user chooses a candidate, convert the chosen direction into a full NoriBrief with concrete user operations, visible results, boundaries, and review method.
+6. If the user starts with "use OpenNori" / "用 OpenNori 跑这个任务" and discovery questions are answered or explicitly accepted as assumptions, prepare a full NoriBrief and run `opennori draft --brief <brief.json> --root <repo> --json`.
 7. Show the draft acceptance criteria and ask the user to approve or revise them.
 8. After approval, run `opennori approve --root <repo> --summary "<approval>" --json`.
 9. If the user states required Skills, preferred stacks, avoided tools, install policy, or execution constraints, run `opennori profile add --root <repo> ... --json` and keep those items out of the user acceptance criteria.
@@ -480,15 +465,13 @@ On every turn:
 21. If a dashboard is useful, publish live activity from `agent_next.dashboard_activity` or `opennori activity start/heartbeat/finish`; do not treat that activity as acceptance evidence or use dashboard controls for confirmation. If no current goal exists, do not bind activity to drafts; if multiple current goals exist, run doctor/project-health because the state is broken.
 22. Run `opennori evaluate`.
 23. Report acceptance state, profile compliance, and evidence, not implementation steps.
-24. If the goal is complete and the user asked to continue, review `agent_next.candidate_goals`, choose or refine the strongest human-facing next goal, then run discovery or draft for a new Nori Contract using candidate draft metadata when present. The resulting draft must give concrete measurement and passing thresholds for user approval; do not treat candidate goals as approved AC, phases, task lists, or evidence.
+24. If the goal is complete and the user asked to continue, infer or ask for the next human-facing outcome from the completed context and user intent, prepare a full NoriBrief, then run `opennori draft --brief <brief.json> --root <repo> --json`. Do not treat next-loop suggestions as approved AC, phases, task lists, or evidence.
 
 Useful commands:
 
-- `opennori brainstorm --idea "<idea>" --root <repo>`: create selectable acceptance directions before a contract exists.
-- `opennori discover --goal "<goal>" --root <repo>`: create a question source before drafting a contract; the agent still decides which questions matter for the user.
+- `opennori brainstorm --idea "<idea>" --candidates '<candidates.json>' --root <repo>`: store Skill-prepared selectable acceptance directions before a contract exists.
+- `opennori discover --goal "<goal>" --questions '<questions.json>' --root <repo>`: store a Skill-prepared question source before drafting a contract; the agent still decides which questions matter for the user.
 - `opennori draft --brief <brief.json> --root <repo>`: create a standard draft Nori Contract from a Skill-prepared brief, including autogoal convergence output.
-- `opennori draft --goal "<goal>" --root <repo>`: create a draft Nori Contract that needs user approval.
-- `opennori draft --from-brainstorm <brainstorm-id> --candidate <A|B|C> --root <repo>`: convert a selected brainstorm direction into a draft contract.
 - `opennori approve --root <repo>`: mark the acceptance basis as approved so completion can be decided.
 - `opennori criterion add --root <repo> --id <id> ...`: add a newly confirmed acceptance boundary to the current contract and ledger.
 - `opennori criterion update --root <repo> --criterion <id> ...`: preserve a user revision as the new acceptance basis.

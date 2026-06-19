@@ -173,5 +173,5 @@ Keep any autogoal notes short and clearly secondary. The user is approving the N
 - Do not ask the user a full questionnaire when reasonable assumptions can be made. Ask only questions that change completion meaning.
 - Do not treat assumptions as approval. Show them and let the user approve or revise the draft.
 - Do not use autogoal when the user is asking to preserve already discussed AC. Route that to `nori-acceptance` so it stays `source: "conversation"` and draft-only.
-- Do not treat brainstorms, discoveries, candidate goals, activity, dashboard snapshots, or autogoal notes as evidence.
+- Do not treat brainstorms, discoveries, next-outcome notes, activity, dashboard snapshots, or autogoal notes as evidence.
 - Do not claim completion from a draft. Completion still requires approved AC and reviewable evidence.

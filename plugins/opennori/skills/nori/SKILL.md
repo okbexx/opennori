@@ -19,7 +19,7 @@ OpenNori is one capability bundle:
 
 Do not present those pieces as optional standalone product paths.
 
-CLI JSON may include `data.agent_next`. Treat it as the deterministic routing surface from the state layer to Skills. Prefer `agent_next.state`, `agent_next.recommended_skill`, `agent_next.instruction`, `agent_next.user_visible_next`, `agent_next.dashboard_activity`, and `agent_next.candidate_goals` over guessing from files or command prose.
+CLI JSON may include `data.agent_next`. Treat it as the deterministic routing surface from the state layer to Skills. Prefer `agent_next.state`, `agent_next.recommended_skill`, `agent_next.instruction`, `agent_next.user_visible_next`, and `agent_next.dashboard_activity` over guessing from files or command prose.
 
 `.opennori/agent-guide.md` is only a project-local supplementary guide. Do not depend on it for OpenNori discovery, and do not assume a fresh project has an Architecture Baseline or a current Nori Contract just because `.opennori/` directories exist.
 
@@ -41,7 +41,7 @@ entrypoints, operations, outcomes, evidence needs, and boundaries.
    - `architecture_needs_review` -> follow `recommended_skill` (`nori-architecture-brainstorm`, `nori-architecture-challenge`, or `nori-build-vs-buy`) before non-trivial implementation continues.
    - `work_on_current_gap` -> work only on the current acceptance gap and hand off to `nori-evidence` after verification.
    - `completion_needs_review`, `evidence_needs_review`, or `acceptance_needs_user` -> use reporting/evidence/acceptance as directed and involve the user when `needs_user` is true.
-   - `ready_for_next_loop` -> if the user asked to continue, choose or refine one `agent_next.candidate_goals` item and hand off to `nori-acceptance`.
+   - `ready_for_next_loop` -> if the user asked to continue, hand off to `nori-acceptance` so the Skill can prepare the next human-facing NoriBrief from context and user intent.
 4. If the project is already initialized but the command did not expose `agent_next`, run `opennori list --root <repo> --json`, then `opennori resume --root <repo> --json` or `opennori status --root <repo> --json`.
 5. If `.opennori/current` contains multiple goals, treat it as broken state and route to `nori-project-health`; do not ask the user to choose among multiple current goals.
 6. If doctor reports missing Plugin discovery, packaged Skills, CLI access, manifest, or project state, route to `nori-project-health`.
@@ -69,7 +69,7 @@ entrypoints, operations, outcomes, evidence needs, and boundaries.
 - "Before self-building this parser/installer/schema/storage/UI primitive" -> hand off to `nori-build-vs-buy`.
 - "Install", "upgrade", "uninstall", "doctor", "state is broken", "sync local OpenNori plugin", or "Codex Plugin cache is stale" -> hand off to `nori-project-health`.
 - "Show me the dashboard", "watch OpenNori run", "I want live status" -> run or suggest `opennori dashboard --root <repo>` and keep completion judgment plus user confirmations in conversation and status/report.
-- A complete goal with `agent_next.candidate_goals` and a user asking to continue -> choose or refine one human-facing next goal, then hand off to `nori-acceptance`.
+- A complete goal with `agent_next.state: ready_for_next_loop` and a user asking to continue -> infer or ask for the next human-facing outcome, then hand off to `nori-acceptance` to prepare a standard NoriBrief. Do not expect the CLI to invent product candidate goals.
 
 ## State Writes
 
@@ -118,7 +118,7 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not silently translate current or approved contracts; language changes to existing contracts require explicit revision and approval.
 - Do not split OpenNori into separate Plugin, Skill, and CLI user paths; they are one capability bundle.
 - Do not continue a half-installed mode when Plugin discovery, packaged Skills, CLI access, or `.opennori` state is missing; route to project health and recover the missing piece.
-- Do not present candidate goals as approved AC, evidence, phases, or task lists.
+- Do not expect OpenNori CLI to generate candidate product goals. Next-loop goal selection is a Skill/user judgment that becomes a standard draft through `opennori draft --brief`.
 - Do not answer confidently complete while required AC evidence, blocking profile items, architecture challenges, evidence health, or acceptance review risks remain unresolved or unaccepted.
 - Do not outsource AC quality judgment to CLI heuristics. The agent must inspect AC wording and ask the user the missing acceptance questions when the human judgment surface is vague.
 - Do not accept visible interface goals with only functional/data AC. The agent must check whether the user can navigate, scan, understand state, get feedback, recover from failure, and judge visual/interaction consistency.

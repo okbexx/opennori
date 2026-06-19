@@ -13,8 +13,6 @@ import { inferCriterionLayer, nowIso, slugify, PROTOCOL_VERSION } from "./shared
 
 export const VALID_STATUSES = new Set(["unknown", "failing", "passing", "blocked", "waived"]);
 
-const PLAN_FIELD_NAMES = new Set(["plan", "steps", "tasks", "todos", "next_steps", "implementation_plan"]);
-
 export function buildContractFromBrief(brief: NoriBrief): NoriContract {
   const goal = String(brief.goal || "").trim();
   const goalId = slugify(brief.goal_id || goal.slice(0, 60));
@@ -212,11 +210,6 @@ export function validateContractIntegrity(contract: NoriContract, ledger: Eviden
   }
   if (!contract.goal) {
     issues.push({ path: "goal", message: "Goal is required" });
-  }
-  for (const field of Object.keys(contract)) {
-    if (PLAN_FIELD_NAMES.has(field)) {
-      issues.push({ path: field, message: "OpenNori contract must not expose process-plan fields" });
-    }
   }
   if (!Array.isArray(contract.criteria) || contract.criteria.length === 0) {
     issues.push({ path: "criteria", message: "At least one user acceptance criterion is required" });

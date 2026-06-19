@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User added AC-A-11.",
-      "approved_at": "2026-06-19T02:42:46.186Z"
+      "summary": "Revise AC-P-4 to preserve objective evidence state while surfacing review risk.",
+      "approved_at": "2026-06-19T04:20:29.424Z"
     },
     "criteria": [
       {
@@ -40,9 +40,9 @@
       {
         "id": "AC-P-4",
         "layer": "protocol",
-        "user_story": "作为用户，我查看高风险 AC 的状态时，能看到弱证据不能让它变成 passing。",
-        "measurement": "给 high risk AC 添加弱 passing 证据，再查看 status 或 report。",
-        "threshold": "高风险 passing 不能只由 agent 自我总结证明；缺少强证据时必须保持 failing、unknown 或 blocked。",
+        "user_story": "作为用户，我查看高风险 AC 的状态时，能看到 agent 自我总结或弱证据即使被记录为 passing，也不会让 OpenNori 给出无风险的确信完成结论。",
+        "measurement": "给 high risk AC 添加只有 agent summary 的 passing 证据，再查看 status、check 或 report。",
+        "threshold": "高风险 AC 的证据记录保持 agent 提交的客观 result，但 CLI 必须暴露 review risk、confidence 或 evidence_health 警告，让用户知道还需要可复查来源、人类确认、限制说明或 waiver；CLI 不用硬编码强弱词表直接替用户裁判主观充分性。",
         "required": true,
         "risk": "high"
       },
@@ -567,6 +567,15 @@
         "threshold": "OpenNori 提供 architecture requirement 状态（unknown/required/not_required/waived）和记录入口；Skill 要求 agent 判断非平凡性并写入该状态；CLI 不再用 Boolean(goalId) 作为是否需要 baseline 的依据，只根据已记录 requirement、baseline、challenge、build-vs-buy 和 evidence 状态做确定性路由；该机制不把技术架构写成 Product AC，也不让 CLI 通过自然语言硬判非平凡。",
         "required": true,
         "risk": "medium"
+      },
+      {
+        "id": "AC-A-12",
+        "layer": "architecture",
+        "user_story": "作为用户，我让 agent 用 OpenNori 起草、追问、记录证据或继续下一轮目标时，CLI 不会用内置自然语言模板、词表或候选目标替我判断主观产品语义；这些判断由 packaged Skills、agent 和用户确认完成。",
+        "measurement": "用户或评审者检查 opennori draft/discover/brainstorm/status/report/context export、CLI 源码、测试和 OpenNori Skills。",
+        "threshold": "CLI 只校验和保存 contract/evidence/profile/architecture/report 的客观结构、状态一致性和 review risk；不再内置默认 Product AC、固定 discovery gap 词表、固定 brainstorm 候选、完成后自动生成下一轮产品目标，或把高风险证据强弱直接硬改为主观完成裁判；Skills 明确负责生成/复核 AC、候选目标和证据充分性。",
+        "required": true,
+        "risk": "high"
       }
     ]
   },
@@ -574,7 +583,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-19T03:21:27.488Z",
+    "updated_at": "2026-06-19T05:15:50.768Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -833,68 +842,57 @@
         "evidence": [
           {
             "kind": "review-result",
-            "basis": "protocol-check",
-            "summary": "AC-P-4 is covered by the OpenNori 0.1.3 single-bin CLI implementation, self contract refresh, tests, and reviewable artifacts.",
-            "result": "passing",
-            "confidence": "verified",
-            "sources": [
-              {
-                "type": "command",
-                "label": "npm run check",
-                "command": "npm run check"
-              },
-              {
-                "type": "command",
-                "label": "npm pack --dry-run --json",
-                "command": "npm pack --dry-run --json"
-              },
-              {
-                "type": "command",
-                "label": "node ./bin/opennori.js",
-                "command": "node ./bin/opennori.js"
-              },
-              {
-                "type": "artifact",
-                "label": "bin/opennori.js",
-                "path": "bin/opennori.js"
-              },
-              {
-                "type": "artifact",
-                "label": "package.json",
-                "path": "package.json"
-              },
-              {
-                "type": "artifact",
-                "label": "examples/opennori-self.json",
-                "path": "examples/opennori-self.json"
-              },
-              {
-                "type": "url",
-                "label": "https://opennori.okbexx.com",
-                "url": "https://opennori.okbexx.com"
-              }
-            ],
-            "reviewability": "Run npm run check, inspect package.json bin.opennori, run node ./bin/opennori.js in a fresh directory, inspect README and the public site quick start.",
-            "limitations": "This verifies local implementation and staged site content; public npm and public site require publish/deploy before external users get this exact version.",
-            "gate": "accepted",
-            "created_at": "2026-06-11T09:51:29.306Z"
-          },
-          {
-            "kind": "review-result",
             "basis": "tool-observation",
-            "summary": "High-risk criteria still require strong evidence, and weak passing evidence is downgraded; evidence_health now also prevents broad summary evidence from being treated as confidently complete.",
+            "summary": "High-risk passing evidence now preserves the agent-submitted objective result while exposing review risk through confidence and evidence_health instead of hard-downgrading by a fixed strong/weak evidence list. Evidence health also treats non-context custom sources such as screenshot, diff, log, command, artifact, URL, label, and summary-bearing sources as reviewable, so agent evidence remains flexible while context-only architecture sources still cannot prove Product AC by themselves.",
             "result": "passing",
             "confidence": "verified",
             "sources": [
               {
-                "type": "command",
-                "label": "npm run check",
-                "command": "npm run check"
+                "type": "architecture-apply",
+                "label": "ac-p-4-high-risk-review-risk-boundary",
+                "path": ".opennori/architecture/evidence/ac-p-4-high-risk-review-risk-boundary.json",
+                "role": "context",
+                "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
               },
               {
                 "type": "command",
-                "label": "node ./bin/opennori.js check --root . --json",
-                "command": "node ./bin/opennori.js check --root . --json"
+                "label": "npm run typecheck",
+                "command": "npm run typecheck"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js",
+                "command": "npx vitest run test/core.test.js"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js --testNamePattern 'evidence health|flexible reviewable sources|custom non-context source|high-risk agent observation'",
+                "command": "npx vitest run test/core.test.js --testNamePattern 'evidence health|flexible reviewable sources|custom non-context source|high-risk agent observation'"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js --testNamePattern dashboard",
+                "command": "npx vitest run test/cli-commands.test.js --testNamePattern dashboard"
+              },
+              {
+                "type": "command",
+                "label": "rg -n 'PRODUCT_EVIDENCE_SOURCE_TYPES|strong-evidence-required|DEFAULT_CRITERIA|DISCOVERY_GAPS|BRAINSTORM_CANDIDATES|draft --goal|--from-discovery|--from-brainstorm|--from-next-candidate' src test plugins/opennori/skills README.md .opennori/protocol.md AGENTS.md",
+                "command": "rg -n 'PRODUCT_EVIDENCE_SOURCE_TYPES|strong-evidence-required|DEFAULT_CRITERIA|DISCOVERY_GAPS|BRAINSTORM_CANDIDATES|draft --goal|--from-discovery|--from-brainstorm|--from-next-candidate' src test plugins/opennori/skills README.md .opennori/protocol.md AGENTS.md"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/evidence.ts",
+                "path": "src/core/evidence.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/report.ts",
+                "path": "src/core/report.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
               },
               {
                 "type": "artifact",
@@ -903,14 +901,24 @@
               },
               {
                 "type": "artifact",
+                "label": "plugins/opennori/skills/nori-evidence/SKILL.md",
+                "path": "plugins/opennori/skills/nori-evidence/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
                 "label": ".opennori/protocol.md",
                 "path": ".opennori/protocol.md"
               }
             ],
-            "reviewability": "Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and generated report.",
-            "limitations": "This is local repository evidence for the current worktree; npm publishing and public site deployment are separate release steps.",
+            "reviewability": "Run the listed typecheck, Vitest, and rg commands; inspect src/core/evidence.ts for objective risk-gate/evidence-health behavior and test/core.test.js for high-risk and custom source coverage.",
+            "limitations": "This verifies the CLI boundary and evidence-health state behavior in the local worktree. It does not prove future agents will choose strong enough evidence; Skills and user review still decide subjective sufficiency.",
             "gate": "accepted",
-            "created_at": "2026-06-12T03:14:15.075Z"
+            "created_at": "2026-06-19T05:05:19.709Z"
           }
         ]
       },
@@ -6639,6 +6647,194 @@
             "limitations": "Full npm run check may still fail in this sandbox if tests attempt to bind the local dashboard server to 127.0.0.1; the relevant non-dashboard targeted suites passed.",
             "gate": "accepted",
             "created_at": "2026-06-19T03:21:27.488Z"
+          }
+        ]
+      },
+      "AC-A-12": {
+        "status": "passing",
+        "confidence": "verified",
+        "required": true,
+        "risk": "high",
+        "evidence": [
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "OpenNori CLI no longer generates subjective product semantics from built-in templates or word lists. Draft now requires a Skill-prepared --brief; discover and brainstorm require Skill-prepared --questions/--candidates; default criteria, discovery gap pattern lists, built-in brainstorm candidates, next candidate goals, and hard high-risk strong/weak evidence lists were removed. The remaining CLI validation is structural state integrity and deterministic routing, while packaged Skills and the agent/user conversation own AC discovery, brainstorm directions, next-loop NoriBrief preparation, AC quality review, and subjective evidence sufficiency.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "architecture-apply",
+                "label": "ac-a-12-skill-owned-subjective-semantics",
+                "path": ".opennori/architecture/evidence/ac-a-12-skill-owned-subjective-semantics.json",
+                "role": "context",
+                "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+              },
+              {
+                "type": "command",
+                "label": "npm run typecheck",
+                "command": "npm run typecheck"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js",
+                "command": "npx vitest run test/core.test.js"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js --testNamePattern '^(?!.*dashboard).*$'",
+                "command": "npx vitest run test/cli-commands.test.js --testNamePattern '^(?!.*dashboard).*$'"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js --testNamePattern dashboard",
+                "command": "npx vitest run test/cli-commands.test.js --testNamePattern dashboard"
+              },
+              {
+                "type": "command",
+                "label": "rg -n 'PRODUCT_EVIDENCE_SOURCE_TYPES|strong-evidence-required|DEFAULT_CRITERIA|DISCOVERY_GAPS|BRAINSTORM_CANDIDATES|draft --goal|--from-discovery|--from-brainstorm|--from-next-candidate|NextGoalCandidate' src test plugins/opennori/skills README.md .opennori/protocol.md AGENTS.md",
+                "command": "rg -n 'PRODUCT_EVIDENCE_SOURCE_TYPES|strong-evidence-required|DEFAULT_CRITERIA|DISCOVERY_GAPS|BRAINSTORM_CANDIDATES|draft --goal|--from-discovery|--from-brainstorm|--from-next-candidate|NextGoalCandidate' src test plugins/opennori/skills README.md .opennori/protocol.md AGENTS.md"
+              },
+              {
+                "type": "artifact",
+                "label": "src/acceptance.ts",
+                "path": "src/acceptance.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/draft.ts",
+                "path": "src/cli/commands/acceptance/draft.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/brainstorm.ts",
+                "path": "src/cli/commands/acceptance/brainstorm.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/report.ts",
+                "path": "src/core/report.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/agent-next.ts",
+                "path": "src/agent-next.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/types.ts",
+                "path": "src/types.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+                "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-evidence/SKILL.md",
+                "path": "plugins/opennori/skills/nori-evidence/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/protocol.md",
+                "path": ".opennori/protocol.md"
+              },
+              {
+                "type": "artifact",
+                "label": "AGENTS.md",
+                "path": "AGENTS.md"
+              }
+            ],
+            "reviewability": "Run the listed typecheck, Vitest, and rg commands; inspect the referenced CLI/domain modules to verify Skill-prepared inputs are required and subjective generators were removed; inspect packaged Skills and docs for agent-owned subjective review behavior.",
+            "limitations": "Compatibility surfaces such as acceptance_review and negative candidate_goals assertions remain to help downstream agents/review tools understand the boundary. This evidence does not evaluate whether a future agent asks ideal questions; Skills and user approval still govern that subjective quality.",
+            "gate": "accepted",
+            "created_at": "2026-06-19T05:05:48.886Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "CLI boundary audit confirms subjective product semantics stay in packaged Skills and agent/user review. The CLI no longer generates draft criteria from built-in templates or next-goal candidates, no longer hard-fails process-oriented field names, and its validation errors now describe objective contract/ledger structure fixes rather than judging AC wording.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "architecture-apply",
+                "label": "opennori-self-ac-a-12-aligned",
+                "path": ".opennori/architecture/evidence/opennori-self-ac-a-12-aligned.json",
+                "role": "context",
+                "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+              },
+              {
+                "type": "command",
+                "label": "rg -n 'Rewrite ACs|from the user' src/cli src/core",
+                "command": "rg -n 'Rewrite ACs|from the user' src/cli src/core"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js --testNamePattern 'contract integrity validation stays structural|drafted generic goals stay blocked|high-risk agent observation|evidence health accepts custom'",
+                "command": "npx vitest run test/core.test.js --testNamePattern 'contract integrity validation stays structural|drafted generic goals stay blocked|high-risk agent observation|evidence health accepts custom'"
+              },
+              {
+                "type": "command",
+                "label": "npm run typecheck",
+                "command": "npm run typecheck"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/contract.ts",
+                "path": "src/core/contract.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/draft.ts",
+                "path": "src/cli/commands/acceptance/draft.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/criterion.ts",
+                "path": "src/cli/commands/acceptance/criterion.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/acceptance.ts",
+                "path": "src/acceptance.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Review the listed source files and rerun the commands. The structural validator test proves process-oriented extra fields are not a CLI hard failure; draft/discover/brainstorm code still requires Skill-prepared inputs.",
+            "limitations": "This evidence verifies CLI boundaries and objective tests. It does not prove every future agent will ask ideal AC questions; that remains packaged Skill behavior and user approval.",
+            "gate": "accepted",
+            "created_at": "2026-06-19T05:15:50.768Z"
           }
         ]
       }
