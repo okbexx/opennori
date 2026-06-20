@@ -10,8 +10,26 @@ import {
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
-import type { AcceptanceCriterion } from "../../../types.ts";
+import type { AcceptanceBasis, AcceptanceCriterion } from "../../../types.ts";
 import { jsonArg, rootArg } from "./shared.ts";
+
+function revisedAcceptanceBasis(pairLocation: string, existing: AcceptanceBasis | undefined, summary: unknown, fallbackSummary: string): AcceptanceBasis {
+  const summaryText = String(summary || fallbackSummary);
+  if (pairLocation === "drafts") {
+    const { approved_at: _approvedAt, ...basis } = existing || {};
+    return {
+      ...basis,
+      status: "draft",
+      summary: summaryText
+    };
+  }
+  return {
+    ...(existing || {}),
+    status: "approved",
+    summary: summaryText,
+    approved_at: new Date().toISOString()
+  };
+}
 
 export const criterionAddCommand = defineCommand({
   meta: {
@@ -57,7 +75,7 @@ export const criterionAddCommand = defineCommand({
     json: jsonArg
   },
   run({ args, data }) {
-    const { contract, ledger, acceptancePath, evidencePath, root } = data.loadPair(args);
+    const { contract, ledger, acceptancePath, evidencePath, root, location } = data.loadPair(args);
     const criterionId = String(args.id || "").trim();
     if (!criterionId) throw new Error("--id is required");
     if (contract.criteria.some((item: AcceptanceCriterion) => item.id === criterionId)) {
@@ -81,11 +99,7 @@ export const criterionAddCommand = defineCommand({
       risk: criterion.risk || "medium",
       evidence: []
     };
-    contract.acceptance_basis = {
-      status: "approved",
-      summary: args.summary || `User added ${criterionId}.`,
-      approved_at: new Date().toISOString()
-    };
+    contract.acceptance_basis = revisedAcceptanceBasis(location, contract.acceptance_basis, args.summary, `User added ${criterionId}.`);
 
     const issues = validateContract(contract, ledger);
     if (issues.length > 0) {
@@ -150,7 +164,7 @@ export const criterionUpdateCommand = defineCommand({
     json: jsonArg
   },
   run({ args, data }) {
-    const { contract, ledger, acceptancePath, evidencePath, root } = data.loadPair(args);
+    const { contract, ledger, acceptancePath, evidencePath, root, location } = data.loadPair(args);
     const criterionId = args.criterion;
     if (!criterionId) throw new Error("--criterion is required");
     const criterion = contract.criteria.find((item: AcceptanceCriterion) => item.id === criterionId);
@@ -181,11 +195,7 @@ export const criterionUpdateCommand = defineCommand({
         evidence: []
       };
     }
-    contract.acceptance_basis = {
-      status: "approved",
-      summary: args.summary || `User revised ${criterionId}.`,
-      approved_at: new Date().toISOString()
-    };
+    contract.acceptance_basis = revisedAcceptanceBasis(location, contract.acceptance_basis, args.summary, `User revised ${criterionId}.`);
     const issues = validateContract(contract, ledger);
     if (issues.length > 0) {
       return {

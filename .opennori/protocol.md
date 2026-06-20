@@ -459,7 +459,7 @@ On every turn:
 13. Before self-building infrastructure, record a build-vs-buy decision.
 14. If project evidence conflicts with the baseline, run `opennori architecture challenge`; do not silently replace the baseline.
 15. If the user adds a new acceptance boundary after approval, run `opennori criterion add --root <repo> --id <id> ... --json`; the new criterion becomes an evidence gap without forcing the agent to edit state files manually.
-16. If the user revises a criterion later, run `opennori criterion update --root <repo> --criterion <id> ... --json`; old evidence for the changed criterion is cleared.
+16. If the user revises a criterion while reviewing a draft, run `opennori criterion update --root <repo> --from-draft --goal <goal-id> --criterion <id> ... --json`; the draft remains unapproved and the AC Review Loop restarts from the changed AC. If the user revises an already approved current contract, run `opennori criterion update --root <repo> --criterion <id> ... --json`; old evidence for the changed criterion is cleared and the revised AC becomes the current evidence gap.
 17. If the user asks to update an existing OpenNori project, run `opennori doctor`, use `opennori upgrade --dry-run/--confirm` for manifest/protocol/guide refreshes, then run `opennori check`; use `nori-acceptance` to review existing AC wording with the user instead of relying on fixed CLI quality gaps. If packaged Plugin Skills are missing, reinstall or update the OpenNori package instead of copying Skills into the project.
 18. Run `opennori resume --root <repo>` or `opennori next --root <repo>` to recover the current goal and current acceptance gap from repository files.
 19. Work only to produce evidence for that gap under the confirmed Architecture Baseline.
@@ -476,7 +476,8 @@ Useful commands:
 - `opennori draft --brief <brief.json> --root <repo>`: create a standard draft Nori Contract from a Skill-prepared brief, including autogoal convergence output.
 - `opennori approve --root <repo>`: mark the acceptance basis as approved so completion can be decided.
 - `opennori criterion add --root <repo> --id <id> ...`: add a newly confirmed acceptance boundary to the current contract and ledger.
-- `opennori criterion update --root <repo> --criterion <id> ...`: preserve a user revision as the new acceptance basis.
+- `opennori criterion update --root <repo> --from-draft --goal <goal-id> --criterion <id> ...`: revise a draft AC while keeping the acceptance basis unapproved.
+- `opennori criterion update --root <repo> --criterion <id> ...`: revise an approved current AC and clear stale evidence for that AC.
 - `opennori evidence add --root <repo> --criterion <id> --kind <kind> --summary "<summary>" --result <passing|failing|blocked|waived> --basis <basis> --source '<json-or-label>' --reviewability "<how to review>" --limitations "<known limits>"`: attach user-understandable, reviewable evidence without forcing a fixed adapter.
 - `opennori evidence prune --root <repo> --criterion <id> --reason "<reason>"`: remove invalid or obsolete evidence from a current criterion so reports and context exports only carry current proof.
 - `opennori profile add --root <repo> --type <skill|stack|constraint> --name "<name>" --strength <must|prefer|avoid>`: record user execution preferences separately from ACs.

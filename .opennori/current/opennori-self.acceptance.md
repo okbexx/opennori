@@ -11,7 +11,7 @@ Language: en
 ## Acceptance Basis
 
 Status: approved
-Summary: User added enhanced autogoal visibility acceptance.
+Summary: User added draft revision state-safety AC.
 
 ## Nori Profile
 
@@ -87,6 +87,7 @@ Summary: User added enhanced autogoal visibility acceptance.
 | AC-O-14 | operator | 作为用户，我在 agent 生成 Nori Contract Draft 后，不会一次面对一大段所有 AC 的理解，而是能从 AC-1 开始逐条确认 agent 对当前 AC 的具体理解，全部确认后再决定 approve。 | 阅读 nori、nori-acceptance、nori-autogoal packaged Skills、README、protocol、AGENTS、agent_next 输出和 draft next_actions，检查 draft 后是否要求 AC Review Loop：先概览，再逐条确认当前 AC。 | agent 在请求最终 approve 前必须先展示 compact overview，然后一次只解释当前 AC 的具体理解：精确用户入口、对象或字段、可见状态/提示/结果、不通过样例和具体证据对象；用户用 confirm AC-<n> 或 revise AC-<n>: ... 推进；全部 AC 逐条确认前不得运行 approve；批量解释、早期 approve 或泛化理解不能作为批准依据；该规则只在 Skill 行为协议、文档、agent_next 提示和资产测试中表达，不写成 CLI 主观 validator、实现计划或证据声明。 | passing |
 | AC-O-15 | operator | 作为用户，我要求 OpenNori autogoal 增强模式或让 agent 先自己 grill 一个粗略想法时，agent 会先自行展开使用场景、假设、边界和关键问题，再把结果收敛成标准 Nori Contract Draft。 | 阅读 nori、nori-autogoal packaged Skill、OpenNori protocol、README、官网和测试资产；用 todolist 这类粗略 idea 检查 agent 是否先做 Enhanced Discovery，而不是直接生成少量泛化 AC 或向用户抛完整问卷。 | Skills 明确要求增强 autogoal 仍是 Skill 行为而不是新 CLI 或新产物；agent 自行展开用户角色、入口、场景、数据对象与规则、状态转换、非法输入、成功反馈、持久化、失败/恢复、UI/UX、复查方式、假设和 out-of-scope；只把会改变完成定义的关键问题交给用户确认；最后仍写入标准 Nori Contract Draft，并进入逐条 AC Review Loop。 | passing |
 | AC-O-16 | operator | 作为用户，我要求 OpenNori autogoal 增强模式后，能从 agent 回复、draft 状态和 report/status 中看出 Enhanced Discovery 是否真的被使用，而不是只能相信 agent 自称用了增强模式。 | 查看 nori-autogoal/nori Skills、OpenNori protocol、AGENTS、README、draft markdown/status/report 输出和测试。 | 增强 autogoal 的用户可见回复必须包含 Enhanced Discovery checked；标准 Nori Contract Draft 的 acceptance_basis 必须持久化 source=autogoal、mode=enhanced、coverage_summary、assumptions、open_questions 和可选 out_of_scope；opennori status/resume/report 和 acceptance markdown 能展示这些来源元数据；缺少该确认面时 Skill 不得要求用户 approve；该机制不创建新 CLI、新产物、过程日志或主观 hard validator。 | passing |
+| AC-O-17 | operator | 作为用户，我在 draft 的 AC Review Loop 里修订某条 AC 后，OpenNori 仍然把这份 Nori Contract 保持为待确认草案，而不会把 acceptance_basis 自动标成 approved、不会跳到 profile/architecture/implementation，也不会把修订本身当作 evidence。 | 在一个带有 required Nori Profile 的 draft 上运行 criterion update --from-draft，然后查看 status/current_gap、draft evidence JSON、acceptance markdown、nori-acceptance Skill 和协议文档。 | 修订 draft AC 后 acceptance_basis.status 仍为 draft，approved_at 不存在，source/mode/coverage 等 basis metadata 保留，workflow_status 为 draft，current_gap 为 ACCEPTANCE-BASIS；只有最终 approve 后才能进入 profile、architecture、implementation 或 evidence 路由。已批准 current contract 的 criterion update 仍会清理该 AC 的旧 evidence 并产生新的 evidence gap。 | passing |
 
 ## Rule
 

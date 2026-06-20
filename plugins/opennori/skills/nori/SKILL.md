@@ -40,6 +40,10 @@ example, or evidence object. If it could be copied unchanged to another AC or
 product, route back to `nori-acceptance` for revision before continuing the
 loop. If that explanation changes the completion definition, route back to
 `nori-acceptance` for revision before approval.
+Revising a draft AC is not approval. The child Skill should use the draft
+revision path, keep `acceptance_basis.status` as `draft`, and restart review for
+the changed AC. Do not let profile, architecture, implementation, or evidence
+routing begin until final approval happens after every AC is confirmed.
 
 ## Start Here
 

@@ -3084,6 +3084,63 @@ test("criterion update preserves the revised acceptance basis and clears stale e
   assert.equal(payload.ledger.criteria["AC-P-1"].evidence.length, 0);
 });
 
+test("criterion update on a draft keeps the contract awaiting AC review", () => {
+  const root = tempRoot();
+  const briefPath = writeBriefFile(root, "交付 AW 项目登记和选择能力", {
+    goalId: "aw-project-registry",
+    language: "zh-CN",
+    criteria: [
+      {
+        id: "AC-1",
+        layer: "operator",
+        user_story: "作为用户，我能在 AW 项目列表选择一个项目。",
+        measurement: "打开 AW 项目列表并选择项目。",
+        threshold: "被选项目显示为当前项目。"
+      }
+    ]
+  });
+  const draft = run(["draft", "--brief", briefPath, "--root", root, "--json"]);
+
+  run([
+    "profile", "add",
+    "--root", root,
+    "--from-draft",
+    "--goal", "aw-project-registry",
+    "--id", "ui-component-library-first",
+    "--type", "constraint",
+    "--name", "优先使用项目现有组件库",
+    "--strength", "must",
+    "--purpose", "UI 实现应先复用现有组件库。",
+    "--scope", "AW UI work",
+    "--json"
+  ]);
+
+  const updated = run([
+    "criterion", "update",
+    "--root", root,
+    "--from-draft",
+    "--goal", "aw-project-registry",
+    "--criterion", "AC-1",
+    "--user-story", "作为用户，我能在 AW 项目登记层新增、查看、修改、解绑并选择项目。",
+    "--measurement", "打开 AW 项目登记入口，新增或修改项目登记信息，查看可见项目列表，解绑一个登记项，并选择一个项目。",
+    "--threshold", "增删改查只影响 AW 登记信息和可见项目列表；解绑不会删除本地项目目录；选中的项目状态清楚可见。",
+    "--summary", "用户在 AC Review Loop 中修订 AC-1。",
+    "--json"
+  ]);
+
+  assert.equal(updated.data.acceptance_basis.status, "draft");
+  assert.equal(updated.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(updated.data.workflow_status, "draft");
+  const status = run(["status", "--root", root, "--from-draft", "--goal", "aw-project-registry", "--json"]);
+  assert.equal(status.data.acceptance_basis.status, "draft");
+  assert.equal(status.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(status.data.workflow_status, "draft");
+  const payload = JSON.parse(fs.readFileSync(draft.data.evidence_path, "utf8"));
+  assert.equal(payload.contract.acceptance_basis.status, "draft");
+  assert.equal(payload.contract.acceptance_basis.approved_at, undefined);
+  assert.equal(payload.ledger.status, "draft");
+});
+
 test("criterion add preserves contract and ledger consistency", () => {
   const root = tempRoot();
   const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);

@@ -100,6 +100,10 @@ enough. This explanation is not an implementation plan, architecture decision,
 file list, task list, or evidence claim. If the explanation adds a completion
 condition, exposes a mismatch, or cannot be made concrete from the draft, the
 agent must revise the AC or assumptions before continuing the review loop.
+Revising a draft AC is not approval: use the draft revision path, keep the
+acceptance basis as draft, and restart review for the changed AC. Do not let
+profile, architecture, implementation, or evidence routing begin until final
+approval happens after every AC is confirmed.
 
 Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, or implementation tasks into user AC. They can influence Nori Profile, Architecture Baseline, evidence risk, or recovery guidance, but Product AC must remain human-visible operations or judgments.
 

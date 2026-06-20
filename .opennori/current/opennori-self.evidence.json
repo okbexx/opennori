@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User added enhanced autogoal visibility acceptance.",
-      "approved_at": "2026-06-20T04:01:27.830Z"
+      "summary": "User added draft revision state-safety AC.",
+      "approved_at": "2026-06-20T06:07:05.046Z"
     },
     "criteria": [
       {
@@ -603,6 +603,15 @@
         "threshold": "增强 autogoal 的用户可见回复必须包含 Enhanced Discovery checked；标准 Nori Contract Draft 的 acceptance_basis 必须持久化 source=autogoal、mode=enhanced、coverage_summary、assumptions、open_questions 和可选 out_of_scope；opennori status/resume/report 和 acceptance markdown 能展示这些来源元数据；缺少该确认面时 Skill 不得要求用户 approve；该机制不创建新 CLI、新产物、过程日志或主观 hard validator。",
         "required": true,
         "risk": "medium"
+      },
+      {
+        "id": "AC-O-17",
+        "layer": "operator",
+        "user_story": "作为用户，我在 draft 的 AC Review Loop 里修订某条 AC 后，OpenNori 仍然把这份 Nori Contract 保持为待确认草案，而不会把 acceptance_basis 自动标成 approved、不会跳到 profile/architecture/implementation，也不会把修订本身当作 evidence。",
+        "measurement": "在一个带有 required Nori Profile 的 draft 上运行 criterion update --from-draft，然后查看 status/current_gap、draft evidence JSON、acceptance markdown、nori-acceptance Skill 和协议文档。",
+        "threshold": "修订 draft AC 后 acceptance_basis.status 仍为 draft，approved_at 不存在，source/mode/coverage 等 basis metadata 保留，workflow_status 为 draft，current_gap 为 ACCEPTANCE-BASIS；只有最终 approve 后才能进入 profile、architecture、implementation 或 evidence 路由。已批准 current contract 的 criterion update 仍会清理该 AC 的旧 evidence 并产生新的 evidence gap。",
+        "required": true,
+        "risk": "medium"
       }
     ]
   },
@@ -610,7 +619,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-20T04:02:52.494Z",
+    "updated_at": "2026-06-20T06:07:33.789Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -7114,6 +7123,77 @@
             "limitations": "This verifies persisted and visible confirmation surfaces for enhanced autogoal. It intentionally does not make CLI judge whether the agent's scenario expansion is subjectively sufficient; users still review and confirm the draft.",
             "gate": "accepted",
             "created_at": "2026-06-20T04:02:52.493Z"
+          }
+        ]
+      },
+      "AC-O-17": {
+        "status": "passing",
+        "confidence": "high",
+        "required": true,
+        "risk": "medium",
+        "evidence": [
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "Draft criterion revisions now preserve draft acceptance state: criterion add/update keeps drafts unapproved, preserves source/mode/coverage metadata, removes approved_at, and routes current_gap to ACCEPTANCE-BASIS even when required profile items exist. Approved current-contract revisions still clear stale evidence and create an evidence gap.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js --testNamePattern 'criterion update command'",
+                "command": "npx vitest run test/cli-commands.test.js --testNamePattern 'criterion update command'"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js --testNamePattern 'criterion update'",
+                "command": "npx vitest run test/core.test.js --testNamePattern 'criterion update'"
+              },
+              {
+                "type": "command",
+                "label": "npm run typecheck",
+                "command": "npm run typecheck"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/criterion.ts",
+                "path": "src/cli/commands/acceptance/criterion.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/protocol.md",
+                "path": ".opennori/protocol.md"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": "AGENTS.md",
+                "path": "AGENTS.md"
+              }
+            ],
+            "reviewability": "Review criterion.ts and the draft/current regression tests. Rerun the listed Vitest commands plus npm run typecheck; inspect status on the draft fixture to confirm current_gap remains ACCEPTANCE-BASIS.",
+            "limitations": "This verifies deterministic CLI state and Skill/protocol guidance. It does not prove every future agent will phrase AC revisions well; the AC Review Loop remains a Skill/user conversation responsibility.",
+            "gate": "accepted",
+            "created_at": "2026-06-20T06:07:33.789Z"
           }
         ]
       }
