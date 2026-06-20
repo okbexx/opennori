@@ -43,6 +43,28 @@ function CopyableCommand({ cmd }: { cmd: string }) {
   );
 }
 
+function formatSignal(value: string | undefined): string {
+  const clean = String(value || "").trim();
+  return clean ? clean.replace(/[-_]+/g, " ").toUpperCase() : "UNKNOWN";
+}
+
+function criterionConfidenceLabel(confidence: string | undefined): string {
+  const clean = String(confidence || "").toLowerCase();
+  if (clean === "review-required") return "REVIEW NEEDED";
+  if (clean === "product-evidence-required") return "PRODUCT EVIDENCE NEEDED";
+  if (clean === "human-required") return "HUMAN REVIEW NEEDED";
+  if (clean === "verified") return "VERIFIED";
+  if (clean === "agent") return "AGENT OBSERVED";
+  if (clean === "none") return "NO EVIDENCE";
+  return formatSignal(confidence);
+}
+
+function confidenceColor(confidence: string | undefined, fallbackColor: string): string {
+  const clean = String(confidence || "").toLowerCase();
+  if (["review-required", "human-required", "product-evidence-required"].includes(clean)) return "#fbbf24";
+  return fallbackColor;
+}
+
 export function InspectNodePanel({ node }: InspectNodePanelProps) {
   // 1. 简体中文：Goal 目标的只读面板渲染
   if (node.type === "goal") {
@@ -85,6 +107,7 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
   if (node.id === "passed-group") {
     const rawGroup = node.rawData as {
       total_completed: number;
+      focused_id?: string;
       criteria: Array<{
         id: string;
         user_story: string;
@@ -118,14 +141,16 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
         {/* 滚动列表 */}
         <div className="flex-1 overflow-auto scrollbar-hover-visible flex flex-col gap-2 pr-1 min-h-0 max-h-full select-text">
           {rawGroup.criteria.map((ac) => (
-            <div key={ac.id} className="group relative rounded border border-slate-900 bg-slate-950/20 p-2.5 transition hover:border-[#34d399]/30 hover:bg-[#34d399]/2">
+            <div key={ac.id} className={`group relative rounded border bg-slate-950/20 p-2.5 transition hover:border-[#34d399]/30 hover:bg-[#34d399]/2 ${
+              rawGroup.focused_id === ac.id ? "border-[#00f0ff]/45 shadow-[0_0_0_1px_rgba(0,240,255,0.12)]" : "border-slate-900"
+            }`}>
               <div className="flex items-start justify-between gap-3 mb-1">
                 <span className="inline-flex items-center gap-1 rounded bg-[#34d399]/10 px-1.5 py-0.5 text-[9px] font-mono font-bold text-[#34d399]">
                   {ac.id}
                 </span>
-                <span className="inline-flex items-center gap-1 text-[8px] font-mono text-[#34d399] opacity-80">
+                <span className="inline-flex items-center gap-1 text-[8px] font-mono opacity-80" style={{ color: confidenceColor(ac.confidence, "#34d399") }}>
                   <CheckCircle2 size={9} />
-                  {ac.confidence.toUpperCase()}
+                  {criterionConfidenceLabel(ac.confidence)}
                 </span>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed font-medium">{ac.user_story}</p>
@@ -153,12 +178,15 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
     const isPassing = ["passing", "waived"].includes(cleanStatus);
     const isFailing = ["failing", "broken", "invalid", "blocked", "challenged"].includes(cleanStatus);
     const color = isPassing ? "#34d399" : isFailing ? "#f87171" : "#fbbf24";
+    const confidenceText = criterionConfidenceLabel(ac.confidence);
+    const displayColor = confidenceColor(ac.confidence, color);
+    const hasReviewRisk = displayColor === "#fbbf24" && isPassing;
 
     return (
       <div className="flex flex-col gap-3 text-left min-h-0 h-full max-h-full overflow-hidden select-text">
-        <div className="rounded-lg border p-3 bg-slate-950/30 flex items-center justify-between gap-3" style={{ borderColor: `${color}25` }}>
+        <div className="rounded-lg border p-3 bg-slate-950/30 flex items-center justify-between gap-3" style={{ borderColor: `${displayColor}25` }}>
           <div className="flex items-center gap-2.5">
-            <div className="grid h-8 w-8 place-items-center rounded bg-slate-900 text-xs font-mono font-bold" style={{ color: color, backgroundColor: `${color}12` }}>
+            <div className="grid h-8 w-8 place-items-center rounded bg-slate-900 text-xs font-mono font-bold" style={{ color: displayColor, backgroundColor: `${displayColor}12` }}>
               {ac.id.replace("AC-", "")}
             </div>
             <div>
@@ -170,12 +198,15 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
                 {ac.required && (
                   <span className="rounded bg-rose-500/10 px-1 py-0.5 text-[8px] font-mono font-bold text-rose-400">REQUIRED</span>
                 )}
+                {hasReviewRisk && (
+                  <span className="rounded bg-[#fbbf24]/10 px-1 py-0.5 text-[8px] font-mono font-bold text-[#fbbf24]">REVIEW RISK</span>
+                )}
               </div>
             </div>
           </div>
           <div className="text-right">
-            <span className="block text-[8px] font-mono text-slate-500 uppercase">confidence</span>
-            <span className="text-xs font-mono font-bold" style={{ color: color }}>{ac.confidence.toUpperCase()}</span>
+            <span className="block text-[8px] font-mono text-slate-500 uppercase">review signal</span>
+            <span className="text-xs font-mono font-bold" style={{ color: displayColor }}>{confidenceText}</span>
           </div>
         </div>
 
@@ -188,7 +219,7 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
           </div>
 
           {/* Measurement & Threshold */}
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2">
             <div className="rounded border border-slate-900 bg-slate-950/20 p-2.5">
               <span className="block text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
                 <ArrowUpRight size={10} className="text-[#00f0ff]" />

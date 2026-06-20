@@ -15,7 +15,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchSnapshot, subscribeToEvents } from "./api";
 import { AcceptanceRadarNet, type RadarNode } from "./components/AcceptanceRadarNet";
 import { InspectNodePanel } from "./components/InspectNodePanel";
-import type { NoriEvent, NoriSnapshot } from "./types";
+import { gapIdFromFocusEvent, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "./selection";
+import type { NoriSnapshot } from "./types";
 
 type ConnectionState = "connecting" | "live" | "retrying";
 
@@ -32,111 +33,16 @@ function snapshotRenderKey(snapshot: NoriSnapshot): string {
   });
 }
 
-function isPassingStatus(status: string | undefined): boolean {
-  return ["passing", "waived"].includes(String(status || "").toLowerCase());
+function formatSignal(value: string | undefined): string {
+  const clean = String(value || "").trim();
+  return clean ? clean.replace(/[-_]+/g, " ").toUpperCase() : "UNKNOWN";
 }
 
-function passedGroupRawData(criteria: NonNullable<NoriSnapshot["criteria"]>) {
-  const passedCriteria = criteria.filter((criterion) => isPassingStatus(criterion.status));
-  return {
-    title: "Passed Acceptance Criteria List",
-    description: "All criteria that have already satisfied the acceptance conditions.",
-    total_completed: passedCriteria.length,
-    criteria: passedCriteria.map((criterion) => ({
-      id: criterion.id,
-      user_story: criterion.user_story,
-      measurement: criterion.measurement,
-      threshold: criterion.threshold,
-      status: criterion.status,
-      confidence: criterion.confidence
-    }))
-  };
-}
-
-function criterionNodeFromSnapshot(snapshot: NoriSnapshot, criterionId: string): RadarNode | null {
-  const criterion = snapshot.criteria?.find((item) => item.id === criterionId);
-  if (!criterion) return null;
-  return {
-    id: `ac-${criterion.id}`,
-    type: "ac",
-    label: criterion.id,
-    status: criterion.status,
-    x: 0,
-    y: 0,
-    rawData: criterion
-  };
-}
-
-function syncSelectedNodeWithSnapshot(selectedNode: RadarNode | null, nextSnapshot: NoriSnapshot): RadarNode | null {
-  if (!selectedNode) return null;
-
-  if (selectedNode.type === "goal") {
-    if (!nextSnapshot.goal) return null;
-    return {
-      ...selectedNode,
-      id: nextSnapshot.goal.id,
-      label: "Goal",
-      status: nextSnapshot.goal.workflow_status,
-      rawData: nextSnapshot.goal
-    };
-  }
-
-  if (selectedNode.id === "passed-group") {
-    const criteria = nextSnapshot.criteria || [];
-    const passedCriteria = criteria.filter((criterion) => isPassingStatus(criterion.status));
-    if (passedCriteria.length === 0) return null;
-    return {
-      ...selectedNode,
-      label: "Passed",
-      subLabel: String(passedCriteria.length),
-      status: "passed_group",
-      rawData: passedGroupRawData(criteria)
-    };
-  }
-
-  if (selectedNode.id.startsWith("ac-")) {
-    const criterionId = selectedNode.id.slice("ac-".length);
-    const criterion = nextSnapshot.criteria?.find((item) => item.id === criterionId);
-    if (!criterion) return null;
-    return {
-      ...selectedNode,
-      label: criterion.id,
-      status: criterion.status,
-      rawData: criterion
-    };
-  }
-
-  if (selectedNode.id.startsWith("ev-")) {
-    const evidencePath = selectedNode.id.slice("ev-".length);
-    const separatorIndex = evidencePath.lastIndexOf("-");
-    if (separatorIndex < 1) return selectedNode;
-
-    const criterionId = evidencePath.slice(0, separatorIndex);
-    const evidenceIndex = Number.parseInt(evidencePath.slice(separatorIndex + 1), 10);
-    const criterion = nextSnapshot.criteria?.find((item) => item.id === criterionId);
-    const evidence = Number.isInteger(evidenceIndex) ? criterion?.evidence[evidenceIndex] : undefined;
-    if (!evidence) return null;
-
-    return {
-      ...selectedNode,
-      label: `E-${evidenceIndex + 1}`,
-      status: evidence.result || "unknown",
-      rawData: evidence
-    };
-  }
-
-  return selectedNode;
-}
-
-function gapIdFromFocusEvent(event: NoriEvent | null): string | null {
-  if (!event?.gap_id) return null;
-  const type = String(event.type || "");
-  if (type === "ac.started") return event.gap_id;
-  if (type === "activity.started" || type === "activity.heartbeat") {
-    const state = String(event.data?.state || "");
-    if (RUNNING_AGENT_STATES.has(state)) return event.gap_id;
-  }
-  return null;
+function architectureDecisionClass(decision: string): string {
+  const clean = String(decision || "").toLowerCase();
+  if (["valid", "active", "approved", "complete"].includes(clean)) return "text-[#34d399]";
+  if (["challenged", "invalid", "broken"].includes(clean)) return "text-rose-400 animate-pulse";
+  return "text-[#fbbf24]";
 }
 
 function relativeTime(value: string | undefined): string {
@@ -196,12 +102,12 @@ export default function App() {
         setSnapshot(nextSnapshot);
         setSelectedNode((prev) => {
           if (focusGapId) {
-            return criterionNodeFromSnapshot(nextSnapshot, focusGapId) || syncSelectedNodeWithSnapshot(prev, nextSnapshot);
+            return renderedCriterionNodeFromSnapshot(nextSnapshot, focusGapId) || syncSelectedNodeWithSnapshot(prev, nextSnapshot);
           }
           return syncSelectedNodeWithSnapshot(prev, nextSnapshot);
         });
       } else if (focusGapId) {
-        setSelectedNode((prev) => criterionNodeFromSnapshot(nextSnapshot, focusGapId) || prev);
+        setSelectedNode((prev) => renderedCriterionNodeFromSnapshot(nextSnapshot, focusGapId) || prev);
       }
       setConnection("live");
       setError("");
@@ -250,6 +156,9 @@ export default function App() {
   const recentEvents = useMemo(() => {
     return [...(snapshot?.events || [])].sort((left, right) => Number(right.seq || 0) - Number(left.seq || 0));
   }, [snapshot]);
+  const latestAgentEvent = useMemo(() => {
+    return recentEvents.find((event) => event.actor.kind === "agent");
+  }, [recentEvents]);
   const agentRunning = isAgentRunning(snapshot);
 
   return (
@@ -352,7 +261,7 @@ export default function App() {
                         </span>
                       </div>
                       <p className="text-[11px] leading-relaxed text-slate-300">
-                        {snapshot.agent.summary || "No recent activity."}
+                        {snapshot.agent.summary || (latestAgentEvent ? `Last agent event: ${latestAgentEvent.actor.name}${latestAgentEvent.actor.skill ? ` / ${latestAgentEvent.actor.skill}` : ""} ${latestAgentEvent.type}.` : "No recent OpenNori agent activity.")}
                       </p>
                       {snapshot.current_gap && (
                         <div className="mt-2 border-t border-slate-800/80 pt-1.5">
@@ -371,12 +280,8 @@ export default function App() {
                         <span className="inline-flex items-center gap-1 rounded bg-[#bd93f9]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#bd93f9]">
                           ARCHITECTURE COMPLIANCE
                         </span>
-                        <span className={`inline-flex items-center gap-1.5 text-[8.5px] font-mono font-bold ${
-                          snapshot.architecture.decision === "approved" ? "text-[#34d399]" :
-                          snapshot.architecture.decision === "challenged" ? "text-rose-400 animate-pulse" :
-                          "text-[#fbbf24]"
-                        }`}>
-                          {snapshot.architecture.decision.toUpperCase()}
+                        <span className={`inline-flex items-center gap-1.5 text-[8.5px] font-mono font-bold ${architectureDecisionClass(snapshot.architecture.decision)}`}>
+                          {formatSignal(snapshot.architecture.decision)}
                         </span>
                       </div>
                       <div className="text-[10px] text-slate-300 leading-normal flex flex-col gap-1">
@@ -417,7 +322,7 @@ export default function App() {
                               snapshot.completion.confidence === "review-risk" ? "text-[#fbbf24] animate-pulse" :
                               "text-rose-400"
                             }`}>
-                              {snapshot.completion.confidence.toUpperCase()}
+                              {formatSignal(snapshot.completion.confidence)}
                             </span>
                           </div>
                         )}

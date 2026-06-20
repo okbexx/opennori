@@ -11,3 +11,4 @@ npm-debug.log*
 .opennori/events/
 .opennori/snapshots/
 output/dashboard-review/
+output/playwright/

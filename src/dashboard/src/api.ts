@@ -29,10 +29,16 @@ export function subscribeToEvents(onEvent: (event: NoriEvent | null) => void, on
   };
   source.onopen = () => onEvent(null);
   source.onmessage = handleEventMessage;
+  source.addEventListener("gap.changed", handleEventMessage);
   source.addEventListener("ac.started", handleEventMessage);
+  source.addEventListener("ac.finished", handleEventMessage);
   source.addEventListener("activity.started", handleEventMessage);
   source.addEventListener("activity.heartbeat", handleEventMessage);
   source.addEventListener("activity.finished", handleEventMessage);
+  source.addEventListener("evidence.added", handleEventMessage);
+  source.addEventListener("architecture.changed", handleEventMessage);
+  source.addEventListener("profile.changed", handleEventMessage);
+  source.addEventListener("report.generated", handleEventMessage);
   source.onerror = onError;
   return () => source.close();
 }
