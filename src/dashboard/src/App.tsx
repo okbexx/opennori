@@ -4,6 +4,7 @@ import {
   Copy,
   Eye,
   Info,
+  ListChecks,
   Radio,
   RefreshCw,
   Terminal,
@@ -15,7 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchSnapshot, subscribeToEvents } from "./api";
 import { AcceptanceRadarNet, type RadarNode } from "./components/AcceptanceRadarNet";
 import { InspectNodePanel } from "./components/InspectNodePanel";
-import { gapIdFromFocusEvent, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "./selection";
+import { gapIdFromFocusEvent, profileNodeFromSnapshot, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "./selection";
 import type { NoriSnapshot } from "./types";
 
 type ConnectionState = "connecting" | "live" | "retrying";
@@ -196,13 +197,23 @@ export default function App() {
                 <Radio size={13} className={agentRunning ? "animate-pulse" : ""} />
                 {connection}
               </span>
+              <IconButton
+                label="Inspect Nori Profile"
+                onClick={() => {
+                  if (!snapshot) return;
+                  setSelectedNode(profileNodeFromSnapshot(snapshot));
+                  setDrawerTab("visual");
+                }}
+              >
+                <ListChecks size={18} />
+              </IconButton>
               <IconButton label="Refresh snapshot" onClick={() => void refresh()}>
                 <RefreshCw size={18} />
               </IconButton>
             </div>
           </header>
 
-          <section className="grid min-h-0 gap-4 lg:grid-cols-[1fr_auto] h-full max-h-full overflow-hidden">
+          <section className="relative h-full max-h-full min-h-0 overflow-hidden">
             {/* 1. 简体中文：核心雷达网画布 */}
             <div className="relative flex flex-col h-full max-h-full min-h-0 min-w-0">
               <div className="relative flex-1 grid place-items-center min-h-0 min-w-0 h-full max-h-full overflow-hidden">
@@ -377,7 +388,7 @@ export default function App() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 260 }}
                   transition={{ type: "spring", damping: 22, stiffness: 150 }}
-                  className="w-[min(420px,calc(100vw-2rem))] rounded-lg border border-[rgba(189,147,249,0.18)] bg-[rgba(16,20,38,0.72)] p-4 shadow-2xl backdrop-blur-md grid grid-rows-[auto_1fr] h-full max-h-full min-h-0 overflow-hidden"
+                  className="absolute right-4 top-4 bottom-4 z-30 w-[min(420px,calc(100vw-2rem))] rounded-lg border border-[rgba(189,147,249,0.18)] bg-[rgba(16,20,38,0.78)] p-4 shadow-2xl backdrop-blur-md grid grid-rows-[auto_1fr] min-h-0 overflow-hidden"
                 >
                   <div className="border-b border-slate-800 pb-3 mb-3 flex flex-col gap-3">
                     <div className="flex items-center justify-between gap-4">
@@ -386,18 +397,18 @@ export default function App() {
                           Inspected Node
                         </span>
                         <h3 className="text-base font-semibold text-[#e2e8f0]">
-                        {selectedNode.type === "goal" ? `GOAL: ${selectedNode.id}` : `${selectedNode.type.toUpperCase()}: ${selectedNode.label}`}
-                      </h3>
+                          {selectedNode.type === "goal" ? `GOAL: ${selectedNode.id}` : `${selectedNode.type.toUpperCase()}: ${selectedNode.label}`}
+                        </h3>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label="Close panel"
+                        onClick={() => setSelectedNode(null)}
+                        className="grid h-8 w-8 place-items-center rounded border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                      >
+                        <X size={16} />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      aria-label="Close panel"
-                      onClick={() => setSelectedNode(null)}
-                      className="grid h-8 w-8 place-items-center rounded border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white hover:bg-slate-800 transition"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
 
                   {/* 简体中文：精细的分段胶囊式切换栏 (Segmented Control)，提供完美的对齐与大屏科技质感 */}
                   <div className="inline-flex items-center rounded-lg bg-black/45 p-0.5 border border-slate-800/80 self-start">

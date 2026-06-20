@@ -38,6 +38,50 @@ export type CompletionAnswer = {
   answer: string;
 };
 
+export type ProfileEvidenceRecord = {
+  item_id: string;
+  result: "satisfied" | "violated" | "waived" | (string & {});
+  summary?: string;
+  path?: string;
+  created_at?: string;
+  [key: string]: unknown;
+};
+
+export type ProfileItem = {
+  id: string;
+  type: "skill" | "stack" | "constraint" | (string & {});
+  name: string;
+  strength: "must" | "prefer" | "avoid" | (string & {});
+  purpose?: string;
+  scope?: string;
+  install_policy?: string;
+  evidence?: ProfileEvidenceRecord[];
+  [key: string]: unknown;
+};
+
+export type CapabilityProfile = {
+  items: ProfileItem[];
+  evidence: ProfileEvidenceRecord[];
+};
+
+export type ProfileStatusRow = {
+  id: string;
+  type: "skill" | "stack" | "constraint" | (string & {});
+  name: string;
+  strength: "must" | "prefer" | "avoid" | (string & {});
+  purpose?: string;
+  status: "unknown" | "satisfied" | "violated" | "waived" | (string & {});
+  summary: string;
+};
+
+export type ProfileCompliance = {
+  required: boolean;
+  complete: boolean;
+  blocking: ProfileStatusRow[];
+  review: ProfileStatusRow[];
+  statuses: ProfileStatusRow[];
+};
+
 export type NoriSnapshot = {
   schema_version: string;
   generated_at: string;
@@ -82,6 +126,8 @@ export type NoriSnapshot = {
     profile_title?: string | null;
     open_challenges?: number;
   };
+  capability_profile?: CapabilityProfile;
+  capability_compliance?: ProfileCompliance;
   loop: {
     goal: string;
     contract: string;

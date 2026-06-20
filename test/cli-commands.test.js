@@ -1517,8 +1517,39 @@ test("kernel events activity and snapshot expose dashboard state without replaci
   const snapshot = refreshSnapshot(root, { goalId: "module-goal" });
   assert.equal(snapshot.goal.id, "module-goal");
   assert.equal(snapshot.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(snapshot.capability_profile.items.length, 0);
+  assert.equal(snapshot.capability_compliance.complete, true);
   assert.equal(fs.existsSync(snapshotPath(root)), true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "current", "module-goal.evidence.json")), true);
+});
+
+test("dashboard snapshot exposes Nori Profile without turning it into an AC node", { tags: ["cli", "dashboard", "profile", "quick"] }, async () => {
+  const root = tempRoot();
+  writeActiveGoalWithId(root, "module-goal");
+  const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
+  const payload = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  payload.ledger.capability_profile = {
+    items: [
+      {
+        id: "skill-design-taste-frontend",
+        type: "skill",
+        name: "design-taste-frontend",
+        strength: "must",
+        purpose: "Generate a design read before implementation.",
+        scope: "frontend UI work",
+        install_policy: "existing_only",
+        evidence: []
+      }
+    ],
+    evidence: []
+  };
+  writeJson(evidencePath, payload);
+
+  const snapshot = refreshSnapshot(root, { goalId: "module-goal" });
+  assert.equal(snapshot.capability_profile.items.length, 1);
+  assert.equal(snapshot.capability_compliance.complete, false);
+  assert.equal(snapshot.capability_compliance.blocking[0].id, "skill-design-taste-frontend");
+  assert.equal(snapshot.criteria.some((criterion) => criterion.id === "skill-design-taste-frontend"), false);
 });
 
 test("activity commands infer the unique current gap for dashboard publishing only", { tags: ["cli", "dashboard"] }, async () => {

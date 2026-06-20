@@ -25,6 +25,30 @@ function passedGroupRawDataWithFocus(criteria: NonNullable<NoriSnapshot["criteri
   };
 }
 
+export function profileNodeFromSnapshot(snapshot: NoriSnapshot): RadarNode {
+  const profile = snapshot.capability_profile || { items: [], evidence: [] };
+  const compliance = snapshot.capability_compliance || {
+    required: false,
+    complete: true,
+    blocking: [],
+    review: [],
+    statuses: []
+  };
+  return {
+    id: "profile",
+    type: "profile",
+    label: "Profile",
+    status: compliance.complete ? "satisfied" : "review",
+    x: 0,
+    y: 0,
+    rawData: {
+      title: "Nori Profile",
+      profile,
+      compliance
+    }
+  };
+}
+
 export function renderedCriterionNodeFromSnapshot(snapshot: NoriSnapshot, criterionId: string): RadarNode | null {
   const criterion = snapshot.criteria?.find((item) => item.id === criterionId);
   if (!criterion) return null;
@@ -64,6 +88,10 @@ export function syncSelectedNodeWithSnapshot(selectedNode: RadarNode | null, nex
       status: nextSnapshot.goal.workflow_status,
       rawData: nextSnapshot.goal
     };
+  }
+
+  if (selectedNode.type === "profile" || selectedNode.id === "profile") {
+    return profileNodeFromSnapshot(nextSnapshot);
   }
 
   if (selectedNode.id === "passed-group") {

@@ -9,10 +9,11 @@ import {
   Check,
   FileText,
   Globe,
+  ListChecks,
   ShieldAlert
 } from "lucide-react";
 import type { RadarNode } from "./AcceptanceRadarNet";
-import type { EvidenceRecord } from "../types";
+import type { CapabilityProfile, EvidenceRecord, ProfileCompliance } from "../types";
 
 /* 简体中文：定义可视化节点视图组件的参数属性 */
 type InspectNodePanelProps = {
@@ -63,6 +64,20 @@ function confidenceColor(confidence: string | undefined, fallbackColor: string):
   const clean = String(confidence || "").toLowerCase();
   if (["review-required", "human-required", "product-evidence-required"].includes(clean)) return "#fbbf24";
   return fallbackColor;
+}
+
+function profileStatusColor(status: string | undefined): string {
+  const clean = String(status || "").toLowerCase();
+  if (clean === "satisfied" || clean === "waived") return "#34d399";
+  if (clean === "violated") return "#f87171";
+  return "#fbbf24";
+}
+
+function profileStrengthColor(strength: string | undefined): string {
+  const clean = String(strength || "").toLowerCase();
+  if (clean === "must") return "#f87171";
+  if (clean === "avoid") return "#fbbf24";
+  return "#00f0ff";
 }
 
 export function InspectNodePanel({ node }: InspectNodePanelProps) {
@@ -161,7 +176,153 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
     );
   }
 
-  // 3. 简体中文：普通单个 AC 节点的只读面板渲染
+  // 3. 简体中文：Nori Profile 只读面板，不提供任何写状态动作
+  if (node.type === "profile") {
+    const rawProfile = node.rawData as {
+      profile?: CapabilityProfile;
+      compliance?: ProfileCompliance;
+    };
+    const profile = rawProfile.profile || { items: [], evidence: [] };
+    const compliance = rawProfile.compliance || {
+      required: false,
+      complete: true,
+      blocking: [],
+      review: [],
+      statuses: []
+    };
+    const counts = profile.items.reduce<Record<"total" | "must" | "prefer" | "avoid", number>>((acc, item) => {
+      acc.total += 1;
+      switch (item.strength) {
+        case "must":
+          acc.must += 1;
+          break;
+        case "prefer":
+          acc.prefer += 1;
+          break;
+        case "avoid":
+          acc.avoid += 1;
+          break;
+        default:
+          break;
+      }
+      return acc;
+    }, { total: 0, must: 0, prefer: 0, avoid: 0 });
+    const statusById = new Map(compliance.statuses.map((row) => [row.id, row]));
+    const panelColor = compliance.complete ? "#34d399" : "#fbbf24";
+
+    return (
+      <div className="flex h-full max-h-full min-h-0 select-text flex-col gap-3 overflow-hidden text-left">
+        <div className="rounded-lg border bg-slate-950/30 p-3" style={{ borderColor: `${panelColor}25` }}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="grid h-8 w-8 place-items-center rounded bg-[#00f0ff]/10 text-[#00f0ff]">
+                <ListChecks size={17} />
+              </div>
+              <div>
+                <span className="text-[10px] font-mono font-bold tracking-widest text-slate-400">NORI PROFILE</span>
+                <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                  <span className="rounded bg-slate-900 px-1.5 py-0.5 text-[8px] font-mono font-bold text-slate-300">
+                    ITEMS {counts.total}
+                  </span>
+                  <span className="rounded bg-rose-500/10 px-1.5 py-0.5 text-[8px] font-mono font-bold text-rose-300">
+                    MUST {counts.must || 0}
+                  </span>
+                  <span className="rounded bg-[#00f0ff]/10 px-1.5 py-0.5 text-[8px] font-mono font-bold text-[#00f0ff]">
+                    PREFER {counts.prefer || 0}
+                  </span>
+                  <span className="rounded bg-[#fbbf24]/10 px-1.5 py-0.5 text-[8px] font-mono font-bold text-[#fbbf24]">
+                    AVOID {counts.avoid || 0}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="block text-[8px] font-mono uppercase text-slate-500">compliance</span>
+              <span className="text-xs font-mono font-bold" style={{ color: panelColor }}>
+                {compliance.complete ? "COMPLETE" : "NEEDS REVIEW"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded border border-rose-500/15 bg-rose-500/5 p-2.5">
+            <span className="block text-[8px] font-bold uppercase tracking-wider text-rose-300">Blocking</span>
+            <span className="mt-1 block text-2xl font-black text-rose-300">{compliance.blocking.length}</span>
+          </div>
+          <div className="rounded border border-[#fbbf24]/15 bg-[#fbbf24]/5 p-2.5">
+            <span className="block text-[8px] font-bold uppercase tracking-wider text-[#fbbf24]">Review</span>
+            <span className="mt-1 block text-2xl font-black text-[#fbbf24]">{compliance.review.length}</span>
+          </div>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-auto pr-1 scrollbar-hover-visible">
+          {profile.items.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {profile.items.map((item) => {
+                const row = statusById.get(item.id);
+                const latest = item.evidence?.at(-1);
+                const status = row?.status || "unknown";
+                const statusColor = profileStatusColor(status);
+                const strengthColor = profileStrengthColor(item.strength);
+                return (
+                  <div key={item.id} className="rounded border border-slate-900/80 bg-black/20 p-2.5">
+                    <div className="mb-1.5 flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="rounded px-1.5 py-0.5 text-[8px] font-mono font-bold" style={{ color: strengthColor, backgroundColor: `${strengthColor}14` }}>
+                            {String(item.strength || "prefer").toUpperCase()}
+                          </span>
+                          <span className="rounded bg-slate-900 px-1.5 py-0.5 text-[8px] font-mono font-bold text-slate-400">
+                            {String(item.type || "constraint").toUpperCase()}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-200">{item.name}</p>
+                      </div>
+                      <span className="shrink-0 rounded px-1.5 py-0.5 text-[8px] font-mono font-bold" style={{ color: statusColor, backgroundColor: `${statusColor}14` }}>
+                        {formatSignal(status)}
+                      </span>
+                    </div>
+
+                    {item.purpose && (
+                      <p className="text-[11px] leading-relaxed text-slate-300">{item.purpose}</p>
+                    )}
+
+                    <div className="mt-2 grid grid-cols-1 gap-1.5 text-[10px] text-slate-400">
+                      <div className="rounded bg-slate-950/30 p-1.5">
+                        <span className="font-mono text-[8px] uppercase text-slate-500">scope </span>
+                        {item.scope || "<none>"}
+                      </div>
+                      <div className="rounded bg-slate-950/30 p-1.5">
+                        <span className="font-mono text-[8px] uppercase text-slate-500">install policy </span>
+                        {item.install_policy || "ask_before_install"}
+                      </div>
+                      <div className="rounded bg-slate-950/30 p-1.5">
+                        <span className="font-mono text-[8px] uppercase text-slate-500">latest evidence </span>
+                        {latest?.summary || row?.summary || "<none>"}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded border border-dashed border-slate-800/80 p-5 text-center">
+              <div className="mx-auto mb-2 grid h-9 w-9 place-items-center rounded bg-slate-900/70 text-slate-500">
+                <ListChecks size={17} />
+              </div>
+              <p className="text-xs font-semibold text-slate-400">No Nori Profile items recorded.</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+                Required Skills, preferred stacks, and avoided tools will appear here after the agent records them through OpenNori Profile.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 4. 简体中文：普通单个 AC 节点的只读面板渲染
   if (node.type === "ac") {
     const ac = node.rawData as {
       id: string;
@@ -283,7 +444,7 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
     );
   }
 
-  // 4. 简体中文：Evidence 证据节点的只读面板渲染
+  // 5. 简体中文：Evidence 证据节点的只读面板渲染
   if (node.type === "evidence") {
     const ev = node.rawData as EvidenceRecord;
     const isPass = ["passing", "waived"].includes(String(ev.result || "").toLowerCase());

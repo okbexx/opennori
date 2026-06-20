@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-ac-d-5-aligned",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-D-5",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Dashboard Profile drawer follows the confirmed dashboard web architecture: React/Vite/Tailwind/Motion renders a readonly overlay, kernel snapshot exposes capability_profile and capability_compliance, and .opennori remains the source of truth.",
+  "fit": "aligned",
+  "implementation_focus": "Dashboard observation surface only: add a header Profile icon, expose profile/compliance in snapshots, render a readonly absolute-positioned drawer, and keep Profile out of Product AC radar nodes.",
+  "evidence": "",
+  "limitations": "",
+  "created_at": "2026-06-20T14:34:17.857Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

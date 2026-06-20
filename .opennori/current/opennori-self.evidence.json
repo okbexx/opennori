@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "AC-O-18 updated to cover all packaged Skills, not only acceptance/evidence/reporting.",
-      "approved_at": "2026-06-20T07:05:32.031Z"
+      "summary": "User clarified that the right-side Profile drawer must be a floating overlay and must not affect the dashboard layout.",
+      "approved_at": "2026-06-20T14:33:15.835Z"
     },
     "criteria": [
       {
@@ -621,6 +621,15 @@
         "threshold": "Skills 把 Acceptance Surface Modeling 写成跨 Skill 的 agent runtime contract：draft、autogoal、AC Review Loop、evidence、reporting、architecture brainstorm/apply/challenge、build-vs-buy、capability profile 和 project health 都必须在可见产品表面缺少 actor、entry、visible trigger、object、action、interaction surface、required information、feedback、state change、persistence、destructive boundary 或 evidence shape 时回到 nori-acceptance；未知项要问单个会改变完成定义的问题，或写成明确假设进入 AC Review Loop；任何旁路都不能把宽泛 AC 当作 confidently acceptable；该机制不变成 CLI hard validator、固定目标类型词表、自然语言好坏单元测试或实现计划。",
         "required": true,
         "risk": "medium"
+      },
+      {
+        "id": "AC-D-5",
+        "layer": "acceptance",
+        "user_story": "作为用户，我打开 OpenNori dashboard 后，能点击顶部 Profile 图标，在右侧只读浮窗查看当前 Nori Profile 的执行偏好、合规状态、阻塞或 review 风险和证据摘要，而不需要回到 CLI 才知道 agent 是否遵守了我声明的 Skill、技术栈或 avoid 约束。",
+        "measurement": "启动 dashboard，在存在和不存在 Nori Profile items 的项目中点击顶部 Profile 图标，并切换 UI Panel / Raw JSON 查看浮窗内容。",
+        "threshold": "右侧 overlay 浮窗展示 Profile item 总数、must/prefer/avoid 分布、complete/blocking/review 状态、每个 item 的 type/name/strength/purpose/scope/install policy/latest evidence summary；没有 profile 时显示空态；浮窗只读，不提供 add/check/evidence/waive/confirm 等写状态按钮；Profile 不被渲染为 Product AC 节点；打开或关闭浮窗前后，radar/main 区域不重新分配布局宽度，浮窗只覆盖在右侧观察层上。",
+        "required": true,
+        "risk": "medium"
       }
     ]
   },
@@ -628,7 +637,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-20T13:58:33.394Z",
+    "updated_at": "2026-06-20T14:34:50.508Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -7925,6 +7934,93 @@
             "limitations": "This proves the packaged Skill behavior protocols, trigger metadata, docs, and tests encode the operation-path boundary. It does not prove every future agent will ask perfect product questions; users still confirm or revise AC through the AC Review Loop.",
             "gate": "accepted",
             "created_at": "2026-06-20T07:20:17.204Z"
+          }
+        ]
+      },
+      "AC-D-5": {
+        "status": "passing",
+        "confidence": "verified",
+        "required": true,
+        "risk": "medium",
+        "evidence": [
+          {
+            "kind": "dashboard-ui-verification",
+            "basis": "tool-observation",
+            "summary": "Dashboard now exposes a readonly Nori Profile drawer from the header Profile icon. The snapshot includes capability_profile and capability_compliance; the drawer shows item counts, must/prefer/avoid distribution, compliance, blocking/review counts, item metadata, and latest evidence; Profile remains outside Product AC radar criteria. Playwright measured the radar SVG width before and after opening the drawer as 1118px both times, confirming the right-side drawer is an overlay and does not affect main layout sizing.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "reference",
+                "label": "Playwright dashboard observation: clicked Inspect Nori Profile; UI Panel showed NORI PROFILE, ITEMS 1, MUST 1, PREFER 0, AVOID 0, NEEDS REVIEW, Blocking 1, Review 0, design-taste-frontend, install policy existing_only, latest evidence <none>. Radar width was 1118px before and 1118px after opening the drawer."
+              },
+              {
+                "type": "architecture-apply",
+                "label": "opennori-self-ac-d-5-aligned",
+                "path": "/Users/jarl/code/jarlone/opennori/.opennori/architecture/evidence/opennori-self-ac-d-5-aligned.json",
+                "role": "context",
+                "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+              },
+              {
+                "type": "command",
+                "label": "npm run lint",
+                "command": "npm run lint"
+              },
+              {
+                "type": "command",
+                "label": "npm run typecheck:dashboard",
+                "command": "npm run typecheck:dashboard"
+              },
+              {
+                "type": "command",
+                "label": "npm run test:quick",
+                "command": "npm run test:quick"
+              },
+              {
+                "type": "command",
+                "label": "npm run test:dashboard",
+                "command": "npm run test:dashboard"
+              },
+              {
+                "type": "command",
+                "label": "git diff --check",
+                "command": "git diff --check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/dashboard/src/App.tsx",
+                "path": "src/dashboard/src/App.tsx"
+              },
+              {
+                "type": "artifact",
+                "label": "src/dashboard/src/components/InspectNodePanel.tsx",
+                "path": "src/dashboard/src/components/InspectNodePanel.tsx"
+              },
+              {
+                "type": "artifact",
+                "label": "src/dashboard/src/selection.ts",
+                "path": "src/dashboard/src/selection.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/kernel/snapshot.ts",
+                "path": "src/kernel/snapshot.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/dashboard-selection.test.ts",
+                "path": "test/dashboard-selection.test.ts"
+              }
+            ],
+            "reviewability": "Run npm run lint, npm run typecheck:dashboard, npm run test:quick, npm run test:dashboard, and git diff --check. Start opennori dashboard, click the header Profile icon, inspect UI Panel / Raw JSON, and compare the radar SVG width before and after opening the drawer.",
+            "limitations": "Manual Playwright verification used a local demo dashboard state with one required Profile item; tests cover snapshot and selection behavior but do not create a permanent browser screenshot artifact.",
+            "gate": "accepted",
+            "created_at": "2026-06-20T14:34:50.508Z"
           }
         ]
       }

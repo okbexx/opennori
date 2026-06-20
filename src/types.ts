@@ -362,6 +362,8 @@ export type NoriSnapshot = {
     profile_title?: string | null;
     open_challenges?: number;
   };
+  capability_profile?: CapabilityProfile;
+  capability_compliance?: ProfileCompliance;
   loop: {
     goal: string;
     contract: string;

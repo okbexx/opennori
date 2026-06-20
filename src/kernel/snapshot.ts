@@ -3,6 +3,7 @@ import path from "node:path";
 import { architectureState } from "../architecture.ts";
 import { reviewAcceptanceQuality } from "../acceptance.ts";
 import { currentGap, evidenceHealth } from "../core/evidence.ts";
+import { profileCompliance } from "../core/profile.ts";
 import { completionAnswer, intervention } from "../core/report.ts";
 import { findCurrentPairs, readJson, writeJson } from "../core/shared.ts";
 import type { EvidenceLedger, NoriEvidencePayload, NoriSnapshot } from "../types.ts";
@@ -70,6 +71,14 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
         decision: "unknown",
         profile: null
       },
+      capability_profile: { items: [], evidence: [] },
+      capability_compliance: {
+        required: false,
+        complete: true,
+        blocking: [],
+        review: [],
+        statuses: []
+      },
       loop: {
         goal: "empty",
         contract: "missing",
@@ -92,6 +101,8 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
   const userIntervention = intervention(contract, ledger);
   const acceptanceReview = reviewAcceptanceQuality(contract);
   const evidence = evidenceHealth(contract, ledger, { root });
+  const capabilityProfile = ledger.capability_profile || { items: [], evidence: [] };
+  const capabilityCompliance = profileCompliance(ledger);
   const activityState = activity?.state || "idle";
   const decision = completion.complete
     ? completion.confidence === "review-risk" ? "review_risk" : "complete"
@@ -151,6 +162,8 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
       profile_title: architecture.baseline?.profile_title || null,
       open_challenges: architecture.open_challenges?.length || 0
     },
+    capability_profile: capabilityProfile,
+    capability_compliance: capabilityCompliance,
     loop: {
       goal: "ready",
       contract: contractState,

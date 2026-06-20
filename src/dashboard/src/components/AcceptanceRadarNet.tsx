@@ -5,7 +5,7 @@ import type { EvidenceRecord, NoriSnapshot } from "../types";
 /* 简体中文：定义节点类型以方便统一处理 */
 export type RadarNode = {
   id: string;
-  type: "goal" | "ac" | "evidence";
+  type: "goal" | "ac" | "evidence" | "profile";
   label: string;
   subLabel?: string; /* 简体中文：支持节点内的第二行副文本展示 */
   x: number;
@@ -39,7 +39,7 @@ function isPassed(status: string): boolean {
 }
 
 /* 简体中文：根据只读状态获取对应的边框颜色 */
-function getNodeColor(status: string, type: "goal" | "ac" | "evidence"): string {
+function getNodeColor(status: string, type: RadarNode["type"]): string {
   if (type === "goal") return "#00f0ff"; /* 冰蓝色 */
   if (type === "ac" && status === "passed_group") return "#34d399"; /* 极光绿 */
 
@@ -57,7 +57,7 @@ function getNodeColor(status: string, type: "goal" | "ac" | "evidence"): string 
 }
 
 /* 简体中文：根据状态获取发光 className */
-function getNodePulseClass(status: string, type: "goal" | "ac" | "evidence", animate: boolean): string {
+function getNodePulseClass(status: string, type: RadarNode["type"], animate: boolean): string {
   if (!animate) return "";
   if (type === "goal") return "pulse-cyan";
   if (type === "ac" && status === "passed_group") return "pulse-success";

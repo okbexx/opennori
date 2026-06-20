@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
-import { gapIdFromFocusEvent, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "../src/dashboard/src/selection.ts";
+import { gapIdFromFocusEvent, profileNodeFromSnapshot, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "../src/dashboard/src/selection.ts";
 import type { NoriSnapshot } from "../src/dashboard/src/types.ts";
 
 function snapshotWithCriteria(criteria: NonNullable<NoriSnapshot["criteria"]>): NoriSnapshot {
@@ -124,4 +124,79 @@ test("dashboard focus events include evidence and architecture changes", { tags:
     summary: "Architecture alignment changed.",
     created_at: "2026-06-20T00:00:01.000Z"
   }), "AC-4");
+});
+
+test("dashboard profile node syncs Nori Profile compliance from snapshots", { tags: ["dashboard", "quick"] }, () => {
+  const snapshot = snapshotWithCriteria([]);
+  snapshot.capability_profile = {
+    items: [
+      {
+        id: "skill-design-taste-frontend",
+        type: "skill",
+        name: "design-taste-frontend",
+        strength: "must",
+        purpose: "Generate a design read before implementation.",
+        scope: "frontend UI work",
+        install_policy: "existing_only",
+        evidence: []
+      }
+    ],
+    evidence: []
+  };
+  snapshot.capability_compliance = {
+    required: true,
+    complete: false,
+    blocking: [
+      {
+        id: "skill-design-taste-frontend",
+        type: "skill",
+        name: "design-taste-frontend",
+        strength: "must",
+        purpose: "Generate a design read before implementation.",
+        status: "unknown",
+        summary: "<none>"
+      }
+    ],
+    review: [],
+    statuses: [
+      {
+        id: "skill-design-taste-frontend",
+        type: "skill",
+        name: "design-taste-frontend",
+        strength: "must",
+        purpose: "Generate a design read before implementation.",
+        status: "unknown",
+        summary: "<none>"
+      }
+    ]
+  };
+
+  const node = profileNodeFromSnapshot(snapshot);
+  assert.equal(node.id, "profile");
+  assert.equal(node.type, "profile");
+  assert.equal(node.status, "review");
+  assert.equal((node.rawData as { compliance: { blocking: unknown[] } }).compliance.blocking.length, 1);
+
+  snapshot.capability_compliance = {
+    required: true,
+    complete: true,
+    blocking: [],
+    review: [],
+    statuses: [
+      {
+        id: "skill-design-taste-frontend",
+        type: "skill",
+        name: "design-taste-frontend",
+        strength: "must",
+        purpose: "Generate a design read before implementation.",
+        status: "satisfied",
+        summary: "Skill was used."
+      }
+    ]
+  };
+
+  const synced = syncSelectedNodeWithSnapshot(node, snapshot);
+  assert.equal(synced?.id, "profile");
+  assert.equal(synced?.status, "satisfied");
+  assert.equal((synced?.rawData as { compliance: { complete: boolean } }).compliance.complete, true);
 });
