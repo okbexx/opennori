@@ -628,7 +628,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-20T07:20:17.204Z",
+    "updated_at": "2026-06-20T09:44:04.642Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -6885,7 +6885,7 @@
       },
       "AC-O-14": {
         "status": "passing",
-        "confidence": "high",
+        "confidence": "verified",
         "required": true,
         "risk": "high",
         "evidence": [
@@ -7003,6 +7003,69 @@
             "limitations": "This proves OpenNori's capability assets and routing surfaces instruct agents to review draft AC one at a time. It does not prove every future agent will ask perfect AC questions; users still confirm or revise each AC in conversation.",
             "gate": "accepted",
             "created_at": "2026-06-19T14:45:53.838Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "artifact-review",
+            "summary": "AC Review Loop now documents and tests the safe draft criterion add path, preventing agents from manually patching draft acceptance/evidence/manifest files when a missing AC is discovered.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npx vitest run test/core.test.js -t 'criterion add|Codex Plugin manifest exposes OpenNori Skills|public product surfaces'",
+                "command": "npx vitest run test/core.test.js -t 'criterion add|Codex Plugin manifest exposes OpenNori Skills|public product surfaces'"
+              },
+              {
+                "type": "command",
+                "label": "npx vitest run test/cli-commands.test.js -t 'criterion add'",
+                "command": "npx vitest run test/cli-commands.test.js -t 'criterion add'"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+                "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/protocol.md",
+                "path": ".opennori/protocol.md"
+              },
+              {
+                "type": "artifact",
+                "label": "AGENTS.md",
+                "path": "AGENTS.md"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/acceptance/criterion.ts",
+                "path": "src/cli/commands/acceptance/criterion.ts"
+              }
+            ],
+            "reviewability": "Inspect the listed Skills, docs, CLI help text, and tests; rerun the two targeted Vitest commands to confirm draft criterion add keeps drafts unapproved and synchronized.",
+            "limitations": "This verifies the packaged OpenNori assets and CLI behavior in this source checkout. Future Codex sessions need plugin sync or a published package update before the new Skill wording is loaded.",
+            "gate": "accepted",
+            "created_at": "2026-06-20T09:44:04.642Z"
           }
         ]
       },

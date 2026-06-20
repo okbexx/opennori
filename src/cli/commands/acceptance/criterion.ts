@@ -34,7 +34,7 @@ function revisedAcceptanceBasis(pairLocation: string, existing: AcceptanceBasis 
 export const criterionAddCommand = defineCommand({
   meta: {
     name: "criterion-add",
-    description: "Add a user acceptance criterion to an active OpenNori contract."
+    description: "Add a user acceptance criterion to a current or draft OpenNori contract."
   },
   args: {
     ...activeGoalArgs,

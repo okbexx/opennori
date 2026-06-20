@@ -409,6 +409,19 @@ When a draft AC is revised, the draft stays unapproved. The agent should use the
 draft revision path, restart review for the changed AC, and avoid treating the
 revision as final approval or implementation evidence.
 
+When review reveals a missing acceptance boundary, the agent should add it
+through the draft criterion add path:
+
+```bash
+opennori criterion add --root <repo> --from-draft --goal <goal-id> --id AC-... \
+  --user-story "..." --measurement "..." --threshold "..."
+```
+
+This keeps `acceptance_basis.status` as `draft` while synchronizing the draft
+contract, evidence ledger, acceptance markdown, and manifest. Agents should not
+patch `.acceptance.md`, `.evidence.json`, or manifest files by hand for normal
+draft AC additions.
+
 This is not an implementation plan, file list, architecture decision, or
 evidence claim. If the interpretation adds a new completion condition, the
 agent should revise the AC or assumptions before continuing the review. If the
@@ -1026,6 +1039,15 @@ Nori Contract Draft 生成后，agent 必须先给出简短概览，然后一次
 用户回复 `confirm AC-1` 继续下一条，或回复 `revise AC-1: ...` 修正这一条。只有全部 AC 都逐条确认后，agent 才应该请求最终 `approve`。
 
 draft AC 被修订后仍然是未批准草案。agent 应使用 draft 修订路径，并从被修改的 AC 重新开始确认；不能把这次修订当成最终 approval、实现证据或进入 profile/implementation 的信号。
+
+如果逐条确认时发现缺了一条验收边界，agent 应使用 draft 新增 AC 路径：
+
+```bash
+opennori criterion add --root <repo> --from-draft --goal <goal-id> --id AC-... \
+  --user-story "..." --measurement "..." --threshold "..."
+```
+
+这会保持 `acceptance_basis.status` 为 `draft`，同时同步 draft contract、evidence ledger、acceptance markdown 和 manifest。正常补 draft AC 时，agent 不应手工 patch `.acceptance.md`、`.evidence.json` 或 manifest。
 
 这不是实现计划、文件清单、架构决策或完成证据。如果解释里出现了新的完成条件，agent 应先修订 AC 或假设，再继续确认。如果同一段理解可以原封不动套到另一个 AC 或另一个项目，它就太泛。
 

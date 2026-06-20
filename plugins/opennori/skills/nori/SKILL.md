@@ -92,6 +92,7 @@ routing begin until final approval happens after every AC is confirmed.
 - "Are these AC good enough", "this AC is too vague", "the goal is broad", or visible AC text lacks concrete user judgment -> hand off to `nori-acceptance`; do not wait for `opennori check` to flag it.
 - "Approve this draft", "approve these AC", "这些 AC 可以 approve 吗", or a draft exists but every AC has not been confirmed one by one -> hand off to `nori-acceptance` for the AC Review Loop before approval.
 - "confirm AC-1", "确认 AC-1", or "revise AC-1: ..." -> hand off to `nori-acceptance` to continue the AC Review Loop or revise the current AC.
+- "add AC-14", "补一条 AC", "还缺一个设置 AC", or AC Review Loop reveals a missing draft acceptance boundary -> hand off to `nori-acceptance`; the child Skill should use `opennori criterion add --from-draft --goal <goal-id>` instead of patching `.acceptance.md` or `.evidence.json` by hand.
 - "complete product", "complete feature", "full app", "full dashboard", "完整产品", "完整功能闭环", "完整应用", "完整 Dashboard", "完整工作台", or "不要 MVP" -> hand off to `nori-acceptance` or `nori-autogoal` with an explicit full-acceptance-surface instruction. The child Skill should preserve the complete user closure, not compress the Nori Contract into a compact MVP-style AC set unless the user explicitly narrows scope.
 - "Why are there so few AC", "these AC are too broad", "为什么 AC 这么少", "AC 太粗", or a complete-product draft has broad bundled criteria -> hand off to `nori-acceptance` for coverage review and revision. The child Skill should show missing coverage surfaces, split independent user judgments, and keep the result draft-only until user approval.
 - "The UI/UX AC is missing", "this is a page/app/dashboard/desktop/workbench/form", "the interface must feel usable", or a visible interface goal has only data/status/function AC -> hand off to `nori-acceptance` to add user-experience acceptance checks for navigation, information hierarchy, states, feedback, readability, consistency, recovery, and UI boundaries.
@@ -164,6 +165,10 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not answer confidently complete while required AC evidence, blocking profile items, architecture challenges, evidence health, or acceptance review risks remain unresolved or unaccepted.
 - Do not outsource AC quality judgment to CLI heuristics. The agent must inspect AC wording and ask the user the missing acceptance questions when the human judgment surface is vague.
 - Do not ask for blind approval of a draft. The agent must run the one-AC-at-a-time AC Review Loop and revise any mismatch before approval.
+- Do not patch draft acceptance/evidence files manually when adding a missing
+  draft AC. Route to `nori-acceptance` and use
+  `criterion add --from-draft` so the contract, ledger, markdown, and manifest
+  stay consistent.
 - Do not dump all AC interpretations as the approval surface. A compact overview is allowed, but user confirmation happens one AC at a time.
 - Do not treat early `approve` as valid final approval before every AC has been confirmed one by one.
 - Do not accept generic AC Interpretation Review. The agent must name the concrete objects, fields, states, boundaries, failure examples, and evidence objects that make each AC reviewable.

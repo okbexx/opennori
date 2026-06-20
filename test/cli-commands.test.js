@@ -2166,6 +2166,60 @@ test("criterion add command module extends the contract and ledger together", as
   assert.match(fs.readFileSync(acceptancePath, "utf8"), /AC-Z-18/);
 });
 
+test("criterion add command module can add draft criteria without approval", async () => {
+  const root = tempRoot();
+  const acceptancePath = path.join(root, ".opennori", "drafts", "module-draft.acceptance.md");
+  const evidencePath = path.join(root, ".opennori", "drafts", "module-draft.evidence.json");
+  const contract = {
+    schema_version: "opennori/contract-v1",
+    protocol_version: "opennori/v1",
+    goal_id: "module-draft",
+    goal: "Add draft acceptance",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "As a user, I can inspect the draft criterion.",
+        measurement: "Open the draft report.",
+        threshold: "The draft criterion is visible."
+      }
+    ],
+    acceptance_basis: { status: "draft", summary: "Draft pending review." }
+  };
+  const ledger = buildEvidenceLedger(contract);
+  ledger.status = "draft";
+  fs.mkdirSync(path.dirname(acceptancePath), { recursive: true });
+  fs.writeFileSync(acceptancePath, "# Module draft\n");
+  writeJson(evidencePath, { contract, ledger });
+
+  const added = await runCriterionAddCommand([
+    "--from-draft",
+    "--goal", "module-draft",
+    "--id", "AC-14",
+    "--user-story", "As a user, I can review the missing settings boundary.",
+    "--measurement", "Open settings, change the chosen value, and save it.",
+    "--threshold", "The saved value persists and failed saves show a recovery message.",
+    "--summary", "AC Review Loop added AC-14.",
+    "--json"
+  ], {
+    loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root, location: "drafts" }),
+    refreshManifest() {}
+  });
+
+  assert.equal(added.ok, true);
+  assert.equal(added.data.criterion.id, "AC-14");
+  assert.equal(added.data.acceptance_basis.status, "draft");
+  assert.equal(added.data.workflow_status, "draft");
+  assert.equal(added.data.current_gap.id, "ACCEPTANCE-BASIS");
+
+  const written = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  assert.equal(written.contract.acceptance_basis.status, "draft");
+  assert.equal(written.contract.acceptance_basis.approved_at, undefined);
+  assert.equal(written.contract.criteria.some((criterion) => criterion.id === "AC-14"), true);
+  assert.equal(written.ledger.status, "draft");
+  assert.equal(written.ledger.criteria["AC-14"].status, "unknown");
+  assert.match(fs.readFileSync(acceptancePath, "utf8"), /AC-14/);
+});
+
 test("evidence add command module records flexible reviewable sources", async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");

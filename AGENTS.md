@@ -143,6 +143,11 @@ Revising a draft AC is not approval: use the draft revision path, keep the
 acceptance basis as draft, and restart review for the changed AC. Do not let
 profile, architecture, implementation, or evidence routing begin until final
 approval happens after every AC is confirmed.
+If the review loop discovers a missing acceptance boundary, add it with
+`opennori criterion add --from-draft --goal <goal-id>` so the draft contract,
+ledger, markdown, and manifest stay synchronized. Do not manually patch
+`.acceptance.md`, `.evidence.json`, or manifest files for normal draft AC
+additions.
 
 Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, or implementation tasks into user AC. They can influence Nori Profile, Architecture Baseline, evidence risk, or recovery guidance, but Product AC must remain human-visible operations or judgments.
 

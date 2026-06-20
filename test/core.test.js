@@ -1719,6 +1719,9 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /measurement and threshold/);
   assert.match(noriAsset, /coverage notes mention\s+Acceptance Surface Modeling/);
   assert.match(noriAsset, /project CRUD works|settings are editable/);
+  assert.match(noriAsset, /add AC-14/);
+  assert.match(noriAsset, /criterion add --from-draft/);
+  assert.match(noriAsset, /Do not patch draft acceptance\/evidence files manually/);
   assert.match(noriAsset, /blind approval/);
   assert.match(noriAsset, /actual page, route, command, object, field, state/);
   assert.match(noriAsset, /concrete objects, fields, states, boundaries/);
@@ -1755,9 +1758,13 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(acceptanceAsset, /AC Review Loop/);
   assert.match(acceptanceAsset, /confirm AC-1/);
   assert.match(acceptanceAsset, /revise AC-1/);
+  assert.match(acceptanceAsset, /add AC-14/);
+  assert.match(acceptanceAsset, /criterion add --from-draft/);
+  assert.match(acceptanceAsset, /not `apply_patch` or manual JSON\/Markdown edits/);
   assert.match(acceptanceAsset, /User enters|用户入口/);
   assert.match(acceptanceAsset, /Evidence I would use|我会使用的证据类型/);
   assert.match(acceptanceAsset, /Do not ask for blind approval/);
+  assert.match(acceptanceAsset, /Do not use `apply_patch` to add a missing AC to a draft/);
   assert.match(acceptanceAsset, /If the explanation could be copied unchanged\s+to another AC/);
   assert.match(acceptanceAsset, /Do not dump all AC interpretations/);
   assert.match(acceptanceAsset, /actual page/);
@@ -1913,6 +1920,9 @@ test("public product surfaces present OpenNori as one capability bundle", () => 
   assert.match(health, /opennori init/);
   assert.match(protocol, /Direct CLI use\s+is an advanced, automation, or debugging route/);
   assert.match(readme, /AC Review Loop/);
+  assert.match(readme, /criterion add --root <repo> --from-draft --goal <goal-id>/);
+  assert.match(readme, /Agents should not\s+patch `.acceptance\.md`, `.evidence\.json`, or manifest files by hand/);
+  assert.match(readme, /agent 不应手工 patch `.acceptance\.md`、`.evidence\.json` 或 manifest/);
   assert.match(readme, /Enhanced Discovery/);
   assert.match(readme, /todolist/);
   assert.match(readme, /measurement and threshold should expose/);
@@ -1927,6 +1937,8 @@ test("public product surfaces present OpenNori as one capability bundle", () => 
   assert.match(protocol, /The model is only useful when it changes the draft criteria/);
   assert.match(protocol, /`measurement`: entry, visible trigger/);
   assert.match(protocol, /revise the draft criterion first/);
+  assert.match(protocol, /criterion add --root <repo> --from-draft --goal <goal-id>/);
+  assert.match(protocol, /Do not patch the draft files manually/);
 
   for (const text of [readme, protocol]) {
     assert.doesNotMatch(text, /Choose one path/);
@@ -3240,6 +3252,58 @@ test("criterion update on a draft keeps the contract awaiting AC review", () => 
   assert.equal(payload.contract.acceptance_basis.status, "draft");
   assert.equal(payload.contract.acceptance_basis.approved_at, undefined);
   assert.equal(payload.ledger.status, "draft");
+});
+
+test("criterion add on a draft keeps the contract awaiting AC review", () => {
+  const root = tempRoot();
+  const briefPath = writeBriefFile(root, "交付 AW 项目设置能力", {
+    goalId: "aw-project-settings",
+    language: "zh-CN",
+    criteria: [
+      {
+        id: "AC-1",
+        layer: "operator",
+        user_story: "作为用户，我能在 AW 项目详情页查看项目名称。",
+        measurement: "打开 AW 项目详情页并查看项目名称展示。",
+        threshold: "当前项目名称可见，并与项目登记状态一致。"
+      }
+    ]
+  });
+  const draft = run(["draft", "--brief", briefPath, "--root", root, "--json"]);
+
+  const added = run([
+    "criterion", "add",
+    "--root", root,
+    "--from-draft",
+    "--goal", "aw-project-settings",
+    "--id", "AC-14",
+    "--user-story", "作为用户，我能从 AW 项目详情页打开设置入口并修改项目分类。",
+    "--measurement", "打开项目详情页，点击设置入口，在设置表单中修改项目分类并保存。",
+    "--threshold", "保存成功后详情页显示新的分类；刷新后分类仍然存在；保存失败时显示可理解的错误和重试入口。",
+    "--summary", "AC Review Loop discovered the missing settings acceptance boundary.",
+    "--json"
+  ]);
+
+  assert.equal(added.data.criterion.id, "AC-14");
+  assert.equal(added.data.acceptance_basis.status, "draft");
+  assert.equal(added.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(added.data.workflow_status, "draft");
+
+  const status = run(["status", "--root", root, "--from-draft", "--goal", "aw-project-settings", "--json"]);
+  assert.equal(status.data.acceptance_basis.status, "draft");
+  assert.equal(status.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(status.data.workflow_status, "draft");
+
+  const payload = JSON.parse(fs.readFileSync(draft.data.evidence_path, "utf8"));
+  assert.equal(payload.contract.criteria.some((criterion) => criterion.id === "AC-14"), true);
+  assert.equal(payload.contract.acceptance_basis.status, "draft");
+  assert.equal(payload.contract.acceptance_basis.approved_at, undefined);
+  assert.equal(payload.ledger.status, "draft");
+  assert.equal(payload.ledger.criteria["AC-14"].status, "unknown");
+  assert.match(fs.readFileSync(draft.data.acceptance_path, "utf8"), /AC-14/);
+
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "manifest.json"), "utf8"));
+  assert.equal(manifest.draft_goals.some((goal) => goal.goal_id === "aw-project-settings"), true);
 });
 
 test("criterion add preserves contract and ledger consistency", () => {

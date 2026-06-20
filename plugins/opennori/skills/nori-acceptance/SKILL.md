@@ -162,7 +162,8 @@ Useful state commands:
 - `opennori draft --brief <brief.json> --root <repo> --json`
 - `opennori approve --root <repo> --summary "<approval>" --json`
 - `opennori approve --no-from-draft --language zh-CN|en --root <repo> --summary "<approval>" --json`
-- `opennori criterion update --root <repo> --from-draft --goal <goal-id> --criterion <id> --user-story "..." --measurement "..." --threshold "..." --json` for draft AC review revisions.
+- `opennori criterion add --root <repo> --from-draft --goal <goal-id> --id <id> --user-story "..." --measurement "..." --threshold "..." --json` for adding a missing AC to a draft during AC Review Loop.
+- `opennori criterion update --root <repo> --from-draft --goal <goal-id> --criterion <id> --user-story "..." --measurement "..." --threshold "..." --json` for revising an existing draft AC during AC Review Loop.
 - `opennori criterion update --root <repo> --criterion <id> --user-story "..." --measurement "..." --threshold "..." --json` for already approved current-contract revisions.
 - `opennori activity start|heartbeat|finish --root <repo> --skill nori-acceptance --state thinking --summary "..." --json` (required dashboard signal when the dashboard is observed and a current goal/gap exists)
 
@@ -180,7 +181,8 @@ Useful state commands:
 - "project CRUD", "manage projects", "管理项目", "新增/编辑/删除", "list/form/table/settings/dashboard" with broad AC -> run Acceptance Surface Modeling before approval. Split create/read/update/delete/link/unlink/select/preview operations when they have different entries, visible triggers, interaction surfaces, required fields, feedback, persistence, or destructive boundaries.
 - User answers discovery questions -> convert the answers into a complete NoriBrief with concrete Product AC, run `opennori draft --brief`, then show the draft overview and start the one-AC-at-a-time AC Review Loop before final approval.
 - "confirm AC-1", "AC-1 对", "确认 AC-1" -> mark that AC as conversation-confirmed and continue the AC Review Loop with the next unconfirmed AC. Do not run `opennori approve` until every AC has been confirmed.
-- "revise AC-1: ...", "AC-1 应该是..." -> revise that draft criterion or the draft assumptions with `criterion update --from-draft`, then restart review for the changed AC before continuing. This keeps `acceptance_basis.status` as `draft`; do not treat the revision as approval.
+- "revise AC-1: ...", "AC-1 应该是..." -> revise that existing draft criterion or the draft assumptions with `criterion update --from-draft`, then restart review for the changed AC before continuing. This keeps `acceptance_basis.status` as `draft`; do not treat the revision as approval.
+- "add AC-14", "补一条设置 AC", "还缺一个 AC", or the AC Review Loop discovers a missing acceptance boundary while the contract is still a draft -> add that missing draft criterion with `criterion add --from-draft --goal <goal-id>`, not `apply_patch` or manual JSON/Markdown edits. The CLI updates the draft contract, evidence ledger, acceptance markdown, and manifest together while keeping `acceptance_basis.status` as `draft`.
 - "Approve these AC" -> if every AC has not already been confirmed one by one in this conversation, do not approve yet. Start or continue the AC Review Loop from the first unconfirmed AC. Only after all ACs are confirmed should you write approval, read `agent_next`, and route to architecture review, evidence, or reporting from that returned state.
 - "Change AC-2 to mean..." on an approved current contract -> update that criterion and treat older evidence for it as stale.
 - Complete goal with `agent_next.state: ready_for_next_loop` -> infer or ask for the next human-facing outcome, prepare a complete NoriBrief, run `opennori draft --brief`, then show the draft overview and start the AC Review Loop with concrete Measure / Passes when text.
@@ -285,6 +287,11 @@ Ask fewer, sharper questions when the user already provided enough detail.
 
 May write brainstorms, draft contracts, approved acceptance basis, and criterion revisions under `.opennori/`. Do not write evidence, profile, architecture decisions, or reports except through the responsible Skill.
 
+When adding or revising draft AC, prefer `opennori criterion add --from-draft`
+and `opennori criterion update --from-draft`. Do not use manual file patches to
+keep `.acceptance.md`, `.evidence.json`, and manifest in sync unless the CLI is
+broken and project-health recovery has failed.
+
 When adopting an in-progress AC discussion, write only a draft under `.opennori/drafts/`. Do not approve it, activate it, implement it, or record passing evidence until the user approves or revises the Nori Contract.
 
 Must write live dashboard activity while acceptance work is happening and the dashboard is observed with a current goal/gap. Activity is not a Nori Contract, not approval, and not completion evidence.
@@ -375,6 +382,9 @@ For Chinese presentation, use this shape:
 - Do not ask for blind approval immediately after creating a draft. Start the one-AC-at-a-time AC Review Loop so the user can catch mismatches before final approval.
 - Do not dump all AC interpretations as the approval surface when a draft has many AC. A compact overview is allowed, but confirmation happens one AC at a time.
 - Do not treat a bulk overview, batch interpretation, or the user's early `approve` as final approval before every AC has been confirmed one by one.
+- Do not use `apply_patch` to add a missing AC to a draft when
+  `criterion add --from-draft` is available. The deterministic CLI must keep
+  the draft contract, ledger, markdown, and manifest consistent.
 - Do not give generic AC Interpretation Review. Phrases like "the user opens the relevant page", "checks the result", "sees it works", "failure is handled", or "I would test it" are not enough unless they name the actual page/object/field/state/message/failure/evidence for that AC.
 - Do not let AC Interpretation Review add hidden requirements. If the explanation changes what "done" means, revise the AC or assumptions before asking for approval.
 - Do not turn AC Interpretation Review into an implementation plan, file plan, task list, technology choice, or evidence claim.
