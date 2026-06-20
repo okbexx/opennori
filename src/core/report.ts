@@ -28,6 +28,33 @@ function reviewRiskSources(acceptanceReview: AcceptanceQualityAudit, health = { 
   return risks;
 }
 
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.map((item) => String(item).trim()).filter(Boolean) : [];
+}
+
+export function acceptanceBasisView(contract: NoriContract): {
+  status: string;
+  summary: string | null;
+  source: string | null;
+  mode: string | null;
+  coverage_summary: string[];
+  assumptions: string[];
+  open_questions: string[];
+  out_of_scope: string[];
+} {
+  const basis = contract.acceptance_basis || { status: "draft" };
+  return {
+    status: String(basis.status || "draft"),
+    summary: basis.summary ? String(basis.summary) : null,
+    source: basis.source ? String(basis.source) : null,
+    mode: basis.mode ? String(basis.mode) : null,
+    coverage_summary: stringList(basis.coverage_summary),
+    assumptions: stringList(basis.assumptions),
+    open_questions: stringList(basis.open_questions),
+    out_of_scope: stringList(basis.out_of_scope)
+  };
+}
+
 function profileReviewRisks(ledger: EvidenceLedger): string[] {
   return profileCompliance(ledger).review.length > 0 ? ["profile_review"] : [];
 }
@@ -385,6 +412,7 @@ export function renderReport(contract: NoriContract, ledger: EvidenceLedger, { r
   const acceptanceReview = reviewAcceptanceQuality(contract);
   const profile = profileCompliance(ledger);
   const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+  const basis = acceptanceBasisView(contract);
   const lines = [
     `# ${contract.goal_id} Acceptance Report`,
     "",
@@ -405,8 +433,34 @@ export function renderReport(contract: NoriContract, ledger: EvidenceLedger, { r
     "",
     "## Acceptance Basis",
     "",
-    `Status: ${contract.acceptance_basis?.status || "draft"}`,
-    contract.acceptance_basis?.summary ? `Summary: ${contract.acceptance_basis.summary}` : "Summary: <none>",
+    `Status: ${basis.status}`,
+    `Summary: ${basis.summary || "<none>"}`,
+    ...(basis.source ? [`Source: ${basis.source}`] : []),
+    ...(basis.mode ? [`Mode: ${basis.mode}`] : []),
+    ...(basis.coverage_summary.length > 0
+      ? [
+          "Discovery coverage:",
+          ...basis.coverage_summary.map((item) => `- ${item}`)
+        ]
+      : []),
+    ...(basis.assumptions.length > 0
+      ? [
+          "Assumptions:",
+          ...basis.assumptions.map((item) => `- ${item}`)
+        ]
+      : []),
+    ...(basis.open_questions.length > 0
+      ? [
+          "Open questions:",
+          ...basis.open_questions.map((item) => `- ${item}`)
+        ]
+      : []),
+    ...(basis.out_of_scope.length > 0
+      ? [
+          "Out of scope:",
+          ...basis.out_of_scope.map((item) => `- ${item}`)
+        ]
+      : []),
     "",
     "## Nori Profile",
     "",

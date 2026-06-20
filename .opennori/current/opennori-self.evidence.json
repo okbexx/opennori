@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User added enhanced autogoal discovery acceptance.",
-      "approved_at": "2026-06-20T03:08:59.327Z"
+      "summary": "User added enhanced autogoal visibility acceptance.",
+      "approved_at": "2026-06-20T04:01:27.830Z"
     },
     "criteria": [
       {
@@ -594,6 +594,15 @@
         "threshold": "Skills 明确要求增强 autogoal 仍是 Skill 行为而不是新 CLI 或新产物；agent 自行展开用户角色、入口、场景、数据对象与规则、状态转换、非法输入、成功反馈、持久化、失败/恢复、UI/UX、复查方式、假设和 out-of-scope；只把会改变完成定义的关键问题交给用户确认；最后仍写入标准 Nori Contract Draft，并进入逐条 AC Review Loop。",
         "required": true,
         "risk": "medium"
+      },
+      {
+        "id": "AC-O-16",
+        "layer": "operator",
+        "user_story": "作为用户，我要求 OpenNori autogoal 增强模式后，能从 agent 回复、draft 状态和 report/status 中看出 Enhanced Discovery 是否真的被使用，而不是只能相信 agent 自称用了增强模式。",
+        "measurement": "查看 nori-autogoal/nori Skills、OpenNori protocol、AGENTS、README、draft markdown/status/report 输出和测试。",
+        "threshold": "增强 autogoal 的用户可见回复必须包含 Enhanced Discovery checked；标准 Nori Contract Draft 的 acceptance_basis 必须持久化 source=autogoal、mode=enhanced、coverage_summary、assumptions、open_questions 和可选 out_of_scope；opennori status/resume/report 和 acceptance markdown 能展示这些来源元数据；缺少该确认面时 Skill 不得要求用户 approve；该机制不创建新 CLI、新产物、过程日志或主观 hard validator。",
+        "required": true,
+        "risk": "medium"
       }
     ]
   },
@@ -601,7 +610,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-20T03:09:12.733Z",
+    "updated_at": "2026-06-20T04:02:52.494Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -7032,6 +7041,79 @@
             "limitations": "This verifies packaged behavior instructions and documentation surfaces; real project quality still depends on the agent applying the Skill and the user confirming AC in conversation.",
             "gate": "accepted",
             "created_at": "2026-06-20T03:09:12.733Z"
+          }
+        ]
+      },
+      "AC-O-16": {
+        "status": "passing",
+        "confidence": "high",
+        "required": true,
+        "risk": "medium",
+        "evidence": [
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "Enhanced autogoal now leaves a user-visible confirmation surface: Skill replies must show Enhanced Discovery checked, drafts persist source/mode/coverage metadata, and status/report/acceptance markdown expose that metadata for review.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "reference",
+                "label": "artifact:plugins/opennori/skills/nori-autogoal/SKILL.md"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:.opennori/protocol.md"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:AGENTS.md"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:README.md"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:src/core/contract.ts"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:src/core/report.ts"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:src/cli/commands/acceptance/runtime-status.ts"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:src/cli/commands/acceptance/draft.ts"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:src/cli/human-output.ts"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:test/core.test.js"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:test/cli-commands.test.js"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:../opennori-site/src/pages/index.astro"
+              }
+            ],
+            "reviewability": "Review the listed Skills, protocol, README, CLI rendering code, tests, and website copy; run the enhanced autogoal targeted Vitest command, npm run check, opennori status/check, and opennori-site pnpm build.",
+            "limitations": "This verifies persisted and visible confirmation surfaces for enhanced autogoal. It intentionally does not make CLI judge whether the agent's scenario expansion is subjectively sufficient; users still review and confirm the draft.",
+            "gate": "accepted",
+            "created_at": "2026-06-20T04:02:52.493Z"
           }
         ]
       }

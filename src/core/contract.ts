@@ -76,8 +76,12 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
         acceptanceBasis: "验收基础",
         status: "状态",
         summary: "摘要",
+        source: "来源",
+        mode: "模式",
+        coverageSummary: "发现覆盖面",
         assumptions: "假设",
         openQuestions: "开放问题",
+        outOfScope: "范围外",
         none: "<无>",
         profile: "Nori Profile",
         criteria: "用户验收标准",
@@ -95,8 +99,12 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
         acceptanceBasis: "Acceptance Basis",
         status: "Status",
         summary: "Summary",
+        source: "Source",
+        mode: "Mode",
+        coverageSummary: "Discovery coverage",
         assumptions: "Assumptions",
         openQuestions: "Open Questions",
+        outOfScope: "Out of scope",
         none: "<none>",
         profile: "Nori Profile",
         criteria: "User Acceptance Criteria",
@@ -111,13 +119,27 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
     `${labels.status}: ${basis.status || "draft"}`,
     basis.summary ? `${labels.summary}: ${basis.summary}` : `${labels.summary}: ${labels.none}`
   ];
+  if (basis.source) {
+    basisLines.push(`${labels.source}: ${String(basis.source)}`);
+  }
+  if (basis.mode) {
+    basisLines.push(`${labels.mode}: ${String(basis.mode)}`);
+  }
+  const coverageSummary = Array.isArray(basis.coverage_summary) ? basis.coverage_summary.map((item) => String(item).trim()).filter(Boolean) : [];
   const assumptions = Array.isArray(basis.assumptions) ? basis.assumptions.map((item) => String(item).trim()).filter(Boolean) : [];
   const openQuestions = Array.isArray(basis.open_questions) ? basis.open_questions.map((item) => String(item).trim()).filter(Boolean) : [];
+  const outOfScope = Array.isArray(basis.out_of_scope) ? basis.out_of_scope.map((item) => String(item).trim()).filter(Boolean) : [];
+  if (coverageSummary.length > 0) {
+    basisLines.push("", `${labels.coverageSummary}:`, ...coverageSummary.map((item) => `- ${item}`));
+  }
   if (assumptions.length > 0) {
     basisLines.push("", `${labels.assumptions}:`, ...assumptions.map((item) => `- ${item}`));
   }
   if (openQuestions.length > 0) {
     basisLines.push("", `${labels.openQuestions}:`, ...openQuestions.map((item) => `- ${item}`));
+  }
+  if (outOfScope.length > 0) {
+    basisLines.push("", `${labels.outOfScope}:`, ...outOfScope.map((item) => `- ${item}`));
   }
 
   const lines = [

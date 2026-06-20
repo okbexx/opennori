@@ -4,6 +4,7 @@ import { architectureState } from "../../../architecture.ts";
 import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
   completionAnswer,
+  acceptanceBasisView,
   criterionStatusRows,
   currentGap,
   evidenceHealth,
@@ -64,6 +65,7 @@ export const resumeCommand = defineCommand({
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
+      acceptance_basis: acceptanceBasisView(contract),
       workflow_status: ledger.status,
       current_gap: gap,
       completion: completionAnswer(contract, ledger, { root, architecture }),
@@ -100,6 +102,7 @@ export const statusCommand = defineCommand({
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
+      acceptance_basis: acceptanceBasisView(contract),
       workflow_status: ledger.status,
       current_gap: gap,
       completion: completionAnswer(contract, ledger, { root, architecture }),

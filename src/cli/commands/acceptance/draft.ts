@@ -17,9 +17,24 @@ import {
 } from "../../../core.ts";
 import { bootstrap, refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
-import type { NoriBrief } from "../../../types.ts";
+import type { AcceptanceBasis, NoriBrief } from "../../../types.ts";
 import { withContractLanguage } from "../../../language.ts";
 import { jsonArg, resolveRoot, rootArg } from "./shared.ts";
+
+function draftNextActions(brief: NoriBrief): string[] {
+  const basis: Partial<AcceptanceBasis> = brief.acceptance_basis || {};
+  const source = String(basis.source || "");
+  const mode = String(basis.mode || "");
+  const actions = [
+    "Show a compact draft overview, then start the one-AC-at-a-time AC Review Loop. Review only the current AC with exact entry, object or field, visible state/result, non-passing examples, and specific evidence object. Ask for final approve only after every AC is confirmed one by one."
+  ];
+  if (source === "autogoal" && mode === "enhanced") {
+    actions.unshift(
+      "Show an `Enhanced Discovery checked` section before approval: coverage summary, assumptions, critical questions, and out-of-scope boundaries. If this section is missing, do not ask the user to approve the draft."
+    );
+  }
+  return actions;
+}
 
 export const draftCommand = defineCommand({
   meta: {
@@ -84,9 +99,7 @@ export const draftCommand = defineCommand({
         { kind: "evidence_ledger", path: paths.evidencePath }
       ],
       [],
-      [
-        "Show a compact draft overview, then start the one-AC-at-a-time AC Review Loop. Review only the current AC with exact entry, object or field, visible state/result, non-passing examples, and specific evidence object. Ask for final approve only after every AC is confirmed one by one."
-      ]
+      draftNextActions(contract)
     );
   }
 });

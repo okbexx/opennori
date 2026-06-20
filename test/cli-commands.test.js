@@ -715,6 +715,49 @@ test("draft command module stores Skill-prepared draft contracts", async () => {
   assert.equal(draft.artifacts.some((artifact) => artifact.kind === "draft_acceptance_contract"), true);
 });
 
+test("human status output shows enhanced autogoal acceptance basis", () => {
+  const output = [];
+  const printed = printHumanResult({
+    ok: true,
+    data: {
+      goal_id: "enhanced-todolist",
+      workflow_status: "draft",
+      current_gap: {
+        id: "ACCEPTANCE-BASIS",
+        reason: "Acceptance criteria have not been approved by the user yet."
+      },
+      acceptance_basis: {
+        source: "autogoal",
+        mode: "enhanced",
+        coverage_summary: [
+          "task creation",
+          "invalid input",
+          "refresh persistence"
+        ]
+      },
+      completion: {
+        complete: false,
+        answer: "Not complete: acceptance basis is draft."
+      },
+      intervention: {
+        required: true,
+        action: "Review the draft."
+      }
+    },
+    artifacts: [],
+    warnings: [],
+    next_actions: []
+  }, {
+    commandPath: ["status"],
+    stdout: { isTTY: true, write: (chunk) => output.push(chunk) }
+  });
+
+  assert.equal(printed, true);
+  const text = output.join("");
+  assert.match(text, /Acceptance basis: autogoal enhanced/);
+  assert.match(text, /Discovery coverage: task creation, invalid input, refresh persistence/);
+});
+
 test("ready completed goals route Skills to prepare the next brief instead of CLI candidates", async () => {
   const root = tempRoot();
   const contract = {

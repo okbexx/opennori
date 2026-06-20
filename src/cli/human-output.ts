@@ -123,8 +123,17 @@ function printAcceptanceStatus(stdout: NodeJS.WriteStream, title: string, data: 
   const gap = data.current_gap === null ? null : asObject(data.current_gap);
   const completion = asObject(data.completion);
   const intervention = asObject(data.intervention);
+  const basis = asObject(data.acceptance_basis);
+  const basisLabel = [
+    basis.source ? String(basis.source) : "",
+    basis.mode ? String(basis.mode) : ""
+  ].filter(Boolean).join(" ");
   line(stdout, title);
   line(stdout, `Goal: ${data.goal_id || "unknown"}`);
+  if (basisLabel) line(stdout, `Acceptance basis: ${basisLabel}`);
+  if (Array.isArray(basis.coverage_summary) && basis.coverage_summary.length > 0) {
+    line(stdout, `Discovery coverage: ${basis.coverage_summary.slice(0, 6).map(String).join(", ")}`);
+  }
   line(stdout, `Workflow: ${data.workflow_status || (completion.complete ? "complete" : "active") || "unknown"}`);
   line(stdout, `Current gap: ${gap ? `${gap.id}: ${gap.reason || gap.user_story || "needs evidence"}` : "none"}`);
   if (completion.answer) line(stdout, `Decision: ${completion.answer}`);
