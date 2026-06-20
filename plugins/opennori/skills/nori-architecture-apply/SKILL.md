@@ -63,6 +63,8 @@ Useful state commands:
 
 May write architecture apply records under `.opennori/architecture/evidence/`. These records document baseline alignment for an acceptance gap; they are not Product AC evidence and must not mark an AC passing by themselves. Delegate Product AC evidence, challenges, build-vs-buy decisions, and reporting writes to the responsible Skills.
 
+Only write apply-record-shaped artifacts to `.opennori/architecture/evidence/`, preferably through `opennori architecture apply`. Do not place Architecture Profile JSON, profile import sources, baseline preview JSON, screenshots, logs, or Product AC evidence in this directory. Profile definitions belong under `.opennori/architecture/profiles/`; Product AC proof belongs in the normal evidence ledger through `nori-evidence`.
+
 Must publish live activity for the dashboard when the dashboard is observed and a current goal/gap exists, preferably from `agent_next.dashboard_activity` command templates when present. Activity is not architecture evidence and must not replace apply records or Product AC evidence.
 
 ## Handoffs
@@ -101,3 +103,4 @@ Keep architecture commentary brief unless there is a conflict or risk.
 - Do not present Architecture Checks as Product AC failures.
 - Do not skip evidence after implementation just because the architecture fit is good.
 - Do not treat dashboard activity, events, or snapshots as proof that architecture was followed.
+- Do not use `.opennori/architecture/evidence/` as a scratch space. Invalid files there make architecture state unrecoverable until cleaned up.

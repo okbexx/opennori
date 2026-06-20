@@ -99,6 +99,13 @@ export function architectureHealthChecks(architecture: ArchitectureState, baseli
     architecture.decision === "invalid" ? "broken" : "needs-action"
   ));
   checks.push(doctorCheck(
+    "architecture_evidence",
+    architecture.evidence_health.status === "clear",
+    architecture.evidence_health.summary,
+    "Move profile/source/temp JSON out of .opennori/architecture/evidence, or replace it with a valid opennori architecture apply record.",
+    "broken"
+  ));
+  checks.push(doctorCheck(
     "build_vs_buy_health",
     (!baselineRequired && architecture.build_vs_buy_decisions.length === 0) || architecture.build_vs_buy.status === "clear",
     architecture.build_vs_buy.summary,

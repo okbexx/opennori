@@ -2819,6 +2819,97 @@ test("project architecture profiles can be added and used for baselines", () => 
   assert.match(fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.md"), "utf8"), /team-parser-first/);
 });
 
+test("architecture evidence directory rejects misplaced profile source files", () => {
+  const root = tempRoot();
+  const draft = draftAndApprove(draftArgsFromGoal(root, "Ship under clean architecture evidence"));
+  recordArchitectureRequirement(
+    root,
+    draft.data.goal_id,
+    "required",
+    "This fixture verifies architecture evidence directory health."
+  );
+  run([
+    "architecture", "baseline",
+    "--root", root,
+    "--goal", "Ship under clean architecture evidence",
+    "--goal-id", draft.data.goal_id,
+    "--confirm",
+    "--json"
+  ]);
+
+  const misplacedProfilePath = path.join(root, ".opennori", "architecture", "evidence", "team-cli.profile.json");
+  fs.mkdirSync(path.dirname(misplacedProfilePath), { recursive: true });
+  fs.writeFileSync(misplacedProfilePath, `${JSON.stringify({
+    id: "team-cli",
+    title: "Team CLI",
+    summary: "This is a profile source, not an architecture apply record.",
+    principles: ["team-parser-first"],
+    checks: [
+      {
+        id: "TEAM-1",
+        audience: "maintainer",
+        statement: "Commands follow team architecture.",
+        review: "Inspect command modules."
+      }
+    ],
+    technical_baseline: {
+      runtime_topology: [{ name: "runtime", decision: "Use the team runtime." }],
+      source_of_truth: [{ name: "state", decision: "Use project state." }],
+      module_boundaries: [{ name: "modules", decision: "Use team modules." }],
+      contract_surfaces: [{ name: "json", decision: "Expose JSON." }],
+      data_flows: [{ name: "flow", steps: ["Read input.", "Write state."] }],
+      dependency_decisions: [{ name: "parser", decision: "Use team parser." }],
+      reference_mappings: [{ name: "standard", decision: "Map team standard." }],
+      verification: ["npm test"]
+    },
+    build_vs_buy_policy: {
+      order: ["current-project-dependency", "mature-open-source-library", "small-local-implementation"],
+      require_reason_when_self_building: true
+    }
+  }, null, 2)}\n`);
+
+  const check = run(["check", "--root", root, "--json"]);
+  assert.equal(check.data.architecture_check.status, "needs-action");
+  assert.equal(check.data.architecture_check.architecture.evidence_health.status, "broken");
+  assert.equal(check.warnings.some((warning) => warning.type === "architecture_evidence" && warning.path === ".opennori/architecture/evidence/team-cli.profile.json"), true);
+  assert.equal(check.next_actions.some((action) => /architecture evidence/.test(action)), true);
+
+  const payload = JSON.parse(fs.readFileSync(draft.data.evidence_path, "utf8"));
+  for (const criterion of Object.keys(payload.ledger.criteria)) {
+    run([
+      "evidence", "add",
+      "--root", root,
+      "--criterion", criterion,
+      "--kind", "verification",
+      "--summary", `${criterion} has user-visible evidence.`,
+      "--result", "passing",
+      "--confidence", "high",
+      "--basis", "tool-observation",
+      "--source-command", "npm test",
+      "--reviewability", "Rerun npm test and inspect the output.",
+      "--limitations", "This fixture focuses on architecture evidence directory health.",
+      "--json"
+    ]);
+  }
+
+  const status = run(["status", "--root", root, "--json"]);
+  assert.equal(status.data.completion.review_risks.includes("architecture_evidence"), true);
+  assert.equal(status.data.next_recommendation.status, "completion-review-required");
+  assert.equal(status.data.next_recommendation.recommended_skill, "nori-project-health");
+
+  const doctorPayload = run(["doctor", "--root", root, "--json"]);
+  const architectureEvidenceCheck = doctorPayload.data.checks.find((item) => item.name === "architecture_evidence");
+  assert.equal(architectureEvidenceCheck.ok, false);
+  assert.equal(architectureEvidenceCheck.severity, "broken");
+  assert.equal(doctorPayload.data.recovery_actions.some((action) => action.check === "architecture_evidence"), true);
+
+  const report = run(["report", "--root", root, "--json"]);
+  const reportText = fs.readFileSync(report.data.report_path, "utf8");
+  assert.match(reportText, /Review risks: .*architecture_evidence/);
+  assert.match(reportText, /Architecture evidence health: broken/);
+  assert.match(reportText, /team-cli\.profile\.json/);
+});
+
 test("project architecture profiles without technical verification are not usable for baselines", () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);

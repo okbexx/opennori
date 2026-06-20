@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readJson, writeJson } from "../core.ts";
-import type { ArchitectureApplyRecord, ArchitectureApplySummary } from "../types.ts";
-import { validateSchema } from "../validation.ts";
+import type { ArchitectureApplyRecord, ArchitectureApplySummary, ArchitectureEvidenceFinding, ArchitectureEvidenceHealth } from "../types.ts";
+import { schemaErrorSummary, validateSchema } from "../validation.ts";
 import { ARCHITECTURE_APPLY_SCHEMA_VERSION, architectureApplyPath, architectureDir, errorMessage, relativeTo } from "./shared.ts";
 
 type ArchitectureApplyInput = {
@@ -120,4 +120,54 @@ export function architectureApplySummaries(root: string): ArchitectureApplySumma
       }
     })
     .sort((left, right) => left.id.localeCompare(right.id));
+}
+
+export function architectureEvidenceHealth(root: string): ArchitectureEvidenceHealth {
+  const dir = path.join(architectureDir(root), "evidence");
+  if (!fs.existsSync(dir)) {
+    return {
+      status: "clear",
+      summary: ".opennori/architecture/evidence does not exist yet.",
+      finding_count: 0,
+      findings: []
+    };
+  }
+
+  const findings: ArchitectureEvidenceFinding[] = fs.readdirSync(dir)
+    .filter((fileName) => fileName.endsWith(".json"))
+    .flatMap((fileName): ArchitectureEvidenceFinding[] => {
+      const recordPath = path.join(dir, fileName);
+      const relativePath = relativeTo(root, recordPath);
+      try {
+        const record = readJson<ArchitectureApplyRecord>(recordPath);
+        const schemaResult = validateSchema("architecture-apply", record);
+        if (schemaResult.valid) return [];
+        return [{
+          path: relativePath,
+          issue: "schema-invalid-apply-record" as const,
+          severity: "broken" as const,
+          message: `Architecture evidence files must be architecture apply records. ${schemaErrorSummary(schemaResult)}`,
+          recovery: "Move profile/source/temp JSON out of .opennori/architecture/evidence, or record real architecture context with opennori architecture apply.",
+          schema_errors: schemaResult.errors
+        }];
+      } catch (error) {
+        return [{
+          path: relativePath,
+          issue: "unreadable-apply-record" as const,
+          severity: "broken" as const,
+          message: `Architecture evidence file is not readable JSON: ${errorMessage(error)}`,
+          recovery: "Fix or remove the unreadable file, then rerun opennori doctor/check.",
+          error: errorMessage(error)
+        }];
+      }
+    });
+
+  return {
+    status: findings.length > 0 ? "broken" : "clear",
+    summary: findings.length > 0
+      ? `${findings.length} invalid architecture evidence file(s) found.`
+      : "Architecture evidence directory contains only valid architecture apply records.",
+    finding_count: findings.length,
+    findings
+  };
 }

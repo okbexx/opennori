@@ -228,10 +228,10 @@ OpenNori uses one project-local state directory:
   architecture/
     baseline.json
     baseline.md
-    profiles/
-    challenges/
-    decisions/
-    evidence/
+    profiles/            # reusable project Architecture Profiles
+    challenges/          # Architecture Challenges
+    decisions/           # build-vs-buy and architecture decisions
+    evidence/            # architecture apply records only
 ```
 
 It does not create `process/` as the workflow surface, and it does not copy
@@ -488,10 +488,14 @@ confirmation, waivers, or other reviewable sources. OpenNori keeps evidence
 flexible, but high-risk completion should not rely only on an agent's
 self-summary.
 
-Architecture apply records can be attached to evidence as context, so a report
-can show that the proof was produced under the confirmed baseline. They do not
-prove Product AC by themselves; passing evidence still needs a user-visible
-verification source.
+Architecture apply records live under `.opennori/architecture/evidence/` and
+can be attached to Product AC evidence as context, so a report can show that the
+proof was produced under the confirmed baseline. They do not prove Product AC by
+themselves; passing evidence still needs a user-visible verification source.
+Do not put Architecture Profile source JSON, baseline previews, screenshots,
+logs, or Product AC evidence in `.opennori/architecture/evidence/`; profiles
+belong under `.opennori/architecture/profiles/`, and Product AC proof belongs in
+the normal evidence ledger.
 
 ### Next Loop Handoff
 
@@ -948,7 +952,7 @@ OpenNori 在项目本地使用一个独立的状态目录进行所有信息持�
     profiles/            # 项目技术画像
     challenges/          # 架构偏离挑战记录
     decisions/           # 架构决策记录
-    evidence/            # 架构规约的偏离/合规证据
+    evidence/            # 仅存架构 apply 记录
 ```
 
 它不会在项目中创建如 `process/` 这样繁琐的工作流目录，也不会把 OpenNori 技能的实现源码复制到用户的项目内部。

@@ -78,7 +78,11 @@ Useful state commands:
 
 ## State Writes
 
-May write Architecture Requirement decisions, project architecture profiles, and confirmed Architecture Baseline files under `.opennori/architecture/`. Do not write Product AC, acceptance evidence, or implementation tasks.
+May write Architecture Requirement decisions, project architecture profiles, and confirmed Architecture Baseline files under `.opennori/architecture/`. Use `opennori architecture profile --from <profile.json>` to install project profiles into `.opennori/architecture/profiles/<id>.json`; do not save the source/import JSON under `.opennori/architecture/evidence/`.
+
+`.opennori/architecture/evidence/` is reserved for architecture apply records created by `nori-architecture-apply`. It is not a scratch directory for profile drafts, source profiles, baseline previews, or Product AC evidence. If you need a temporary profile source before importing, keep it outside `.opennori/architecture/evidence/` and report only the managed profile path after import.
+
+Do not write Product AC, acceptance evidence, or implementation tasks.
 
 Must write live dashboard activity for baseline review when the dashboard is observed and a current goal/gap exists. Activity is not baseline confirmation, not build-vs-buy evidence, and not Product AC evidence.
 
@@ -129,3 +133,4 @@ Needs confirmation: yes
 - Do not self-build infrastructure before build-vs-buy evidence exists.
 - Do not copy process-centered workflow models into OpenNori architecture decisions.
 - Do not treat dashboard activity, events, or snapshots as proof that a baseline is valid or confirmed.
+- Do not report both a source profile JSON and `.opennori/architecture/profiles/<id>.json` as installed project profiles. The managed profile is the file under `profiles/`; source files are temporary inputs and should not live under architecture evidence.

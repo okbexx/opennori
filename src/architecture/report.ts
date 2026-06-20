@@ -15,6 +15,7 @@ function renderArchitectureReportSection(root: string, goalId: string | undefine
       : "<missing>"}`,
     `Challenge: ${state.open_challenges.length > 0 ? `${state.open_challenges.length} open` : "none"}`,
     `Architecture apply records: ${state.apply_records?.length || 0}`,
+    `Architecture evidence health: ${state.evidence_health.status}`,
     `Build-vs-buy: ${state.build_vs_buy.status} (${state.build_vs_buy_decisions.length} decisions)`,
     `Agent guide: ${state.agent_surface.guide.installed ? "installed" : "missing"}`,
     "",
@@ -34,6 +35,13 @@ function renderArchitectureReportSection(root: string, goalId: string | undefine
     lines.push("Architecture apply records:");
     for (const record of state.apply_records || []) {
       lines.push(`- ${record.criterion_id}: ${record.status} (${record.baseline_profile}) - ${record.summary || record.path}`);
+    }
+    lines.push("");
+  }
+  if (state.evidence_health.findings.length > 0) {
+    lines.push("Architecture evidence findings:");
+    for (const finding of state.evidence_health.findings) {
+      lines.push(`- ${finding.path}: ${finding.message}`);
     }
     lines.push("");
   }

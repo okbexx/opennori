@@ -787,6 +787,7 @@ export type ArchitectureState = {
   issues: ValidationIssue[];
   open_challenges: ArchitectureChallengeSummary[];
   apply_records?: ArchitectureApplySummary[];
+  evidence_health: ArchitectureEvidenceHealth;
   build_vs_buy_decisions: BuildVsBuyDecisionSummary[];
   build_vs_buy: BuildVsBuyHealth;
   agent_surface: ArchitectureSurfaceState;
@@ -840,6 +841,23 @@ export type ArchitectureApplySummary = {
   schema_valid?: boolean;
   schema_errors?: SchemaValidationError[];
   error?: string;
+};
+
+export type ArchitectureEvidenceFinding = {
+  path: string;
+  issue: "schema-invalid-apply-record" | "unreadable-apply-record";
+  severity: "broken";
+  message: string;
+  recovery: string;
+  schema_errors?: SchemaValidationError[];
+  error?: string;
+};
+
+export type ArchitectureEvidenceHealth = {
+  status: "clear" | "broken";
+  summary: string;
+  finding_count: number;
+  findings: ArchitectureEvidenceFinding[];
 };
 
 export type NoriArtifact = {

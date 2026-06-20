@@ -88,6 +88,18 @@ export const checkCommand = defineCommand({
         recovery: "Preview opennori install --root <project> --merge-agent-route --dry-run --json, then confirm the refresh if acceptable."
       });
     }
+    if (architecture.evidence_health.status !== "clear") {
+      for (const finding of architecture.evidence_health.findings) {
+        architectureWarnings.push({
+          type: "architecture_evidence",
+          path: finding.path,
+          issue: finding.issue,
+          severity: finding.severity,
+          message: finding.message,
+          recovery: finding.recovery
+        });
+      }
+    }
     const architectureStatus = architectureWarnings.length > 0 ? "needs-action" : "clear";
     const buildVsBuyWarnings = (architecture.required_for_goal || architecture.build_vs_buy_decisions.length > 0)
       ? architecture.build_vs_buy.findings.map((finding: JsonObject) => ({
@@ -125,6 +137,9 @@ export const checkCommand = defineCommand({
     }
     if (buildVsBuyWarnings.length > 0) {
       nextActions.push("Resolve build_vs_buy warnings before treating custom infrastructure as mature.");
+    }
+    if (architecture.evidence_health.status !== "clear") {
+      nextActions.push("Clean invalid architecture evidence files before treating architecture state as recoverable.");
     }
     if (health.status !== "clear") {
       nextActions.push("Review evidence_health warnings before treating this goal as confidently complete.");

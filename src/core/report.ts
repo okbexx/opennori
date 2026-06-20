@@ -77,12 +77,16 @@ function architectureReviewRisks(architecture: ArchitectureState | undefined): s
   if (architecture.build_vs_buy.status !== "clear") {
     risks.push("build_vs_buy");
   }
+  if (architecture.evidence_health.status !== "clear") {
+    risks.push("architecture_evidence");
+  }
   return [...new Set(risks)];
 }
 
 function architectureReviewSkill(architecture: ArchitectureState): AgentSkill {
   if (architecture.requirement.status === "unknown") return "nori-architecture-brainstorm";
   if (architecture.decision === "challenged") return "nori-architecture-challenge";
+  if (architecture.evidence_health.status !== "clear") return "nori-project-health";
   if (architecture.build_vs_buy.status !== "clear") return "nori-build-vs-buy";
   if (architecture.decision === "valid") return "nori-architecture-apply";
   return "nori-architecture-brainstorm";
@@ -125,6 +129,12 @@ function architectureReviewActions(architecture: ArchitectureState): string[] {
       "Run OpenNori check or doctor again after the baseline is recoverable."
     ];
   }
+  if (architecture.evidence_health.status !== "clear") {
+    return [
+      "Clean invalid files from .opennori/architecture/evidence before treating architecture state as recoverable.",
+      "Move profile/source/temp JSON out of architecture evidence, or replace it with a valid architecture apply record."
+    ];
+  }
   if (architecture.build_vs_buy.status !== "clear") {
     return [
       "Review build_vs_buy findings before custom infrastructure work continues.",
@@ -138,7 +148,9 @@ function architectureReviewActions(architecture: ArchitectureState): string[] {
 
 function reviewRiskSkill(input: {
   acceptanceReview: AcceptanceQualityAudit;
+  architecture?: ArchitectureState;
 }): AgentSkill {
+  if (input.architecture && architectureReviewRisks(input.architecture).includes("architecture_evidence")) return "nori-project-health";
   if (input.acceptanceReview.status !== "clear") return "nori-acceptance";
   return "nori-reporting";
 }
@@ -260,7 +272,7 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
     && gap.id !== "ACCEPTANCE-BASIS"
     && architecture
     && architecture.required_for_goal
-    && (architecture.decision !== "valid" || architecture.build_vs_buy.status !== "clear")
+    && (architecture.decision !== "valid" || architecture.build_vs_buy.status !== "clear" || architecture.evidence_health.status !== "clear")
   ) {
     const skill = architectureReviewSkill(architecture);
     return {
@@ -337,10 +349,14 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
       actions.push("Review build_vs_buy findings.");
       actions.push("Record reusable alternatives or the reason self-build is justified before reporting mature architecture completion.");
     }
+    if (architecture && architectureReviewRisks(architecture).includes("architecture_evidence")) {
+      actions.push("Review architecture_evidence health findings.");
+      actions.push("Move misplaced profile/source/temp files out of .opennori/architecture/evidence or replace them with valid architecture apply records.");
+    }
     return {
       status: "completion-review-required",
       focus: null,
-      recommended_skill: reviewRiskSkill({ acceptanceReview }),
+      recommended_skill: reviewRiskSkill({ acceptanceReview, architecture }),
       summary: `All required ACs have passing or waived evidence, but completion has review risk: ${reviewRisks.join(", ")}.`,
       actions
     };

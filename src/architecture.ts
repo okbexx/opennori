@@ -35,6 +35,7 @@ export {
   renderBuildVsBuyMarkdown
 } from "./architecture/build-vs-buy.ts";
 export {
+  architectureEvidenceHealth,
   architectureApplySummaries,
   buildArchitectureApplyRecord,
   renderArchitectureApplyMarkdown,

@@ -102,7 +102,7 @@ a durable workflow asset.
 | AC-Z-11 | CLI | Preview and apply uninstall | The user can uninstall OpenNori entry assets without losing acceptance state by default. | Uninstall plan shows removals and preserved state; real uninstall requires confirmation; `.opennori` state is deleted only with `--include-state --confirm`. |
 | AC-Z-12 | Codex Plugin / Codex Skills | Use OpenNori Plugin Skills | The agent gets focused OpenNori Skills for acceptance, evidence, Nori Profile, architecture, project health, reporting, and next-loop handoff while the user keeps using natural language. | The npm package ships `.agents/plugins/marketplace.json`, `plugins/opennori/.codex-plugin/plugin.json`, and `plugins/opennori/skills/nori*/SKILL.md`; each Skill is an agent behavior protocol with trigger semantics, state reading, natural-language mapping, state write boundaries, handoffs, user reply shape, and misuse guards; install does not copy Skills into the project; manifest records `plugin`; doctor detects missing packaged Plugin Skills. |
 | AC-Z-13 | CLI / project file browser | Establish an Architecture Baseline | The user can see what architecture the agent must follow while implementing Product AC. | `.opennori/architecture/baseline.json`, `.opennori/architecture/baseline.md`, and `.opennori/agent-guide.md` expose the baseline to agents and reviewers. |
-| AC-Z-14 | CLI / project file browser | Add a project Architecture Profile | The user can extend built-in profiles with a reviewed project profile. | `opennori architecture profile --from <profile.json>` writes `.opennori/architecture/profiles/<id>.json`; `architecture profiles` lists it before built-ins. |
+| AC-Z-14 | CLI / project file browser | Add a project Architecture Profile | The user can extend built-in profiles with a reviewed project profile without polluting architecture evidence. | `opennori architecture profile --from <profile.json>` writes `.opennori/architecture/profiles/<id>.json`; `architecture profiles` lists it before built-ins; `.opennori/architecture/evidence/` is not used for profile source or duplicate profile files. |
 | AC-Z-15 | CLI / report | Challenge a baseline | The user can review evidence before an agent changes architecture. | `opennori architecture challenge` records current baseline, conflict evidence, recommendation, and user confirmation requirement. |
 | AC-Z-16 | CLI / report | Record build-vs-buy decisions | The user can see whether existing dependencies, standard libraries, official SDKs, and mature OSS were checked before self-building infrastructure. | `opennori architecture build-vs-buy` records the decision under `.opennori/architecture/decisions/` and status/report summarize it. |
 | AC-Z-18 | README / website / Plugin description | First read the OpenNori entry material | The user understands OpenNori as one agent capability bundle: Plugin discovery, packaged Skills, deterministic CLI state layer, and `.opennori` project state work together. | README Install/Quick Start, website Start, Plugin longDescription, and nori/project-health Skills do not present Plugin, Skills, or CLI as separate user paths; they explain that missing bundle parts should be recovered through doctor/health rather than used as a half-installed workflow. |
@@ -399,6 +399,10 @@ use cases, reference sources, architecture principles, concrete technical baseli
 checks, preferred libraries, avoid boundaries, validation issues, and build-vs-buy policy.
 Use `opennori architecture profile --root <project> --from <profile.json> --json` to add a reviewed
 project profile. Existing profiles are not overwritten unless the agent uses `--force` after review.
+The managed project profile is `.opennori/architecture/profiles/<id>.json`.
+Do not place profile source JSON, profile drafts, or baseline previews under
+`.opennori/architecture/evidence/`; that directory is reserved for
+architecture apply records.
 
 Use `opennori architecture baseline --root <project> --goal "<goal>" --profile <profile-id> --json`
 to preview a baseline. Preview has no side effect. After the user accepts it, rerun with `--confirm`.
@@ -421,7 +425,7 @@ or project architecture:
 opennori architecture challenge --root <project> --summary "<conflict>" --evidence "<evidence>" --recommendation "<change>" --json
 ```
 
-Build-vs-buy decisions are first-class architecture evidence. Before self-building infrastructure,
+Build-vs-buy decisions are first-class architecture decisions. Before self-building infrastructure,
 the agent checks current project dependencies, standard libraries, official SDKs, mature
 open-source libraries, and documented reference projects:
 
@@ -434,8 +438,9 @@ Architecture Requirement as `unknown`, `required`, `not_required`, or `waived`; 
 non-triviality from the existence of a goal or from natural-language text. When every required
 Product AC is `passing` or `waived` but the requirement is still `unknown`, OpenNori reports
 `architecture_requirement` review risk. When requirement is `required` and the goal has a
-missing/draft/invalid/challenged baseline, stale agent-readable architecture surface, or unhealthy
-build-vs-buy decisions, OpenNori reports `architecture_review` or `build_vs_buy` review risk. When
+missing/draft/invalid/challenged baseline, stale agent-readable architecture surface, invalid
+architecture apply records, or unhealthy build-vs-buy decisions, OpenNori reports
+`architecture_review`, `architecture_evidence`, or `build_vs_buy` review risk. When
 requirement is `waived`, OpenNori reports `architecture_waived` with the recorded reason. It must
 not create synthetic ARCH acceptance criteria or replace `current_gap` unless a real Product AC or
 blocking Profile item is still incomplete.

@@ -628,7 +628,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-20T09:44:04.642Z",
+    "updated_at": "2026-06-20T10:25:55.423Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -3744,7 +3744,7 @@
       },
       "AC-Z-13": {
         "status": "passing",
-        "confidence": "verified",
+        "confidence": "high",
         "required": true,
         "risk": "high",
         "evidence": [
@@ -3785,6 +3785,44 @@
             "limitations": "Current repo is healthy, so broken-state behavior is verified through test fixtures rather than by damaging this checkout.",
             "gate": "accepted",
             "created_at": "2026-06-13T15:02:52.802Z"
+          },
+          {
+            "kind": "verification",
+            "basis": "tool-observation",
+            "summary": "Doctor/check/report now expose invalid architecture evidence files with a concrete recovery action when profile-shaped JSON is misplaced under .opennori/architecture/evidence.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "artifact",
+                "label": "src/lifecycle/doctor/project-health.ts",
+                "path": "src/lifecycle/doctor/project-health.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/cli/commands/check.ts",
+                "path": "src/cli/commands/check.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "src/core/report.ts",
+                "path": "src/core/report.ts"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              }
+            ],
+            "reviewability": "Rerun npm run check, node ./bin/opennori.js doctor --root /Users/jarl/code/jarlone/agent-workbench --json, and node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json; inspect the architecture_evidence doctor check and recovery action.",
+            "limitations": "OpenNori intentionally does not auto-delete misplaced user/project files; it reports the broken state and recovery action for user or agent cleanup.",
+            "gate": "accepted",
+            "created_at": "2026-06-20T10:20:09.146Z"
           }
         ]
       },
@@ -4508,7 +4546,7 @@
       },
       "AC-A-3": {
         "status": "passing",
-        "confidence": "verified",
+        "confidence": "high",
         "required": true,
         "risk": "high",
         "evidence": [
@@ -4803,6 +4841,101 @@
             "limitations": "This verifies objective structure, generated baseline state, Skill guidance, and one AW project baseline. It intentionally does not make CLI judge subjective architecture quality; agents and users still review whether a baseline is specific and appropriate before confirmation.",
             "gate": "accepted",
             "created_at": "2026-06-18T09:48:36.705Z"
+          },
+          {
+            "kind": "verification",
+            "basis": "tool-observation",
+            "summary": "Project Architecture Profile import now writes only the managed profile file under .opennori/architecture/profiles, and architecture/evidence is validated as apply-record-only state.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "architecture-apply",
+                "label": "ac-a-3-architecture-evidence-boundary",
+                "path": ".opennori/architecture/evidence/ac-a-3-architecture-evidence-boundary.json",
+                "role": "context",
+                "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+              },
+              {
+                "type": "command",
+                "label": "npm run check",
+                "command": "npm run check"
+              },
+              {
+                "type": "command",
+                "label": "node ./bin/opennori.js check --root . --json",
+                "command": "node ./bin/opennori.js check --root . --json"
+              },
+              {
+                "type": "command",
+                "label": "node ./bin/opennori.js doctor --root /Users/jarl/code/jarlone/agent-workbench --json",
+                "command": "node ./bin/opennori.js doctor --root /Users/jarl/code/jarlone/agent-workbench --json"
+              },
+              {
+                "type": "artifact",
+                "label": "test/cli-commands.test.js",
+                "path": "test/cli-commands.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "src/architecture/apply.ts",
+                "path": "src/architecture/apply.ts"
+              }
+            ],
+            "reviewability": "Rerun npm run check, OpenNori self check, and doctor against the AW project with the misplaced .profile.json; inspect the profile import test and architecture evidence health test.",
+            "limitations": "This verifies objective artifact boundaries and recovery surfacing; it does not make CLI judge whether a project Architecture Profile is subjectively good.",
+            "gate": "accepted",
+            "created_at": "2026-06-20T10:19:55.227Z"
+          },
+          {
+            "kind": "verification",
+            "basis": "artifact-review",
+            "summary": "Project AGENTS guidance now preserves the architecture artifact boundary: profiles, baselines, decisions, challenges, and apply records each have distinct directories, and invalid architecture evidence routes to project health.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "architecture-apply",
+                "label": "ac-a-3-architecture-evidence-boundary",
+                "path": ".opennori/architecture/evidence/ac-a-3-architecture-evidence-boundary.json",
+                "role": "context",
+                "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+              },
+              {
+                "type": "artifact",
+                "label": "AGENTS.md",
+                "path": "AGENTS.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md",
+                "path": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-architecture-apply/SKILL.md",
+                "path": "plugins/opennori/skills/nori-architecture-apply/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/protocol.md",
+                "path": ".opennori/protocol.md"
+              }
+            ],
+            "reviewability": "Inspect AGENTS.md, packaged architecture Skills, README, and protocol for the same directory boundary.",
+            "limitations": "This is guidance and state-boundary evidence; it does not judge subjective profile quality.",
+            "gate": "accepted",
+            "created_at": "2026-06-20T10:25:55.423Z"
           }
         ]
       },

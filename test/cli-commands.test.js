@@ -1086,6 +1086,7 @@ test("architecture profile command module installs and validates project profile
   assert.equal(added.data.profile.id, "module-team-cli");
   assert.equal(added.data.profile_path, path.join(root, ".opennori", "architecture", "profiles", "module-team-cli.json"));
   assert.equal(fs.existsSync(added.data.profile_path), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "architecture", "evidence", "module-team-cli.profile.json")), false);
   assert.equal(added.data.profiles[0].id, "module-team-cli");
   assert.equal(added.artifacts.some((artifact) => artifact.kind === "architecture_profile"), true);
 

@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "ac-a-3-architecture-evidence-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-3",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Architecture profile import keeps managed project profiles under architecture/profiles and reserves architecture/evidence for architecture apply records.",
+  "fit": "This preserves the confirmed OpenNori state model: profiles define reusable architecture inputs, while architecture evidence contains only apply records that document baseline alignment for an acceptance gap.",
+  "implementation_focus": "Validate architecture evidence directory shape and prevent profile import from creating duplicate evidence/profile artifacts.",
+  "evidence": "npm run check; test/cli-commands.test.js; test/core.test.js; doctor against /Users/jarl/code/jarlone/agent-workbench with misplaced profile JSON",
+  "limitations": "This guards objective artifact boundaries; the quality of any Architecture Profile still remains an agent/user review decision.",
+  "created_at": "2026-06-20T10:19:44.310Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

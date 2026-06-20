@@ -72,6 +72,18 @@ must also include a concrete Technical Architecture Baseline: runtime topology,
 source-of-truth model, module/package boundaries, contract surfaces, data flows,
 dependency decisions, reference mappings, and verification.
 
+Keep architecture artifacts in their correct directories. Project Architecture
+Profiles belong under `.opennori/architecture/profiles/<id>.json`; confirmed
+baselines belong in `.opennori/architecture/baseline.*`; build-vs-buy records
+belong under `.opennori/architecture/decisions/`; Architecture Challenges belong
+under `.opennori/architecture/challenges/`; and `.opennori/architecture/evidence/`
+is reserved only for architecture apply records produced by
+`opennori architecture apply`. Do not put profile source JSON, profile drafts,
+baseline previews, screenshots, logs, or Product AC evidence in
+`.opennori/architecture/evidence/`. If doctor/check reports invalid
+architecture evidence, route through `nori-project-health` and clean or replace
+the misplaced file instead of continuing in a half-broken architecture state.
+
 OpenNori has exactly one default current goal. Drafts live under `.opennori/drafts/` and are not executable until approved; completed and blocked goals are history. Legacy `.opennori/active/` is recovery input only and must not be used as the normal work context.
 
 OpenNori product changes must preserve the original acceptance loop:
