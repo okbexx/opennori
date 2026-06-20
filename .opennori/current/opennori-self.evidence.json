@@ -628,7 +628,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-20T10:51:39.263Z",
+    "updated_at": "2026-06-20T11:19:57.455Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -7106,6 +7106,75 @@
             "limitations": "This evidence verifies CLI boundaries and objective tests. It does not prove every future agent will ask ideal AC questions; that remains packaged Skill behavior and user approval.",
             "gate": "accepted",
             "created_at": "2026-06-19T05:15:50.768Z"
+          },
+          {
+            "kind": "review-result",
+            "basis": "tool-observation",
+            "summary": "OpenNori validation is split into layered Vitest tags and npm scripts: npm test/test:quick runs a true fast smoke subset, domain scripts run acceptance/architecture/dashboard/docs/evidence/lifecycle/profile/reporting/schema tests, and check:full remains the release-grade full gate. Test-internal duplicate npm run build calls were removed from built-dist package tests so full validation does not rebuild twice inside Vitest.",
+            "result": "passing",
+            "confidence": "verified",
+            "sources": [
+              {
+                "type": "reference",
+                "label": "command:npm run check"
+              },
+              {
+                "type": "reference",
+                "label": "command:npm run test:acceptance"
+              },
+              {
+                "type": "reference",
+                "label": "command:npm run test:schema"
+              },
+              {
+                "type": "reference",
+                "label": "command:npm run test:dashboard"
+              },
+              {
+                "type": "reference",
+                "label": "command:npm run test:package"
+              },
+              {
+                "type": "reference",
+                "label": "command:npm run test:architecture"
+              },
+              {
+                "type": "reference",
+                "label": "command:npm run check:full"
+              },
+              {
+                "type": "reference",
+                "label": "command:git diff --check"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:package.json"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:vitest.config.ts"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:test/core.test.js"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:test/cli-commands.test.js"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:README.md"
+              },
+              {
+                "type": "reference",
+                "label": "artifact:AGENTS.md"
+              }
+            ],
+            "reviewability": "Review package scripts, Vitest tag config, test tags, README/AGENTS verification instructions, and rerun the listed commands.",
+            "limitations": "Quick tests are intentionally a smoke subset; domain scripts and check:full remain required for broader changes, lifecycle/package boundaries, and release validation.",
+            "gate": "accepted",
+            "created_at": "2026-06-20T11:19:57.455Z"
           }
         ]
       },

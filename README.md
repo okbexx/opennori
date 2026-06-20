@@ -805,8 +805,10 @@ opennori report --root .
 ## Development
 
 ```bash
-npm test
-npm run check
+npm test                 # quick tagged Vitest subset for day-to-day edits
+npm run test:acceptance  # run one domain, also: architecture/dashboard/docs/evidence/lifecycle/profile/reporting/schema
+npm run check            # lint, typecheck, build, quick tests, doctor
+npm run check:full       # full pre-release/pre-push guard
 ```
 
 ## License
@@ -1285,8 +1287,10 @@ opennori report --root .                                              # 生成�
 ## 开发
 
 ```bash
-npm test                                                              # 运行 Vitest 测试套件
-npm run check                                                         # 执行代码规范与静态类型诊断
+npm test                                                              # 运行 quick 标签的日常 Vitest 子集
+npm run test:acceptance                                               # 按领域运行，也可用 architecture/dashboard/docs/evidence/lifecycle/profile/reporting/schema
+npm run check                                                         # lint、typecheck、build、quick tests 和 doctor
+npm run check:full                                                    # 发布或大改前运行完整门禁
 ```
 
 ## 许可证

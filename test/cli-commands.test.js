@@ -188,7 +188,7 @@ function renderHuman(payload, commandPath) {
   return output;
 }
 
-test("citty command modules preserve agent-readable JSON payloads", async () => {
+test("citty command modules preserve agent-readable JSON payloads", { tags: ["cli", "unit", "quick"] }, async () => {
   const profiles = await runArchitectureProfilesCommand(["--root", ROOT, "--json"]);
   assert.equal(profiles.ok, true);
   assert.equal(profiles.data.side_effect, "none");
@@ -201,7 +201,7 @@ test("citty command modules preserve agent-readable JSON payloads", async () => 
   assert.equal(doctor.data.agent_next.schema_version, "opennori/agent-next-v1");
 });
 
-test("doctor routes fresh projects to init preview instead of repeated recovery actions", async () => {
+test("doctor routes fresh projects to init preview instead of repeated recovery actions", { tags: ["cli", "lifecycle", "acceptance"] }, async () => {
   const root = tempRoot();
   const doctor = await runDoctorCommand(["--root", root, "--json"]);
 
@@ -213,7 +213,7 @@ test("doctor routes fresh projects to init preview instead of repeated recovery 
   assert.match(doctor.data.agent_next.instruction, /Run the init preview/);
 });
 
-test("bootstrap command module previews before confirmed setup", async () => {
+test("bootstrap command module previews before confirmed setup", { tags: ["cli", "lifecycle"] }, async () => {
   const root = tempRoot();
   const preview = await runBootstrapCommand(["--root", root, "--json"]);
   assert.equal(preview.ok, true);
@@ -237,7 +237,7 @@ test("bootstrap command module previews before confirmed setup", async () => {
   assert.equal(fs.existsSync(path.join(root, ".agents", "skills", "nori", "SKILL.md")), false);
 });
 
-test("setup command previews one complete capability bundle without writing", async () => {
+test("setup command previews one complete capability bundle without writing", { tags: ["cli", "lifecycle"] }, async () => {
   const root = tempRoot();
   const { calls, runner } = setupRunner();
   const preview = await runSetupCommand(["--root", root, "--json"], { runner });
@@ -256,7 +256,7 @@ test("setup command previews one complete capability bundle without writing", as
   assert.equal(calls.some((call) => call.join(" ") === "codex plugin marketplace add okbexx/opennori --ref main"), false);
 });
 
-test("setup command confirm applies external commands through official CLIs and initializes project state", async () => {
+test("setup command confirm applies external commands through official CLIs and initializes project state", { tags: ["cli", "lifecycle", "acceptance"] }, async () => {
   const root = tempRoot();
   const { calls, runner } = setupRunner();
   const confirmed = await runSetupCommand(["--root", root, "--confirm", "--json"], { runner });
@@ -270,7 +270,7 @@ test("setup command confirm applies external commands through official CLIs and 
   assert.equal(fs.existsSync(path.join(root, ".agents", "skills", "nori", "SKILL.md")), false);
 });
 
-test("setup command does not rerun already installed bundle parts", async () => {
+test("setup command does not rerun already installed bundle parts", { tags: ["cli", "lifecycle"] }, async () => {
   const root = tempRoot();
   const { calls, runner } = setupRunner({
     marketplace: true,
@@ -286,7 +286,7 @@ test("setup command does not rerun already installed bundle parts", async () => 
   assert.equal(fs.existsSync(path.join(root, ".opennori", "manifest.json")), true);
 });
 
-test("setup command upgrades stale installed Codex Plugin versions", async () => {
+test("setup command upgrades stale installed Codex Plugin versions", { tags: ["cli", "profile", "lifecycle"] }, async () => {
   const root = tempRoot();
   const { calls, runner } = setupRunner({
     marketplace: true,
@@ -306,7 +306,7 @@ test("setup command upgrades stale installed Codex Plugin versions", async () =>
   assert.equal(calls.some((call) => call.join(" ") === "codex plugin add opennori@opennori"), true);
 });
 
-test("plugin sync previews and confirms Codex Plugin cache refresh without project state writes", async () => {
+test("plugin sync previews and confirms Codex Plugin cache refresh without project state writes", { tags: ["cli", "profile", "lifecycle"] }, async () => {
   const root = tempRoot();
   const { calls, runner } = setupRunner({
     marketplace: true,
@@ -332,7 +332,7 @@ test("plugin sync previews and confirms Codex Plugin cache refresh without proje
   assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
 });
 
-test("plugin sync local mode can register the current package marketplace", async () => {
+test("plugin sync local mode can register the current package marketplace", { tags: ["cli", "profile", "lifecycle"] }, async () => {
   const { calls, runner } = setupRunner({
     marketplace: false,
     plugin: true,
@@ -357,7 +357,7 @@ test("plugin sync local mode can register the current package marketplace", asyn
   assert.equal(calls.some((call) => call.join(" ") === "codex plugin add opennori@opennori"), true);
 });
 
-test("interactive setup reports underlying setup failure instead of throwing on missing data", async () => {
+test("interactive setup reports underlying setup failure instead of throwing on missing data", { tags: ["cli", "lifecycle", "package", "reporting"] }, async () => {
   const root = tempRoot();
   const { runner } = setupRunner({
     failCommand: "npm install -g opennori"
@@ -386,7 +386,7 @@ test("interactive setup reports underlying setup failure instead of throwing on 
   assert.match(output, /failed npm install -g opennori@/);
 });
 
-test("install command module preserves preview and confirm safety", async () => {
+test("install command module preserves preview and confirm safety", { tags: ["cli", "lifecycle"] }, async () => {
   const root = tempRoot();
   const dryRun = await runInstallCommand(["--root", root, "--dry-run", "--json"]);
   assert.equal(dryRun.ok, true);
@@ -407,7 +407,7 @@ test("install command module preserves preview and confirm safety", async () => 
   assert.match(unconfirmed.error.fix, /--dry-run --force --json/);
 });
 
-test("uninstall command module preserves state unless include-state is confirmed", async () => {
+test("uninstall command module preserves state unless include-state is confirmed", { tags: ["cli", "lifecycle"] }, async () => {
   const root = tempRoot();
   await runInstallCommand(["--root", root, "--json"]);
 
@@ -433,7 +433,7 @@ test("uninstall command module preserves state unless include-state is confirmed
   assert.equal(fs.existsSync(path.join(stateRemovedRoot, ".opennori")), false);
 });
 
-test("upgrade command module preserves preview and install-required safety", async () => {
+test("upgrade command module preserves preview and install-required safety", { tags: ["cli", "lifecycle"] }, async () => {
   const root = tempRoot();
   await runInstallCommand(["--root", root, "--json"]);
   fs.writeFileSync(path.join(root, ".opennori", "protocol.md"), "old protocol\n");
@@ -460,7 +460,7 @@ test("upgrade command module preserves preview and install-required safety", asy
   assert.equal(missing.error.type, "install_required");
 });
 
-test("human output summarizes lifecycle commands instead of printing full JSON", async () => {
+test("human output summarizes lifecycle commands instead of printing full JSON", { tags: ["cli", "reporting", "quick"] }, async () => {
   const root = tempRoot();
   await runInstallCommand(["--root", root, "--json"]);
   fs.writeFileSync(path.join(root, ".opennori", "protocol.md"), "old protocol\n");
@@ -484,7 +484,7 @@ test("human output summarizes lifecycle commands instead of printing full JSON",
   assert.doesNotMatch(pluginText, /"plugin_sync_plan"/);
 });
 
-test("human output summarizes doctor check status report and dashboard", async () => {
+test("human output summarizes doctor check status report and dashboard", { tags: ["cli", "dashboard", "lifecycle", "reporting", "acceptance"] }, async () => {
   const root = tempRoot();
   await runInstallCommand(["--root", root, "--json"]);
   writeActiveGoalWithId(root, "human-output-goal");
@@ -514,7 +514,7 @@ test("human output summarizes doctor check status report and dashboard", async (
   assert.match(dashboardText, /URL:/);
 });
 
-test("status commands return routeable no-current-goal state instead of unexpected errors", async () => {
+test("status commands return routeable no-current-goal state instead of unexpected errors", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   await runInitCommand(["--root", root, "--confirm", "--json"]);
 
@@ -529,7 +529,7 @@ test("status commands return routeable no-current-goal state instead of unexpect
   assert.match(renderHuman(status, ["status"]), /OpenNori has no current goal/);
 });
 
-test("status with draft contracts routes agents to one-AC review before approval", async () => {
+test("status with draft contracts routes agents to one-AC review before approval", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   await runInitCommand(["--root", root, "--confirm", "--json"]);
   const briefPath = writeBriefFile(root, "Ship a reviewable draft", {
@@ -550,7 +550,7 @@ test("status with draft contracts routes agents to one-AC review before approval
   assert.match(status.data.agent_next.user_visible_next, /one AC at a time/);
 });
 
-test("status routes incomplete project state to health recovery instead of unexpected errors", async () => {
+test("status routes incomplete project state to health recovery instead of unexpected errors", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   await runInitCommand(["--root", root, "--confirm", "--json"]);
   fs.rmSync(path.join(root, ".opennori", "current"), { recursive: true, force: true });
@@ -570,7 +570,7 @@ test("status routes incomplete project state to health recovery instead of unexp
   assert.match(text, /Health: needs-action/);
 });
 
-test("list command module reports current goal gaps without CLI dispatch", async () => {
+test("list command module reports current goal gaps without CLI dispatch", { tags: ["cli", "reporting", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   writeActiveGoal(root);
 
@@ -581,7 +581,7 @@ test("list command module reports current goal gaps without CLI dispatch", async
   assert.equal(list.data.active_goals[0].current_gap.id, "ACCEPTANCE-BASIS");
 });
 
-test("brainstorm command module creates selectable directions without a contract", async () => {
+test("brainstorm command module creates selectable directions without a contract", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const candidates = JSON.stringify({
     candidates: [
@@ -613,7 +613,7 @@ test("brainstorm command module creates selectable directions without a contract
   assert.match(fs.readFileSync(brainstorm.data.markdown_path, "utf8"), /不是计划、Nori Contract 或完成证据/);
 });
 
-test("discover command module writes a question source without creating a current goal", async () => {
+test("discover command module writes a question source without creating a current goal", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const questions = JSON.stringify({
     gaps: [
@@ -644,7 +644,7 @@ test("discover command module writes a question source without creating a curren
   assert.match(fs.readFileSync(discovery.data.markdown_path, "utf8"), /不是 Nori Contract、过程计划或完成证据/);
 });
 
-test("draft command module creates contracts only from Skill-prepared briefs", async () => {
+test("draft command module creates contracts only from Skill-prepared briefs", { tags: ["cli", "profile", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const missing = await runDraftCommand(["--root", root, "--json"]);
   assert.equal(missing.ok, false);
@@ -691,7 +691,7 @@ test("draft command module creates contracts only from Skill-prepared briefs", a
   assert.match(draft.next_actions.join("\n"), /exact entry, object or field, visible state\/result/);
 });
 
-test("draft command module stores Skill-prepared draft contracts", async () => {
+test("draft command module stores Skill-prepared draft contracts", { tags: ["cli", "profile", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const briefPath = writeBriefFile(root, "Ship an OpenNori-backed task", {
     goalId: "module-goal",
@@ -720,7 +720,7 @@ test("draft command module stores Skill-prepared draft contracts", async () => {
   assert.doesNotMatch(draftText, /"evidence_path"/);
 });
 
-test("human status output shows enhanced autogoal acceptance basis", () => {
+test("human status output shows enhanced autogoal acceptance basis", { tags: ["cli", "reporting", "acceptance", "quick"] }, () => {
   const output = [];
   const printed = printHumanResult({
     ok: true,
@@ -763,7 +763,7 @@ test("human status output shows enhanced autogoal acceptance basis", () => {
   assert.match(text, /Discovery coverage: task creation, invalid input, refresh persistence/);
 });
 
-test("ready completed goals route Skills to prepare the next brief instead of CLI candidates", async () => {
+test("ready completed goals route Skills to prepare the next brief instead of CLI candidates", { tags: ["cli", "profile", "reporting", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const contract = {
     schema_version: "opennori/contract-v1",
@@ -821,7 +821,7 @@ test("ready completed goals route Skills to prepare the next brief instead of CL
   assert.match(resume.data.next_recommendation.actions.join("\n"), /opennori draft --brief/);
 });
 
-test("init command module initializes project state with preview safety", async () => {
+test("init command module initializes project state with preview safety", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const preview = await runInitCommand(["--root", root, "--json"]);
   assert.equal(preview.ok, true);
@@ -848,7 +848,7 @@ test("init command module initializes project state with preview safety", async 
   assert.match(doctor.data.agent_next.instruction, /already stated goal/);
 });
 
-test("draft command module creates current Nori Contracts from brief files", async () => {
+test("draft command module creates current Nori Contracts from brief files", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const briefPath = path.join(root, "brief.json");
   writeJson(briefPath, {
@@ -874,7 +874,7 @@ test("draft command module creates current Nori Contracts from brief files", asy
   assert.equal(drafted.artifacts.some((artifact) => artifact.kind === "nori_contract_draft"), true);
 });
 
-test("check command module reports acceptance architecture and evidence health", async () => {
+test("check command module reports acceptance architecture and evidence health", { tags: ["cli", "architecture", "evidence", "reporting", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const contract = {
     schema_version: "opennori/contract-v1",
@@ -906,7 +906,7 @@ test("check command module reports acceptance architecture and evidence health",
   assert.equal(checked.next_actions.some((action) => /architecture requirement/.test(action) || /opennori architecture requirement/.test(action)), true);
 });
 
-test("architecture build-vs-buy command module records reviewable decisions", async () => {
+test("architecture build-vs-buy command module records reviewable decisions", { tags: ["cli", "architecture", "quick"] }, async () => {
   const root = tempRoot();
 
   const decision = await runArchitectureBuildVsBuyCommand([
@@ -937,7 +937,7 @@ test("architecture build-vs-buy command module records reviewable decisions", as
   assert.match(fs.readFileSync(decision.data.markdown_path, "utf8"), /Build-vs-Buy Decision/);
 });
 
-test("architecture challenge command module records baseline challenges", async () => {
+test("architecture challenge command module records baseline challenges", { tags: ["cli", "architecture", "quick"] }, async () => {
   const root = tempRoot();
   writeArchitectureRequirement(root, {
     goalId: "module-goal",
@@ -973,7 +973,7 @@ test("architecture challenge command module records baseline challenges", async 
   assert.match(fs.readFileSync(challenge.data.markdown_path, "utf8"), /Do not silently replace/);
 });
 
-test("architecture apply command module records baseline alignment without Product AC evidence", async () => {
+test("architecture apply command module records baseline alignment without Product AC evidence", { tags: ["cli", "architecture", "evidence", "quick"] }, async () => {
   const root = tempRoot();
   writeArchitectureRequirement(root, {
     goalId: "module-goal",
@@ -1022,7 +1022,7 @@ test("architecture apply command module records baseline alignment without Produ
   assert.match(fs.readFileSync(applied.data.markdown_path, "utf8"), /not Product AC evidence/);
 });
 
-test("architecture apply routes conflicts to architecture challenge", async () => {
+test("architecture apply routes conflicts to architecture challenge", { tags: ["cli", "architecture", "quick"] }, async () => {
   const root = tempRoot();
   writeArchitectureRequirement(root, {
     goalId: "module-goal",
@@ -1054,7 +1054,7 @@ test("architecture apply routes conflicts to architecture challenge", async () =
   assert.equal(applied.next_actions.some((action) => /Architecture Challenge/.test(action)), true);
 });
 
-test("architecture profile command module installs and validates project profiles", async () => {
+test("architecture profile command module installs and validates project profiles", { tags: ["cli", "architecture", "profile", "lifecycle"] }, async () => {
   const root = tempRoot();
   const sourcePath = path.join(root, "team-architecture.json");
   writeJson(sourcePath, {
@@ -1113,7 +1113,7 @@ test("architecture profile command module installs and validates project profile
   assert.equal(missingVerification.issues.some((issue) => issue.path === "technical_baseline" && /verification/.test(issue.message)), true);
 });
 
-test("architecture baseline command module previews before confirmed write", async () => {
+test("architecture baseline command module previews before confirmed write", { tags: ["cli", "architecture", "quick"] }, async () => {
   const root = tempRoot();
   const baselinePath = path.join(root, ".opennori", "architecture", "baseline.json");
   const activeDir = path.join(root, ".opennori", "current");
@@ -1177,7 +1177,7 @@ test("architecture baseline command module previews before confirmed write", asy
   assert.equal(confirmed.next_actions.some((action) => /AC-1/.test(action)), true);
 });
 
-test("context export command module can write a review artifact", async () => {
+test("context export command module can write a review artifact", { tags: ["cli", "evidence", "reporting", "quick"] }, async () => {
   const root = tempRoot();
   writeActiveGoal(root);
   const outputPath = path.join(root, "context.json");
@@ -1190,7 +1190,7 @@ test("context export command module can write a review artifact", async () => {
   assert.equal(JSON.parse(fs.readFileSync(outputPath, "utf8")).goal_id, "module-goal");
 });
 
-test("profile show command module reads the current goal via injected loader", async () => {
+test("profile show command module reads the current goal via injected loader", { tags: ["cli", "profile", "acceptance", "quick"] }, async () => {
   const contract = {
     goal_id: "module-goal",
     criteria: [],
@@ -1207,7 +1207,7 @@ test("profile show command module reads the current goal via injected loader", a
   assert.equal(profile.data.profile.items.length, 0);
 });
 
-test("profile add and evidence modules update compliance and workflow state", async () => {
+test("profile add and evidence modules update compliance and workflow state", { tags: ["cli", "profile", "evidence", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -1262,7 +1262,7 @@ test("profile add and evidence modules update compliance and workflow state", as
   assert.equal(JSON.parse(fs.readFileSync(evidencePath, "utf8")).ledger.capability_profile.items.length, 1);
 });
 
-test("next command module asks for architecture requirement before baseline review", async () => {
+test("next command module asks for architecture requirement before baseline review", { tags: ["cli", "architecture", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const contract = {
     goal_id: "module-goal",
@@ -1290,7 +1290,7 @@ test("next command module asks for architecture requirement before baseline revi
   assert.equal(next.next_actions.some((action) => /required, not_required, or waived/.test(action)), true);
 });
 
-test("architecture requirement command records decisions and controls baseline routing", async () => {
+test("architecture requirement command records decisions and controls baseline routing", { tags: ["cli", "architecture", "quick"] }, async () => {
   const root = tempRoot();
   writeActiveGoalWithId(root, "module-goal");
 
@@ -1334,7 +1334,7 @@ test("architecture requirement command records decisions and controls baseline r
   assert.equal(waived.data.agent_next.recommended_skill, "nori-evidence");
 });
 
-test("resume command module includes completion, health, architecture, and next actions", async () => {
+test("resume command module includes completion, health, architecture, and next actions", { tags: ["cli", "architecture", "reporting", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -1364,7 +1364,7 @@ test("resume command module includes completion, health, architecture, and next 
   assert.equal(resume.next_actions.some((action) => /Architecture Baseline review/.test(action)), true);
 });
 
-test("resume command module returns next-loop handoff without CLI candidate goals", async () => {
+test("resume command module returns next-loop handoff without CLI candidate goals", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -1402,7 +1402,7 @@ test("resume command module returns next-loop handoff without CLI candidate goal
   assert.equal(resume.next_actions.some((action) => /candidate_goals/.test(action)), false);
 });
 
-test("status command module includes criteria and completion state", async () => {
+test("status command module includes criteria and completion state", { tags: ["cli", "reporting", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const contract = {
     goal_id: "module-goal",
@@ -1436,7 +1436,7 @@ test("status command module includes criteria and completion state", async () =>
   assert.equal(status.next_actions.some((action) => /required, not_required, or waived/.test(action)), true);
 });
 
-test("report command module renders a report artifact", async () => {
+test("report command module renders a report artifact", { tags: ["cli", "evidence", "reporting", "quick"] }, async () => {
   const root = tempRoot();
   const outputPath = path.join(root, "report.md");
   const contract = {
@@ -1467,7 +1467,7 @@ test("report command module renders a report artifact", async () => {
   assert.match(fs.readFileSync(outputPath, "utf8"), /## Decision Summary/);
 });
 
-test("kernel events activity and snapshot expose dashboard state without replacing source files", async () => {
+test("kernel events activity and snapshot expose dashboard state without replacing source files", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();
   writeActiveGoal(root);
 
@@ -1521,7 +1521,7 @@ test("kernel events activity and snapshot expose dashboard state without replaci
   assert.equal(fs.existsSync(path.join(root, ".opennori", "current", "module-goal.evidence.json")), true);
 });
 
-test("activity commands infer the unique current gap for dashboard publishing only", async () => {
+test("activity commands infer the unique current gap for dashboard publishing only", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();
   writeActiveGoalWithId(root, "module-goal");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -1571,7 +1571,7 @@ test("activity commands infer the unique current gap for dashboard publishing on
   assert.equal(readEvents(root).some((event) => event.type === "evidence.added"), false);
 });
 
-test("activity start ignores drafts and requires a current goal before publishing dashboard state", async () => {
+test("activity start ignores drafts and requires a current goal before publishing dashboard state", { tags: ["cli", "dashboard", "acceptance"] }, async () => {
   const root = tempRoot();
   await runInitCommand(["--root", root, "--confirm", "--json"]);
   await runDraftCommand(["--root", root, "--brief", writeBriefFile(root, "Ship first goal", { goalId: "first-goal" }), "--json"]);
@@ -1596,7 +1596,7 @@ test("activity start ignores drafts and requires a current goal before publishin
   assert.equal(noCurrent.data.snapshot.status, "no_active_goal");
 });
 
-test("activity start refuses invalid multiple current goals instead of attaching dashboard state to the wrong target", async () => {
+test("activity start refuses invalid multiple current goals instead of attaching dashboard state to the wrong target", { tags: ["cli", "dashboard", "acceptance"] }, async () => {
   const root = tempRoot();
   writeActiveGoalWithId(root, "first-goal");
   writeActiveGoalWithId(root, "second-goal");
@@ -1632,7 +1632,7 @@ test("activity start refuses invalid multiple current goals instead of attaching
   assert.equal(explicit.data.target.inferred, false);
 });
 
-test("dashboard snapshot ignores drafts and follows the unique current goal", async () => {
+test("dashboard snapshot ignores drafts and follows the unique current goal", { tags: ["cli", "dashboard", "acceptance"] }, async () => {
   const root = tempRoot();
   writeActiveGoalWithId(root, "first-goal");
   writeActiveGoalWithId(root, "second-goal", "active", "drafts");
@@ -1653,7 +1653,7 @@ test("dashboard snapshot ignores drafts and follows the unique current goal", as
   assert.equal(snapshot.current_gap.id, "AC-1");
 });
 
-test("dashboard command can start the local kernel without opening a browser", async () => {
+test("dashboard command can start the local kernel without opening a browser", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();
   const dashboard = await runDashboardCommand(["--root", root, "--port", "0", "--no-open", "--once", "--json"]);
 
@@ -1663,7 +1663,7 @@ test("dashboard command can start the local kernel without opening a browser", a
   assert.equal(readEvents(root).some((event) => event.type === "dashboard.started"), true);
 });
 
-test("dashboard rejects non-GET requests with a deterministic error", async () => {
+test("dashboard rejects non-GET requests with a deterministic error", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();
   const handle = await startDashboardServer({ root, port: 0, open: false });
   const response = await fetch(`${handle.url}api/snapshot`, { method: "POST" });
@@ -1675,7 +1675,7 @@ test("dashboard rejects non-GET requests with a deterministic error", async () =
   assert.equal(payload.error.type, "method_not_allowed");
 });
 
-test("dashboard exposes observation only and rejects confirmation-style control writes", async () => {
+test("dashboard exposes observation only and rejects confirmation-style control writes", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();
   const handle = await startDashboardServer({ root, port: 0, open: false });
   const controlPaths = [
@@ -1705,7 +1705,7 @@ test("dashboard exposes observation only and rejects confirmation-style control 
   assert.equal(snapshot.status, 200);
 });
 
-test("dashboard serves the built React app and assets", async () => {
+test("dashboard serves the built React app and assets", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();
   const handle = await startDashboardServer({ root, port: 0, open: false });
   const page = await fetch(handle.url);
@@ -1730,7 +1730,7 @@ test("dashboard serves the built React app and assets", async () => {
   assert.doesNotMatch(scriptText, /Waive/);
 });
 
-test("dashboard SSE emits generic and typed event frames", async () => {
+test("dashboard SSE emits generic and typed event frames", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();
   const handle = await startDashboardServer({ root, port: 0, open: false });
   let responseText = "";
@@ -1754,7 +1754,7 @@ test("dashboard SSE emits generic and typed event frames", async () => {
   assert.match(responseText, /\nevent: dashboard\.started\n/);
 });
 
-test("dashboard SSE stays read-only and does not refresh snapshot on heartbeat", async () => {
+test("dashboard SSE stays read-only and does not refresh snapshot on heartbeat", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();
   const handle = await startDashboardServer({ root, port: 0, open: false });
   const currentSnapshotPath = snapshotPath(root);
@@ -1781,7 +1781,7 @@ test("dashboard SSE stays read-only and does not refresh snapshot on heartbeat",
   assert.equal(fs.existsSync(currentSnapshotPath), false);
 });
 
-test("archive command module moves complete goals and preserves a report", async () => {
+test("archive command module moves complete goals and preserves a report", { tags: ["cli", "reporting", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -1818,7 +1818,7 @@ test("archive command module moves complete goals and preserves a report", async
   assert.equal(fs.existsSync(archived.data.report_path), true);
 });
 
-test("archive command module rejects current goals", async () => {
+test("archive command module rejects current goals", { tags: ["cli", "reporting", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -1851,7 +1851,7 @@ test("archive command module rejects current goals", async () => {
   assert.equal(fs.existsSync(evidencePath), true);
 });
 
-test("evaluate command module recomputes and writes workflow state", async () => {
+test("evaluate command module recomputes and writes workflow state", { tags: ["cli", "reporting", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -1884,7 +1884,7 @@ test("evaluate command module recomputes and writes workflow state", async () =>
   assert.match(fs.readFileSync(acceptancePath, "utf8"), /\| AC-1 .* passing \|/);
 });
 
-test("changes command module groups acceptance and implementation files", async () => {
+test("changes command module groups acceptance and implementation files", { tags: ["cli", "reporting", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   spawnSync("git", ["init"], { cwd: root, encoding: "utf8" });
   writeActiveGoal(root);
@@ -1899,7 +1899,7 @@ test("changes command module groups acceptance and implementation files", async 
   assert.equal(changes.data.changed_files.implementation.some((item) => item.path === "src/index.js"), true);
 });
 
-test("approve command module marks acceptance basis approved and recomputes status", async () => {
+test("approve command module marks acceptance basis approved and recomputes status", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -1937,7 +1937,7 @@ test("approve command module marks acceptance basis approved and recomputes stat
   assert.match(fs.readFileSync(acceptancePath, "utf8"), /Status: approved/);
 });
 
-test("approve command module only changes current contract language when explicitly approved", async () => {
+test("approve command module only changes current contract language when explicitly approved", { tags: ["cli", "reporting", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -1976,7 +1976,7 @@ test("approve command module only changes current contract language when explici
   assert.match(fs.readFileSync(acceptancePath, "utf8"), /语言: zh-CN/);
 });
 
-test("approve command module routes approved non-trivial gaps to architecture review before implementation", async () => {
+test("approve command module routes approved non-trivial gaps to architecture review before implementation", { tags: ["cli", "architecture", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -2011,7 +2011,7 @@ test("approve command module routes approved non-trivial gaps to architecture re
   assert.equal(approved.next_actions.some((action) => /required, not_required, or waived/.test(action)), true);
 });
 
-test("criterion update command module clears stale evidence after a user revision", async () => {
+test("criterion update command module clears stale evidence after a user revision", { tags: ["cli", "evidence", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -2055,7 +2055,7 @@ test("criterion update command module clears stale evidence after a user revisio
   assert.equal(written.ledger.criteria["AC-1"].evidence.length, 0);
 });
 
-test("criterion update command keeps draft revisions awaiting acceptance review", async () => {
+test("criterion update command keeps draft revisions awaiting acceptance review", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "drafts", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "drafts", "module-goal.evidence.json");
@@ -2125,7 +2125,7 @@ test("criterion update command keeps draft revisions awaiting acceptance review"
   assert.equal(written.ledger.status, "draft");
 });
 
-test("criterion add command module extends the contract and ledger together", async () => {
+test("criterion add command module extends the contract and ledger together", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -2172,7 +2172,7 @@ test("criterion add command module extends the contract and ledger together", as
   assert.match(fs.readFileSync(acceptancePath, "utf8"), /AC-Z-18/);
 });
 
-test("criterion add command module can add draft criteria without approval", async () => {
+test("criterion add command module can add draft criteria without approval", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "drafts", "module-draft.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "drafts", "module-draft.evidence.json");
@@ -2226,7 +2226,7 @@ test("criterion add command module can add draft criteria without approval", asy
   assert.match(fs.readFileSync(acceptancePath, "utf8"), /AC-14/);
 });
 
-test("evidence add command module records flexible reviewable sources", async () => {
+test("evidence add command module records flexible reviewable sources", { tags: ["cli", "evidence", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");
@@ -2301,7 +2301,7 @@ test("evidence add command module records flexible reviewable sources", async ()
   assert.equal(JSON.parse(fs.readFileSync(evidencePath, "utf8")).ledger.criteria["AC-1"].status, "passing");
 });
 
-test("evidence prune command module removes obsolete criterion evidence", async () => {
+test("evidence prune command module removes obsolete criterion evidence", { tags: ["cli", "evidence", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const acceptancePath = path.join(root, ".opennori", "current", "module-goal.acceptance.md");
   const evidencePath = path.join(root, ".opennori", "current", "module-goal.evidence.json");

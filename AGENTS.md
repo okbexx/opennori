@@ -218,5 +218,16 @@ state behavior: drafts remain drafts until approval, check/report do not mutate
 contracts, invalid schemas fail, evidence drives status, and Skills contain the
 rules agents must follow.
 
+Use layered verification instead of defaulting every local change to the full
+suite. `npm test` runs the quick tagged Vitest subset, and `npm run check` runs
+lint, typecheck, build, quick tests, and doctor. For focused changes, prefer the
+matching domain script such as `npm run test:acceptance`,
+`npm run test:architecture`, `npm run test:dashboard`,
+`npm run test:lifecycle`, `npm run test:profile`, `npm run test:evidence`,
+`npm run test:reporting`, `npm run test:docs`, or `npm run test:schema`.
+Run `npm run check:full` for releases, broad architecture/CLI lifecycle
+changes, or before pushing a large batch. New tests should carry one or more
+declared Vitest tags; do not introduce undeclared ad hoc tags.
+
 When changing Skill behavior, update package-local `plugins/opennori/skills/nori*/SKILL.md`, `plugins/opennori/.codex-plugin/plugin.json`, and marketplace metadata first.
 Do not add compatibility shims for old `adaw`, `nori`, `opennori skill export`, `install --skill`, or `refresh-skill` entry points.

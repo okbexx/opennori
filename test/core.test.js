@@ -203,7 +203,7 @@ function spawnJson(args, options = {}) {
   };
 }
 
-test("command help is side-effect free", () => {
+test("command help is side-effect free", { tags: ["core", "unit", "quick"] }, () => {
   const root = tempRoot();
   const payload = run(["install", "--help", "--json", "--root", root]);
 
@@ -213,7 +213,7 @@ test("command help is side-effect free", () => {
   assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
 });
 
-test("published package uses built dist bin while local source bin remains available", () => {
+test("published package uses built dist bin while local source bin remains available", { tags: ["core", "lifecycle", "package"] }, () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
   assert.equal(packageJson.bin.opennori, "bin/opennori.js");
   assert.equal(packageJson.files.includes(".agents/plugins/"), true);
@@ -229,7 +229,7 @@ test("published package uses built dist bin while local source bin remains avail
   assert.equal(fs.readFileSync(path.join(ROOT, "bin", "opennori.ts"), "utf8").includes("../src/cli.ts"), true);
 });
 
-test("contract integrity validation stays structural and does not hard-fail subjective process wording", () => {
+test("contract integrity validation stays structural and does not hard-fail subjective process wording", { tags: ["core", "schema", "acceptance", "quick"] }, () => {
   const contract = buildContractFromBrief(skillBrief("Ship a contract boundary check"));
   const ledger = buildEvidenceLedger(contract);
   contract.plan = "Agent-private planning is not a Product AC.";
@@ -241,7 +241,7 @@ test("contract integrity validation stays structural and does not hard-fail subj
   assert.equal(issues.some((issue) => issue.path === "steps"), false);
 });
 
-test("CLI entrypoint delegates command dispatch to the citty command tree", () => {
+test("CLI entrypoint delegates command dispatch to the citty command tree", { tags: ["core", "unit", "quick"] }, () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
   const cliSource = fs.readFileSync(path.join(ROOT, "src", "cli.ts"), "utf8");
   const commandTree = fs.readFileSync(path.join(ROOT, "src", "cli", "command-tree.ts"), "utf8");
@@ -255,12 +255,8 @@ test("CLI entrypoint delegates command dispatch to the citty command tree", () =
   assert.match(commandTree, /subCommands/);
 });
 
-test("built dist bin can report package-root Plugin Skill assets", () => {
-  const build = spawnSync("npm", ["run", "build"], {
-    cwd: ROOT,
-    encoding: "utf8"
-  });
-  assert.equal(build.status, 0, build.stderr || build.stdout);
+test("built dist bin can report package-root Plugin Skill assets", { tags: ["core", "profile", "lifecycle", "package", "docs"] }, () => {
+  assert.equal(fs.existsSync(path.join(ROOT, "dist", "bin", "opennori.js")), true);
 
   const root = tempRoot();
   const payload = run(["install", "--root", root, "--json"], {
@@ -280,12 +276,8 @@ test("built dist bin can report package-root Plugin Skill assets", () => {
   assert.equal(fs.existsSync(path.join(root, ".agents", "skills", "nori", "SKILL.md")), false);
 });
 
-test("built dist bin runs when invoked through a package-manager symlink", () => {
-  const build = spawnSync("npm", ["run", "build"], {
-    cwd: ROOT,
-    encoding: "utf8"
-  });
-  assert.equal(build.status, 0, build.stderr || build.stdout);
+test("built dist bin runs when invoked through a package-manager symlink", { tags: ["core", "lifecycle", "package"] }, () => {
+  assert.equal(fs.existsSync(path.join(ROOT, "dist", "bin", "opennori.js")), true);
 
   const root = tempRoot();
   const binDir = path.join(root, "node_modules", ".bin");
@@ -313,7 +305,7 @@ test("built dist bin runs when invoked through a package-manager symlink", () =>
   assert.match(payload.data.usage, /opennori/);
 });
 
-test("opennori quickstart previews setup without requiring install flags", () => {
+test("opennori quickstart previews setup without requiring install flags", { tags: ["core", "lifecycle"] }, () => {
   const root = tempRoot();
   const preview = run([], { cwd: root });
 
@@ -341,7 +333,7 @@ test("opennori quickstart previews setup without requiring install flags", () =>
   assert.equal(fs.existsSync(path.join(root, ".agents", "skills", "nori", "SKILL.md")), false);
 });
 
-test("opennori quickstart accepts top-level json for agents", () => {
+test("opennori quickstart accepts top-level json for agents", { tags: ["core", "lifecycle"] }, () => {
   const root = tempRoot();
   const preview = run(["--json"], { cwd: root });
 
@@ -352,7 +344,7 @@ test("opennori quickstart accepts top-level json for agents", () => {
   assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
 });
 
-test("autogoal brief drafts a standard Nori Contract with assumptions and open questions", () => {
+test("autogoal brief drafts a standard Nori Contract with assumptions and open questions", { tags: ["core", "acceptance"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   const briefPath = path.join(root, "autogoal-brief.json");
@@ -398,7 +390,7 @@ test("autogoal brief drafts a standard Nori Contract with assumptions and open q
   assert.doesNotMatch(acceptance, /Implementation Plan|Task List/);
 });
 
-test("enhanced autogoal brief exposes reviewable discovery basis without new artifacts", () => {
+test("enhanced autogoal brief exposes reviewable discovery basis without new artifacts", { tags: ["core", "evidence", "acceptance"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   const briefPath = path.join(root, "enhanced-autogoal-brief.json");
@@ -464,7 +456,7 @@ test("enhanced autogoal brief exposes reviewable discovery basis without new art
   assert.match(reportText, /Out of scope:/);
 });
 
-test("conversation adoption brief stays a draft Nori Contract awaiting user approval", () => {
+test("conversation adoption brief stays a draft Nori Contract awaiting user approval", { tags: ["core", "acceptance"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   const briefPath = path.join(root, "conversation-brief.json");
@@ -527,7 +519,7 @@ test("conversation adoption brief stays a draft Nori Contract awaiting user appr
   assert.equal(list.data.draft_goals.some((goal) => goal.goal_id === "settings-discussion-adoption"), true);
 });
 
-test("opennori quickstart is interactive for human terminals", () => {
+test("opennori quickstart is interactive for human terminals", { tags: ["core", "lifecycle"] }, () => {
   const declinedRoot = tempRoot();
   const declined = runInteractiveSetup(declinedRoot, "n");
 
@@ -539,7 +531,7 @@ test("opennori quickstart is interactive for human terminals", () => {
   assert.equal(fs.existsSync(path.join(declinedRoot, ".opennori")), false);
 });
 
-test("init creates markdown contract and evidence record", () => {
+test("init creates markdown contract and evidence record", { tags: ["core", "evidence", "acceptance"] }, () => {
   const root = tempRoot();
   const payload = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
@@ -558,7 +550,7 @@ test("init creates markdown contract and evidence record", () => {
   assert.doesNotMatch(acceptance, /Step 1/);
 });
 
-test("contract language is inferred for new briefs but not silently changed for legacy contracts", () => {
+test("contract language is inferred for new briefs but not silently changed for legacy contracts", { tags: ["core", "acceptance", "quick"] }, () => {
   const zhContract = buildContractFromBrief({
     goal_id: "legacy-language-boundary",
     goal: "交付设置页",
@@ -584,7 +576,7 @@ test("contract language is inferred for new briefs but not silently changed for 
   assert.doesNotMatch(legacyMarkdown, /## 表达偏好/);
 });
 
-test("existing contract language changes only through explicit current approval", () => {
+test("existing contract language changes only through explicit current approval", { tags: ["core", "reporting", "acceptance"] }, () => {
   const root = tempRoot();
   run([
     "draft",
@@ -630,7 +622,7 @@ test("existing contract language changes only through explicit current approval"
   assert.equal(fs.existsSync(acceptancePath), true);
 });
 
-test("next returns the current acceptance gap, not a process step", () => {
+test("next returns the current acceptance gap, not a process step", { tags: ["core", "acceptance"] }, () => {
   const root = tempRoot();
   const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
   const payload = run([
@@ -645,7 +637,7 @@ test("next returns the current acceptance gap, not a process step", () => {
   assert.match(payload.data.current_gap.reason, /no user-understandable evidence/);
 });
 
-test("resume and status recover the current goal from repository files", () => {
+test("resume and status recover the current goal from repository files", { tags: ["core", "acceptance"] }, () => {
   const root = tempRoot();
   const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
@@ -702,7 +694,7 @@ test("resume and status recover the current goal from repository files", () => {
   assert.match(acceptance, /AC-P-1 .* passing/);
 });
 
-test("draft requires user approval before completion evidence can finish the workflow", () => {
+test("draft requires user approval before completion evidence can finish the workflow", { tags: ["core", "evidence", "reporting", "acceptance"] }, () => {
   const root = tempRoot();
   const draft = run(["draft", ...draftArgsFromGoal(root, "Ship an OpenNori-backed task")]);
   assert.equal(draft.data.acceptance_basis.status, "draft");
@@ -745,7 +737,7 @@ test("draft requires user approval before completion evidence can finish the wor
   assert.equal(approved.data.workflow_status, "complete");
 });
 
-test("brainstorm creates selectable acceptance directions, not a process plan", () => {
+test("brainstorm creates selectable acceptance directions, not a process plan", { tags: ["core", "acceptance"] }, () => {
   const root = tempRoot();
   const candidates = JSON.stringify({
     candidates: [
@@ -789,7 +781,7 @@ test("brainstorm creates selectable acceptance directions, not a process plan", 
   assert.equal(draft.data.criteria.every((criterion) => criterion.user_story.startsWith("作为用户")), true);
 });
 
-test("discover writes a non-contract question source before draft", () => {
+test("discover writes a non-contract question source before draft", { tags: ["core", "acceptance"] }, () => {
   const root = tempRoot();
   const questions = JSON.stringify({
     gaps: [
@@ -830,7 +822,7 @@ test("discover writes a non-contract question source before draft", () => {
   assert.doesNotMatch(text, /Implementation plan/);
 });
 
-test("draft preserves explicit contract language preference for human-readable goal and AC", () => {
+test("draft preserves explicit contract language preference for human-readable goal and AC", { tags: ["core", "acceptance"] }, () => {
   const root = tempRoot();
   const zhDraft = run([
     "draft",
@@ -859,7 +851,7 @@ test("draft preserves explicit contract language preference for human-readable g
   assert.match(enMarkdown, /Language: en/);
 });
 
-test("Skill-prepared brief drafts specific user-facing acceptance criteria", () => {
+test("Skill-prepared brief drafts specific user-facing acceptance criteria", { tags: ["core", "profile", "acceptance"] }, () => {
   const root = tempRoot();
   const briefPath = writeBriefFile(root, "Ship a settings page where users edit profile details", {
     language: "zh-CN",
@@ -934,7 +926,7 @@ test("Skill-prepared brief drafts specific user-facing acceptance criteria", () 
   assert.match(joined, /保留表单中的用户输入/);
 });
 
-test("Nori Profile records required skills and blocks completion until satisfied", () => {
+test("Nori Profile records required skills and blocks completion until satisfied", { tags: ["core", "profile", "reporting"] }, () => {
   const root = tempRoot();
   const init = draftAndApprove([
     "--goal", "Build a frontend page",
@@ -999,7 +991,7 @@ test("Nori Profile records required skills and blocks completion until satisfied
   assert.match(text, /radix-ui/);
 });
 
-test("preferred profile items create review risk without blocking objective completion", () => {
+test("preferred profile items create review risk without blocking objective completion", { tags: ["core", "profile", "reporting"] }, () => {
   const root = tempRoot();
   const init = draftAndApprove([
     "--goal", "Build a frontend page",
@@ -1055,7 +1047,7 @@ test("preferred profile items create review risk without blocking objective comp
   assert.match(text, /radix-ui is unknown \(prefer\)/);
 });
 
-test("evidence can drive the workflow to complete and render a human report", () => {
+test("evidence can drive the workflow to complete and render a human report", { tags: ["core", "evidence", "reporting", "acceptance"] }, () => {
   const root = tempRoot();
   const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
   run(["install", "--root", root, "--json"]);
@@ -1173,7 +1165,7 @@ test("evidence can drive the workflow to complete and render a human report", ()
   assert.equal(exported.data.next_recommendation.candidate_goals, undefined);
 });
 
-test("blocked criteria produce a concrete intervention answer", () => {
+test("blocked criteria produce a concrete intervention answer", { tags: ["core", "evidence"] }, () => {
   const root = tempRoot();
   draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
@@ -1194,7 +1186,7 @@ test("blocked criteria produce a concrete intervention answer", () => {
   assert.match(status.data.intervention.action, /Choose whether OpenNori should pause/);
 });
 
-test("high-risk agent observation stays objective passing but surfaces review risk", () => {
+test("high-risk agent observation stays objective passing but surfaces review risk", { tags: ["core", "evidence"] }, () => {
   const root = tempRoot();
   const init = run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
   recordArchitectureRequirement(
@@ -1267,7 +1259,7 @@ test("high-risk agent observation stays objective passing but surfaces review ri
   assert.equal(flexibleStrong.data.gate, "accepted");
 });
 
-test("evidence records flexible reviewable sources without fixed adapters", () => {
+test("evidence records flexible reviewable sources without fixed adapters", { tags: ["core", "evidence"] }, () => {
   const root = tempRoot();
   run(["draft", ...draftArgsFromGoal(root, "Ship a reviewable OpenNori task")]);
   run(["approve", "--root", root, "--summary", "User approved criteria.", "--json"]);
@@ -1318,7 +1310,7 @@ test("evidence records flexible reviewable sources without fixed adapters", () =
   assert.match(text, /Browser-specific visual review was not performed/);
 });
 
-test("evidence health accepts custom non-context source shapes as reviewable", () => {
+test("evidence health accepts custom non-context source shapes as reviewable", { tags: ["core", "evidence", "reporting"] }, () => {
   const root = tempRoot();
   draftAndApprove([
     "--brief", writeBriefFile(root, "Ship with custom review sources", {
@@ -1377,7 +1369,7 @@ test("evidence health accepts custom non-context source shapes as reviewable", (
   assert.equal(check.warnings.some((warning) => warning.type === "evidence_health" && warning.issue === "missing-reviewable-source"), false);
 });
 
-test("concurrent evidence writes preserve every reviewable record", async () => {
+test("concurrent evidence writes preserve every reviewable record", { tags: ["core", "evidence"] }, async () => {
   const root = tempRoot();
   const current = draftAndApprove(draftArgsFromGoal(root, "Ship concurrent evidence safely"));
   const lockPath = path.join(root, ".opennori", ".locks", "active-goal.write.lock");
@@ -1419,7 +1411,7 @@ test("concurrent evidence writes preserve every reviewable record", async () => 
   );
 });
 
-test("check surfaces high-risk agent-observation evidence health without forcing adapter taxonomy", () => {
+test("check surfaces high-risk agent-observation evidence health without forcing adapter taxonomy", { tags: ["core", "evidence"] }, () => {
   const weakRoot = tempRoot();
   draftAndApprove([
     "--brief", writeBriefFile(weakRoot, "Ship with weak evidence", {
@@ -1517,7 +1509,7 @@ test("check surfaces high-risk agent-observation evidence health without forcing
   assert.equal(strongCheck.warnings.some((warning) => warning.type === "evidence_health"), false);
 });
 
-test("missing local artifact evidence is pruned and does not occupy report or context export", () => {
+test("missing local artifact evidence is pruned and does not occupy report or context export", { tags: ["core", "evidence", "reporting"] }, () => {
   const root = tempRoot();
   const current = draftAndApprove(draftArgsFromGoal(root, "Ship without stale evidence"));
 
@@ -1560,7 +1552,7 @@ test("missing local artifact evidence is pruned and does not occupy report or co
   assert.match(text, /AC-1/);
 });
 
-test("agent can explicitly prune obsolete evidence before recording fresh proof", () => {
+test("agent can explicitly prune obsolete evidence before recording fresh proof", { tags: ["core", "evidence"] }, () => {
   const root = tempRoot();
   draftAndApprove(draftArgsFromGoal(root, "Refresh obsolete evidence"));
 
@@ -1598,7 +1590,7 @@ test("agent can explicitly prune obsolete evidence before recording fresh proof"
   assert.equal(JSON.stringify(exported.data).includes("Old product behavior"), false);
 });
 
-test("protocol v1 example contains concrete user tool operations", () => {
+test("protocol v1 example contains concrete user tool operations", { tags: ["core", "docs", "quick"] }, () => {
   const brief = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "opennori-self.json"), "utf8"));
   assert.equal(brief.criteria.length, 54);
   assert.deepEqual(new Set(brief.criteria.map((criterion) => criterion.layer)), new Set(["protocol", "operator", "productization", "architecture"]));
@@ -1659,7 +1651,7 @@ test("protocol v1 example contains concrete user tool operations", () => {
   }
 });
 
-test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => {
+test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", { tags: ["core", "profile", "lifecycle", "docs", "acceptance"] }, () => {
   const pluginRoot = path.join(ROOT, "plugins", "opennori");
   const plugin = JSON.parse(fs.readFileSync(path.join(pluginRoot, ".codex-plugin", "plugin.json"), "utf8"));
   const marketplace = JSON.parse(fs.readFileSync(path.join(ROOT, ".agents", "plugins", "marketplace.json"), "utf8"));
@@ -1919,7 +1911,7 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   }
 });
 
-test("public product surfaces present OpenNori as one capability bundle", () => {
+test("public product surfaces present OpenNori as one capability bundle", { tags: ["core", "docs", "quick"] }, () => {
   const readme = fs.readFileSync(path.join(ROOT, "README.md"), "utf8");
   const plugin = JSON.parse(fs.readFileSync(path.join(ROOT, "plugins", "opennori", ".codex-plugin", "plugin.json"), "utf8"));
   const nori = fs.readFileSync(path.join(ROOT, "plugins", "opennori", "skills", "nori", "SKILL.md"), "utf8");
@@ -1979,7 +1971,7 @@ test("public product surfaces present OpenNori as one capability bundle", () => 
   }
 });
 
-test("public JSON Schemas validate persisted OpenNori state and separate structure from semantics", () => {
+test("public JSON Schemas validate persisted OpenNori state and separate structure from semantics", { tags: ["core", "schema"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   const current = draftAndApprove(draftArgsFromGoal(root, "Ship schema-backed OpenNori state"));
@@ -2046,7 +2038,7 @@ test("public JSON Schemas validate persisted OpenNori state and separate structu
   assert.equal(validateContract(evidence.contract, evidence.ledger).some((issue) => issue.path === "criteria[0].user_story"), false);
 });
 
-test("install creates project assets and skips existing user content by default", () => {
+test("install creates project assets and skips existing user content by default", { tags: ["core", "lifecycle"] }, () => {
   const root = tempRoot();
   const protocolPath = path.join(root, ".opennori", "protocol.md");
   fs.mkdirSync(path.dirname(protocolPath), { recursive: true });
@@ -2135,7 +2127,7 @@ test("install creates project assets and skips existing user content by default"
   assert.equal(confirmed.data.install_plan.summary.will_write > 0, true);
 });
 
-test("install can explicitly merge optional project agent routes without installing Skills", () => {
+test("install can explicitly merge optional project agent routes without installing Skills", { tags: ["core", "profile", "lifecycle"] }, () => {
   const root = tempRoot();
   fs.writeFileSync(path.join(root, "AGENTS.md"), "# Existing Project Guide\n\nKeep this project-specific guidance.\n");
   run(["install", "--root", root, "--json"]);
@@ -2184,7 +2176,7 @@ test("install can explicitly merge optional project agent routes without install
   assert.equal(doctor.data.architecture.agent_surface.agents.references_baseline, true);
 });
 
-test("doctor reports ready, needs-action, and broken project health", () => {
+test("doctor reports ready, needs-action, and broken project health", { tags: ["core", "lifecycle", "reporting"] }, () => {
   const readyRoot = tempRoot();
   run(["install", "--root", readyRoot, "--json"]);
   const ready = run(["doctor", "--root", readyRoot, "--json"]);
@@ -2283,7 +2275,7 @@ test("doctor reports ready, needs-action, and broken project health", () => {
   assert.equal(schemaBrokenDoctor.data.active_goal_issues.some((issue) => issue.path?.startsWith("schema/ledger")), true);
 });
 
-test("uninstall previews removals and preserves OpenNori state by default", () => {
+test("uninstall previews removals and preserves OpenNori state by default", { tags: ["core", "lifecycle"] }, () => {
   const root = tempRoot();
   const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
   run(["install", "--root", root, "--json"]);
@@ -2314,7 +2306,7 @@ test("uninstall previews removals and preserves OpenNori state by default", () =
   assert.equal(fs.existsSync(path.join(root, ".opennori", "reports", "opennori-self.report.md")), true);
 });
 
-test("uninstall include-state requires confirmation before removing OpenNori state", () => {
+test("uninstall include-state requires confirmation before removing OpenNori state", { tags: ["core", "lifecycle"] }, () => {
   const root = tempRoot();
   run(["draft", "--brief", "examples/opennori-self.json", "--root", root, "--json"]);
   run(["install", "--root", root, "--json"]);
@@ -2339,7 +2331,7 @@ test("uninstall include-state requires confirmation before removing OpenNori sta
   assert.equal(fs.existsSync(path.join(root, ".opennori")), false);
 });
 
-test("upgrade previews and confirms manifest protocol and generated guidance refresh", () => {
+test("upgrade previews and confirms manifest protocol and generated guidance refresh", { tags: ["core", "lifecycle", "docs"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   fs.writeFileSync(path.join(root, ".opennori", "protocol.md"), "old protocol\n");
@@ -2376,7 +2368,7 @@ test("upgrade previews and confirms manifest protocol and generated guidance ref
   assert.equal(upgraded.next_actions.some((action) => /opennori check/.test(action)), true);
 });
 
-test("profile check automatically checks local Skills and package stacks without forcing adapters", () => {
+test("profile check automatically checks local Skills and package stacks without forcing adapters", { tags: ["core", "profile", "lifecycle"] }, () => {
   const root = tempRoot();
   fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({
     dependencies: {
@@ -2435,7 +2427,7 @@ test("profile check automatically checks local Skills and package stacks without
   assert.equal(payload.ledger.capability_profile.evidence.length, 3);
 });
 
-test("architecture baseline loop is agent-readable sticky and challengeable", () => {
+test("architecture baseline loop is agent-readable sticky and challengeable", { tags: ["core", "architecture"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   const draft = draftAndApprove(draftArgsFromGoal(root, "Refactor OpenNori into a TypeScript agent state CLI product"));
@@ -2606,7 +2598,7 @@ test("architecture baseline loop is agent-readable sticky and challengeable", ()
   assert.equal(fs.existsSync(draft.data.acceptance_path), true);
 });
 
-test("missing architecture baseline is a completion review risk, not a product AC gap", () => {
+test("missing architecture baseline is a completion review risk, not a product AC gap", { tags: ["core", "architecture", "reporting"] }, () => {
   const root = tempRoot();
   const draft = draftAndApprove(draftArgsFromGoal(root, "Ship an architecture-aware user outcome"));
   recordArchitectureRequirement(
@@ -2648,7 +2640,7 @@ test("missing architecture baseline is a completion review risk, not a product A
   assert.match(fs.readFileSync(report.data.report_path, "utf8"), /Review risks: architecture_review/);
 });
 
-test("architecture apply records do not count as Product AC evidence", () => {
+test("architecture apply records do not count as Product AC evidence", { tags: ["core", "architecture", "evidence"] }, () => {
   const root = tempRoot();
   const draft = draftAndApprove(draftArgsFromGoal(root, "Ship an architecture-guided user outcome"));
   recordArchitectureRequirement(
@@ -2696,7 +2688,7 @@ test("architecture apply records do not count as Product AC evidence", () => {
   assert.match(reportText, /AC-1: aligned/);
 });
 
-test("product evidence can reference architecture apply context without treating it as proof", () => {
+test("product evidence can reference architecture apply context without treating it as proof", { tags: ["core", "architecture", "evidence", "reporting"] }, () => {
   const root = tempRoot();
   const draft = draftAndApprove(draftArgsFromGoal(root, "Ship architecture-context evidence"));
   recordArchitectureRequirement(
@@ -2768,7 +2760,7 @@ test("product evidence can reference architecture apply context without treating
   assert.match(reportText, /command=npm run check/);
 });
 
-test("project architecture profiles can be added and used for baselines", () => {
+test("project architecture profiles can be added and used for baselines", { tags: ["core", "architecture", "profile"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   recordArchitectureRequirement(
@@ -2850,7 +2842,7 @@ test("project architecture profiles can be added and used for baselines", () => 
   assert.match(fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.md"), "utf8"), /team-parser-first/);
 });
 
-test("architecture evidence directory rejects misplaced profile source files", () => {
+test("architecture evidence directory rejects misplaced profile source files", { tags: ["core", "architecture", "profile", "evidence"] }, () => {
   const root = tempRoot();
   const draft = draftAndApprove(draftArgsFromGoal(root, "Ship under clean architecture evidence"));
   recordArchitectureRequirement(
@@ -2941,7 +2933,7 @@ test("architecture evidence directory rejects misplaced profile source files", (
   assert.match(reportText, /team-cli\.profile\.json/);
 });
 
-test("project architecture profiles without technical verification are not usable for baselines", () => {
+test("project architecture profiles without technical verification are not usable for baselines", { tags: ["core", "architecture", "profile"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
 
@@ -2983,7 +2975,7 @@ test("project architecture profiles without technical verification are not usabl
   assert.equal(projectProfile.validation_issues.some((issue) => issue.path === "technical_baseline" && /verification/.test(issue.message)), true);
 });
 
-test("build-vs-buy health surfaces missing reuse review before self-build", () => {
+test("build-vs-buy health surfaces missing reuse review before self-build", { tags: ["core", "architecture"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   const draft = draftAndApprove(draftArgsFromGoal(root, "Ship a reusable infrastructure choice"));
@@ -3088,7 +3080,7 @@ test("build-vs-buy health surfaces missing reuse review before self-build", () =
   assert.equal(schemaBroken.warnings.some((warning) => warning.type === "build_vs_buy" && warning.issue === "schema-invalid-decision"), true);
 });
 
-test("superseded build-vs-buy decisions stay reviewable without blocking current health", () => {
+test("superseded build-vs-buy decisions stay reviewable without blocking current health", { tags: ["core", "architecture"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
   run([
@@ -3116,7 +3108,7 @@ test("superseded build-vs-buy decisions stay reviewable without blocking current
   assert.equal(status.data.architecture.build_vs_buy.superseded_decision_count, 1);
 });
 
-test("context export exposes goal AC profile evidence and report paths for review tools", () => {
+test("context export exposes goal AC profile evidence and report paths for review tools", { tags: ["core", "profile", "evidence", "reporting"] }, () => {
   const root = tempRoot();
   const draft = draftAndApprove(draftArgsFromGoal(root, "Ship a reviewable workflow"));
   recordArchitectureRequirement(
@@ -3173,7 +3165,7 @@ test("context export exposes goal AC profile evidence and report paths for revie
   assert.equal(JSON.parse(fs.readFileSync(output, "utf8")).schema_version, "opennori/context-export-v1");
 });
 
-test("changes groups acceptance artifacts separately from implementation files", () => {
+test("changes groups acceptance artifacts separately from implementation files", { tags: ["core", "evidence", "reporting", "acceptance"] }, () => {
   const root = tempRoot();
   spawnSync("git", ["init"], { cwd: root, encoding: "utf8" });
   fs.mkdirSync(path.join(root, ".opennori", "current"), { recursive: true });
@@ -3187,7 +3179,7 @@ test("changes groups acceptance artifacts separately from implementation files",
   assert.equal(payload.data.changed_files.implementation.some((item) => item.path === "src/index.js"), true);
 });
 
-test("list separates drafts from the single current goal", () => {
+test("list separates drafts from the single current goal", { tags: ["core", "reporting", "acceptance"] }, () => {
   const root = tempRoot();
   const firstBrief = path.join(root, "first.json");
   const secondBrief = path.join(root, "second.json");
@@ -3228,7 +3220,7 @@ test("list separates drafts from the single current goal", () => {
   assert.match(draftResumePayload.error.message, /No current OpenNori goal found/);
 });
 
-test("archive moves complete goals out of current and preserves report", () => {
+test("archive moves complete goals out of current and preserves report", { tags: ["core", "reporting"] }, () => {
   const root = tempRoot();
   const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
   const ledger = JSON.parse(fs.readFileSync(init.data.evidence_path, "utf8"));
@@ -3258,7 +3250,7 @@ test("archive moves complete goals out of current and preserves report", () => {
   assert.equal(list.data.current_goals.length, 0);
 });
 
-test("archive can preserve blocked goals outside current work", () => {
+test("archive can preserve blocked goals outside current work", { tags: ["core", "evidence", "reporting"] }, () => {
   const root = tempRoot();
   const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
@@ -3285,7 +3277,7 @@ test("archive can preserve blocked goals outside current work", () => {
   assert.match(report, /User must choose whether to pause or continue/);
 });
 
-test("criterion update preserves the revised acceptance basis and clears stale evidence", () => {
+test("criterion update preserves the revised acceptance basis and clears stale evidence", { tags: ["core", "evidence", "acceptance"] }, () => {
   const root = tempRoot();
   const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
@@ -3319,7 +3311,7 @@ test("criterion update preserves the revised acceptance basis and clears stale e
   assert.equal(payload.ledger.criteria["AC-P-1"].evidence.length, 0);
 });
 
-test("criterion update on a draft keeps the contract awaiting AC review", () => {
+test("criterion update on a draft keeps the contract awaiting AC review", { tags: ["core", "acceptance"] }, () => {
   const root = tempRoot();
   const briefPath = writeBriefFile(root, "交付 AW 项目登记和选择能力", {
     goalId: "aw-project-registry",
@@ -3376,7 +3368,7 @@ test("criterion update on a draft keeps the contract awaiting AC review", () => 
   assert.equal(payload.ledger.status, "draft");
 });
 
-test("criterion add on a draft keeps the contract awaiting AC review", () => {
+test("criterion add on a draft keeps the contract awaiting AC review", { tags: ["core", "acceptance"] }, () => {
   const root = tempRoot();
   const briefPath = writeBriefFile(root, "交付 AW 项目设置能力", {
     goalId: "aw-project-settings",
@@ -3428,7 +3420,7 @@ test("criterion add on a draft keeps the contract awaiting AC review", () => {
   assert.equal(manifest.draft_goals.some((goal) => goal.goal_id === "aw-project-settings"), true);
 });
 
-test("criterion add preserves contract and ledger consistency", () => {
+test("criterion add preserves contract and ledger consistency", { tags: ["core", "acceptance"] }, () => {
   const root = tempRoot();
   const init = draftAndApprove(["--brief", "examples/opennori-self.json", "--root", root, "--json"]);
 
@@ -3471,7 +3463,7 @@ test("criterion add preserves contract and ledger consistency", () => {
   assert.match(duplicatePayload.error.message, /Criterion already exists/);
 });
 
-test("drafted generic goals stay blocked on acceptance approval", () => {
+test("drafted generic goals stay blocked on acceptance approval", { tags: ["core", "evidence", "acceptance"] }, () => {
   const root = tempRoot();
   const draft = run(["draft", ...draftArgsFromGoal(root, "Ship a settings page where users edit profile details")]);
   assert.equal(draft.ok, true);
@@ -3480,7 +3472,7 @@ test("drafted generic goals stay blocked on acceptance approval", () => {
   assert.equal(draft.data.current_gap.id, "ACCEPTANCE-BASIS");
 });
 
-test("check does not rewrite existing contracts while reporting objective state", () => {
+test("check does not rewrite existing contracts while reporting objective state", { tags: ["core", "reporting", "acceptance"] }, () => {
   const root = tempRoot();
   const brief = path.join(root, "existing-contract.json");
   fs.writeFileSync(brief, JSON.stringify({
