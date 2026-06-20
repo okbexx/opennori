@@ -1,6 +1,6 @@
 ---
 name: nori-project-health
-description: "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, or needs safe lifecycle actions with preview and explicit confirmation."
+description: "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, needs safe lifecycle actions with preview and explicit confirmation, or sees healthy state but broad UI/CRUD/dashboard AC still need acceptance review."
 ---
 
 ## Mission
@@ -10,6 +10,14 @@ Keep OpenNori project state usable and recoverable without making lifecycle comm
 Health work protects `.opennori/` integrity, manifest freshness, packaged Plugin Skill visibility, and current-goal recoverability. It should not decide subjective product acceptance.
 
 Treat OpenNori readiness as bundle readiness. Plugin discovery, packaged Skills, CLI access, and `.opennori` state are coupled product parts; if one is missing, recover it instead of telling the user to use the remaining pieces as a separate workflow.
+
+Health commands protect state integrity, not AC meaning. When a recovered,
+upgraded, or checked project contains broad visible Product AC such as "project
+CRUD works", "manage items", "settings are editable", or "dashboard shows
+state", treat the state as usable but the acceptance meaning as needing
+`nori-acceptance`. Do not turn that into a doctor failure, and do not continue
+toward evidence, architecture, or reporting as though the Product AC were
+confidently acceptable.
 
 When CLI JSON includes `data.agent_next`, use it as the state-layer routing instruction. Health work should not guess whether to draft, recover, or resume when `agent_next.state` already says `initialized_no_active_contract`, `health_needs_recovery`, `setup_preview_needs_confirmation`, or `ready_with_current_goal`.
 
@@ -26,7 +34,7 @@ A fresh `opennori init` normally creates empty `.opennori/current`, `.opennori/d
 5. If doctor/setup/init reports missing Plugin assets, packaged Skills, CLI access, manifest, damaged current state, or legacy `.opennori/active` state, present the missing bundle part and the recovery action. When safe_next_command exists, run that preview first.
 6. If doctor/setup/init reports `agent_next.state: initialized_no_active_contract`, explain that the project is ready but has no approved current contract, then hand off to `nori-acceptance`.
 7. For lifecycle writes, show preview first and ask for explicit confirmation when the action writes, overwrites, upgrades, uninstalls, syncs plugin cache, or deletes state.
-8. After upgrade or repair, run `opennori check --root <repo> --json` for objective state health. If AC wording itself looks vague, implementation-centered, or too broad, route to `nori-acceptance`; do not wait for CLI quality findings.
+8. After upgrade or repair, run `opennori check --root <repo> --json` for objective state health. If AC wording itself looks vague, implementation-centered, too broad, or lacks Acceptance Surface Modeling for a visible Product surface, route to `nori-acceptance`; do not wait for CLI quality findings.
 9. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live health activity while diagnosing or recovering bundle readiness for that current state: start before health work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-project-health --state working --summary "..." --json`. Do not invent activity for setup/init preview, no-current-goal state, or drafts.
 
 Useful state commands:
@@ -62,6 +70,10 @@ Useful state commands:
 - "Remove OpenNori" -> uninstall dry run; preserve `.opennori` state unless the user explicitly asks to delete it.
 - "State is broken" -> doctor, identify hard integrity failures, and propose recovery actions.
 - "Doctor/check shows review risks" -> route evidence, profile, architecture, or build-vs-buy review to the responsible Skill; route subjective AC wording concerns to `nori-acceptance` based on agent judgment.
+- "Doctor is ready but AC says CRUD/dashboard/settings broadly" -> say the
+  OpenNori bundle is healthy, but the Product AC needs Acceptance Surface
+  Modeling; hand off to `nori-acceptance` instead of treating health as
+  completion.
 
 ## State Writes
 
@@ -71,7 +83,9 @@ Must write live dashboard activity for health diagnosis or recovery when the das
 
 ## Handoffs
 
-- AC wording is vague, implementation-centered, or too broad from the user's perspective -> `nori-acceptance`.
+- AC wording is vague, implementation-centered, too broad from the user's
+  perspective, or missing Acceptance Surface Modeling for a visible Product
+  surface -> `nori-acceptance`.
 - `evidence_health` -> `nori-evidence`.
 - `profile_review` -> `nori-capability-profile`.
 - `architecture_requirement` or `architecture_check` -> `nori-architecture-brainstorm`, `nori-architecture-apply`, or `nori-architecture-challenge` as recommended. Requirement unknown means decide required/not_required/waived first; it is not lifecycle repair.
@@ -121,4 +135,7 @@ Confirm initialization?
 - Do not treat soft review findings as hard protocol rejection.
 - Do not reopen Product AC just because architecture, build-vs-buy, evidence health, or profile review needs user attention.
 - Do not use health commands as a substitute for acceptance evidence.
+- Do not let a ready doctor/check result imply that broad visible Product AC is
+  acceptable. Ready means the bundle/state is usable; acceptance meaning still
+  belongs to `nori-acceptance` and user review.
 - Do not treat dashboard activity, events, or snapshots as proof that the bundle is healthy.

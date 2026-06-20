@@ -1,6 +1,6 @@
 ---
 name: nori-architecture-brainstorm
-description: Establish a reviewable OpenNori Architecture Baseline before non-trivial implementation. Use when the user wants a good architecture first, asks for built-in or project architecture profiles, prefers a stack that should shape implementation, or expects future agent work to follow a confirmed technical baseline.
+description: Establish a reviewable OpenNori Architecture Baseline before non-trivial implementation. Use when the user wants a good architecture first, asks for built-in or project architecture profiles, prefers a stack that should shape implementation, expects future agent work to follow a confirmed technical baseline, or asks for architecture around UI/CRUD/dashboard work after Product AC operation paths are concrete.
 ---
 
 ## Mission
@@ -22,21 +22,38 @@ The baseline answers "what architecture should guide this work", not "what steps
 
 If a baseline only says "use good architecture", "prefer existing patterns", or lists broad principles without concrete runtime/state/module/contract/dependency choices, treat it as incomplete and keep asking architecture questions before confirmation.
 
+Architecture cannot repair vague Product AC. If the current goal or AC is a
+visible product surface such as UI, CRUD, dashboard, list, table, form,
+settings, admin, desktop, CLI prompt, MCP/tool flow, preview, inspector, or a
+management surface, first check whether the Product AC already has an
+Acceptance Surface Model: actor, entry, visible trigger, object, action,
+interaction surface, required information, feedback, state change, persistence,
+destructive boundary, and evidence shape. If the user still cannot tell how
+they would operate or judge the product, hand off to `nori-acceptance` before
+previewing or confirming an Architecture Baseline. Do not use architecture
+questions to decide button/icon/menu/modal/field/delete semantics that belong
+in Product AC.
+
 ## Start Here
 
 1. Read the current goal, Product AC, and `data.architecture.requirement` from resume/status.
 2. Read Nori Profile for required Skills, preferred stacks, avoid rules, and install policy.
 3. Inspect existing project architecture, dependencies, package/module layout, state model, command/API/MCP/IPC surfaces, tests, docs, and user-supplied references.
-4. Decide requirement status from project evidence and user intent:
+4. If visible Product AC is broad, implementation-centered, or missing its
+   operation path, stop architecture work and hand off to `nori-acceptance`.
+   Architecture review can continue after the user approves a product surface
+   that names the user operation, feedback, persistence, destructive boundary,
+   and evidence shape.
+5. Decide requirement status from project evidence and user intent:
    - If simple and no architecture boundary is touched, record `not_required` with a reason and return to the current Product AC/evidence loop.
    - If the user waives architecture review, record `waived` with the user's reason and limitations; report it as review risk.
    - If non-trivial, record `required` with a reason before previewing the baseline.
-5. Compare mature references and current project evidence before proposing self-built infrastructure.
-6. List available architecture profiles and select or create the best fit.
-7. Ensure the selected profile has a concrete `technical_baseline` with runtime topology, source-of-truth model, module boundaries, contract surfaces, data flows, dependency decisions, reference mappings, and verification.
-8. Preview the baseline and ask the user to confirm before implementation.
-9. After confirmed baseline write, read the returned `data.agent_next` and route to the recommended next Skill.
-10. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish architecture activity while reviewing or confirming the requirement/baseline: start before architecture work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-brainstorm --state thinking --summary "..." --json`.
+6. Compare mature references and current project evidence before proposing self-built infrastructure.
+7. List available architecture profiles and select or create the best fit.
+8. Ensure the selected profile has a concrete `technical_baseline` with runtime topology, source-of-truth model, module boundaries, contract surfaces, data flows, dependency decisions, reference mappings, and verification.
+9. Preview the baseline and ask the user to confirm before implementation.
+10. After confirmed baseline write, read the returned `data.agent_next` and route to the recommended next Skill.
+11. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish architecture activity while reviewing or confirming the requirement/baseline: start before architecture work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-brainstorm --state thinking --summary "..." --json`.
 
 Useful state commands:
 
@@ -55,6 +72,7 @@ Useful state commands:
 - "Use OpenNori's built-in good architecture" -> show the relevant built-in profile, including sources, principles, checks, preferred libraries, avoid rules, and build-vs-buy policy.
 - "The architecture feels vague" -> split the answer into Architecture Charter and Technical Architecture Baseline; fill the missing runtime, state, module, contract, flow, dependency, reference, and verification decisions.
 - "This is a simple change" -> decide whether baseline is needed; if non-trivial implementation or infrastructure is involved, create one.
+- "Project CRUD architecture", "dashboard architecture", "settings page architecture", or another visible product surface with broad AC -> first hand off to `nori-acceptance` if the AC does not name entry, trigger, fields, feedback, persistence, destructive boundary, and evidence shape. Architecture can choose state/module/dependency boundaries only after the Product AC surface is reviewable.
 - `agent_next.state: architecture_requirement_needs_decision` -> decide and record `required`, `not_required`, or `waived` with a reason. Do not jump straight to baseline because a goal exists.
 - "The product is done but architecture is missing" -> treat baseline work as architecture review cleanup, not Product AC failure.
 
@@ -71,6 +89,9 @@ Must write live dashboard activity for baseline review when the dashboard is obs
 - If the baseline requires custom infrastructure, hand off to `nori-build-vs-buy`.
 - If project evidence contradicts an existing baseline, hand off to `nori-architecture-challenge`.
 - If the user changes what the product should do, hand off to `nori-acceptance`.
+- If a visible Product AC lacks Acceptance Surface Modeling, hand off to
+  `nori-acceptance` before requirement decision, baseline preview, or
+  confirmation.
 
 ## User Reply Shape
 
@@ -96,6 +117,11 @@ Needs confirmation: yes
 
 - Do not turn architecture choices, profiles, libraries, or Architecture Checks into Product AC.
 - Do not confirm a baseline that is only product boundary, governance principle, or broad preference; it must also include the concrete Technical Architecture Baseline.
+- Do not use architecture baseline work to bypass vague visible Product AC. If
+  the user operation path is unclear, Product AC must be revised first.
+- Do not decide UI controls, CRUD delete semantics, dashboard interaction
+  states, or form field scope as hidden architecture assumptions. They belong
+  in AC Review Loop when they affect what the user accepts.
 - Do not start non-trivial implementation before the baseline is confirmed or explicitly waived by the user.
 - Do not force simple goals through Architecture Baseline. Record `not_required` with a concrete reason when architecture review is unnecessary.
 - Do not let CLI or fixed text rules decide non-triviality. The agent/user owns that judgment and records the decision.

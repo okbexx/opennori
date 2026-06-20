@@ -1,6 +1,6 @@
 ---
 name: nori-capability-profile
-description: Capture and check OpenNori execution preferences such as required Skills, preferred stacks, avoided tools, install policy, and user-declared implementation constraints. Use when the user says a task must use a specific Skill, prefers a library or stack, wants to avoid a tool, or requires approval before installs.
+description: Capture and check OpenNori execution preferences such as required Skills, preferred stacks, avoided tools, install policy, and user-declared implementation constraints. Use when the user says a task must use a specific Skill, prefers a library or stack, wants to avoid a tool, requires approval before installs, or declares UI/CRUD/dashboard stack preferences that must stay separate from Product AC operation paths.
 ---
 
 ## Mission
@@ -8,6 +8,16 @@ description: Capture and check OpenNori execution preferences such as required S
 Keep the user's execution preferences visible to the agent and completion report without polluting Product AC.
 
 Nori Profile answers "how should the agent work" and "what constraints affect completion confidence". Product AC still answers "what can the human user accept".
+
+Profile items also cannot replace Acceptance Surface Modeling. If the user says
+"use Radix", "use design-taste-frontend", "avoid another CSS framework", or
+"prefer an existing component library" while defining a UI, CRUD, dashboard,
+settings, form, admin, preview, CLI prompt, MCP/tool flow, or management
+surface, record the preference as Profile, then still make sure Product AC
+names the user entry, visible trigger, object/action, interaction surface,
+required information, feedback, state change, persistence, destructive boundary,
+and evidence shape. Stack preference is not enough for the user to judge the
+product behavior.
 
 ## Start Here
 
@@ -18,8 +28,12 @@ Nori Profile answers "how should the agent work" and "what constraints affect co
    - `prefer`: objective completion can pass, but unresolved preference is review risk.
    - `avoid`: violation blocks completion unless waived.
 4. Record install policy when the user mentions whether new dependencies or Skills may be installed.
-5. Record compliance evidence before confident completion.
-6. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live profile activity while recording or checking preferences: start before profile work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-capability-profile --state working --summary "..." --json`.
+5. If the preference changes the visible product operation, field scope,
+   feedback, persistence, or destructive boundary, hand off to
+   `nori-acceptance` so it becomes user-confirmed Product AC instead of hidden
+   Profile semantics.
+6. Record compliance evidence before confident completion.
+7. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live profile activity while recording or checking preferences: start before profile work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-capability-profile --state working --summary "..." --json`.
 
 Useful state commands:
 
@@ -34,6 +48,9 @@ Useful state commands:
 - "Prefer Radix UI for components" -> add a `stack` item with `prefer`.
 - "Avoid adding another state library" -> add a `constraint` or `stack` item with `avoid`.
 - "Ask me before installing packages" -> set install policy to `ask_before_install`.
+- "Use Radix for this CRUD page", "use a design Skill first", or "avoid
+  duplicate CSS" -> record the stack/Skill/constraint in Profile, then route
+  any missing user operation path or UI behavior detail to `nori-acceptance`.
 - "This preference can be waived" -> record profile evidence as `waived` with the user's reason.
 - "Did we follow my stack preference" -> show profile items and compliance evidence.
 
@@ -46,6 +63,9 @@ Must write live dashboard activity for profile work when the dashboard is observ
 ## Handoffs
 
 - If a preference changes what the user can accept as a product outcome, hand off to `nori-acceptance` for AC revision.
+- If a visible Product AC is broad and the Profile item only says which
+  Skill/library/tool to use, hand off to `nori-acceptance` for Acceptance
+  Surface Modeling.
 - If a stack preference should shape architecture, hand off to `nori-architecture-brainstorm` or `nori-architecture-challenge`.
 - If a preference requires proof, hand off to `nori-evidence` for user-facing verification after profile evidence is recorded.
 - If completion is being judged, hand off to `nori-reporting`.
@@ -64,6 +84,11 @@ Evidence needed: ...
 ## Misuse Guards
 
 - Do not turn Skills, libraries, architecture, or install policy into Product AC.
+- Do not treat a satisfied Skill or stack preference as proof that the UI,
+  CRUD, dashboard, form, settings, or management workflow is acceptable.
+- Do not hide user-facing controls, field scope, feedback, persistence, or
+  destructive boundaries inside Profile purpose text. If they affect "done",
+  revise Product AC through `nori-acceptance`.
 - Do not report confident completion with unsatisfied `must`, violated `avoid`, or unaccepted `prefer` review risk.
 - Do not install or suggest installing tools when the profile says `existing_only` or `ask_before_install` without user approval.
 - Do not treat availability of a Skill as evidence that the product behavior is complete.

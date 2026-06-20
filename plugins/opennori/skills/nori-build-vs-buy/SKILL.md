@@ -1,6 +1,6 @@
 ---
 name: nori-build-vs-buy
-description: Record OpenNori build-vs-buy decisions before infrastructure or platform work so agents prefer existing project code, standard libraries, official SDKs, and mature open-source libraries before self-building. Use when implementation touches CLI parsing, schemas, storage, rendering, routing, auth, installers, validators, adapters, UI primitives, or other reusable infrastructure.
+description: Record OpenNori build-vs-buy decisions before infrastructure or platform work so agents prefer existing project code, standard libraries, official SDKs, and mature open-source libraries before self-building. Use when implementation touches CLI parsing, schemas, storage, rendering, routing, auth, installers, validators, adapters, UI primitives, or reusable infrastructure, especially after UI/CRUD/dashboard Product AC operation paths are defined.
 ---
 
 ## Mission
@@ -9,14 +9,27 @@ Prevent agents from rebuilding solved infrastructure without evidence, while sti
 
 Build-vs-buy is architecture evidence, not a Product AC.
 
+Build-vs-buy cannot define what the user accepts. For visible product surfaces
+such as UI, CRUD, dashboard, list, table, form, settings, admin, desktop, CLI
+prompt, MCP/tool flow, preview, inspector, or management surfaces, first make
+sure the Product AC already defines the user operation path. A library choice
+can support a modal, table, form, state store, router, parser, or SDK boundary,
+but it does not decide which button/icon/menu the user triggers, which fields
+exist, what feedback appears, what persists, or what delete/unlink/archive
+means.
+
 ## Start Here
 
 1. Identify the infrastructure need and why it matters for the current AC.
-2. Check in this order: current project dependency, standard library, official SDK, mature open-source library, then small local implementation.
-3. Compare license, maintenance, security, package size, runtime cost, performance, integration cost, and product boundary.
-4. If self-building, state why reuse options fail.
-5. Record the decision before implementing the infrastructure.
-6. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live activity while comparing options: start before build-vs-buy work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-build-vs-buy --state thinking --summary "..." --json`.
+2. If the infrastructure need exists only because a visible Product AC is vague,
+   stop and hand off to `nori-acceptance`. Do not choose a component library,
+   form library, router, state model, parser, or SDK to fill in missing user
+   operation-path semantics.
+3. Check in this order: current project dependency, standard library, official SDK, mature open-source library, then small local implementation.
+4. Compare license, maintenance, security, package size, runtime cost, performance, integration cost, and product boundary.
+5. If self-building, state why reuse options fail.
+6. Record the decision before implementing the infrastructure.
+7. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live activity while comparing options: start before build-vs-buy work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-build-vs-buy --state thinking --summary "..." --json`.
 
 Useful state command:
 
@@ -31,6 +44,10 @@ Dashboard signal when observed:
 - "Can we handwrite this parser/installer/schema/state layer" -> run build-vs-buy first.
 - "Use open-source where possible" -> record reuse candidates and the chosen dependency or reason to avoid them.
 - "This dependency feels heavy" -> compare package and integration costs before rejecting it.
+- "Which UI library should project CRUD use" while CRUD AC is broad -> route to
+  `nori-acceptance` first. After the user operation paths are clear, use
+  build-vs-buy for reusable UI primitives, forms, tables, routing, storage, or
+  SDK boundaries.
 - "Report shows build_vs_buy risk" -> fill missing reuse candidates or self-build reason without reopening Product AC.
 
 ## Acceptable Self-Build Reasons
@@ -51,6 +68,8 @@ Must write live dashboard activity for option review when the dashboard is obser
 ## Handoffs
 
 - If the decision changes the baseline -> `nori-architecture-challenge`.
+- If the decision is being used to fill missing Product AC semantics ->
+  `nori-acceptance`.
 - If the user has stack or install preferences -> `nori-capability-profile`.
 - If implementation follows the decision -> `nori-architecture-apply`.
 - If completion is being judged -> `nori-reporting`.
@@ -72,5 +91,8 @@ Risk: ...
 - Do not self-build because it seems faster, simpler, or familiar without evidence.
 - Do not add a dependency only to avoid a few stable product-domain lines.
 - Do not make build-vs-buy a user-facing Product AC.
+- Do not let build-vs-buy decide product-surface questions such as CRUD
+  controls, required fields, feedback messages, persistence expectations, or
+  destructive boundaries. Those belong in Product AC.
 - Do not claim confident architecture completion while required reuse candidates or self-build reasons are missing.
 - Do not treat dashboard activity, events, or snapshots as proof that reuse candidates were checked.

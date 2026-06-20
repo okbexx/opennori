@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-ac-o-18-aligned",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-O-18",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Acceptance Surface Modeling stays in packaged Skills, protocol, README, AGENTS, and asset tests while CLI remains deterministic state storage rather than a subjective AC validator.",
+  "fit": "Aligned with the confirmed TypeScript agent state CLI baseline: packaged Skills own subjective product-surface modeling; CLI only stores state, reports evidence, and validates objective structure.",
+  "implementation_focus": "Update root routing, acceptance/autogoal, evidence, reporting, protocol, README, AGENTS, and asset tests for operation-path acceptance modeling.",
+  "evidence": "",
+  "limitations": "",
+  "created_at": "2026-06-20T06:40:58.866Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

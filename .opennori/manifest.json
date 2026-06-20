@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-20T06:07:33.855Z",
+  "updated_at": "2026-06-20T07:20:17.278Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -208,67 +208,67 @@
     "skills": [
       {
         "name": "nori",
-        "description": "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, asks for project health, wants architecture decided first, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, and .opennori state as coupled parts of one product.",
+        "description": "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, asks for project health, wants architecture decided first, says UI/CRUD/dashboard/list/form/settings/admin AC are too broad or missing operation paths, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, and .opennori state as coupled parts of one product.",
         "path": "plugins/opennori/skills/nori/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-autogoal",
-        "description": "Automatically converge a rough user idea into a standard OpenNori Nori Contract Draft without creating a separate autogoal artifact. Use when the user asks for autogoal, wants OpenNori to derive goal and AC from a rough idea, or wants fewer clarification rounds before approving a contract.",
+        "description": "Automatically converge a rough user idea into a standard OpenNori Nori Contract Draft without creating a separate autogoal artifact. Use when the user asks for autogoal, enhanced autogoal, self-grill, wants OpenNori to derive goal and AC from a rough idea, wants fewer clarification rounds, or needs a complete product/UI/CRUD/dashboard idea expanded into reviewable user operation paths before approval.",
         "path": "plugins/opennori/skills/nori-autogoal/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-acceptance",
-        "description": "Discover, draft, approve, and revise human-centered OpenNori acceptance criteria from natural-language goals, fuzzy ideas, Skill-prepared brainstorm directions, next outcomes, or user corrections. Use when completion meaning is unclear, AC quality is being discussed, or a human-facing outcome needs to become a Nori Contract.",
+        "description": "Discover, draft, approve, and revise human-centered OpenNori acceptance criteria from natural-language goals, fuzzy ideas, Skill-prepared brainstorm directions, next outcomes, or user corrections. Use when completion meaning is unclear, AC quality is being discussed, a human-facing outcome needs a Nori Contract, or UI/CRUD/dashboard/list/form/settings/admin work needs Acceptance Surface Modeling with concrete user operation paths before approval.",
         "path": "plugins/opennori/skills/nori-acceptance/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-evidence",
-        "description": "Record, prune, and judge reviewable OpenNori evidence for acceptance criteria while preserving agent freedom to choose verification methods. Use when the user says to attach a validation, confirms behavior, waives a gap, asks why an AC is passing, or says evidence is stale, invalid, or insufficient.",
+        "description": "Record, prune, and judge reviewable OpenNori evidence for acceptance criteria while preserving agent freedom to choose verification methods. Use when the user says to attach a validation, confirms behavior, waives a gap, asks why an AC is passing, says evidence is stale/invalid/insufficient, or broad UI/CRUD/dashboard evidence lacks the modeled user operation path needed for confident passing.",
         "path": "plugins/opennori/skills/nori-evidence/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-capability-profile",
-        "description": "Capture and check OpenNori execution preferences such as required Skills, preferred stacks, avoided tools, install policy, and user-declared implementation constraints. Use when the user says a task must use a specific Skill, prefers a library or stack, wants to avoid a tool, or requires approval before installs.",
+        "description": "Capture and check OpenNori execution preferences such as required Skills, preferred stacks, avoided tools, install policy, and user-declared implementation constraints. Use when the user says a task must use a specific Skill, prefers a library or stack, wants to avoid a tool, requires approval before installs, or declares UI/CRUD/dashboard stack preferences that must stay separate from Product AC operation paths.",
         "path": "plugins/opennori/skills/nori-capability-profile/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-architecture-brainstorm",
-        "description": "Establish a reviewable OpenNori Architecture Baseline before non-trivial implementation. Use when the user wants a good architecture first, asks for built-in or project architecture profiles, prefers a stack that should shape implementation, or expects future agent work to follow a confirmed technical baseline.",
+        "description": "Establish a reviewable OpenNori Architecture Baseline before non-trivial implementation. Use when the user wants a good architecture first, asks for built-in or project architecture profiles, prefers a stack that should shape implementation, expects future agent work to follow a confirmed technical baseline, or asks for architecture around UI/CRUD/dashboard work after Product AC operation paths are concrete.",
         "path": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-architecture-apply",
-        "description": "Apply a confirmed OpenNori Architecture Baseline while implementing acceptance gaps. Use before non-trivial code changes when a current goal has architecture state, when resuming implementation in a new session, or when the agent must ensure Product AC work stays aligned with the baseline.",
+        "description": "Apply a confirmed OpenNori Architecture Baseline while implementing acceptance gaps. Use before non-trivial code changes when a current goal has architecture state, when resuming implementation in a new session, when the agent must ensure Product AC work stays aligned with the baseline, or when implementation of UI/CRUD/dashboard gaps must first confirm the AC has modeled user operation paths.",
         "path": "plugins/opennori/skills/nori-architecture-apply/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-architecture-challenge",
-        "description": "Create reviewable Architecture Challenges when evidence conflicts with a confirmed OpenNori Architecture Baseline. Use when the baseline appears too heavy, too weak, incompatible with project conventions, blocked by license/security/runtime constraints, or contradicted by implementation evidence.",
+        "description": "Create reviewable Architecture Challenges when evidence conflicts with a confirmed OpenNori Architecture Baseline. Use when the baseline appears too heavy, too weak, incompatible with project conventions, blocked by license/security/runtime constraints, contradicted by implementation evidence, or when the agent must distinguish real architecture drift from missing UI/CRUD/dashboard Product AC operation-path detail.",
         "path": "plugins/opennori/skills/nori-architecture-challenge/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-build-vs-buy",
-        "description": "Record OpenNori build-vs-buy decisions before infrastructure or platform work so agents prefer existing project code, standard libraries, official SDKs, and mature open-source libraries before self-building. Use when implementation touches CLI parsing, schemas, storage, rendering, routing, auth, installers, validators, adapters, UI primitives, or other reusable infrastructure.",
+        "description": "Record OpenNori build-vs-buy decisions before infrastructure or platform work so agents prefer existing project code, standard libraries, official SDKs, and mature open-source libraries before self-building. Use when implementation touches CLI parsing, schemas, storage, rendering, routing, auth, installers, validators, adapters, UI primitives, or reusable infrastructure, especially after UI/CRUD/dashboard Product AC operation paths are defined.",
         "path": "plugins/opennori/skills/nori-build-vs-buy/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-project-health",
-        "description": "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, or needs safe lifecycle actions with preview and explicit confirmation.",
+        "description": "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, needs safe lifecycle actions with preview and explicit confirmation, or sees healthy state but broad UI/CRUD/dashboard AC still need acceptance review.",
         "path": "plugins/opennori/skills/nori-project-health/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-reporting",
-        "description": "Explain OpenNori status, current gaps, completion decisions, user intervention, reports, changes, and context export in human terms. Use when the user asks whether work is complete, what remains, what changed, what they need to do, or how to continue after a completed goal.",
+        "description": "Explain OpenNori status, current gaps, completion decisions, user intervention, reports, changes, and context export in human terms. Use when the user asks whether work is complete, what remains, what changed, what they need to do, how to continue after a completed goal, or whether broad UI/CRUD/dashboard/list/form/settings/admin AC can be confidently accepted from evidence and operation paths.",
         "path": "plugins/opennori/skills/nori-reporting/SKILL.md",
         "source": "package"
       }
@@ -426,6 +426,17 @@
         "summary": "Conversation-to-contract adoption is implemented as Skill-driven nori-acceptance behavior backed by the existing standard draft path, without adding a new CLI workflow or autogoal artifact.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-ac-o-10-aligned.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-ac-o-18-aligned",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-O-18",
+        "status": "aligned",
+        "summary": "Acceptance Surface Modeling stays in packaged Skills, protocol, README, AGENTS, and asset tests while CLI remains deterministic state storage rather than a subjective AC validator.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-o-18-aligned.json",
         "schema_valid": true,
         "schema_errors": []
       }

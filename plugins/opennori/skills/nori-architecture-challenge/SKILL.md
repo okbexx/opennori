@@ -1,6 +1,6 @@
 ---
 name: nori-architecture-challenge
-description: Create reviewable Architecture Challenges when evidence conflicts with a confirmed OpenNori Architecture Baseline. Use when the baseline appears too heavy, too weak, incompatible with project conventions, blocked by license/security/runtime constraints, or contradicted by implementation evidence.
+description: Create reviewable Architecture Challenges when evidence conflicts with a confirmed OpenNori Architecture Baseline. Use when the baseline appears too heavy, too weak, incompatible with project conventions, blocked by license/security/runtime constraints, contradicted by implementation evidence, or when the agent must distinguish real architecture drift from missing UI/CRUD/dashboard Product AC operation-path detail.
 ---
 
 ## Mission
@@ -9,11 +9,22 @@ Give the user a concrete, evidence-backed decision point before the agent change
 
 A challenge is a review artifact. It does not authorize implementation drift by itself.
 
+Use a challenge for real architecture conflict, not for missing Product AC. If
+the disagreement is that a UI, CRUD, dashboard, form, settings, admin, preview,
+CLI prompt, MCP/tool flow, or management-surface AC is too broad to know what
+the user should operate or see, hand off to `nori-acceptance` instead of filing
+an Architecture Challenge. Product-surface questions such as button vs icon,
+directory picker vs manual path, field scope, feedback message, persistence,
+and delete/unlink/archive boundary belong in the AC Review Loop.
+
 ## Start Here
 
 1. Read the current baseline and current Product AC.
 2. Collect the specific project evidence that conflicts with the baseline.
-3. Decide whether the conflict is real architecture drift or just implementation detail.
+3. Decide whether the conflict is real architecture drift, just implementation
+   detail, or actually a missing Acceptance Surface Model. If the user cannot
+   judge the visible operation path from Product AC, route to `nori-acceptance`
+   before challenging the baseline.
 4. Record a challenge with summary, evidence, recommendation, risk, and whether user input is needed.
 5. Stop architecture-changing work until the user confirms, revises, or waives.
 6. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live activity while preparing the challenge: start before challenge work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-architecture-challenge --state thinking --summary "..." --json`.
@@ -30,6 +41,9 @@ Dashboard signal when observed:
 
 - "The baseline does not fit this repo" -> record a challenge with project evidence.
 - "The baseline is too vague" -> challenge it with missing concrete technical baseline evidence: runtime topology, source of truth, module boundaries, contract surfaces, data flows, dependency decisions, reference mappings, or verification.
+- "The AC is too vague", "project CRUD is unclear", or "dashboard behavior is
+  broad" -> hand off to `nori-acceptance`; do not disguise a missing user
+  operation path as an architecture challenge.
 - "This dependency is not viable" -> challenge the dependency policy with license, maintenance, security, package size, performance, or integration evidence.
 - "Can we just use another architecture" -> create a challenge first; do not silently switch.
 - "User approved the change" -> update or create the appropriate baseline through architecture brainstorm/profile flow, then continue implementation.
@@ -46,6 +60,8 @@ Must write live dashboard activity for challenge preparation when the dashboard 
 - Need build-vs-buy evidence for the recommendation -> `nori-build-vs-buy`.
 - Need completion/status summary -> `nori-reporting`.
 - If the conflict changes what the product should do -> `nori-acceptance`.
+- If the conflict is missing visible Product AC operation-path detail rather
+  than architecture drift -> `nori-acceptance`.
 
 ## User Reply Shape
 
@@ -64,6 +80,9 @@ Need user: yes/no
 - Do not treat a challenge as permission to change the baseline.
 - Do not create task lists or phases.
 - Do not challenge just because another approach is personally preferred.
+- Do not use Architecture Challenge to decide product-surface semantics that
+  should be user-confirmed AC, such as CRUD controls, field rules, UI feedback,
+  persistence, or destructive boundaries.
 - Do not continue implementation under a baseline that cannot answer which runtime, state, module, contract, dependency, and verification boundaries apply.
 - Do not hide architecture risk inside implementation notes.
 - Do not treat dashboard activity, events, or snapshots as proof that a challenge is resolved.

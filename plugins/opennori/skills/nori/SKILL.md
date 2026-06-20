@@ -1,6 +1,6 @@
 ---
 name: nori
-description: "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, asks for project health, wants architecture decided first, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, and .opennori state as coupled parts of one product."
+description: "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, asks for project health, wants architecture decided first, says UI/CRUD/dashboard/list/form/settings/admin AC are too broad or missing operation paths, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, and .opennori state as coupled parts of one product."
 ---
 
 ## Mission
@@ -28,6 +28,18 @@ state and may expose review surfaces, but it must not be treated as an oracle
 for whether AC are human-acceptable. When the user asks whether AC are good
 enough, route to `nori-acceptance` and reason from the user's goal, visible
 entrypoints, operations, outcomes, evidence needs, and boundaries.
+
+For any visible product surface, the root router must expect Acceptance Surface
+Modeling before draft approval, evidence confidence, or completion reporting.
+This applies when the user mentions UI screens, CRUD objects, dashboards, lists,
+tables, forms, settings, editors, inspectors, previews, management consoles,
+desktop windows, CLI prompts, MCP/tool-facing user flows, or similar workflows.
+If an AC only says "project CRUD works", "users can manage projects",
+"settings are editable", or "dashboard shows state", route to
+`nori-acceptance` instead of continuing. The child Skill should model actor,
+entry, visible trigger, object, action, interaction surface, required
+information, feedback, state change, persistence, destructive boundary, and
+evidence shape.
 
 Draft approval requires a one-AC-at-a-time AC Review Loop. After a draft exists,
 the agent must show a compact contract overview, then review only the current
@@ -75,6 +87,7 @@ routing begin until final approval happens after every AC is confirmed.
 - "complete product", "complete feature", "full app", "full dashboard", "完整产品", "完整功能闭环", "完整应用", "完整 Dashboard", "完整工作台", or "不要 MVP" -> hand off to `nori-acceptance` or `nori-autogoal` with an explicit full-acceptance-surface instruction. The child Skill should preserve the complete user closure, not compress the Nori Contract into a compact MVP-style AC set unless the user explicitly narrows scope.
 - "Why are there so few AC", "these AC are too broad", "为什么 AC 这么少", "AC 太粗", or a complete-product draft has broad bundled criteria -> hand off to `nori-acceptance` for coverage review and revision. The child Skill should show missing coverage surfaces, split independent user judgments, and keep the result draft-only until user approval.
 - "The UI/UX AC is missing", "this is a page/app/dashboard/desktop/workbench/form", "the interface must feel usable", or a visible interface goal has only data/status/function AC -> hand off to `nori-acceptance` to add user-experience acceptance checks for navigation, information hierarchy, states, feedback, readability, consistency, recovery, and UI boundaries.
+- "project CRUD", "manage projects/items", "管理项目", "新增/编辑/删除", "list/form/table/settings/dashboard/admin" as a broad goal or AC -> hand off to `nori-acceptance` for Acceptance Surface Modeling. Do not accept one broad CRUD/outcome AC until the agent has separated user operations such as add, view/select, edit, delete/unlink/archive, cancel, recover, and preview when their entry, visible trigger, interaction surface, required information, feedback, state change, persistence, destructive boundary, or evidence shape differs.
 - "验收标准用中文", "用中文写 Nori Contract", "write the AC in English", or any explicit Contract language request -> carry that preference to `nori-acceptance`; the child Skill records it as Contract presentation, not as Product AC.
 - "把现有契约改成中文/英文" -> hand off to `nori-acceptance`; changing an approved/current Contract language requires explicit user approval and must not happen as an automatic status/report side effect.
 - If the user already stated the goal before initialization, do not ask them to repeat it after `opennori init`; continue acceptance discovery for that stated goal.
@@ -148,6 +161,11 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not accept generic AC Interpretation Review. The agent must name the concrete objects, fields, states, boundaries, failure examples, and evidence objects that make each AC reviewable.
 - Do not let AC Interpretation Review become implementation planning or hidden requirements; it is only a user-facing semantic confirmation before approval.
 - Do not accept visible interface goals with only functional/data AC. The agent must check whether the user can navigate, scan, understand state, get feedback, recover from failure, and judge visual/interaction consistency.
+- Do not accept broad visible product-surface AC such as "project CRUD works",
+  "manage items", "settings are editable", or "dashboard shows state" before
+  Acceptance Surface Modeling identifies actor, entry, visible trigger, object,
+  action, interaction surface, required information, feedback, state change,
+  persistence, destructive boundary, and evidence shape.
 - Do not turn architecture, profile, build-vs-buy, Plugin, hook, or tool preferences into Product AC.
 - Do not let the CLI decide whether a goal is non-trivial. The agent/user records Architecture Requirement status; CLI only routes from that recorded state.
 - Do not treat dashboard activity, events, or snapshots as acceptance evidence.

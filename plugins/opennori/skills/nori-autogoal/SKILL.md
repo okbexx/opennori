@@ -1,6 +1,6 @@
 ---
 name: nori-autogoal
-description: Automatically converge a rough user idea into a standard OpenNori Nori Contract Draft without creating a separate autogoal artifact. Use when the user asks for autogoal, wants OpenNori to derive goal and AC from a rough idea, or wants fewer clarification rounds before approving a contract.
+description: Automatically converge a rough user idea into a standard OpenNori Nori Contract Draft without creating a separate autogoal artifact. Use when the user asks for autogoal, enhanced autogoal, self-grill, wants OpenNori to derive goal and AC from a rough idea, wants fewer clarification rounds, or needs a complete product/UI/CRUD/dashboard idea expanded into reviewable user operation paths before approval.
 ---
 
 ## Mission
@@ -30,6 +30,39 @@ persistence, review methods, assumptions, and out-of-scope boundaries. Then ask
 only the few questions that would change completion meaning. The user should
 see a concise scenario coverage summary, assumptions, and critical questions,
 not the agent's private reasoning transcript.
+
+Autogoal must also build an Acceptance Surface Model before it writes Product
+AC for visible product surfaces. A visible product surface includes UI screens,
+CRUD objects, dashboards, lists, tables, forms, settings, editors, inspectors,
+previews, management consoles, desktop windows, CLI prompts, MCP/tool-facing
+user flows, or any workflow where completion is judged through a concrete entry,
+object, action, state, or feedback. For every user-facing capability, model:
+
+- actor
+- entry
+- visible trigger
+- object
+- action
+- interaction surface
+- required information
+- feedback
+- state change
+- persistence
+- destructive boundary
+- evidence shape
+
+Do not write broad outcome AC like "project CRUD works", "users can manage
+items", or "the dashboard shows everything". Convert them into user-judgable
+flows such as add, view/select, edit, delete/unlink/archive, preview, recover,
+and report review when those flows have different entries, triggers, fields,
+feedback, state changes, or destructive boundaries.
+
+If the model requires a product decision the user did not provide, use a
+recommended assumption when it is low-risk and reviewable, or ask one critical
+completion-changing question. The draft must expose those assumptions before
+approval; autogoal must not silently decide whether a control is a button or
+icon, whether a directory picker or manual path field is used, or whether
+delete removes local data or only unlinks a registry entry.
 
 The user must be able to tell Enhanced Discovery was actually used. For enhanced
 autogoal, the visible draft reply must include an `Enhanced Discovery checked`
@@ -73,16 +106,17 @@ completion condition, revise the draft instead of continuing the loop.
 5. Read the user's rough idea, any stated constraints, Nori Profile preferences, and relevant project context such as README, product docs, existing UI/API surfaces, and nearby source files.
 6. Preserve the user's full intended product closure. If the idea is broad, do not reduce it to a smaller MVP. Express the full closure through the contract's goal and AC.
 7. Run Enhanced Discovery before drafting. Internally self-grill the rough idea across user roles, entrypoints, primary scenarios, alternate states, data objects and rules, validation, success signals, persistence, failure and recovery, UI/UX when visible, reporting/review, and explicit boundaries. For a todolist, this includes task creation, list visibility, editable fields, complete/uncomplete, filtering, empty state, invalid input, deletion/recovery, refresh persistence, and whether due dates/tags/priorities/sync are included.
-8. Convert strong inferences into assumptions instead of making the user answer a long questionnaire. Ask only the critical questions that change completion meaning, such as whether a todolist needs due dates/tags/priorities or whether persistence is local-only or backend-backed.
-9. If the idea implies a complete product, complete feature loop, full app, full dashboard, or full workbench, enumerate the full acceptance surface before drafting: user roles, entry/navigation, primary workflows, state transitions, data objects and rules, permissions, first-run or empty states, persistence, failure/recovery, reporting or review method, UI/UX when visible, cross-session continuity, and explicit out-of-scope boundaries.
-10. For complete-product goals, create a short acceptance coverage map before drafting. Include at least the surfaces that matter to that product type, such as roles, project list and switching, overview, object lists, object detail, read-only previews, source/version/audit, memory, capabilities, external knowledge, search, timeline, security boundary, persistence, state feedback, failure recovery, and final review/report. Do not treat this map as a separate contract; it is the checklist that prevents a compressed draft.
-11. Convert the coverage map into criteria where each criterion describes one user operation or judgment surface. A criterion may cover closely related sub-states for the same surface, but it must not combine unrelated surfaces such as project overview plus assets plus memory plus knowledge base plus capabilities. Split combined criteria before running `opennori draft --brief`.
-12. If a coverage surface is intentionally omitted, record it as an assumption or open question visible to the user before approval. If the omission would change the meaning of complete product closure, ask the user instead of silently narrowing.
-13. Do internal acceptance discovery yourself: entrypoint, user operation, concrete objects, success signal, persistence/recovery, failure behavior, boundary, and review method.
-14. For visible interface goals such as pages, apps, dashboards, desktops, workbenches, forms, settings screens, and admin consoles, include user-experience acceptance. Cover entry and navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability and scanability, visual and interaction consistency, recovery paths, and UI boundaries. Do not collapse this into one vague "UI looks good" check.
-15. Show the user a compact `Enhanced Discovery checked` summary before or with the draft when enhanced mode was used: scenario coverage, assumptions, critical questions, and explicit out-of-scope boundaries. Keep it short and secondary; it is not a plan, report, or approval artifact.
-16. When enough information exists, create a temporary NoriBrief JSON and run `opennori draft --brief <brief.json> --root <repo> --json`. The resulting artifact is a standard draft Nori Contract. For enhanced mode, the brief must persist `acceptance_basis.source = "autogoal"`, `acceptance_basis.mode = "enhanced"`, `coverage_summary`, `assumptions`, `open_questions`, and optional `out_of_scope` so status/report can show the user how this draft was discovered.
-17. Show the draft using the standard `nori-acceptance` reply shape, include a compact "Coverage checked" or "Enhanced Discovery checked" section for broad ideas, and start the one-AC-at-a-time AC Review Loop from the first unconfirmed AC. Ask the user to confirm or revise the current AC; ask for final approve only after the user can judge that the agent understood every AC's specific objects, fields, states, boundaries, and evidence correctly. Do not ask the user to approve autogoal notes.
+8. Build an Acceptance Surface Model for visible surfaces before drafting: actor, entry, visible trigger, object, action, interaction surface, required information, feedback, state change, persistence, destructive boundary, and evidence shape. For project CRUD, this means separate add/select/edit/delete-or-unlink flows when their controls, dialogs, fields, confirmations, persistence, or destructive boundaries differ.
+9. Convert strong inferences into assumptions instead of making the user answer a long questionnaire. Ask only the critical questions that change completion meaning, such as whether a todolist needs due dates/tags/priorities, whether persistence is local-only or backend-backed, or whether deleting a project means unlinking it from the registry or deleting a local directory.
+10. If the idea implies a complete product, complete feature loop, full app, full dashboard, or full workbench, enumerate the full acceptance surface before drafting: user roles, entry/navigation, primary workflows, state transitions, data objects and rules, permissions, first-run or empty states, persistence, failure/recovery, reporting or review method, UI/UX when visible, cross-session continuity, and explicit out-of-scope boundaries.
+11. For complete-product goals, create a short acceptance coverage map before drafting. Include at least the surfaces that matter to that product type, such as roles, project list and switching, overview, object lists, object detail, read-only previews, source/version/audit, memory, capabilities, external knowledge, search, timeline, security boundary, persistence, state feedback, failure recovery, and final review/report. Do not treat this map as a separate contract; it is the checklist that prevents a compressed draft.
+12. Convert the coverage map and surface model into criteria where each criterion describes one user operation or judgment surface. A criterion may cover closely related sub-states for the same surface, but it must not combine unrelated surfaces such as project overview plus assets plus memory plus knowledge base plus capabilities. Split combined criteria before running `opennori draft --brief`.
+13. If a coverage surface is intentionally omitted, record it as an assumption or open question visible to the user before approval. If the omission would change the meaning of complete product closure, ask the user instead of silently narrowing.
+14. Do internal acceptance discovery yourself: entrypoint, user operation, concrete objects, success signal, persistence/recovery, failure behavior, boundary, and review method.
+15. For visible interface goals such as pages, apps, dashboards, desktops, workbenches, forms, settings screens, and admin consoles, include user-experience acceptance. Cover entry and navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability and scanability, visual and interaction consistency, recovery paths, and UI boundaries. Do not collapse this into one vague "UI looks good" check.
+16. Show the user a compact `Enhanced Discovery checked` summary before or with the draft when enhanced mode was used: scenario coverage, surface coverage, assumptions, critical questions, and explicit out-of-scope boundaries. Keep it short and secondary; it is not a plan, report, or approval artifact.
+17. When enough information exists, create a temporary NoriBrief JSON and run `opennori draft --brief <brief.json> --root <repo> --json`. The resulting artifact is a standard draft Nori Contract. For enhanced mode, the brief must persist `acceptance_basis.source = "autogoal"`, `acceptance_basis.mode = "enhanced"`, `coverage_summary`, `assumptions`, `open_questions`, and optional `out_of_scope` so status/report can show the user how this draft was discovered.
+18. Show the draft using the standard `nori-acceptance` reply shape, include a compact "Coverage checked" or "Enhanced Discovery checked" section for broad ideas, and start the one-AC-at-a-time AC Review Loop from the first unconfirmed AC. Ask the user to confirm or revise the current AC; ask for final approve only after the user can judge that the agent understood every AC's specific objects, fields, states, boundaries, and evidence correctly. Do not ask the user to approve autogoal notes.
 
 Useful state commands:
 
@@ -131,6 +165,7 @@ The user should never need to prepare this JSON. The Skill prepares it from the 
 - "不要问我那么多问题" -> infer reasonable assumptions, ask only completion-changing questions, and show them before approval.
 - "这个目标很大" -> preserve the broad goal as a complete user closure; do not reduce it to MVP, first version, prototype, or happy-path subset.
 - "完整产品", "完整功能闭环", "完整应用", "完整 Dashboard", "完整工作台", "full app", "full dashboard", or "not MVP" -> create a standard Nori Contract Draft with a full acceptance surface, even if that means more AC than a minimal starter contract. First show or internally maintain a coverage map, then split independent user judgment surfaces into separate criteria. Ask the user to narrow scope only when they intentionally want a prototype, MVP, first version, or smaller product closure.
+- "project CRUD", "manage projects/items", "管理项目", "新增/编辑/删除", "dashboard/list/form/table/settings/admin" -> build the Acceptance Surface Model before drafting. Do not output a single CRUD/outcome AC when create, view/select, update, delete/unlink/archive, cancel, recover, or preview have different controls, fields, feedback, persistence, or destructive boundaries.
 - "Why are there so few AC", "these AC are too broad", "为什么 AC 这么少", or a draft combines multiple product surfaces into a few broad criteria -> do not defend the draft. Explain that it failed coverage review, regenerate or revise with a coverage map, and keep the result draft-only until the user approves.
 - "整理我们刚才讨论的 AC", "take over the AC we just discussed", or "不要开始实现，先给我确认" -> hand off to `nori-acceptance`; this is conversation adoption, not rough-idea autogoal.
 - "approve" after an autogoal draft -> if every AC has not already been confirmed one by one in this conversation, do not approve yet. Start or continue the AC Review Loop from the first unconfirmed AC. Only after all ACs are confirmed should you run `opennori approve`, then follow returned `agent_next`; for non-trivial work this usually hands off to `nori-architecture-brainstorm`.
@@ -179,8 +214,12 @@ Reviewing AC-1:
   AC text: ...
   My concrete understanding:
     User enters: exact screen, route, menu, command, or object list the user starts from.
+    User trigger: exact button, icon, menu item, shortcut, command, row action, or automatic prompt used to begin the operation.
     User does or judges: exact object, field, filter, button, state, or report the user acts on or evaluates.
+    Interaction surface: exact modal, drawer, page, inline edit, system picker, command output, table row, dashboard panel, or other surface involved.
+    Required information: exact fields, selections, defaults, read-only values, validation rules, and optional values involved.
     User should see: exact visible data, label, status, message, preview, persisted value, or report result.
+    Persistence/destructive boundary: exact refresh/reopen/restart expectation and what is removed, unlinked, archived, hidden, or explicitly not deleted.
     Does not pass if: concrete wrong, missing, stale, failed, inaccessible, confusing, or out-of-scope cases.
     Evidence I would use: specific screenshot, browser run, command output, saved state, report, artifact path, or human confirmation that would prove this AC.
 Decision:
@@ -207,8 +246,12 @@ For `presentation.language: zh-CN`, use:
   AC 文本：...
   我的具体理解：
     用户入口：用户从哪个具体页面、路由、菜单、命令或对象列表进入。
+    可见触发：用户点击哪个按钮、图标、菜单项、快捷键、命令、行操作或自动提示来开始操作。
     用户操作或判断：用户操作或判断哪个具体对象、字段、筛选器、按钮、状态或报告。
+    交互面：使用哪个弹窗、抽屉、页面、行内编辑、系统选择器、命令输出、表格行、dashboard 面板或其它可见界面。
+    必要信息：涉及哪些字段、选择项、默认值、只读值、校验规则和可选值。
     用户应该看到：用户看到的具体数据、标签、状态、提示、预览、持久化结果或报告结论。
+    持久化/破坏边界：刷新、重启、重进后什么仍应成立；删除、解绑、归档、隐藏或明确不删除的对象是什么。
     不算通过：哪些具体错误、缺失、过期、失败、不可访问、难以理解或越界情况不算通过。
     我会使用的证据类型：能证明该 AC 的具体截图、浏览器运行、命令输出、保存状态、报告、制品路径或人工确认。
 决定：
@@ -236,6 +279,10 @@ Keep any autogoal notes short and clearly secondary. The user is approving the N
 - Do not turn AC Interpretation Review into an implementation plan, file plan, task list, architecture decision, or evidence claim.
 - Do not use AC count as the target, but do use coverage as the target. A complete dashboard/workbench often needs separate criteria for project selection, overview, asset list, asset detail, read-only preview, memory, capability status, external knowledge candidates, search/index state, timeline/audit, security boundary, state feedback, persistence, and failure recovery.
 - Do not generate only functional/data/status AC for a user-visible interface. Autogoal must include concrete UX acceptance dimensions for navigation, hierarchy, states, feedback, readability, consistency, recovery, and UI boundaries when the goal includes a page, app, Dashboard, Desktop, workbench, form, or settings/admin screen.
+- Do not generate broad outcome AC for visible product surfaces before modeling
+  actor, entry, visible trigger, object, action, interaction surface, required
+  information, feedback, state change, persistence, destructive boundary, and
+  evidence shape.
 - Do not make architecture, libraries, files, commands, Skills, tests, or build-vs-buy choices into Product AC.
 - Do not ask implementation questions in autogoal. Architecture and build-vs-buy are handled after Product AC approval.
 - Do not ask the user a full questionnaire when reasonable assumptions can be made. Ask only questions that change completion meaning.

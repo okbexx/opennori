@@ -80,6 +80,7 @@ The operator layer proves that Codex can actually use OpenNori as the work proto
 | AC-O-8 | Codex conversation | State required Skills, preferred stacks, avoided tools, or execution constraints | The agent records a Nori Profile without making the user remember CLI syntax. | Must/avoid profile items are shown in contract and report; unsatisfied must items or violated avoid items block completion unless waived. |
 | AC-O-9 | Codex conversation | Ask OpenNori to use a good architecture for a non-trivial goal | The user sees Product AC and an Architecture Baseline before implementation starts. | The baseline is not a plan; it names the architecture profile, boundaries, build-vs-buy policy, and challenge rule. |
 | AC-O-14 | Codex conversation | Review a newly generated Nori Contract Draft | The user can tell whether the agent understood every AC before approving. | After draft generation, the agent shows a compact overview and then reviews one AC at a time: exact user entry, object or field, visible state/message/result, non-passing examples, and specific evidence object for the current AC; the user confirms or revises that AC before the next AC; final approval is requested only after every AC has been confirmed one by one. If the explanation is generic, adds or changes completion meaning, or cannot be made specific from the draft, the draft is revised instead of approved. |
+| AC-O-18 | Codex conversation | Give the agent a visible product goal such as UI, CRUD, dashboard, form, list, settings, or admin work | The agent models the actual user operation path before drafting, recording evidence, or reporting confident completion. | The Skill-owned Acceptance Surface Model identifies actor, entry, visible trigger, object, action, interaction surface, required information, feedback, state change, persistence, destructive boundary, and evidence shape; broad outcome AC such as "CRUD works" or "dashboard shows state" are routed back to acceptance revision, not treated as confidently acceptable. |
 
 ### L3 Productization AC
 
@@ -234,6 +235,53 @@ command flags; the root `nori` Skill routes natural-language requests to focused
 Each packaged Skill states its mission, starting state reads, natural-language mapping, allowed
 state writes, handoff rules, user-facing reply shape, and misuse guards. This lets agents use
 OpenNori from natural language while the CLI remains a deterministic state layer.
+
+Visible product surfaces require Acceptance Surface Modeling before the agent
+drafts Product AC, records confident passing evidence, or reports confident
+completion. The model is an agent runtime contract, not a CLI validator. For
+UI screens, CRUD objects, dashboards, lists, tables, forms, settings, editors,
+inspectors, previews, management consoles, desktop windows, CLI prompts,
+MCP/tool-facing user flows, and similar workflows, the agent identifies:
+
+- actor
+- entry
+- visible trigger
+- object
+- action
+- interaction surface
+- required information
+- feedback
+- state change
+- persistence
+- destructive boundary
+- evidence shape
+
+When a goal says "project CRUD", "manage projects", "settings are editable",
+or "dashboard shows state", the agent splits create, view/select, edit,
+delete/unlink/archive, cancel, recover, and preview flows when their controls,
+fields, feedback, persistence, destructive boundary, or evidence differs. If a
+model item changes the meaning of done and is unknown, the agent asks one
+completion-changing question or records a clear assumption for the AC Review
+Loop. This must not become a fixed target-type word list, implementation plan,
+or hard CLI quality gate.
+
+Acceptance Surface Modeling is a cross-Skill gate. Architecture, profile,
+build-vs-buy, health, evidence, and reporting Skills must not bypass it:
+
+- `nori-architecture-brainstorm` may decide runtime/state/module/dependency
+  boundaries only after the visible Product AC names the user operation path.
+- `nori-architecture-apply` must stop implementation when the current visible
+  Product AC is still a broad outcome.
+- `nori-architecture-challenge` must distinguish real architecture drift from
+  missing AC detail; missing controls, fields, feedback, persistence, or
+  delete semantics route to `nori-acceptance`.
+- `nori-build-vs-buy` may choose reusable infrastructure, but it cannot decide
+  what the user accepts on the product surface.
+- `nori-capability-profile` records Skill/stack/tool constraints separately;
+  satisfying them does not prove the visible workflow.
+- `nori-project-health` reports bundle/state readiness only; it routes broad
+  AC meaning back to acceptance review instead of treating readiness as
+  completion.
 
 If a user and agent are already discussing goal and AC before OpenNori is initialized or before a
 contract is approved, the agent should not restart the user through autogoal or a full discovery
@@ -445,6 +493,21 @@ On every turn:
 1b. If the user asks for a complete product, complete feature loop, full app, full dashboard, full workbench, or explicitly says not MVP, the Skill must define the full acceptance surface before approval instead of compressing the goal into a compact starter AC set. Cover user roles, entry/navigation, core workflows, state transitions, data rules, permissions and boundaries, failure/recovery, persistence, UI/UX when visible, and report/review method. AC count may grow with the real product surface; execution still advances one current gap at a time. Only shrink the completion definition when the user explicitly chooses a prototype, MVP, first version, or narrower scope.
 1b-i. For complete-product autogoal or draft revision, the Skill must run a coverage self-check before asking for approval. It should map product surfaces to planned AC boundaries and split unrelated user judgments instead of bundling them into a few broad AC. Typical separate surfaces include project selection, overview, object list/detail, read-only preview, source/version/audit, memory, capabilities, external knowledge, search/index, timeline/audit, permissions/security boundary, state feedback, persistence, failure recovery, and final review/report. This remains Skill/user review behavior, not a CLI hard validator or natural-language quality test.
 1c. If the goal includes a visible interface such as a page, app, Dashboard, Desktop, workbench, form, settings screen, or admin console, the Skill must discover UI/UX acceptance as Product AC. It should cover entry/navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability, visual and interaction consistency, recovery paths, and UI boundaries. This is Skill/user review behavior, not a CLI hard validator.
+1d. If the goal or AC includes UI, CRUD, Dashboard, list, table, form, settings,
+admin, desktop, CLI prompt, MCP tool flow, preview, inspector, or management
+surface behavior, build an Acceptance Surface Model before drafting,
+approving, recording confident passing evidence, or reporting confident
+completion. Model actor, entry, visible trigger, object, action, interaction
+surface, required information, feedback, state change, persistence, destructive
+boundary, and evidence shape. Do not accept broad outcome AC such as "CRUD
+works", "manage items", "settings are editable", or "dashboard shows state";
+split the underlying user operations when their entry, control, fields,
+feedback, persistence, destructive boundary, or evidence differs.
+1d-i. Apply that rule across all OpenNori Skills. Do not preview/confirm an
+architecture baseline, record architecture apply, file an architecture
+challenge, choose a dependency, mark profile compliance, report project health,
+or answer completion in a way that hides the fact that visible Product AC lacks
+user operation-path detail. Route those cases to `nori-acceptance`.
 2. Ask only the discovery questions that affect completion judgment. Do not turn discovery gaps into implementation tasks or completion evidence.
 3. If the user wants to discuss, brainstorm, explore, or is not ready to define acceptance criteria, prepare candidate directions as the Skill and optionally store them with `opennori brainstorm --idea "<idea>" --candidates '<candidates.json>' --root <repo> --json`.
 4. Show only candidate acceptance directions and ask the user to choose or revise a direction. Brainstorm output is not a contract or completion evidence.
@@ -463,10 +526,10 @@ On every turn:
 17. If the user asks to update an existing OpenNori project, run `opennori doctor`, use `opennori upgrade --dry-run/--confirm` for manifest/protocol/guide refreshes, then run `opennori check`; use `nori-acceptance` to review existing AC wording with the user instead of relying on fixed CLI quality gaps. If packaged Plugin Skills are missing, reinstall or update the OpenNori package instead of copying Skills into the project.
 18. Run `opennori resume --root <repo>` or `opennori next --root <repo>` to recover the current goal and current acceptance gap from repository files.
 19. Work only to produce evidence for that gap under the confirmed Architecture Baseline.
-20. Add acceptance evidence with `opennori evidence add`; choose any suitable verification method, but record basis, sources, reviewability, confidence, and limitations. If existing evidence is invalid or obsolete, run `opennori evidence prune` first so stale proof does not occupy current context. Add profile compliance evidence with `opennori profile evidence` when profile items exist.
+20. Add acceptance evidence with `opennori evidence add`; choose any suitable verification method, but record basis, sources, reviewability, confidence, and limitations. For visible product surfaces, evidence should name the modeled operation path: entry, visible trigger, object/action, interaction surface, required information, feedback, state change, persistence or destructive boundary, and evidence shape. If existing evidence is invalid or obsolete, run `opennori evidence prune` first so stale proof does not occupy current context. Add profile compliance evidence with `opennori profile evidence` when profile items exist.
 21. If a dashboard is useful, publish live activity from `agent_next.dashboard_activity` or `opennori activity start/heartbeat/finish`; do not treat that activity as acceptance evidence or use dashboard controls for confirmation. If no current goal exists, do not bind activity to drafts; if multiple current goals exist, run doctor/project-health because the state is broken.
 22. Run `opennori evaluate`.
-23. Report acceptance state, profile compliance, and evidence, not implementation steps.
+23. Report acceptance state, profile compliance, and evidence, not implementation steps. If objective evidence exists but a visible product AC lacks Acceptance Surface Modeling, report it as objectively evidenced but not confidently acceptable yet and route back to `nori-acceptance`.
 24. If the goal is complete and the user asked to continue, infer or ask for the next human-facing outcome from the completed context and user intent, prepare a full NoriBrief, then run `opennori draft --brief <brief.json> --root <repo> --json`. Do not treat next-loop suggestions as approved AC, phases, task lists, or evidence.
 
 Useful commands:

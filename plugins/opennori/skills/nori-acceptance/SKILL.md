@@ -1,6 +1,6 @@
 ---
 name: nori-acceptance
-description: Discover, draft, approve, and revise human-centered OpenNori acceptance criteria from natural-language goals, fuzzy ideas, Skill-prepared brainstorm directions, next outcomes, or user corrections. Use when completion meaning is unclear, AC quality is being discussed, or a human-facing outcome needs to become a Nori Contract.
+description: Discover, draft, approve, and revise human-centered OpenNori acceptance criteria from natural-language goals, fuzzy ideas, Skill-prepared brainstorm directions, next outcomes, or user corrections. Use when completion meaning is unclear, AC quality is being discussed, a human-facing outcome needs a Nori Contract, or UI/CRUD/dashboard/list/form/settings/admin work needs Acceptance Surface Modeling with concrete user operation paths before approval.
 ---
 
 ## Mission
@@ -20,6 +20,43 @@ AC quality is a Skill responsibility, not a CLI validator. Do not wait for
 stores drafts, contracts, evidence, and objective state; this Skill must use
 the conversation, project context, and user intent to decide what questions to
 ask before approval.
+
+Before drafting or approving Product AC for any visible product surface, build
+an Acceptance Surface Model. A visible product surface is any place where the
+user judges completion through a concrete entry, object, action, state, or
+feedback: UI screens, CRUD objects, dashboards, lists, tables, forms, settings,
+editors, inspectors, previews, management consoles, desktop windows, CLI
+prompts, MCP/tool-facing user flows, or similar user-facing workflows.
+
+Do not jump from intent to broad outcome criteria such as "project CRUD works",
+"user can manage projects", "settings can be modified", or "dashboard shows the
+state". For each user-facing capability, identify:
+
+- actor: who operates or judges.
+- entry: where the user starts.
+- visible trigger: button, icon, menu item, command, shortcut, empty-state
+  action, row action, or automatic prompt.
+- object: what entity is being acted on.
+- action: create, read, update, delete, link, unlink, select, preview, export,
+  recover, or another user-visible operation.
+- interaction surface: modal, drawer, page, inline edit, system picker, context
+  menu, table row, command output, dashboard panel, or another visible surface.
+- required information: fields, selections, defaults, read-only values,
+  validation rules, and optional values.
+- feedback: success, loading, empty, error, cancel, disabled, confirmation, and
+  recovery states.
+- state change: what becomes visible immediately afterward.
+- persistence: what should remain true after refresh, restart, rerun, or
+  reopening.
+- destructive boundary: what is removed, unlinked, hidden, archived, or
+  explicitly not deleted.
+- evidence shape: what screenshot, browser run, command output, state read-back,
+  report, artifact, or human confirmation would let the user judge it.
+
+If any model item changes what "done" means and is unknown, ask the single most
+completion-changing question or write a clear recommended assumption into the
+draft basis and AC Review Loop. Do not silently invent the UI shape, fields, or
+destructive behavior as final AC.
 
 When the user's goal is a complete product, complete feature loop, full app,
 full dashboard, full workbench, or otherwise asks for a complete delivery, do
@@ -60,6 +97,13 @@ the missing completion-changing question before continuing the loop.
    acceptance questions yourself; optionally use `opennori discover` as a
    scratch question source, but do not treat its gap ids or wording as
    authoritative.
+   Build an Acceptance Surface Model before drafting visible product goals:
+   actor, entry, visible trigger, object, action, interaction surface, required
+   information, feedback, state change, persistence, destructive boundary, and
+   evidence shape. If "project CRUD" is the target, separate add/select/edit/unlink or
+   delete flows and expose whether each flow uses a button, icon, menu, system
+   picker, modal, inline edit, confirmation dialog, or another user-visible
+   surface.
    For complete-product goals, expand the full acceptance surface before
    approval instead of compressing it into a starter slice. If scope must be
    reduced, ask the user whether they intentionally want a prototype, MVP,
@@ -112,6 +156,7 @@ Useful state commands:
 - "Change this existing contract to Chinese/English" -> explain that existing approved/current contracts are not silently translated; revise any visible wording that needs translation, then ask for approval and use `approve --no-from-draft --language ...`.
 - "Brainstorm this idea" -> produce selectable acceptance directions; ask which direction should become the contract.
 - "This AC is too vague" -> ask only questions that change completion judgment.
+- "project CRUD", "manage projects", "管理项目", "新增/编辑/删除", "list/form/table/settings/dashboard" with broad AC -> run Acceptance Surface Modeling before approval. Split create/read/update/delete/link/unlink/select/preview operations when they have different entries, visible triggers, interaction surfaces, required fields, feedback, persistence, or destructive boundaries.
 - User answers discovery questions -> convert the answers into a complete NoriBrief with concrete Product AC, run `opennori draft --brief`, then show the draft overview and start the one-AC-at-a-time AC Review Loop before final approval.
 - "confirm AC-1", "AC-1 对", "确认 AC-1" -> mark that AC as conversation-confirmed and continue the AC Review Loop with the next unconfirmed AC. Do not run `opennori approve` until every AC has been confirmed.
 - "revise AC-1: ...", "AC-1 应该是..." -> revise that draft criterion or the draft assumptions with `criterion update --from-draft`, then restart review for the changed AC before continuing. This keeps `acceptance_basis.status` as `draft`; do not treat the revision as approval.
@@ -180,6 +225,14 @@ Ask questions that affect user acceptance:
 - Failure behavior: what the user sees when the operation cannot complete.
 - Boundaries: what is intentionally out of scope.
 - Review method: how the user or reviewer can verify the behavior.
+- Acceptance Surface Model: for each visible product capability, identify actor,
+  entry, visible trigger, object, action, interaction surface, required
+  information, feedback, state change, persistence, destructive boundary, and
+  evidence shape before writing or approving the AC.
+- CRUD and management flows: do not write "CRUD works" as one AC. Ask or infer
+  how users add, view/select, edit, delete/unlink/archive, cancel, and recover;
+  what fields or defaults exist; whether deletion affects local data or only a
+  registry; and what confirmation or failure feedback appears.
 - Complete product surface: when the goal is a full product, full app, full dashboard, full workbench, or complete feature loop, enumerate the acceptance dimensions before drafting: user roles, entry and navigation, primary workflows, state transitions, data objects and rules, permissions, onboarding or first-run state, empty/loading/error/success states, persistence, failure recovery, reporting or audit surface, cross-session continuity, and explicit out-of-scope boundaries.
 - Complete product coverage map: for broad dashboards/workbenches/apps, map the intended contract before approval. Typical separate surfaces include project list/switching, project initialization state, overview, Markdown list/detail/preview, HTML prototype list/detail/preview, source/version/audit, project memory overview/detail/conflict, Codex context export, Skill/CLI/MCP capability status, external knowledge candidates, search/index state, timeline/audit, security boundary, persistence, empty/loading/error/success states, recovery paths, and final review/report.
 - Abstract product surfaces: if an AC says overview, long-term assets, memory, knowledge candidates, capabilities, or result changes, ask what exact visible objects, fields, states, source links, failure states, and boundaries the user must see.
@@ -240,8 +293,12 @@ Reviewing AC-1:
   AC text: ...
   My concrete understanding:
     User enters: exact screen, route, menu, command, or object list the user starts from.
+    User trigger: exact button, icon, menu item, shortcut, command, row action, or automatic prompt used to begin the operation.
     User does or judges: exact object, field, filter, button, state, or report the user acts on or evaluates.
+    Interaction surface: exact modal, drawer, page, inline edit, system picker, command output, table row, dashboard panel, or other surface involved.
+    Required information: exact fields, selections, defaults, read-only values, validation rules, and optional values involved.
     User should see: exact visible data, label, status, message, preview, persisted value, or report result.
+    Persistence/destructive boundary: exact refresh/reopen/restart expectation and what is removed, unlinked, archived, hidden, or explicitly not deleted.
     Does not pass if: concrete wrong, missing, stale, failed, inaccessible, confusing, or out-of-scope cases.
     Evidence I would use: specific screenshot, browser run, command output, saved state, report, artifact path, or human confirmation that would prove this AC.
 Decision:
@@ -268,8 +325,12 @@ For Chinese presentation, use this shape:
   AC 文本：...
   我的具体理解：
     用户入口：用户从哪个具体页面、路由、菜单、命令或对象列表进入。
+    可见触发：用户点击哪个按钮、图标、菜单项、快捷键、命令、行操作或自动提示来开始操作。
     用户操作或判断：用户操作或判断哪个具体对象、字段、筛选器、按钮、状态或报告。
+    交互面：使用哪个弹窗、抽屉、页面、行内编辑、系统选择器、命令输出、表格行、dashboard 面板或其它可见界面。
+    必要信息：涉及哪些字段、选择项、默认值、只读值、校验规则和可选值。
     用户应该看到：用户看到的具体数据、标签、状态、提示、预览、持久化结果或报告结论。
+    持久化/破坏边界：刷新、重启、重进后什么仍应成立；删除、解绑、归档、隐藏或明确不删除的对象是什么。
     不算通过：哪些具体错误、缺失、过期、失败、不可访问、难以理解或越界情况不算通过。
     我会使用的证据类型：能证明该 AC 的具体截图、浏览器运行、命令输出、保存状态、报告、制品路径或人工确认。
 决定：
@@ -280,6 +341,12 @@ For Chinese presentation, use this shape:
 ## Misuse Guards
 
 - Do not accept generic criteria such as "modify fields" or "show an error" until field scope, validation, success, persistence, failure, and review method are clear enough for the user to judge.
+- Do not accept broad product-surface criteria such as "project CRUD works",
+  "user can manage items", "the dashboard shows state", or "settings are
+  editable" until the Acceptance Surface Model is concrete enough for the user
+  to approve: actor, entry, visible trigger, object, action, interaction
+  surface, required information, feedback, state change, persistence,
+  destructive boundary, and evidence shape.
 - Do not accept abstract criteria such as "overall situation", "long-term assets", "project memory", "knowledge candidates", "capabilities", or "result changes" until the exact visible objects, states, source links, failure/recovery behavior, and boundaries are clear enough for the user to judge.
 - Do not accept a compact starter AC set for complete product, complete feature loop, full app, full dashboard, or full workbench goals unless the user explicitly chooses a prototype, MVP, first version, or narrower scope. AC count is not the quality target; complete user-judgable coverage is.
 - Do not accept a complete-product draft where one AC bundles unrelated surfaces such as overview, assets, memory, capabilities, external knowledge, search, audit, UI states, persistence, and recovery. Split it before asking for approval.

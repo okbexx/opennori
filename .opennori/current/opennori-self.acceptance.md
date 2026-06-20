@@ -11,7 +11,7 @@ Language: en
 ## Acceptance Basis
 
 Status: approved
-Summary: User added draft revision state-safety AC.
+Summary: AC-O-18 updated to cover all packaged Skills, not only acceptance/evidence/reporting.
 
 ## Nori Profile
 
@@ -88,6 +88,7 @@ Summary: User added draft revision state-safety AC.
 | AC-O-15 | operator | 作为用户，我要求 OpenNori autogoal 增强模式或让 agent 先自己 grill 一个粗略想法时，agent 会先自行展开使用场景、假设、边界和关键问题，再把结果收敛成标准 Nori Contract Draft。 | 阅读 nori、nori-autogoal packaged Skill、OpenNori protocol、README、官网和测试资产；用 todolist 这类粗略 idea 检查 agent 是否先做 Enhanced Discovery，而不是直接生成少量泛化 AC 或向用户抛完整问卷。 | Skills 明确要求增强 autogoal 仍是 Skill 行为而不是新 CLI 或新产物；agent 自行展开用户角色、入口、场景、数据对象与规则、状态转换、非法输入、成功反馈、持久化、失败/恢复、UI/UX、复查方式、假设和 out-of-scope；只把会改变完成定义的关键问题交给用户确认；最后仍写入标准 Nori Contract Draft，并进入逐条 AC Review Loop。 | passing |
 | AC-O-16 | operator | 作为用户，我要求 OpenNori autogoal 增强模式后，能从 agent 回复、draft 状态和 report/status 中看出 Enhanced Discovery 是否真的被使用，而不是只能相信 agent 自称用了增强模式。 | 查看 nori-autogoal/nori Skills、OpenNori protocol、AGENTS、README、draft markdown/status/report 输出和测试。 | 增强 autogoal 的用户可见回复必须包含 Enhanced Discovery checked；标准 Nori Contract Draft 的 acceptance_basis 必须持久化 source=autogoal、mode=enhanced、coverage_summary、assumptions、open_questions 和可选 out_of_scope；opennori status/resume/report 和 acceptance markdown 能展示这些来源元数据；缺少该确认面时 Skill 不得要求用户 approve；该机制不创建新 CLI、新产物、过程日志或主观 hard validator。 | passing |
 | AC-O-17 | operator | 作为用户，我在 draft 的 AC Review Loop 里修订某条 AC 后，OpenNori 仍然把这份 Nori Contract 保持为待确认草案，而不会把 acceptance_basis 自动标成 approved、不会跳到 profile/architecture/implementation，也不会把修订本身当作 evidence。 | 在一个带有 required Nori Profile 的 draft 上运行 criterion update --from-draft，然后查看 status/current_gap、draft evidence JSON、acceptance markdown、nori-acceptance Skill 和协议文档。 | 修订 draft AC 后 acceptance_basis.status 仍为 draft，approved_at 不存在，source/mode/coverage 等 basis metadata 保留，workflow_status 为 draft，current_gap 为 ACCEPTANCE-BASIS；只有最终 approve 后才能进入 profile、architecture、implementation 或 evidence 路由。已批准 current contract 的 criterion update 仍会清理该 AC 的旧 evidence 并产生新的 evidence gap。 | passing |
+| AC-O-18 | operator | 作为用户，我给 agent 一个 UI、CRUD、Dashboard、表单、列表、设置页、管理台或其它可见产品目标时，OpenNori 能让所有相关 Skills 先守住可验收表面模型，再写 AC、进入架构、记录证据、检查健康或报告完成，而不是生成、接受或绕过宽泛 outcome AC。 | 阅读全部 packaged Skills：nori、nori-acceptance、nori-autogoal、nori-evidence、nori-reporting、nori-architecture-brainstorm、nori-architecture-apply、nori-architecture-challenge、nori-build-vs-buy、nori-capability-profile、nori-project-health，以及 README、protocol、AGENTS 和资产测试；用项目 CRUD 目标检查新增、查看或选择、编辑、删除或解绑等 AC 是否描述用户入口、可见触发、交互面、字段或规则、反馈、状态变化、失败或取消边界和证据形态，并确认 architecture/profile/build-vs-buy/health 不能绕过该建模。 | Skills 把 Acceptance Surface Modeling 写成跨 Skill 的 agent runtime contract：draft、autogoal、AC Review Loop、evidence、reporting、architecture brainstorm/apply/challenge、build-vs-buy、capability profile 和 project health 都必须在可见产品表面缺少 actor、entry、visible trigger、object、action、interaction surface、required information、feedback、state change、persistence、destructive boundary 或 evidence shape 时回到 nori-acceptance；未知项要问单个会改变完成定义的问题，或写成明确假设进入 AC Review Loop；任何旁路都不能把宽泛 AC 当作 confidently acceptable；该机制不变成 CLI hard validator、固定目标类型词表、自然语言好坏单元测试或实现计划。 | passing |
 
 ## Rule
 

@@ -1591,10 +1591,10 @@ test("agent can explicitly prune obsolete evidence before recording fresh proof"
 
 test("protocol v1 example contains concrete user tool operations", () => {
   const brief = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "opennori-self.json"), "utf8"));
-  assert.equal(brief.criteria.length, 53);
+  assert.equal(brief.criteria.length, 54);
   assert.deepEqual(new Set(brief.criteria.map((criterion) => criterion.layer)), new Set(["protocol", "operator", "productization", "architecture"]));
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-P-")).length, 13);
-  assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-O-")).length, 12);
+  assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-O-")).length, 13);
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-Z-")).length, 18);
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-A-")).length, 10);
   const interfaceAcceptanceCriterion = brief.criteria.find((criterion) => criterion.id === "AC-O-11");
@@ -1613,6 +1613,10 @@ test("protocol v1 example contains concrete user tool operations", () => {
   assert.equal(enhancedAutogoalCriterion?.layer, "operator");
   assert.match(enhancedAutogoalCriterion?.user_story ?? "", /增强模式|grill/);
   assert.match(enhancedAutogoalCriterion?.threshold ?? "", /Enhanced Discovery|新 CLI|标准 Nori Contract Draft/);
+  const acceptanceSurfaceCriterion = brief.criteria.find((criterion) => criterion.id === "AC-O-18");
+  assert.equal(acceptanceSurfaceCriterion?.layer, "operator");
+  assert.match(acceptanceSurfaceCriterion?.user_story ?? "", /CRUD|可见产品目标/);
+  assert.match(acceptanceSurfaceCriterion?.threshold ?? "", /Acceptance Surface Modeling|visible trigger|destructive boundary|CLI hard validator/);
 
   const expectedTools = [
     "Codex 对话",
@@ -1634,7 +1638,10 @@ test("protocol v1 example contains concrete user tool operations", () => {
     "UI/UX",
     "完整验收面",
     "coverage self-check",
-    "Enhanced Discovery"
+    "Enhanced Discovery",
+    "Acceptance Surface Modeling",
+    "visible trigger",
+    "destructive boundary"
   ];
 
   const joined = JSON.stringify(brief, null, 2);
@@ -1655,6 +1662,7 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /autogoal/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /enhanced mode.*self-grill/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /complete product.*not an MVP/i.test(prompt)), true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /operation paths.*project CRUD/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /AC we just discussed/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /acceptance criteria/.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /dashboard.*live agent activity/i.test(prompt)), true);
@@ -1705,6 +1713,10 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /one-AC-at-a-time AC Review Loop/);
   assert.match(noriAsset, /Enhanced Discovery/);
   assert.match(noriAsset, /self-expands scenarios/);
+  assert.match(noriAsset, /Acceptance Surface Modeling/);
+  assert.match(noriAsset, /visible trigger/);
+  assert.match(noriAsset, /destructive boundary/);
+  assert.match(noriAsset, /project CRUD works|settings are editable/);
   assert.match(noriAsset, /blind approval/);
   assert.match(noriAsset, /actual page, route, command, object, field, state/);
   assert.match(noriAsset, /concrete objects, fields, states, boundaries/);
@@ -1728,6 +1740,12 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(acceptanceAsset, /coverage map|coverage review/);
   assert.match(acceptanceAsset, /bundles unrelated surfaces/);
   assert.match(acceptanceAsset, /Visible interface experience/);
+  assert.match(acceptanceAsset, /Acceptance Surface Model/);
+  assert.match(acceptanceAsset, /visible trigger/);
+  assert.match(acceptanceAsset, /interaction surface/);
+  assert.match(acceptanceAsset, /persistence/);
+  assert.match(acceptanceAsset, /destructive boundary/);
+  assert.match(acceptanceAsset, /project CRUD/);
   assert.match(acceptanceAsset, /AC Review Loop/);
   assert.match(acceptanceAsset, /confirm AC-1/);
   assert.match(acceptanceAsset, /revise AC-1/);
@@ -1739,13 +1757,22 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(acceptanceAsset, /actual page/);
   assert.match(acceptanceAsset, /object\/field\/state\/message\/failure\/evidence/);
   assert.match(acceptanceAsset, /exact screen, route, menu, command, or object list/);
+  assert.match(acceptanceAsset, /description: .*Acceptance Surface Modeling.*operation paths/i);
 
   const evidenceAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-evidence", "SKILL.md"), "utf8");
   assert.match(evidenceAsset, /Do not force evidence into a fixed adapter taxonomy/);
   assert.match(evidenceAsset, /basis, sources, reviewability, confidence, and limitations/);
+  assert.match(evidenceAsset, /Acceptance Surface Model|modeled user\s+operation path/);
+  assert.match(evidenceAsset, /visible trigger/);
+  assert.match(evidenceAsset, /persistence/);
+  assert.match(evidenceAsset, /destructive boundary/);
+  assert.match(evidenceAsset, /nori-acceptance/);
+  assert.match(evidenceAsset, /description: .*modeled user operation path/i);
 
   const autogoalAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-autogoal", "SKILL.md"), "utf8");
   assert.match(autogoalAsset, /^---\nname: nori-autogoal\n/m);
+  assert.match(autogoalAsset, /description: .*enhanced autogoal.*self-grill/i);
+  assert.match(autogoalAsset, /description: .*operation paths/i);
   assert.match(autogoalAsset, /standard Nori Contract Draft/);
   assert.match(autogoalAsset, /opennori draft --brief/);
   assert.match(autogoalAsset, /Do not create a new "Autogoal Contract" format/);
@@ -1756,6 +1783,11 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(autogoalAsset, /full acceptance surface/);
   assert.match(autogoalAsset, /coverage self-check/);
   assert.match(autogoalAsset, /Enhanced Discovery/);
+  assert.match(autogoalAsset, /Acceptance Surface Model/);
+  assert.match(autogoalAsset, /visible trigger/);
+  assert.match(autogoalAsset, /interaction surface/);
+  assert.match(autogoalAsset, /destructive boundary/);
+  assert.match(autogoalAsset, /project CRUD/);
   assert.match(autogoalAsset, /self-grill/);
   assert.match(autogoalAsset, /todolist/);
   assert.match(autogoalAsset, /standard Nori Contract Draft/);
@@ -1768,10 +1800,58 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(autogoalAsset, /If the same text\s+could be copied to another AC/);
   assert.match(autogoalAsset, /actual page, route, command, object, field/);
 
+  const reportingAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-reporting", "SKILL.md"), "utf8");
+  assert.match(reportingAsset, /description: .*operation paths/i);
+  assert.match(reportingAsset, /Acceptance Surface Model/);
+  assert.match(reportingAsset, /objectively evidenced, not confidently acceptable yet/);
+  assert.match(reportingAsset, /visible trigger/);
+  assert.match(reportingAsset, /persistence/);
+  assert.match(reportingAsset, /destructive boundary/);
+
   const healthAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-project-health", "SKILL.md"), "utf8");
+  assert.match(healthAsset, /description: .*healthy state.*acceptance review/i);
   assert.match(healthAsset, /safe_next_command/);
   assert.match(healthAsset, /Do not paste raw doctor\/setup\/init JSON to the user/);
   assert.match(healthAsset, /Confirm initialization/);
+  assert.match(healthAsset, /Acceptance Surface Modeling/);
+  assert.match(healthAsset, /ready state as bundle health only|Ready means the bundle\/state is usable/);
+  assert.match(healthAsset, /nori-acceptance/);
+
+  const architectureBrainstormAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-architecture-brainstorm", "SKILL.md"), "utf8");
+  assert.match(architectureBrainstormAsset, /description: .*architecture.*UI\/CRUD\/dashboard.*operation paths/i);
+  assert.match(architectureBrainstormAsset, /Acceptance Surface Model/);
+  assert.match(architectureBrainstormAsset, /before\s+previewing or confirming an Architecture Baseline/);
+  assert.match(architectureBrainstormAsset, /button\/icon\/menu\/modal\/field\/delete semantics|button vs icon/);
+  assert.match(architectureBrainstormAsset, /nori-acceptance/);
+
+  const architectureApplyAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-architecture-apply", "SKILL.md"), "utf8");
+  assert.match(architectureApplyAsset, /description: .*UI\/CRUD\/dashboard.*operation paths/i);
+  assert.match(architectureApplyAsset, /Acceptance Surface Modeling/);
+  assert.match(architectureApplyAsset, /before implementing or recording architecture apply/);
+  assert.match(architectureApplyAsset, /visible trigger/);
+  assert.match(architectureApplyAsset, /destructive boundary/);
+  assert.match(architectureApplyAsset, /nori-acceptance/);
+
+  const architectureChallengeAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-architecture-challenge", "SKILL.md"), "utf8");
+  assert.match(architectureChallengeAsset, /description: .*architecture drift.*operation-path detail/i);
+  assert.match(architectureChallengeAsset, /missing Product AC|missing AC detail/);
+  assert.match(architectureChallengeAsset, /button vs icon|directory picker/);
+  assert.match(architectureChallengeAsset, /nori-acceptance/);
+
+  const buildVsBuyAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-build-vs-buy", "SKILL.md"), "utf8");
+  assert.match(buildVsBuyAsset, /description: .*UI\/CRUD\/dashboard.*operation paths/i);
+  assert.match(buildVsBuyAsset, /Build-vs-buy cannot define what the user accepts/);
+  assert.match(buildVsBuyAsset, /library choice/);
+  assert.match(buildVsBuyAsset, /destructive boundaries|destructive boundary/);
+  assert.match(buildVsBuyAsset, /nori-acceptance/);
+
+  const capabilityProfileAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-capability-profile", "SKILL.md"), "utf8");
+  assert.match(capabilityProfileAsset, /description: .*stack preferences.*Product AC operation paths/i);
+  assert.match(capabilityProfileAsset, /Profile items also cannot replace Acceptance Surface Modeling/);
+  assert.match(capabilityProfileAsset, /Stack preference is not enough/);
+  assert.match(capabilityProfileAsset, /visible trigger/);
+  assert.match(capabilityProfileAsset, /destructive boundary/);
+  assert.match(capabilityProfileAsset, /nori-acceptance/);
 
   const behaviorProtocolSections = [
     "## Mission",
