@@ -6,8 +6,8 @@
     "created_at": "2026-06-11T09:50:03.223Z",
     "acceptance_basis": {
       "status": "approved",
-      "summary": "User revised AC-O-14.",
-      "approved_at": "2026-06-19T14:41:47.852Z"
+      "summary": "User added enhanced autogoal discovery acceptance.",
+      "approved_at": "2026-06-20T03:08:59.327Z"
     },
     "criteria": [
       {
@@ -585,6 +585,15 @@
         "threshold": "agent 在请求最终 approve 前必须先展示 compact overview，然后一次只解释当前 AC 的具体理解：精确用户入口、对象或字段、可见状态/提示/结果、不通过样例和具体证据对象；用户用 confirm AC-<n> 或 revise AC-<n>: ... 推进；全部 AC 逐条确认前不得运行 approve；批量解释、早期 approve 或泛化理解不能作为批准依据；该规则只在 Skill 行为协议、文档、agent_next 提示和资产测试中表达，不写成 CLI 主观 validator、实现计划或证据声明。",
         "required": true,
         "risk": "high"
+      },
+      {
+        "id": "AC-O-15",
+        "layer": "operator",
+        "user_story": "作为用户，我要求 OpenNori autogoal 增强模式或让 agent 先自己 grill 一个粗略想法时，agent 会先自行展开使用场景、假设、边界和关键问题，再把结果收敛成标准 Nori Contract Draft。",
+        "measurement": "阅读 nori、nori-autogoal packaged Skill、OpenNori protocol、README、官网和测试资产；用 todolist 这类粗略 idea 检查 agent 是否先做 Enhanced Discovery，而不是直接生成少量泛化 AC 或向用户抛完整问卷。",
+        "threshold": "Skills 明确要求增强 autogoal 仍是 Skill 行为而不是新 CLI 或新产物；agent 自行展开用户角色、入口、场景、数据对象与规则、状态转换、非法输入、成功反馈、持久化、失败/恢复、UI/UX、复查方式、假设和 out-of-scope；只把会改变完成定义的关键问题交给用户确认；最后仍写入标准 Nori Contract Draft，并进入逐条 AC Review Loop。",
+        "required": true,
+        "risk": "medium"
       }
     ]
   },
@@ -592,7 +601,7 @@
     "protocol_version": "opennori/v1",
     "goal_id": "opennori-self",
     "status": "complete",
-    "updated_at": "2026-06-19T14:45:53.838Z",
+    "updated_at": "2026-06-20T03:09:12.733Z",
     "criteria": {
       "AC-P-1": {
         "status": "passing",
@@ -6967,6 +6976,62 @@
             "limitations": "This proves OpenNori's capability assets and routing surfaces instruct agents to review draft AC one at a time. It does not prove every future agent will ask perfect AC questions; users still confirm or revise each AC in conversation.",
             "gate": "accepted",
             "created_at": "2026-06-19T14:45:53.838Z"
+          }
+        ]
+      },
+      "AC-O-15": {
+        "status": "passing",
+        "confidence": "high",
+        "required": true,
+        "risk": "medium",
+        "evidence": [
+          {
+            "kind": "asset-review",
+            "basis": "artifact_review",
+            "summary": "Enhanced autogoal discovery is documented as nori-autogoal Skill behavior and surfaced in product docs/site/tests without adding a new CLI artifact.",
+            "result": "passing",
+            "confidence": "high",
+            "sources": [
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori-autogoal/SKILL.md",
+                "path": "plugins/opennori/skills/nori-autogoal/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": "plugins/opennori/skills/nori/SKILL.md",
+                "path": "plugins/opennori/skills/nori/SKILL.md"
+              },
+              {
+                "type": "artifact",
+                "label": ".opennori/protocol.md",
+                "path": ".opennori/protocol.md"
+              },
+              {
+                "type": "artifact",
+                "label": "README.md",
+                "path": "README.md"
+              },
+              {
+                "type": "artifact",
+                "label": "examples/opennori-self.json",
+                "path": "examples/opennori-self.json"
+              },
+              {
+                "type": "artifact",
+                "label": "test/core.test.js",
+                "path": "test/core.test.js"
+              },
+              {
+                "type": "artifact",
+                "label": "../opennori-site/src/pages/index.astro",
+                "path": "../opennori-site/src/pages/index.astro"
+              }
+            ],
+            "reviewability": "Review the listed assets for Enhanced Discovery, self-grill/todolist routing, standard Nori Contract Draft output, and no new CLI command or artifact.",
+            "limitations": "This verifies packaged behavior instructions and documentation surfaces; real project quality still depends on the agent applying the Skill and the user confirming AC in conversation.",
+            "gate": "accepted",
+            "created_at": "2026-06-20T03:09:12.733Z"
           }
         ]
       }

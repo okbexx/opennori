@@ -1525,10 +1525,10 @@ test("agent can explicitly prune obsolete evidence before recording fresh proof"
 
 test("protocol v1 example contains concrete user tool operations", () => {
   const brief = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "opennori-self.json"), "utf8"));
-  assert.equal(brief.criteria.length, 52);
+  assert.equal(brief.criteria.length, 53);
   assert.deepEqual(new Set(brief.criteria.map((criterion) => criterion.layer)), new Set(["protocol", "operator", "productization", "architecture"]));
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-P-")).length, 13);
-  assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-O-")).length, 11);
+  assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-O-")).length, 12);
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-Z-")).length, 18);
   assert.equal(brief.criteria.filter((criterion) => criterion.id.startsWith("AC-A-")).length, 10);
   const interfaceAcceptanceCriterion = brief.criteria.find((criterion) => criterion.id === "AC-O-11");
@@ -1543,6 +1543,10 @@ test("protocol v1 example contains concrete user tool operations", () => {
   assert.equal(completeProductCoverageCriterion?.layer, "operator");
   assert.match(completeProductCoverageCriterion?.user_story ?? "", /覆盖自检|独立 AC/);
   assert.match(completeProductCoverageCriterion?.threshold ?? "", /coverage self-check|拆分|CLI hard validator/);
+  const enhancedAutogoalCriterion = brief.criteria.find((criterion) => criterion.id === "AC-O-15");
+  assert.equal(enhancedAutogoalCriterion?.layer, "operator");
+  assert.match(enhancedAutogoalCriterion?.user_story ?? "", /增强模式|grill/);
+  assert.match(enhancedAutogoalCriterion?.threshold ?? "", /Enhanced Discovery|新 CLI|标准 Nori Contract Draft/);
 
   const expectedTools = [
     "Codex 对话",
@@ -1563,7 +1567,8 @@ test("protocol v1 example contains concrete user tool operations", () => {
     "复查",
     "UI/UX",
     "完整验收面",
-    "coverage self-check"
+    "coverage self-check",
+    "Enhanced Discovery"
   ];
 
   const joined = JSON.stringify(brief, null, 2);
@@ -1582,6 +1587,7 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.equal(plugin.interface.defaultPrompt.length >= 5, true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /Set up OpenNori/.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /autogoal/i.test(prompt)), true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /enhanced mode.*self-grill/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /complete product.*not an MVP/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /AC we just discussed/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /acceptance criteria/.test(prompt)), true);
@@ -1631,6 +1637,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /coverage map|coverage review/);
   assert.match(noriAsset, /UI\/UX|visible interface/i);
   assert.match(noriAsset, /one-AC-at-a-time AC Review Loop/);
+  assert.match(noriAsset, /Enhanced Discovery/);
+  assert.match(noriAsset, /self-expands scenarios/);
   assert.match(noriAsset, /blind approval/);
   assert.match(noriAsset, /actual page, route, command, object, field, state/);
   assert.match(noriAsset, /concrete objects, fields, states, boundaries/);
@@ -1681,6 +1689,11 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(autogoalAsset, /small\s+starter contract/);
   assert.match(autogoalAsset, /full acceptance surface/);
   assert.match(autogoalAsset, /coverage self-check/);
+  assert.match(autogoalAsset, /Enhanced Discovery/);
+  assert.match(autogoalAsset, /self-grill/);
+  assert.match(autogoalAsset, /todolist/);
+  assert.match(autogoalAsset, /standard Nori Contract Draft/);
+  assert.match(autogoalAsset, /new CLI command/);
   assert.match(autogoalAsset, /independent user judgment/);
   assert.match(autogoalAsset, /visible interface goals/);
   assert.match(autogoalAsset, /AC Review Loop/);
@@ -1741,6 +1754,8 @@ test("public product surfaces present OpenNori as one capability bundle", () => 
   assert.match(health, /opennori init/);
   assert.match(protocol, /Direct CLI use\s+is an advanced, automation, or debugging route/);
   assert.match(readme, /AC Review Loop/);
+  assert.match(readme, /Enhanced Discovery/);
+  assert.match(readme, /todolist/);
   assert.match(readme, /AC 逐条确认循环/);
   assert.match(protocol, /AC-O-14/);
   assert.match(protocol, /one AC at a time/);

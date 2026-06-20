@@ -64,7 +64,7 @@ loop. If that explanation changes the completion definition, route back to
 
 - "Use OpenNori for this goal", "turn this into AC", "the AC is wrong", "brainstorm first" -> hand off to `nori-acceptance`.
 - "Use OpenNori to take over the AC we just discussed", "整理我们刚才讨论的 AC", "把上面的 AC 收敛成 Nori Contract Draft", or "不要开始实现，先给我确认" -> hand off to `nori-acceptance` with the already discussed goal, candidate AC, assumptions, and unresolved questions. This is conversation adoption into a draft, not autogoal.
-- "autogoal", "自动帮我把 idea 变成 goal/AC", "I only have a rough idea", or "用 OpenNori autogoal" -> hand off to `nori-autogoal`; it must converge to a standard Nori Contract Draft, not a special autogoal artifact.
+- "autogoal", "自动帮我把 idea 变成 goal/AC", "I only have a rough idea", "用 OpenNori autogoal", "增强模式", "self-grill", "agent 自己 grill 自己", or "把 todolist 的所有使用场景 grill 出来" -> hand off to `nori-autogoal`; it must run Enhanced Discovery when requested, then converge to a standard Nori Contract Draft, not a special autogoal artifact.
 - "Are these AC good enough", "this AC is too vague", "the goal is broad", or visible AC text lacks concrete user judgment -> hand off to `nori-acceptance`; do not wait for `opennori check` to flag it.
 - "Approve this draft", "approve these AC", "这些 AC 可以 approve 吗", or a draft exists but every AC has not been confirmed one by one -> hand off to `nori-acceptance` for the AC Review Loop before approval.
 - "confirm AC-1", "确认 AC-1", or "revise AC-1: ..." -> hand off to `nori-acceptance` to continue the AC Review Loop or revise the current AC.
@@ -126,6 +126,7 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not make the user memorize CLI flags or internal Skill names.
 - Do not treat autogoal as a new contract type. It is only a Skill-driven path to the same standard Nori Contract Draft.
 - Do not let autogoal shrink broad ideas into MVP, first version, prototype, happy-path subset, phases, or task lists.
+- Do not treat autogoal enhanced mode as a separate CLI command or artifact. It is `nori-autogoal` Enhanced Discovery behavior: the agent self-expands scenarios, assumptions, critical questions, and boundaries before drafting the same standard Nori Contract.
 - Do not shrink complete-product goals into a small default AC set for agent convenience. Complete product, complete feature loop, full app, full dashboard, or full workbench goals need a full acceptance surface by default: roles, entry/navigation, core workflows, state transitions, data rules, permissions and boundaries, failure/recovery, persistence, UI/UX when visible, and review/reporting method. Execution can still advance one current gap at a time.
 - Do not defend a compressed complete-product draft. If a draft bundles unrelated surfaces into a few AC, route to acceptance revision, create a coverage map, and split independent user judgment surfaces before approval.
 - Do not route already discussed AC material through autogoal. If the user asks OpenNori to take over a current AC discussion, preserve that material through `nori-acceptance` as `acceptance_basis.source: "conversation"` and keep it draft-only until user approval.

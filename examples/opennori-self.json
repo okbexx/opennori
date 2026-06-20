@@ -200,6 +200,14 @@
       "risk": "medium"
     },
     {
+      "id": "AC-O-15",
+      "layer": "operator",
+      "user_story": "作为用户，我要求 OpenNori autogoal 增强模式或让 agent 先自己 grill 一个粗略想法时，agent 会先自行展开使用场景、假设、边界和关键问题，再把结果收敛成标准 Nori Contract Draft。",
+      "measurement": "阅读 nori、nori-autogoal packaged Skill、OpenNori protocol、README、官网和测试资产；用 todolist 这类粗略 idea 检查 agent 是否先做 Enhanced Discovery，而不是直接生成少量泛化 AC 或向用户抛完整问卷。",
+      "threshold": "Skills 明确要求增强 autogoal 仍是 Skill 行为而不是新 CLI 或新产物；agent 自行展开用户角色、入口、场景、数据对象与规则、状态转换、非法输入、成功反馈、持久化、失败/恢复、UI/UX、复查方式、假设和 out-of-scope；只把会改变完成定义的关键问题交给用户确认；最后仍写入标准 Nori Contract Draft，并进入逐条 AC Review Loop。",
+      "risk": "medium"
+    },
+    {
       "id": "AC-Z-1",
       "layer": "productization",
       "user_story": "作为用户，我通过 OpenNori Codex Plugin 获得 OpenNori Skills 后，agent 能自然语言使用 OpenNori，而不要求我运行 Skill export 或记住 Skill 名称。",
