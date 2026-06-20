@@ -1,6 +1,6 @@
 import { fail, ok } from "./core.ts";
 import { runBootstrap } from "./cli/bootstrap.ts";
-import { CLI_NAME, commandLabelFor, resolveCliCommand, runCliCommand, usageFor } from "./cli/command-tree.ts";
+import { CLI_NAME, commandLabelFor, helpTextFor, resolveCliCommand, runCliCommand, usageFor } from "./cli/command-tree.ts";
 import { printHumanResult, shouldPrintHuman } from "./cli/human-output.ts";
 import { runInit } from "./cli/init.ts";
 import { runSetup } from "./cli/setup.ts";
@@ -29,10 +29,15 @@ function wantsHelp(args: string[]): boolean {
   return args.includes("--help") || args.includes("-h");
 }
 
+function wantsJson(args: string[]): boolean {
+  return args.includes("--json");
+}
+
 export async function main(args: string[]): Promise<void> {
   const command = args[0];
   if (command === "--help" || command === "-h") {
-    printJson(ok({ usage: await usageFor([]), side_effect: "none" }));
+    if (wantsJson(args)) printJson(ok({ usage: await usageFor([]), side_effect: "none" }));
+    else console.log(await helpTextFor(args));
     return;
   }
 
@@ -42,7 +47,8 @@ export async function main(args: string[]): Promise<void> {
   }
 
   if (wantsHelp(args)) {
-    printJson(ok({ command: await commandLabelFor(args), usage: await usageFor(args), side_effect: "none" }));
+    if (wantsJson(args)) printJson(ok({ command: await commandLabelFor(args), usage: await usageFor(args), side_effect: "none" }));
+    else console.log(await helpTextFor(args));
     return;
   }
 

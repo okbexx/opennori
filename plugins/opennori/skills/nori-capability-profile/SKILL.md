@@ -1,6 +1,6 @@
 ---
 name: nori-capability-profile
-description: Capture and check OpenNori execution preferences such as required Skills, preferred stacks, avoided tools, install policy, and user-declared implementation constraints. Use when the user says a task must use a specific Skill, prefers a library or stack, wants to avoid a tool, requires approval before installs, or declares UI/CRUD/dashboard stack preferences that must stay separate from Product AC operation paths.
+description: Capture and check OpenNori execution preferences such as required Skills, preferred stacks, avoided tools, install policy, and user-declared implementation constraints. Use when the user says a task must use a specific Skill, prefers a library or stack, wants to avoid a tool, requires approval before installs, says profile content is in the wrong language, or declares UI/CRUD/dashboard stack preferences that must stay separate from Product AC operation paths.
 ---
 
 ## Mission
@@ -8,6 +8,15 @@ description: Capture and check OpenNori execution preferences such as required S
 Keep the user's execution preferences visible to the agent and completion report without polluting Product AC.
 
 Nori Profile answers "how should the agent work" and "what constraints affect completion confidence". Product AC still answers "what can the human user accept".
+
+Nori Profile is a user-reviewable asset. Keep machine fields such as `id`,
+`type`, `strength`, and `install_policy` stable, but write human-readable values
+such as `name`, `purpose`, `scope`, profile evidence summaries, and user-facing
+explanations in the current Nori Contract presentation language. Prefer an
+explicit user language request; otherwise use `presentation.language` from the
+draft/current contract; if no OpenNori contract exists yet, infer from the
+user's prompt. A Chinese goal should not produce English profile purpose text
+unless the user explicitly asked for English.
 
 Profile items also cannot replace Acceptance Surface Modeling. If the user says
 "use Radix", "use design-taste-frontend", "avoid another CSS framework", or
@@ -21,7 +30,9 @@ product behavior.
 
 ## Start Here
 
-1. Read current profile and status before adding duplicate preferences.
+1. Read current profile, current/draft status, and `presentation.language`
+   before adding duplicate preferences. If no contract exists, infer language
+   from the user's prompt.
 2. Classify the user's statement as `skill`, `stack`, or `constraint`.
 3. Classify strength:
    - `must`: completion is blocked until satisfied or waived.
@@ -48,6 +59,7 @@ Useful state commands:
 - "Prefer Radix UI for components" -> add a `stack` item with `prefer`.
 - "Avoid adding another state library" -> add a `constraint` or `stack` item with `avoid`.
 - "Ask me before installing packages" -> set install policy to `ask_before_install`.
+- "Profile 内容为什么是英文", "profile 应该用中文", or "keep profile in English" -> revise or recreate user-readable profile values in the requested or current contract language. Do not change stable ids or protocol field names just to translate labels.
 - "Use Radix for this CRUD page", "use a design Skill first", or "avoid
   duplicate CSS" -> record the stack/Skill/constraint in Profile, then route
   any missing user operation path or UI behavior detail to `nori-acceptance`.
@@ -81,9 +93,18 @@ Completion impact: blocks completion / review risk / no current risk
 Evidence needed: ...
 ```
 
+Match the reply language to the Nori Contract `presentation.language` when it
+is known. For `zh-CN`, use Chinese labels and keep protocol terms such as
+`must`, `prefer`, `avoid`, and stable item ids only where they are useful for
+agent state.
+
 ## Misuse Guards
 
 - Do not turn Skills, libraries, architecture, or install policy into Product AC.
+- Do not write profile `name`, `purpose`, `scope`, evidence summaries, or
+  user-facing profile explanations in a different language from the user's
+  explicit request or current Nori Contract presentation language. Stable ids
+  and protocol keys remain English.
 - Do not treat a satisfied Skill or stack preference as proof that the UI,
   CRUD, dashboard, form, settings, or management workflow is acceptable.
 - Do not hide user-facing controls, field scope, feedback, persistence, or

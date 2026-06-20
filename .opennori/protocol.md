@@ -141,8 +141,8 @@ OpenNori writes its project-local state under `.opennori/`.
 
 Each current or draft goal has:
 
-- `<goal>.acceptance.md` for human review
-- `<goal>.evidence.json` for deterministic agent/tool updates
+- `<goal>.acceptance.md` for human review of one Nori Contract or Nori Contract Draft
+- `<goal>.evidence.json` for the matching deterministic agent/tool evidence ledger
 
 `.opennori/manifest.json` records the project-local OpenNori registration:
 
@@ -353,6 +353,22 @@ Completion rules:
 Agents translate the user's natural-language preferences into profile records. Users should not
 need to remember `opennori profile` commands.
 
+## Language Preference
+
+Language preference is presentation metadata, not Product AC. OpenNori stores
+`presentation.language` on brainstorms, discoveries, and Nori Contracts so
+generated goals, acceptance checks, discovery questions, and next loop
+candidates stay in the language the user expects. The same preference is carried
+by Skills into user-reviewable Nori Profile and project Architecture Profile
+wording.
+
+Only human-readable values follow the presentation language. Stable ids,
+protocol field names, enum-like values such as `must`, `prefer`, `avoid`, and
+import paths remain stable. If a project profile was created in the wrong
+language, the agent revises or recreates that profile after user review.
+OpenNori should not add a hard-coded language ratio validator or CLI
+auto-translation layer.
+
 ## Architecture Baseline
 
 Architecture Baseline is separate from Product AC. It is not a plan, phase list, task list, or
@@ -403,6 +419,16 @@ The managed project profile is `.opennori/architecture/profiles/<id>.json`.
 Do not place profile source JSON, profile drafts, or baseline previews under
 `.opennori/architecture/evidence/`; that directory is reserved for
 architecture apply records.
+
+Project Architecture Profile field names and stable ids stay English for the
+protocol, but project profile user-readable values should follow the user's
+language. When a current or draft Nori Contract has `presentation.language:
+zh-CN`, agent-created project profile values such as title, summary, sources,
+checks, technical baseline decisions, dependency reasons, preferred library
+policy text, avoid boundaries, and build-vs-buy explanations should be written
+in Chinese unless the user explicitly requests English. Built-in profiles may
+remain in the package language. The CLI stores and validates profile structure;
+it does not automatically translate profile prose.
 
 Use `opennori architecture baseline --root <project> --goal "<goal>" --profile <profile-id> --json`
 to preview a baseline. Preview has no side effect. After the user accepts it, rerun with `--confirm`.

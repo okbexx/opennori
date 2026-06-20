@@ -192,6 +192,17 @@ Existing current or approved contracts must not be silently translated during
 status, report, evidence, or check writes; changing their presentation language
 requires explicit revision and user approval.
 
+The same language boundary applies to user-reviewable profile assets. Nori
+Profile item names, purposes, scopes, profile evidence summaries, and project
+Architecture Profile user-readable values should match the user's explicit
+language request or the current/draft Nori Contract `presentation.language`.
+Stable ids, enum-like values, and JSON/protocol field names remain English.
+Built-in package Architecture Profiles may remain in their shipped language, but
+agent-created project profiles for a Chinese prompt should not be written in
+English unless the user asked for English. Do not solve this by adding CLI
+auto-translation or language validators; Skills own the wording, and CLI owns
+structure.
+
 Keep hard validation and subjective review separate:
 
 - Code may hard-fail objective integrity problems: schema shape, protocol version, required fields, duplicate ids, contract/ledger mismatch, invalid enums, stale managed files, missing local artifacts, or destructive actions without explicit confirmation.

@@ -95,8 +95,12 @@ export const draftCommand = defineCommand({
         current_gap: currentGap(contract, ledger)
       },
       [
-        { kind: "draft_acceptance_contract", path: paths.acceptancePath },
-        { kind: "evidence_ledger", path: paths.evidencePath }
+        {
+          kind: "nori_contract_draft",
+          path: paths.acceptancePath,
+          role: "user_review_surface",
+          internal_evidence_ledger_path: paths.evidencePath
+        }
       ],
       [],
       draftNextActions(contract)

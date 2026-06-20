@@ -205,7 +205,7 @@ function spawnJson(args, options = {}) {
 
 test("command help is side-effect free", () => {
   const root = tempRoot();
-  const payload = run(["install", "--help", "--root", root]);
+  const payload = run(["install", "--help", "--json", "--root", root]);
 
   assert.equal(payload.ok, true);
   assert.equal(payload.data.side_effect, "none");
@@ -299,7 +299,16 @@ test("built dist bin runs when invoked through a package-manager symlink", () =>
   });
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
-  const payload = JSON.parse(result.stdout);
+  assert.match(result.stdout, /OpenNori/);
+  assert.match(result.stdout, /Usage: opennori/);
+  assert.doesNotMatch(result.stdout.trimStart(), /^\{/);
+
+  const jsonResult = spawnSync(process.execPath, [linkedBin, "--help", "--json"], {
+    cwd: root,
+    encoding: "utf8"
+  });
+  assert.equal(jsonResult.status, 0, jsonResult.stderr || jsonResult.stdout);
+  const payload = JSON.parse(jsonResult.stdout);
   assert.equal(payload.ok, true);
   assert.match(payload.data.usage, /opennori/);
 });
@@ -1726,6 +1735,9 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /actual page, route, command, object, field, state/);
   assert.match(noriAsset, /concrete objects, fields, states, boundaries/);
   assert.match(noriAsset, /every AC has been confirmed one by one/);
+  assert.match(noriAsset, /architecture profile content is in the wrong language/);
+  assert.match(noriAsset, /project Architecture Profile titles, summaries, checks/);
+  assert.match(noriAsset, /Protocol keys and stable ids stay English/);
   assert.doesNotMatch(noriAsset, /skill export/);
   assert.doesNotMatch(noriAsset, /process steps/);
 
@@ -1839,9 +1851,14 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
 
   const architectureBrainstormAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-architecture-brainstorm", "SKILL.md"), "utf8");
   assert.match(architectureBrainstormAsset, /description: .*architecture.*UI\/CRUD\/dashboard.*operation paths/i);
+  assert.match(architectureBrainstormAsset, /description: .*wrong language/i);
   assert.match(architectureBrainstormAsset, /Acceptance Surface Model/);
   assert.match(architectureBrainstormAsset, /before\s+previewing or confirming an Architecture Baseline/);
   assert.match(architectureBrainstormAsset, /button\/icon\/menu\/modal\/field\/delete semantics|button vs icon/);
+  assert.match(architectureBrainstormAsset, /Project Architecture Profiles are user-reviewable architecture assets/);
+  assert.match(architectureBrainstormAsset, /presentation\.language/);
+  assert.match(architectureBrainstormAsset, /title.*summary.*sources.*checks.*technical_baseline/s);
+  assert.match(architectureBrainstormAsset, /The CLI\s+stores and validates structure; it does not translate profile prose/);
   assert.match(architectureBrainstormAsset, /nori-acceptance/);
 
   const architectureApplyAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-architecture-apply", "SKILL.md"), "utf8");
@@ -1867,8 +1884,12 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
 
   const capabilityProfileAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-capability-profile", "SKILL.md"), "utf8");
   assert.match(capabilityProfileAsset, /description: .*stack preferences.*Product AC operation paths/i);
+  assert.match(capabilityProfileAsset, /description: .*profile content is in the wrong language/i);
   assert.match(capabilityProfileAsset, /Profile items also cannot replace Acceptance Surface Modeling/);
   assert.match(capabilityProfileAsset, /Stack preference is not enough/);
+  assert.match(capabilityProfileAsset, /current Nori Contract presentation language/);
+  assert.match(capabilityProfileAsset, /name.*purpose.*scope.*profile evidence summaries/s);
+  assert.match(capabilityProfileAsset, /Stable ids\s+and protocol keys remain English/);
   assert.match(capabilityProfileAsset, /visible trigger/);
   assert.match(capabilityProfileAsset, /destructive boundary/);
   assert.match(capabilityProfileAsset, /nori-acceptance/);
@@ -1931,9 +1952,19 @@ test("public product surfaces present OpenNori as one capability bundle", () => 
   assert.match(readme, /AC 逐条确认循环/);
   assert.match(readme, /模型也必须进入 Nori Contract 本身/);
   assert.match(readme, /AC 的衡量方式和通过条件应暴露真实用户入口/);
+  assert.match(readme, /profile assets/);
+  assert.match(readme, /Nori Profile item\s+names, purposes/);
+  assert.match(readme, /Architecture Profile 标题、摘要/);
+  assert.match(readme, /one user-facing Nori Contract with a matching\s+internal evidence ledger/);
+  assert.match(readme, /一份 Nori Contract，并配有一个内部 evidence ledger/);
   assert.match(protocol, /AC-O-14/);
   assert.match(protocol, /one AC at a time/);
   assert.match(protocol, /confirmed one by one/);
+  assert.match(protocol, /Language Preference/);
+  assert.match(protocol, /project profile user-readable values should follow the user's\s+language/);
+  assert.match(protocol, /does not automatically translate profile prose/);
+  assert.match(protocol, /hard-coded language ratio validator/);
+  assert.match(protocol, /one Nori Contract or Nori Contract Draft/);
   assert.match(protocol, /The model is only useful when it changes the draft criteria/);
   assert.match(protocol, /`measurement`: entry, visible trigger/);
   assert.match(protocol, /revise the draft criterion first/);

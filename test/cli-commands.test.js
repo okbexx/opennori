@@ -712,7 +712,12 @@ test("draft command module stores Skill-prepared draft contracts", async () => {
   assert.match(draft.next_actions.join("\n"), /specific evidence object/);
   assert.equal(fs.existsSync(draft.data.acceptance_path), true);
   assert.equal(fs.existsSync(draft.data.evidence_path), true);
-  assert.equal(draft.artifacts.some((artifact) => artifact.kind === "draft_acceptance_contract"), true);
+  assert.equal(draft.artifacts.some((artifact) => artifact.kind === "nori_contract_draft"), true);
+  const draftText = renderHuman(draft, ["draft"]);
+  assert.match(draftText, /OpenNori draft created/);
+  assert.match(draftText, /Nori Contract Draft:/);
+  assert.match(draftText, /Internal evidence ledger:/);
+  assert.doesNotMatch(draftText, /"evidence_path"/);
 });
 
 test("human status output shows enhanced autogoal acceptance basis", () => {
@@ -866,7 +871,7 @@ test("draft command module creates current Nori Contracts from brief files", asy
   assert.match(drafted.next_actions.join("\n"), /one-AC-at-a-time AC Review Loop/);
   assert.equal(fs.existsSync(drafted.data.acceptance_path), true);
   assert.equal(fs.existsSync(drafted.data.evidence_path), true);
-  assert.equal(drafted.artifacts.some((artifact) => artifact.kind === "draft_acceptance_contract"), true);
+  assert.equal(drafted.artifacts.some((artifact) => artifact.kind === "nori_contract_draft"), true);
 });
 
 test("check command module reports acceptance architecture and evidence health", async () => {

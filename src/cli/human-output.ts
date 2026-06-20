@@ -163,6 +163,18 @@ function printReport(stdout: NodeJS.WriteStream, data: JsonObject): void {
   if (data.report_path) line(stdout, `Report: ${relative(data.root, data.report_path)}`);
 }
 
+function printDraft(stdout: NodeJS.WriteStream, data: JsonObject): void {
+  const basis = asObject(data.acceptance_basis);
+  line(stdout, "OpenNori draft created.");
+  line(stdout, `Goal: ${data.goal_id || "unknown"}`);
+  if (basis.source || basis.mode) {
+    line(stdout, `Acceptance basis: ${[basis.source, basis.mode].filter(Boolean).join(" ")}`);
+  }
+  line(stdout, `Nori Contract Draft: ${relative(data.root, data.acceptance_path)}`);
+  if (data.evidence_path) line(stdout, `Internal evidence ledger: ${relative(data.root, data.evidence_path)}`);
+  line(stdout, "State: draft, awaiting AC Review Loop and user approval.");
+}
+
 function printDashboard(stdout: NodeJS.WriteStream, data: JsonObject): void {
   line(stdout, "OpenNori dashboard running.");
   line(stdout, `URL: ${data.url || "unknown"}`);
@@ -189,6 +201,7 @@ export function printHumanResult(payload: NoriResult, options: HumanOutputOption
   else if (command === "plugin" && subcommand === "sync") printPluginSync(stdout, data);
   else if (command === "doctor") printDoctor(stdout, data);
   else if (command === "check") printCheck(stdout, data, payload.warnings);
+  else if (command === "draft") printDraft(stdout, data);
   else if (command === "status" || command === "resume" || command === "next") printAcceptanceStatus(stdout, "OpenNori status", data);
   else if (command === "report") printReport(stdout, data);
   else if (command === "dashboard") printDashboard(stdout, data);

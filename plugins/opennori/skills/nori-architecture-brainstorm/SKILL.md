@@ -1,6 +1,6 @@
 ---
 name: nori-architecture-brainstorm
-description: Establish a reviewable OpenNori Architecture Baseline before non-trivial implementation. Use when the user wants a good architecture first, asks for built-in or project architecture profiles, prefers a stack that should shape implementation, expects future agent work to follow a confirmed technical baseline, or asks for architecture around UI/CRUD/dashboard work after Product AC operation paths are concrete.
+description: Establish a reviewable OpenNori Architecture Baseline before non-trivial implementation. Use when the user wants a good architecture first, asks for built-in or project architecture profiles, says architecture profile content is in the wrong language, prefers a stack that should shape implementation, expects future agent work to follow a confirmed technical baseline, or asks for architecture around UI/CRUD/dashboard work after Product AC operation paths are concrete.
 ---
 
 ## Mission
@@ -34,10 +34,22 @@ previewing or confirming an Architecture Baseline. Do not use architecture
 questions to decide button/icon/menu/modal/field/delete semantics that belong
 in Product AC.
 
+Project Architecture Profiles are user-reviewable architecture assets. Built-in
+profiles may remain in the package language, but a project profile created by
+the agent for a user's goal must use the current contract or prompt language
+for human-readable values. Keep protocol keys, stable ids, and machine-ish
+slugs stable; write `title`, `applies_to`, `summary`, `sources[].label`,
+`sources[].lesson`, `principles` when they are user-facing, `checks[].statement`,
+`checks[].review`, `technical_baseline.*.name`, `decision`, `reason`, `steps`,
+`preferred_libraries[].policy`, `avoid`, and build-vs-buy explanation text in
+the language the user will review. Prefer explicit language requests; otherwise
+read `presentation.language` from the draft/current Nori Contract; if no
+contract exists, infer from the user's prompt.
+
 ## Start Here
 
-1. Read the current goal, Product AC, and `data.architecture.requirement` from resume/status.
-2. Read Nori Profile for required Skills, preferred stacks, avoid rules, and install policy.
+1. Read the current goal, Product AC, `presentation.language`, and `data.architecture.requirement` from resume/status.
+2. Read Nori Profile for required Skills, preferred stacks, avoid rules, and install policy. Preserve the same language when profile preferences influence project Architecture Profile wording.
 3. Inspect existing project architecture, dependencies, package/module layout, state model, command/API/MCP/IPC surfaces, tests, docs, and user-supplied references.
 4. If visible Product AC is broad, implementation-centered, or missing its
    operation path, stop architecture work and hand off to `nori-acceptance`.
@@ -49,7 +61,10 @@ in Product AC.
    - If the user waives architecture review, record `waived` with the user's reason and limitations; report it as review risk.
    - If non-trivial, record `required` with a reason before previewing the baseline.
 6. Compare mature references and current project evidence before proposing self-built infrastructure.
-7. List available architecture profiles and select or create the best fit.
+7. List available architecture profiles and select or create the best fit. If
+   creating a project profile, write the user-readable profile values in the
+   explicit user language or current `presentation.language`; do not default to
+   English just because JSON field names are English.
 8. Ensure the selected profile has a concrete `technical_baseline` with runtime topology, source-of-truth model, module boundaries, contract surfaces, data flows, dependency decisions, reference mappings, and verification.
 9. Preview the baseline and ask the user to confirm before implementation.
 10. After confirmed baseline write, read the returned `data.agent_next` and route to the recommended next Skill.
@@ -69,6 +84,7 @@ Useful state commands:
 
 - "First decide the technical architecture" -> compare project evidence, profile preferences, and available profiles; preview a baseline.
 - "Use my preferred architecture" -> record or select a project Architecture Profile, then preview a baseline.
+- "Architecture Profile 内容为什么是英文", "profile 应该用中文", or "keep the project profile in English" -> revise or recreate the project Architecture Profile's user-readable values in the requested or current contract language. Do not translate built-in package profiles in place, and do not change stable ids or protocol keys for translation.
 - "Use OpenNori's built-in good architecture" -> show the relevant built-in profile, including sources, principles, checks, preferred libraries, avoid rules, and build-vs-buy policy.
 - "The architecture feels vague" -> split the answer into Architecture Charter and Technical Architecture Baseline; fill the missing runtime, state, module, contract, flow, dependency, reference, and verification decisions.
 - "This is a simple change" -> decide whether baseline is needed; if non-trivial implementation or infrastructure is involved, create one.
@@ -79,6 +95,12 @@ Useful state commands:
 ## State Writes
 
 May write Architecture Requirement decisions, project architecture profiles, and confirmed Architecture Baseline files under `.opennori/architecture/`. Use `opennori architecture profile --from <profile.json>` to install project profiles into `.opennori/architecture/profiles/<id>.json`; do not save the source/import JSON under `.opennori/architecture/evidence/`.
+
+When writing a project Architecture Profile source JSON for import, use stable
+English field names and ids, but match all human-readable values to the user's
+explicit language or the current Nori Contract `presentation.language`. The CLI
+stores and validates structure; it does not translate profile prose for the
+agent.
 
 `.opennori/architecture/evidence/` is reserved for architecture apply records created by `nori-architecture-apply`. It is not a scratch directory for profile drafts, source profiles, baseline previews, or Product AC evidence. If you need a temporary profile source before importing, keep it outside `.opennori/architecture/evidence/` and report only the managed profile path after import.
 
@@ -117,9 +139,18 @@ Avoid: ...
 Needs confirmation: yes
 ```
 
+Match this reply language to the current Nori Contract `presentation.language`
+or explicit user request. If the user prompt and contract are Chinese, the
+baseline explanation should be Chinese even when stable profile ids and protocol
+field names remain English.
+
 ## Misuse Guards
 
 - Do not turn architecture choices, profiles, libraries, or Architecture Checks into Product AC.
+- Do not create English project Architecture Profile prose for a Chinese goal or
+  Chinese current contract unless the user explicitly asked for English.
+  Built-in package profiles may remain as shipped, but project profile
+  user-readable values should match the user's review language.
 - Do not confirm a baseline that is only product boundary, governance principle, or broad preference; it must also include the concrete Technical Architecture Baseline.
 - Do not use architecture baseline work to bypass vague visible Product AC. If
   the user operation path is unclear, Product AC must be revised first.

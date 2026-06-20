@@ -271,6 +271,47 @@ export async function usageFor(rawArgs: string[]): Promise<string> {
   return usageParts.join(" ");
 }
 
+export async function helpTextFor(rawArgs: string[]): Promise<string> {
+  const argsWithoutHelp = rawArgs.filter((arg) => arg !== "--help" && arg !== "-h");
+  const resolved = argsWithoutHelp.length > 0 ? await resolveCliCommand(argsWithoutHelp) : { ok: true as const, command: rootCommand, path: [], rawArgs: [], policy: {} };
+  const command = resolved.ok ? resolved.command : rootCommand;
+  const path = resolved.ok ? resolved.path : [];
+  const subCommands = await subCommandsFor(command);
+  const meta = await resolveValue(command.meta);
+  const usage = await usageFor(rawArgs);
+  const lines = [
+    path.length === 0 ? "OpenNori" : [CLI_NAME, ...path].join(" "),
+    meta?.description ? String(meta.description) : "OpenNori acceptance-driven agent state CLI.",
+    "",
+    `Usage: ${usage}`
+  ];
+
+  if (subCommands && Object.keys(subCommands).length > 0) {
+    lines.push("", "Commands:");
+    for (const [name, subCommand] of Object.entries(subCommands)) {
+      const child = asCommand(await resolveValue(subCommand) as CommandDef);
+      const childMeta = await resolveValue(child.meta);
+      lines.push(`  ${name.padEnd(14)} ${childMeta?.description || ""}`.trimEnd());
+    }
+  }
+
+  const args = (await resolveValue(command.args) || {}) as Record<string, UsageArgDefinition>;
+  const options = Object.entries(args)
+    .filter(([name]) => name !== "json")
+    .map(([name, definition]) => ({
+      flag: definition.type === "positional" ? valueHint(name).toUpperCase() : `--${kebabCase(name)}`,
+      description: String((definition as { description?: string }).description || "")
+    }));
+  if (options.length > 0) {
+    lines.push("", "Options:");
+    for (const option of options) lines.push(`  ${option.flag.padEnd(18)} ${option.description}`.trimEnd());
+  }
+
+  lines.push("", `Use ${CLI_NAME} <command> --help for command details.`);
+  lines.push("Use --json for machine-readable output.");
+  return lines.join("\n");
+}
+
 export async function commandLabelFor(rawArgs: string[]): Promise<string> {
   const resolved = await resolveCliCommand(rawArgs.filter((arg) => arg !== "--help" && arg !== "-h"));
   if (!resolved.ok) return [CLI_NAME, ...resolved.path].join(" ");

@@ -203,6 +203,21 @@ the user says "write the AC in Chinese" or "keep this contract in English", the
 Skill records that preference in the draft so later status, report, and next
 candidate surfaces can preserve it.
 
+The same rule applies to user-reviewable profile assets. Nori Profile item
+names, purposes, and evidence summaries, plus agent-created project Architecture
+Profile titles, summaries, checks, technical baseline decisions, dependency
+reasons, and build-vs-buy explanations should follow the user's language or the
+current Nori Contract `presentation.language`. JSON keys, stable ids, and
+enum-like values stay stable in English. Built-in package Architecture Profiles
+may remain as shipped; project profiles created for a Chinese goal should not
+default to English unless the user asks for it.
+
+Each current or draft goal is one user-facing Nori Contract with a matching
+internal evidence ledger: `<goal>.acceptance.md` is what the user reviews, and
+`<goal>.evidence.json` is the deterministic state file agents and tools update.
+Agents should present it as one draft contract, not as two separate user
+deliverables.
+
 ## What It Creates
 
 OpenNori uses one project-local state directory:
@@ -1058,6 +1073,10 @@ opennori criterion add --root <repo> --from-draft --goal <goal-id> --id AC-... \
 ### 契约语言偏好 (Contract Language Preference)
 
 契约语言是表达偏好，不是 Product AC。OpenNori 会在 brainstorm、discovery 和 Nori Contract 上保存 `presentation.language`，让生成的 goal、验收标准、发现问题和下一轮候选目标保持用户期望的语言。
+
+同样的规则也适用于用户需要阅读的 Profile 资产。Nori Profile 的名称、目的、范围和证据摘要，以及 agent 为项目生成的 Architecture Profile 标题、摘要、检查项、技术基线决策、依赖理由和 build-vs-buy 说明，都应该跟随用户明确要求或当前 Nori Contract 的 `presentation.language`。JSON 字段名、稳定 id、`must` / `prefer` / `avoid` 这类协议值保持稳定英文。内置 Architecture Profile 可以保持包内语言；但为中文目标生成的项目 profile 不应该默认写成英文，除非用户明确要求英文。
+
+每个 current 或 draft goal 对用户来说是一份 Nori Contract，并配有一个内部 evidence ledger：`<goal>.acceptance.md` 是用户审阅的契约，`<goal>.evidence.json` 是 agent 和工具更新的确定性状态账本。agent 应把它表达为“一份草案契约”，而不是两个并列的用户产物。
 
 示例：
 
