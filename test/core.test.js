@@ -1716,6 +1716,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(noriAsset, /Acceptance Surface Modeling/);
   assert.match(noriAsset, /visible trigger/);
   assert.match(noriAsset, /destructive boundary/);
+  assert.match(noriAsset, /measurement and threshold/);
+  assert.match(noriAsset, /coverage notes mention\s+Acceptance Surface Modeling/);
   assert.match(noriAsset, /project CRUD works|settings are editable/);
   assert.match(noriAsset, /blind approval/);
   assert.match(noriAsset, /actual page, route, command, object, field, state/);
@@ -1745,6 +1747,10 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(acceptanceAsset, /interaction surface/);
   assert.match(acceptanceAsset, /persistence/);
   assert.match(acceptanceAsset, /destructive boundary/);
+  assert.match(acceptanceAsset, /user_story.*measurement.*threshold/s);
+  assert.match(acceptanceAsset, /The model must land in the draft criteria/);
+  assert.match(acceptanceAsset, /operation path is missing from the criterion text/);
+  assert.match(acceptanceAsset, /more specific than the criterion text/);
   assert.match(acceptanceAsset, /project CRUD/);
   assert.match(acceptanceAsset, /AC Review Loop/);
   assert.match(acceptanceAsset, /confirm AC-1/);
@@ -1766,6 +1772,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(evidenceAsset, /visible trigger/);
   assert.match(evidenceAsset, /persistence/);
   assert.match(evidenceAsset, /destructive boundary/);
+  assert.match(evidenceAsset, /criterion's `measurement` and\s+`threshold`/);
+  assert.match(evidenceAsset, /coverage-summary prose/);
   assert.match(evidenceAsset, /nori-acceptance/);
   assert.match(evidenceAsset, /description: .*modeled user operation path/i);
 
@@ -1787,6 +1795,9 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(autogoalAsset, /visible trigger/);
   assert.match(autogoalAsset, /interaction surface/);
   assert.match(autogoalAsset, /destructive boundary/);
+  assert.match(autogoalAsset, /The Acceptance Surface Model must shape the draft AC text itself/);
+  assert.match(autogoalAsset, /`user_story`.*`measurement`.*`threshold`/s);
+  assert.match(autogoalAsset, /leave the missing\s+operation path only in private reasoning/);
   assert.match(autogoalAsset, /project CRUD/);
   assert.match(autogoalAsset, /self-grill/);
   assert.match(autogoalAsset, /todolist/);
@@ -1807,6 +1818,8 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", () => 
   assert.match(reportingAsset, /visible trigger/);
   assert.match(reportingAsset, /persistence/);
   assert.match(reportingAsset, /destructive boundary/);
+  assert.match(reportingAsset, /Coverage notes alone are not enough/);
+  assert.match(reportingAsset, /criterion's\s+measurement and threshold/);
 
   const healthAsset = fs.readFileSync(path.join(pluginRoot, "skills", "nori-project-health", "SKILL.md"), "utf8");
   assert.match(healthAsset, /description: .*healthy state.*acceptance review/i);
@@ -1902,10 +1915,18 @@ test("public product surfaces present OpenNori as one capability bundle", () => 
   assert.match(readme, /AC Review Loop/);
   assert.match(readme, /Enhanced Discovery/);
   assert.match(readme, /todolist/);
+  assert.match(readme, /measurement and threshold should expose/);
+  assert.match(readme, /The model must also be visible in the Nori Contract itself/);
+  assert.match(readme, /not ready for\s+approval/);
   assert.match(readme, /AC 逐条确认循环/);
+  assert.match(readme, /模型也必须进入 Nori Contract 本身/);
+  assert.match(readme, /AC 的衡量方式和通过条件应暴露真实用户入口/);
   assert.match(protocol, /AC-O-14/);
   assert.match(protocol, /one AC at a time/);
   assert.match(protocol, /confirmed one by one/);
+  assert.match(protocol, /The model is only useful when it changes the draft criteria/);
+  assert.match(protocol, /`measurement`: entry, visible trigger/);
+  assert.match(protocol, /revise the draft criterion first/);
 
   for (const text of [readme, protocol]) {
     assert.doesNotMatch(text, /Choose one path/);

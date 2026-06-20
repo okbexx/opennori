@@ -41,6 +41,14 @@ entry, visible trigger, object, action, interaction surface, required
 information, feedback, state change, persistence, destructive boundary, and
 evidence shape.
 
+The root router must also reject a common false-positive: a draft says the
+surface was modeled in coverage notes, but the AC text itself remains broad.
+For visible product surfaces, route back to `nori-acceptance` unless each
+relevant criterion carries the operation path in its own `measurement` and
+`threshold`: entry, visible trigger, interaction surface, object/action,
+required information or states, visible feedback, state change, persistence or
+destructive boundary, failure/recovery behavior, and evidence shape.
+
 Draft approval requires a one-AC-at-a-time AC Review Loop. After a draft exists,
 the agent must show a compact contract overview, then review only the current
 AC: user entry, user action or judgment, expected result, non-passing cases, and
@@ -166,6 +174,9 @@ Then include only the minimum context needed for the user to approve, revise, pr
   Acceptance Surface Modeling identifies actor, entry, visible trigger, object,
   action, interaction surface, required information, feedback, state change,
   persistence, destructive boundary, and evidence shape.
+- Do not accept a visible-product draft just because coverage notes mention
+  Acceptance Surface Modeling. The operation path must be in the criterion
+  measurement and threshold; otherwise route to `nori-acceptance` for revision.
 - Do not turn architecture, profile, build-vs-buy, Plugin, hook, or tool preferences into Product AC.
 - Do not let the CLI decide whether a goal is non-trivial. The agent/user records Architecture Requirement status; CLI only routes from that recorded state.
 - Do not treat dashboard activity, events, or snapshots as acceptance evidence.

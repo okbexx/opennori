@@ -57,6 +57,23 @@ flows such as add, view/select, edit, delete/unlink/archive, preview, recover,
 and report review when those flows have different entries, triggers, fields,
 feedback, state changes, or destructive boundaries.
 
+The Acceptance Surface Model must shape the draft AC text itself. It is not
+enough to say in coverage notes that the surface was considered. For each
+visible-flow criterion, write:
+
+- `user_story` with the user's role, entry, object, and operation or judgment.
+- `measurement` with the exact operation path: entry, visible trigger,
+  interaction surface, object/action, and required information or states.
+- `threshold` with the visible feedback, immediate state change, persistence
+  or destructive boundary, failure/recovery behavior, and evidence shape.
+
+If those elements cannot be written into the criterion without inventing a
+completion decision, the draft is not ready. Ask the one question that changes
+completion meaning, or write a recommended assumption into `acceptance_basis`
+and review that assumption in the AC Review Loop. Do not leave the missing
+operation path only in private reasoning, coverage summary, or a later
+implementation plan.
+
 If the model requires a product decision the user did not provide, use a
 recommended assumption when it is low-risk and reviewable, or ask one critical
 completion-changing question. The draft must expose those assumptions before
@@ -110,7 +127,7 @@ completion condition, revise the draft instead of continuing the loop.
 9. Convert strong inferences into assumptions instead of making the user answer a long questionnaire. Ask only the critical questions that change completion meaning, such as whether a todolist needs due dates/tags/priorities, whether persistence is local-only or backend-backed, or whether deleting a project means unlinking it from the registry or deleting a local directory.
 10. If the idea implies a complete product, complete feature loop, full app, full dashboard, or full workbench, enumerate the full acceptance surface before drafting: user roles, entry/navigation, primary workflows, state transitions, data objects and rules, permissions, first-run or empty states, persistence, failure/recovery, reporting or review method, UI/UX when visible, cross-session continuity, and explicit out-of-scope boundaries.
 11. For complete-product goals, create a short acceptance coverage map before drafting. Include at least the surfaces that matter to that product type, such as roles, project list and switching, overview, object lists, object detail, read-only previews, source/version/audit, memory, capabilities, external knowledge, search, timeline, security boundary, persistence, state feedback, failure recovery, and final review/report. Do not treat this map as a separate contract; it is the checklist that prevents a compressed draft.
-12. Convert the coverage map and surface model into criteria where each criterion describes one user operation or judgment surface. A criterion may cover closely related sub-states for the same surface, but it must not combine unrelated surfaces such as project overview plus assets plus memory plus knowledge base plus capabilities. Split combined criteria before running `opennori draft --brief`.
+12. Convert the coverage map and surface model into criteria where each criterion describes one user operation or judgment surface. A criterion may cover closely related sub-states for the same surface, but it must not combine unrelated surfaces such as project overview plus assets plus memory plus knowledge base plus capabilities. Each visible-flow criterion's measurement must name the concrete entry, visible trigger, interaction surface, object/action, and required information or states; each threshold must name feedback, state change, persistence or destructive boundary, failure/recovery behavior, and evidence shape. Split combined or path-missing criteria before running `opennori draft --brief`.
 13. If a coverage surface is intentionally omitted, record it as an assumption or open question visible to the user before approval. If the omission would change the meaning of complete product closure, ask the user instead of silently narrowing.
 14. Do internal acceptance discovery yourself: entrypoint, user operation, concrete objects, success signal, persistence/recovery, failure behavior, boundary, and review method.
 15. For visible interface goals such as pages, apps, dashboards, desktops, workbenches, forms, settings screens, and admin consoles, include user-experience acceptance. Cover entry and navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability and scanability, visual and interaction consistency, recovery paths, and UI boundaries. Do not collapse this into one vague "UI looks good" check.
@@ -271,6 +288,10 @@ Keep any autogoal notes short and clearly secondary. The user is approving the N
 - Do not shrink a broad idea for agent convenience. If implementation is large, that affects later execution order, not the completion definition.
 - Do not compress a complete-product idea into a small default AC set. Full product closure may require AC for roles, entry/navigation, primary workflows, states, data rules, permissions, persistence, failure/recovery, UI/UX, reporting/review, and boundaries.
 - Do not write a complete-product draft before doing a coverage self-check. If the draft has a few broad criteria that each bundle several unrelated user judgments, treat it as a failed draft and revise before asking for approval.
+- Do not treat the Acceptance Surface Model as satisfied just because the
+  draft basis, coverage summary, or agent reply says it was considered. For
+  visible product surfaces, the operation path must be present in the criterion
+  `measurement` and `threshold`; otherwise revise before asking for approval.
 - Do not ask for blind approval immediately after writing an autogoal draft. Start the one-AC-at-a-time AC Review Loop so the user can catch whether the agent misunderstood any AC.
 - Do not dump all AC interpretations as the approval surface. A compact overview is allowed, but confirmation happens one AC at a time.
 - Do not treat an early `approve` as final approval before every AC has been confirmed one by one.

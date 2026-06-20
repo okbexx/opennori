@@ -108,6 +108,18 @@ reviewed in the AC Review Loop. Keep this in Skill behavior and user review;
 do not implement it as a CLI hard validator, fixed target-type word list, or
 implementation plan.
 
+Acceptance Surface Modeling is only successful when it changes the draft AC
+text. Do not let agents satisfy the rule by writing a coverage note while the
+criteria remain broad. For visible product surfaces, each related criterion
+must carry the operation path in its own fields: `user_story` names the user's
+role, entry, object, and operation or judgment; `measurement` names the entry,
+visible trigger, interaction surface, object/action, and required information
+or states; `threshold` names feedback, immediate state change, persistence or
+destructive boundary, failure/recovery behavior, and evidence shape. If these
+details exist only in agent prose, architecture notes, evidence notes, or a
+future implementation plan, route back to `nori-acceptance` before approval,
+confident evidence, architecture apply, or completion reporting.
+
 If the user and agent have already discussed a goal, candidate AC, assumptions, or open questions, and the user asks OpenNori to take over that discussion, route to `nori-acceptance`, not `nori-autogoal`. Preserve the discussed material as a standard draft Nori Contract with `acceptance_basis.source: "conversation"`, keep it under `.opennori/drafts/`, and ask the user to approve or revise before implementation or evidence recording.
 
 After any Nori Contract Draft is generated, do not ask for blind approval.
@@ -124,6 +136,9 @@ enough. This explanation is not an implementation plan, architecture decision,
 file list, task list, or evidence claim. If the explanation adds a completion
 condition, exposes a mismatch, or cannot be made concrete from the draft, the
 agent must revise the AC or assumptions before continuing the review loop.
+If the AC Review Loop explanation is more specific than the criterion text,
+revise the draft so the new completion semantics are stored in
+`user_story`, `measurement`, or `threshold`; do not leave them only in chat.
 Revising a draft AC is not approval: use the draft revision path, keep the
 acceptance basis as draft, and restart review for the changed AC. Do not let
 profile, architecture, implementation, or evidence routing begin until final

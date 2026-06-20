@@ -18,6 +18,15 @@ change, persistence, destructive boundary, and evidence shape. If those are
 missing, say the goal may be objectively evidenced but not confidently
 acceptable yet, then route to `nori-acceptance`.
 
+Coverage notes alone are not enough for confident reporting. For visible
+product surfaces, the report should inspect whether each relevant criterion's
+measurement and threshold carry the actual operation path: entry, visible
+trigger, interaction surface, object/action, required information or states,
+visible feedback, state change, persistence or destructive boundary,
+failure/recovery behavior, and evidence shape. If the path only appears in
+agent explanation, implementation notes, architecture, or coverage summary,
+report the missing AC text as the review risk and route to `nori-acceptance`.
+
 ## Start Here
 
 1. Run the narrowest status command that answers the user.
@@ -30,7 +39,11 @@ acceptable yet, then route to `nori-acceptance`.
    create/edit/delete entry, icon vs text trigger, modal vs system picker,
    required fields, validation, feedback, persistence, or delete/unlink
    boundary.
-7. If the user wants a visual live view, use `opennori dashboard --root <repo>` as an observation surface, but keep the completion answer based on status/report data.
+7. If the operation path exists only in evidence summaries, screenshots, code,
+   architecture notes, or a draft coverage summary, say the AC text itself is
+   not yet reviewable. Completion remains "not confidently acceptable yet"
+   until `nori-acceptance` revises the criterion.
+8. If the user wants a visual live view, use `opennori dashboard --root <repo>` as an observation surface, but keep the completion answer based on status/report data.
 
 Useful state commands:
 

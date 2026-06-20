@@ -265,6 +265,22 @@ completion-changing question or records a clear assumption for the AC Review
 Loop. This must not become a fixed target-type word list, implementation plan,
 or hard CLI quality gate.
 
+The model is only useful when it changes the draft criteria. Coverage notes or
+agent prose that say "Acceptance Surface Modeling was considered" are not
+enough. For visible product surfaces, each relevant criterion carries its
+operation path in the criterion itself:
+
+- `user_story`: user role, entry, object, and operation or judgment
+- `measurement`: entry, visible trigger, interaction surface, object/action,
+  and required information or states
+- `threshold`: visible feedback, immediate state change, persistence or
+  destructive boundary, failure/recovery behavior, and evidence shape
+
+If the operation path is present only in coverage summary, private reasoning,
+architecture notes, evidence notes, or future implementation plans, the draft
+is not ready for approval and evidence/reporting cannot treat it as confidently
+acceptable.
+
 Acceptance Surface Modeling is a cross-Skill gate. Architecture, profile,
 build-vs-buy, health, evidence, and reporting Skills must not bypass it:
 
@@ -503,6 +519,14 @@ boundary, and evidence shape. Do not accept broad outcome AC such as "CRUD
 works", "manage items", "settings are editable", or "dashboard shows state";
 split the underlying user operations when their entry, control, fields,
 feedback, persistence, destructive boundary, or evidence differs.
+1d-a. The modeled operation path must be written into the Nori Contract
+criterion, not only mentioned in coverage notes. For visible product surfaces,
+`measurement` should name the entry, visible trigger, interaction surface,
+object/action, and required information or states; `threshold` should name
+feedback, state change, persistence or destructive boundary, failure/recovery,
+and evidence shape. If those fields remain broad, revise the draft through
+`nori-acceptance` before approval, confident evidence, architecture apply, or
+completion reporting.
 1d-i. Apply that rule across all OpenNori Skills. Do not preview/confirm an
 architecture baseline, record architecture apply, file an architecture
 challenge, choose a dependency, mark profile compliance, report project health,
@@ -513,7 +537,7 @@ user operation-path detail. Route those cases to `nori-acceptance`.
 4. Show only candidate acceptance directions and ask the user to choose or revise a direction. Brainstorm output is not a contract or completion evidence.
 5. If the user chooses a candidate, convert the chosen direction into a full NoriBrief with concrete user operations, visible results, boundaries, and review method.
 6. If the user starts with "use OpenNori" / "用 OpenNori 跑这个任务" and discovery questions are answered or explicitly accepted as assumptions, prepare a full NoriBrief and run `opennori draft --brief <brief.json> --root <repo> --json`.
-7. Show a compact draft overview, then start the AC Review Loop. Review one AC at a time with concrete user entry, action or judgment, visible result, non-passing cases, and evidence type. Ask the user to `confirm AC-<n>` or `revise AC-<n>: ...` before moving to the next AC.
+7. Show a compact draft overview, then start the AC Review Loop. Review one AC at a time with concrete user entry, visible trigger, interaction surface, object/action, required information or states, visible result, persistence or destructive boundary, non-passing cases, and evidence type. Ask the user to `confirm AC-<n>` or `revise AC-<n>: ...` before moving to the next AC. If the explanation is more specific than the criterion text, revise the draft criterion first so completion semantics live in the Nori Contract, not only in chat.
 8. Only after every AC has been confirmed one by one, ask for final approval and run `opennori approve --root <repo> --summary "<approval>" --json`.
 9. If the user states required Skills, preferred stacks, avoided tools, install policy, or execution constraints, run `opennori profile add --root <repo> ... --json` and keep those items out of the user acceptance criteria.
 10. For non-trivial goals, run `opennori architecture profiles --root <repo> --json`, preview a baseline, show it to the user, and confirm it before implementation.

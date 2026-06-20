@@ -19,6 +19,13 @@ If the evidence cannot name those elements because the AC only says "CRUD
 works", "manage items", "settings are editable", or "dashboard shows state",
 route to `nori-acceptance` instead of marking it confidently passing.
 
+Do not treat coverage-summary prose as enough. For visible product surfaces,
+confident passing evidence requires the current criterion's `measurement` and
+`threshold` to contain the operation path the evidence is proving. If the
+criterion text is still broad and the agent can only explain the path from
+memory, private reasoning, or an implementation note, hand off to
+`nori-acceptance` to revise the AC before recording passing evidence.
+
 ## Start Here
 
 1. Read resume/status to identify the current criterion and latest evidence.
@@ -28,8 +35,9 @@ route to `nori-acceptance` instead of marking it confidently passing.
 5. For visible product surfaces, tie the evidence summary/reviewability to the
    modeled operation path: entry, visible trigger, object/action, interaction
    surface, state change, persistence or destructive boundary, and evidence
-   shape. If that path is unknown, hand off to `nori-acceptance` before
-   recording confident passing evidence.
+   shape. If that path is unknown or missing from the criterion's measurement
+   and threshold, hand off to `nori-acceptance` before recording confident
+   passing evidence.
 6. Record basis, sources, reviewability, confidence, and limitations.
 7. Read the returned `data.agent_next` after evidence writes and route to the recommended Skill. Do not guess whether to continue, report completion, or request user review.
 8. Heartbeat during longer verification, and finish live activity with `opennori activity finish --root <repo> --skill nori-evidence --summary "..." --json` when the evidence turn is complete.
