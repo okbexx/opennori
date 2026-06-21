@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 1,
   "latest_evidence_summary": "OpenNori test coverage has been reorganized around objective protocol boundaries instead of one giant core/CLI suite. core.test.js now contains only narrow core invariants; the former CLI mega-suite is split into focused cli-domain files; acceptance, evidence, reporting, profile, lifecycle, architecture, docs-schema, and dashboard tests own their domains. docs/testing.md, AGENTS.md, and the local nori-product-development Skill state that automated tests must not prove subjective AC quality, UI/CRUD/Dashboard discovery quality, enhanced autogoal judgment, or exact prompt wording; those belong to Skills, dogfood, eval prompts, and user review.",
-  "updated_at": "2026-06-21T08:14:39.026Z"
+  "updated_at": "2026-06-21T10:26:07.803Z"
 }

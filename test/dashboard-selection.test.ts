@@ -54,7 +54,15 @@ test("dashboard selection maps passed AC focus to the rendered Passed aggregate"
       threshold: "The passed criterion stays visible inside the aggregate.",
       status: "passing",
       confidence: "review-required",
-      evidence: []
+      evidence: [],
+      dossier: {
+        path: ".opennori/current/dashboard-goal/criteria/AC-2",
+        readme_path: ".opennori/current/dashboard-goal/criteria/AC-2/README.md",
+        criterion_path: ".opennori/current/dashboard-goal/criteria/AC-2/criterion.json",
+        status_path: ".opennori/current/dashboard-goal/criteria/AC-2/status.json",
+        evidence_path: ".opennori/current/dashboard-goal/criteria/AC-2/evidence",
+        artifacts_path: ".opennori/current/dashboard-goal/criteria/AC-2/artifacts"
+      }
     },
     {
       id: "AC-3",
@@ -71,6 +79,8 @@ test("dashboard selection maps passed AC focus to the rendered Passed aggregate"
   assert.equal(node?.id, "passed-group");
   assert.equal(node?.subLabel, "1");
   assert.equal((node?.rawData as { focused_id?: string }).focused_id, "AC-2");
+  const rawData = node?.rawData as { criteria: Array<{ dossier?: { readme_path?: string } }> };
+  assert.equal(rawData.criteria.at(0)?.dossier?.readme_path, ".opennori/current/dashboard-goal/criteria/AC-2/README.md");
 });
 
 test("dashboard selection follows visual state when a focused aggregate AC becomes unpassed", { tags: ["dashboard", "quick"] }, () => {

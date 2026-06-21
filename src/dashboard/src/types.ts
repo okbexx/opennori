@@ -112,6 +112,15 @@ export type NoriSnapshot = {
     id: string;
     label: string;
     workflow_status: string;
+    dossier?: {
+      location: string;
+      path: string;
+      readme_path: string;
+      contract_path: string;
+      ledger_path: string;
+      criteria_path: string;
+      report_path: string;
+    };
   } | null;
   current_gap: {
     id: string;
@@ -119,6 +128,14 @@ export type NoriSnapshot = {
     status: string;
     reason: string;
     latest_evidence?: string;
+    dossier?: {
+      path: string;
+      readme_path: string;
+      criterion_path: string;
+      status_path: string;
+      evidence_path: string;
+      artifacts_path: string;
+    };
   } | null;
   need_user: boolean;
   user_action?: string;
@@ -159,6 +176,14 @@ export type NoriSnapshot = {
     status: string;
     confidence: string;
     evidence: EvidenceRecord[];
+    dossier?: {
+      path: string;
+      readme_path: string;
+      criterion_path: string;
+      status_path: string;
+      evidence_path: string;
+      artifacts_path: string;
+    };
   }>;
   events?: NoriEvent[];
 };

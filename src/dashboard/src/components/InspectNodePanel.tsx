@@ -80,12 +80,40 @@ function profileStrengthColor(strength: string | undefined): string {
   return "#00f0ff";
 }
 
+function DossierPathList({ title, paths }: { title: string; paths: Array<{ label: string; value?: string }> }) {
+  const visiblePaths = paths.filter((item) => item.value);
+  if (visiblePaths.length === 0) return null;
+
+  return (
+    <div className="rounded border border-[#00f0ff]/12 bg-[#00f0ff]/5 p-2.5">
+      <span className="mb-1.5 block text-[8px] font-bold uppercase tracking-wider text-[#00f0ff]/80">{title}</span>
+      <div className="flex flex-col gap-1">
+        {visiblePaths.map((item) => (
+          <div key={`${item.label}:${item.value}`} className="grid grid-cols-[78px_1fr] gap-2 rounded bg-black/20 px-2 py-1.5 text-[10px] leading-snug">
+            <span className="font-mono uppercase text-slate-500">{item.label}</span>
+            <span className="break-all font-mono text-slate-300">{item.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function InspectNodePanel({ node }: InspectNodePanelProps) {
   // 1. 简体中文：Goal 目标的只读面板渲染
   if (node.type === "goal") {
     const rawGoal = node.rawData as {
       label: string;
       workflow_status?: string;
+      dossier?: {
+        location?: string;
+        path?: string;
+        readme_path?: string;
+        contract_path?: string;
+        ledger_path?: string;
+        criteria_path?: string;
+        report_path?: string;
+      };
     };
     const isCompleted = String(rawGoal.workflow_status || "").toLowerCase() === "complete";
 
@@ -111,8 +139,20 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
           <p className="text-xs font-semibold leading-relaxed text-slate-200">{rawGoal.label}</p>
         </div>
 
+        <DossierPathList
+          title="Goal Dossier"
+          paths={[
+            { label: "state", value: rawGoal.dossier?.path },
+            { label: "readme", value: rawGoal.dossier?.readme_path },
+            { label: "contract", value: rawGoal.dossier?.contract_path },
+            { label: "ledger", value: rawGoal.dossier?.ledger_path },
+            { label: "criteria", value: rawGoal.dossier?.criteria_path },
+            { label: "report", value: rawGoal.dossier?.report_path }
+          ]}
+        />
+
         <div className="rounded border border-slate-800 bg-slate-950/40 p-3 text-xs leading-normal text-slate-400">
-          This is the primary directive that OpenNori is tracking. Under this goal, layered acceptance criteria are evaluated to guarantee architecture compliance and final delivery standards.
+          This is the primary Nori Contract dossier that OpenNori is observing. The dashboard reads the generated review files and structured JSON state, but it does not approve, waive, or write acceptance data.
         </div>
       </div>
     );
@@ -130,6 +170,14 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
         threshold: string;
         status: string;
         confidence: string;
+        dossier?: {
+          path?: string;
+          readme_path?: string;
+          criterion_path?: string;
+          status_path?: string;
+          evidence_path?: string;
+          artifacts_path?: string;
+        };
       }>;
     };
 
@@ -169,6 +217,15 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
                 </span>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed font-medium">{ac.user_story}</p>
+              {rawGroup.focused_id === ac.id && (
+                <DossierPathList
+                  title="Focused Criterion Dossier"
+                  paths={[
+                    { label: "readme", value: ac.dossier?.readme_path },
+                    { label: "status", value: ac.dossier?.status_path }
+                  ]}
+                />
+              )}
             </div>
           ))}
         </div>
@@ -333,6 +390,14 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
       confidence: string;
       required?: boolean;
       evidence?: EvidenceRecord[];
+      dossier?: {
+        path?: string;
+        readme_path?: string;
+        criterion_path?: string;
+        status_path?: string;
+        evidence_path?: string;
+        artifacts_path?: string;
+      };
     };
 
     const cleanStatus = String(ac.status || "").toLowerCase();
@@ -396,6 +461,18 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
               <p className="text-[11px] leading-relaxed text-slate-300">{ac.threshold}</p>
             </div>
           </div>
+
+          <DossierPathList
+            title="Criterion Dossier"
+            paths={[
+              { label: "state", value: ac.dossier?.path },
+              { label: "readme", value: ac.dossier?.readme_path },
+              { label: "criterion", value: ac.dossier?.criterion_path },
+              { label: "status", value: ac.dossier?.status_path },
+              { label: "evidence", value: ac.dossier?.evidence_path },
+              { label: "artifacts", value: ac.dossier?.artifacts_path }
+            ]}
+          />
 
           {/* Evidence List */}
           <div className="mt-1">

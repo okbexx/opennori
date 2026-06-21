@@ -146,7 +146,8 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
             measurement: ac.measurement,
             threshold: ac.threshold,
             status: ac.status,
-            confidence: ac.confidence
+            confidence: ac.confidence,
+            dossier: ac.dossier
           }))
         }
       });

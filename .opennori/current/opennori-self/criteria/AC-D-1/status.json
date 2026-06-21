@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 2,
-  "latest_evidence_summary": "Dashboard inspect panel now stays aligned with the rendered radar state: focused passing AC events map to the Passed aggregate instead of a hidden individual node, latest evidence/architecture/profile/report events can refresh the inspected AC, long Chinese measurement/threshold text renders in one readable column, review-required passing criteria show review risk wording, and architecture valid displays as a healthy decision.",
-  "updated_at": "2026-06-21T08:14:39.026Z"
+  "evidence_count": 3,
+  "latest_evidence_summary": "Dashboard snapshot and inspect panels now expose goal dossier and criterion dossier paths so users can trace Goal and AC nodes back to .opennori/current/<goal>/contract.json, ledger.json, README.md, and criteria/<AC-id>/{README.md,criterion.json,status.json,evidence,artifacts}. Plugin cache was synced locally from 0.1.9 to 0.1.10 with opennori plugin sync --local --confirm.",
+  "updated_at": "2026-06-21T10:26:07.803Z"
 }

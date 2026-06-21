@@ -17,23 +17,19 @@ Passing threshold: 页面以视觉化 acceptance loop 和少量状态面板展�
 
 ## Evidence
 
-Latest: dashboard-review - Dashboard inspect panel now stays aligned with the rendered radar state: focused passing AC events map to the Passed aggregate instead of a hidden individual node, latest evidence/architecture/profile/report events can refresh the inspected AC, long Chinese measurement/threshold text renders in one readable column, review-required passing criteria show review risk wording, and architecture valid displays as a healthy decision.
+Latest: dashboard-review - Dashboard snapshot and inspect panels now expose goal dossier and criterion dossier paths so users can trace Goal and AC nodes back to .opennori/current/<goal>/contract.json, ledger.json, README.md, and criteria/<AC-id>/{README.md,criterion.json,status.json,evidence,artifacts}. Plugin cache was synced locally from 0.1.9 to 0.1.10 with opennori plugin sync --local --confirm.
 Result: passing
 Basis: tool-observation
-Reviewability: Run npm run lint, npm run typecheck:dashboard, npm run test:quick, npm run test:dashboard, and git diff --check; then open opennori dashboard and trigger evidence/architecture/activity events to confirm the right panel follows the rendered radar node and highlights the focused passed AC inside the aggregate.
-Limitations: This verifies the local dashboard behavior and focused regression coverage. Dashboard remains observation-only and does not write Product AC, evidence, profile, architecture, report, waiver, or completion state.
+Reviewability: Run the listed checks; start opennori dashboard and select Goal, an individual AC, and a focused Passed AC to confirm dossier paths are visible in the read-only inspect panel.
+Limitations: This verifies dashboard projection, UI build, and selection behavior. It does not require dashboard to write, approve, waive, or record evidence; those remain agent/CLI paths.
 
 Sources:
-- npm run lint
 - npm run typecheck:dashboard
-- npm run test:quick
+- npx tsc --noEmit --pretty false
+- npm run build:dashboard
 - npm run test:dashboard
+- npm run test:quick
 - git diff --check
-- src/dashboard/src/App.tsx
-- src/dashboard/src/api.ts
-- src/dashboard/src/selection.ts
-- src/dashboard/src/components/InspectNodePanel.tsx
-- test/dashboard-selection.test.ts
 
 ## Files
 

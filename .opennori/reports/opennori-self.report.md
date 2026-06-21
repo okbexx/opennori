@@ -79,7 +79,7 @@ Summary: Add acceptance for per-AC dossier goal state.
 | AC-Z-18 | productization | passing | verified | artifact-review: README now explains that agent_next.candidate_goals is the Skill routing surfa… | tool-observation |
 | AC-Z-19 | productization | passing | verified | confirmed-init-routing-smoke: Confirmed opennori init on a fresh project creates .opennori stat… | tool-observation |
 | AC-Z-20 | productization | passing | verified | behavior-test: Draft Nori Contracts now keep workflow status as draft until user approval; temp… | protocol-check |
-| AC-D-1 | acceptance | passing | verified | dashboard-review: Dashboard inspect panel now stays aligned with the rendered radar state: focu… | tool-observation |
+| AC-D-1 | acceptance | passing | verified | dashboard-review: Dashboard snapshot and inspect panels now expose goal dossier and criterion d… | tool-observation |
 | AC-D-2 | acceptance | passing | verified | dashboard-activity-workflow: OpenNori now gives Skills a dashboard_activity routing surface, le… | tool-observation |
 | AC-D-3 | acceptance | passing | verified | dashboard-execution-presence-review: Dashboard event focus now follows execution-relevant OpenN… | tool-observation |
 | AC-D-4 | acceptance | passing | verified | dashboard-observation-boundary: Dashboard now presents user intervention as an agent-conversati… | tool-observation |
@@ -99,7 +99,7 @@ Summary: Add acceptance for per-AC dossier goal state.
 | AC-D-5 | acceptance | passing | verified | dashboard-ui-verification: Dashboard now exposes a readonly Nori Profile drawer from the header… | tool-observation |
 | AC-P-14 | protocol | passing | verified | report-rendering-test: OpenNori report rendering now keeps the Acceptance Status table compact… | tool-observation |
 | AC-P-15 | protocol | passing | verified | test-system-refactor-review: OpenNori test coverage has been reorganized around objective proto… | tool-observation |
-| AC-P-16 | protocol | passing | verified | verification: Full OpenNori verification passed after goal dossier state and physical contract/… | tool-observation |
+| AC-P-16 | protocol | passing | verified | protocol-dashboard-review: Dashboard status projection now uses the goal dossier model directly… | tool-observation |
 
 ## Acceptance Details
 
@@ -1584,34 +1584,26 @@ Summary: Add acceptance for per-AC dossier goal state.
 - Passing threshold: 页面以视觉化 acceptance loop 和少量状态面板展示 agent activity、goal、current gap、need user、architecture
   decision、completion decision 和 latest event；有活动动效但不呈现聊天记录、过程任务列表、证据账本或完成权威入口；状态变化来自 /api/snapshot 与
   /api/events。
-- Evidence: dashboard-review: Dashboard inspect panel now stays aligned with the rendered radar state: focused
-  passing AC events map to the Passed aggregate instead of a hidden individual node, latest
-  evidence/architecture/profile/report events can refresh the inspected AC, long Chinese
-  measurement/threshold text renders in one readable column, review-required passing criteria show
-  review risk wording, and architecture valid displays as a healthy decision.
+- Evidence: dashboard-review: Dashboard snapshot and inspect panels now expose goal dossier and criterion
+  dossier paths so users can trace Goal and AC nodes back to .opennori/current/<goal>/contract.json,
+  ledger.json, README.md, and criteria/<AC-id>/{README.md,criterion.json,status.json,evidence,artifact
+  s}. Plugin cache was synced locally from 0.1.9 to 0.1.10 with opennori plugin sync --local
+  --confirm.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-20T13:58:33.238Z
+- Evidence recorded: 2026-06-21T10:26:07.561Z
 - Sources:
-  - type=command, label=npm run lint, command=npm run lint
   - type=command, label=npm run typecheck:dashboard, command=npm run typecheck:dashboard
-  - type=command, label=npm run test:quick, command=npm run test:quick
+  - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
+  - type=command, label=npm run build:dashboard, command=npm run build:dashboard
   - type=command, label=npm run test:dashboard, command=npm run test:dashboard
+  - type=command, label=npm run test:quick, command=npm run test:quick
   - type=command, label=git diff --check, command=git diff --check
-  - type=artifact, label=src/dashboard/src/App.tsx, path=src/dashboard/src/App.tsx
-  - type=artifact, label=src/dashboard/src/api.ts, path=src/dashboard/src/api.ts
-  - type=artifact, label=src/dashboard/src/selection.ts, path=src/dashboard/src/selection.ts
-  - type=artifact, label=src/dashboard/src/components/InspectNodePanel.tsx,
-    path=src/dashboard/src/components/InspectNodePanel.tsx
-  - type=artifact, label=test/dashboard-selection.test.ts, path=test/dashboard-selection.test.ts
-- Reviewability: Run npm run lint, npm run typecheck:dashboard, npm run test:quick, npm run test:dashboard, and git
-  diff --check; then open opennori dashboard and trigger evidence/architecture/activity events to
-  confirm the right panel follows the rendered radar node and highlights the focused passed AC inside
-  the aggregate.
-- Limitations: This verifies the local dashboard behavior and focused regression coverage. Dashboard remains
-  observation-only and does not write Product AC, evidence, profile, architecture, report, waiver, or
-  completion state.
+- Reviewability: Run the listed checks; start opennori dashboard and select Goal, an individual AC, and a focused
+  Passed AC to confirm dossier paths are visible in the read-only inspect panel.
+- Limitations: This verifies dashboard projection, UI build, and selection behavior. It does not require dashboard
+  to write, approve, waive, or record evidence; those remain agent/CLI paths.
 
 ### AC-D-2
 
@@ -2515,21 +2507,20 @@ Summary: Add acceptance for per-AC dossier goal state.
   status/report/dashboard/doctor/manifest use the directory model and no normal
   current/draft/completed/blocked state relies on flat <goal>.acceptance.md + <goal>.evidence.json
   pairs.
-- Evidence: verification: Full OpenNori verification passed after goal dossier state and physical
-  contract/ledger schemas were introduced.
+- Evidence: protocol-dashboard-review: Dashboard status projection now uses the goal dossier model directly:
+  snapshots include goal-level dossier paths and each criterion includes its own dossier paths,
+  including README, criterion source, status projection, evidence directory, and artifacts directory.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-21T08:14:39.026Z
+- Evidence recorded: 2026-06-21T10:26:07.803Z
 - Sources:
-  - type=command, label=npm run check:full, command=npm run check:full
-  - type=artifact, label=schemas/contract.schema.json, path=schemas/contract.schema.json
-  - type=artifact, label=schemas/ledger.schema.json, path=schemas/ledger.schema.json
-  - type=artifact, label=test/docs-schema.test.js, path=test/docs-schema.test.js
-- Reviewability: Run npm run check:full from the OpenNori repository; inspect
-  .opennori/current/opennori-self/README.md and criteria/AC-P-16/README.md for the dossier state.
-- Limitations: This verifies repository behavior and OpenNori self-state; external projects still need their own
-  upgrade/check run after installing the updated package.
+  - type=command, label=npm run test:dashboard, command=npm run test:dashboard
+  - type=command, label=npm run test:quick, command=npm run test:quick
+- Reviewability: Inspect /api/snapshot or .opennori/snapshots/current.json after refreshSnapshot; the goal.dossier
+  and criteria[].dossier fields should point to the physical goal and criterion dossier files.
+- Limitations: This is a read-only dashboard projection of the dossier model. It does not make Markdown
+  authoritative over JSON and does not introduce flat legacy state.
 
 
 ## Current Acceptance Gap

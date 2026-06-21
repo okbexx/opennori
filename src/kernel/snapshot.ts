@@ -38,6 +38,36 @@ function latestEvidenceSummary(ledger: EvidenceLedger, gapId?: string): string {
   return latest?.summary || "";
 }
 
+function projectRelative(root: string, filePath: string): string {
+  const relative = path.relative(root, filePath);
+  if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) return filePath;
+  return relative;
+}
+
+function goalDossier(root: string, pair: NonNullable<ReturnType<typeof chooseActivePair>>) {
+  return {
+    location: pair.location,
+    path: projectRelative(root, pair.goalDir),
+    readme_path: projectRelative(root, pair.acceptancePath),
+    contract_path: projectRelative(root, pair.contractPath),
+    ledger_path: projectRelative(root, pair.ledgerPath),
+    criteria_path: projectRelative(root, pair.criteriaDir),
+    report_path: projectRelative(root, pair.reportPath)
+  };
+}
+
+function criterionDossier(root: string, pair: NonNullable<ReturnType<typeof chooseActivePair>>, criterionId: string) {
+  const dir = path.join(pair.criteriaDir, criterionId);
+  return {
+    path: projectRelative(root, dir),
+    readme_path: projectRelative(root, path.join(dir, "README.md")),
+    criterion_path: projectRelative(root, path.join(dir, "criterion.json")),
+    status_path: projectRelative(root, path.join(dir, "status.json")),
+    evidence_path: projectRelative(root, path.join(dir, "evidence")),
+    artifacts_path: projectRelative(root, path.join(dir, "artifacts"))
+  };
+}
+
 export function buildSnapshot(root: string, options: { goalId?: string } = {}): NoriSnapshot {
   const activity = readActivity(root);
   const pair = chooseActivePair(root, options.goalId, activity?.expired ? undefined : activity?.goal_id);
@@ -133,7 +163,8 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
     goal: {
       id: contract.goal_id,
       label: contract.goal,
-      workflow_status: ledger.status
+      workflow_status: ledger.status,
+      dossier: goalDossier(root, pair)
     },
     current_gap: gap
       ? {
@@ -141,7 +172,8 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
           label: gap.user_story,
           status: gap.status,
           reason: gap.reason,
-          latest_evidence: latestEvidenceSummary(ledger, gap.id)
+          latest_evidence: latestEvidenceSummary(ledger, gap.id),
+          dossier: criterionDossier(root, pair, gap.id)
         }
       : null,
     need_user: userIntervention.required,
@@ -184,7 +216,8 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
         required: c.required,
         status: ledgerState?.status || c.status || "unknown",
         confidence: ledgerState?.confidence || "unknown",
-        evidence: ledgerState?.evidence || []
+        evidence: ledgerState?.evidence || [],
+        dossier: criterionDossier(root, pair, c.id)
       };
     }),
     events: readEvents(root, { limit: 50 })

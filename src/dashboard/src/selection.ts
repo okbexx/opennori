@@ -19,7 +19,8 @@ function passedGroupRawDataWithFocus(criteria: NonNullable<NoriSnapshot["criteri
       measurement: criterion.measurement,
       threshold: criterion.threshold,
       status: criterion.status,
-      confidence: criterion.confidence
+      confidence: criterion.confidence,
+      dossier: criterion.dossier
     }))
   };
 }

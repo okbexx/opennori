@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 3,
   "latest_evidence_summary": "Nori Profile now separates blocking compliance from review risk: must/violated avoid still block, while unknown or violated prefer items surface as profile_review and make objective completion review-risk rather than confidently complete.",
-  "updated_at": "2026-06-21T08:14:39.026Z"
+  "updated_at": "2026-06-21T10:26:07.803Z"
 }

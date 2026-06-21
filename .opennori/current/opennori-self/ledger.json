@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-21T08:14:39.026Z",
+  "updated_at": "2026-06-21T10:26:07.803Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -5360,6 +5360,49 @@
           "limitations": "This verifies the local dashboard behavior and focused regression coverage. Dashboard remains observation-only and does not write Product AC, evidence, profile, architecture, report, waiver, or completion state.",
           "gate": "accepted",
           "created_at": "2026-06-20T13:58:33.238Z"
+        },
+        {
+          "kind": "dashboard-review",
+          "basis": "tool-observation",
+          "summary": "Dashboard snapshot and inspect panels now expose goal dossier and criterion dossier paths so users can trace Goal and AC nodes back to .opennori/current/<goal>/contract.json, ledger.json, README.md, and criteria/<AC-id>/{README.md,criterion.json,status.json,evidence,artifacts}. Plugin cache was synced locally from 0.1.9 to 0.1.10 with opennori plugin sync --local --confirm.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "command",
+              "label": "npm run typecheck:dashboard",
+              "command": "npm run typecheck:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run build:dashboard",
+              "command": "npm run build:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:quick",
+              "command": "npm run test:quick"
+            },
+            {
+              "type": "command",
+              "label": "git diff --check",
+              "command": "git diff --check"
+            }
+          ],
+          "reviewability": "Run the listed checks; start opennori dashboard and select Goal, an individual AC, and a focused Passed AC to confirm dossier paths are visible in the read-only inspect panel.",
+          "limitations": "This verifies dashboard projection, UI build, and selection behavior. It does not require dashboard to write, approve, waive, or record evidence; those remain agent/CLI paths.",
+          "gate": "accepted",
+          "created_at": "2026-06-21T10:26:07.561Z"
         }
       ]
     },
@@ -7583,6 +7626,29 @@
           "limitations": "This verifies repository behavior and OpenNori self-state; external projects still need their own upgrade/check run after installing the updated package.",
           "gate": "accepted",
           "created_at": "2026-06-21T08:14:39.026Z"
+        },
+        {
+          "kind": "protocol-dashboard-review",
+          "basis": "tool-observation",
+          "summary": "Dashboard status projection now uses the goal dossier model directly: snapshots include goal-level dossier paths and each criterion includes its own dossier paths, including README, criterion source, status projection, evidence directory, and artifacts directory.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:quick",
+              "command": "npm run test:quick"
+            }
+          ],
+          "reviewability": "Inspect /api/snapshot or .opennori/snapshots/current.json after refreshSnapshot; the goal.dossier and criteria[].dossier fields should point to the physical goal and criterion dossier files.",
+          "limitations": "This is a read-only dashboard projection of the dossier model. It does not make Markdown authoritative over JSON and does not introduce flat legacy state.",
+          "gate": "accepted",
+          "created_at": "2026-06-21T10:26:07.803Z"
         }
       ]
     }

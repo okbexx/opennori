@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 1,
   "latest_evidence_summary": "OpenNori now directs visible interface goals through UI/UX acceptance discovery as packaged Skill behavior rather than CLI subjective validation. The root nori Skill routes missing UI/UX AC and interface-only functional AC back to nori-acceptance; nori-acceptance requires agent/user discovery for interface entry, navigation, hierarchy, states, feedback, readability, consistency, recovery, and UI boundaries; nori-autogoal includes the same UX acceptance dimensions when deriving a standard Nori Contract Draft from a rough interface idea. README, AGENTS, protocol, self contract, and the website explain the behavior, and objective tests verify the packaged Skill assets and AC-O-11 without encoding a UI-quality word list.",
-  "updated_at": "2026-06-21T08:14:39.026Z"
+  "updated_at": "2026-06-21T10:26:07.803Z"
 }

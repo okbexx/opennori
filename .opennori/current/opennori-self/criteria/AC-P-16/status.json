@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 2,
-  "latest_evidence_summary": "Full OpenNori verification passed after goal dossier state and physical contract/ledger schemas were introduced.",
-  "updated_at": "2026-06-21T08:14:39.026Z"
+  "evidence_count": 3,
+  "latest_evidence_summary": "Dashboard status projection now uses the goal dossier model directly: snapshots include goal-level dossier paths and each criterion includes its own dossier paths, including README, criterion source, status projection, evidence directory, and artifacts directory.",
+  "updated_at": "2026-06-21T10:26:07.803Z"
 }

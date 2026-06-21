@@ -17,17 +17,15 @@ Passing threshold: Goal state is stored as a goal directory; every Product AC ha
 
 ## Evidence
 
-Latest: verification - Full OpenNori verification passed after goal dossier state and physical contract/ledger schemas were introduced.
+Latest: protocol-dashboard-review - Dashboard status projection now uses the goal dossier model directly: snapshots include goal-level dossier paths and each criterion includes its own dossier paths, including README, criterion source, status projection, evidence directory, and artifacts directory.
 Result: passing
 Basis: tool-observation
-Reviewability: Run npm run check:full from the OpenNori repository; inspect .opennori/current/opennori-self/README.md and criteria/AC-P-16/README.md for the dossier state.
-Limitations: This verifies repository behavior and OpenNori self-state; external projects still need their own upgrade/check run after installing the updated package.
+Reviewability: Inspect /api/snapshot or .opennori/snapshots/current.json after refreshSnapshot; the goal.dossier and criteria[].dossier fields should point to the physical goal and criterion dossier files.
+Limitations: This is a read-only dashboard projection of the dossier model. It does not make Markdown authoritative over JSON and does not introduce flat legacy state.
 
 Sources:
-- npm run check:full
-- schemas/contract.schema.json
-- schemas/ledger.schema.json
-- test/docs-schema.test.js
+- npm run test:dashboard
+- npm run test:quick
 
 ## Files
 

@@ -53,7 +53,18 @@ test("kernel events activity and snapshot expose dashboard state without replaci
 
   const snapshot = refreshSnapshot(root, { goalId: "module-goal" });
   assert.equal(snapshot.goal.id, "module-goal");
+  assert.equal(snapshot.goal.dossier.path, ".opennori/current/module-goal");
+  assert.equal(snapshot.goal.dossier.readme_path, ".opennori/current/module-goal/README.md");
+  assert.equal(snapshot.goal.dossier.contract_path, ".opennori/current/module-goal/contract.json");
+  assert.equal(snapshot.goal.dossier.ledger_path, ".opennori/current/module-goal/ledger.json");
+  assert.equal(snapshot.goal.dossier.criteria_path, ".opennori/current/module-goal/criteria");
   assert.equal(snapshot.current_gap.id, "AC-1");
+  assert.equal(snapshot.current_gap.dossier.path, ".opennori/current/module-goal/criteria/AC-1");
+  assert.equal(snapshot.current_gap.dossier.criterion_path, ".opennori/current/module-goal/criteria/AC-1/criterion.json");
+  assert.equal(snapshot.current_gap.dossier.status_path, ".opennori/current/module-goal/criteria/AC-1/status.json");
+  assert.equal(snapshot.current_gap.dossier.evidence_path, ".opennori/current/module-goal/criteria/AC-1/evidence");
+  assert.equal(snapshot.current_gap.dossier.artifacts_path, ".opennori/current/module-goal/criteria/AC-1/artifacts");
+  assert.equal(snapshot.criteria.find((criterion) => criterion.id === "AC-1").dossier.readme_path, ".opennori/current/module-goal/criteria/AC-1/README.md");
   assert.equal(snapshot.capability_profile.items.length, 0);
   assert.equal(snapshot.capability_compliance.complete, true);
   assert.equal(fs.existsSync(snapshotPath(root)), true);
