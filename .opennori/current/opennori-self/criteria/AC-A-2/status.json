@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-A-2",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 3,
+  "latest_evidence_summary": "Evidence add now returns next_recommendation and agent_next, so agents can route after recording evidence instead of guessing whether to continue a gap, review architecture, report completion risk, or start the next loop.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

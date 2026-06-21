@@ -1,0 +1,70 @@
+{
+  "kind": "review-result",
+  "basis": "artifact-review",
+  "summary": "OpenNori now instructs agents to expand complete product, complete feature, full app, full dashboard, and full workbench goals into a full human-reviewable acceptance surface instead of a compact MVP-style AC set. The rule is present in packaged Skills, local development Skills, protocol, README, Plugin prompt, objective asset tests, self example, and the public website content.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "ac-o-12-full-product-acceptance-surface",
+      "path": ".opennori/architecture/evidence/ac-o-12-full-product-acceptance-surface.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-autogoal/SKILL.md",
+      "path": "plugins/opennori/skills/nori-autogoal/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md",
+      "path": "/Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "AGENTS.md",
+      "path": "AGENTS.md"
+    },
+    {
+      "type": "artifact",
+      "label": "examples/opennori-self.json",
+      "path": "examples/opennori-self.json"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+      "path": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+    }
+  ],
+  "reviewability": "Review the listed Skill, documentation, example, test, and website files. Run the targeted asset tests and website build to confirm the rule remains present without adding a CLI subjective validator.",
+  "limitations": "This evidence proves the OpenNori product assets and user-facing website now express the complete-product acceptance behavior. It does not prove that every future agent will apply the Skill perfectly, and it intentionally does not add a hard-coded natural-language AC quality validator.",
+  "gate": "accepted",
+  "created_at": "2026-06-18T13:53:05.841Z"
+}

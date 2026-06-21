@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-Z-14",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 4,
+  "latest_evidence_summary": "agent_next now carries candidate_goals for ready_for_next_loop, including draft_args, draft_command, and draft_rule, so Skills can continue from the deterministic routing surface without reconstructing flags or treating candidates as approved AC.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

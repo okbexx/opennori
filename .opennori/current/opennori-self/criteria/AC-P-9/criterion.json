@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-9",
+  "layer": "protocol",
+  "user_story": "作为用户，我能看到证据的复查方式和限制，而不是只看到通过结论。",
+  "measurement": "添加带复查说明和限制说明的证据后运行 report。",
+  "threshold": "报告展示 reviewability 和 limitations；限制不会被隐藏在实现日志里。",
+  "required": true,
+  "risk": "medium",
+  "order": 8
+}

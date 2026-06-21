@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-5",
+  "layer": "operator",
+  "user_story": "作为用户，我在 Codex 对话里问“我需要做什么？”后，如果任务 blocked，能看到一个明确的人类动作。",
+  "measurement": "制造或查看 blocked 状态下的 OpenNori 报告或 agent 回复。",
+  "threshold": "blocked 说明必须是用户可执行动作，例如确认取舍、提供权限、批准成本或选择方案，而不是技术日志。",
+  "required": true,
+  "risk": "medium",
+  "order": 17
+}

@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-12",
+  "layer": "protocol",
+  "user_story": "作为用户，我让 agent 升级或继续一个已经使用 OpenNori 的项目时，能看到 agent 会用 OpenNori Skills 复核旧 AC 是否仍足够可验收，但项目状态检查不会把主观 AC 质量写成硬编码 CLI 裁判。",
+  "measurement": "查看 opennori upgrade/check 的项目状态输出、nori-acceptance Skill、nori-reporting Skill、README 和测试，确认旧 contract 不被自动改写，主观 AC 复核由 agent 提问和用户确认完成。",
+  "threshold": "upgrade/check 保留并报告现有 contract/evidence/report 状态，不因固定词表重写或 hard-fail 旧 AC；测试不再断言某句自然语言必须触发特定 gap id 或问题文本；Skills 明确要求 agent 对“修改字段”“整体情况”“长期资产”等含糊表述追问具体入口、对象、规则、状态、失败恢复和边界。",
+  "required": true,
+  "risk": "high",
+  "order": 11
+}

@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-9",
+  "layer": "architecture",
+  "user_story": "作为用户，我打开 README 或官网时，能理解 OpenNori 同时提供产品验收、架构基线、Plugin Skills、证据和完成判断，而不是过程模板工具。",
+  "measurement": "阅读 README、官网首页、protocol 和 OpenNori Skills。",
+  "threshold": "用户能看到 Architecture Baseline、Architecture Challenge、build-vs-buy、Plugin Skills、项目 profile 和 Product AC 分离的说明与用例。",
+  "risk": "medium",
+  "required": true,
+  "order": 46
+}

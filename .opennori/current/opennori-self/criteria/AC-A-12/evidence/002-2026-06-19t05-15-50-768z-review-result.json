@@ -1,0 +1,60 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "CLI boundary audit confirms subjective product semantics stay in packaged Skills and agent/user review. The CLI no longer generates draft criteria from built-in templates or next-goal candidates, no longer hard-fails process-oriented field names, and its validation errors now describe objective contract/ledger structure fixes rather than judging AC wording.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-a-12-aligned",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-a-12-aligned.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "rg -n 'Rewrite ACs|from the user' src/cli src/core",
+      "command": "rg -n 'Rewrite ACs|from the user' src/cli src/core"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js --testNamePattern 'contract integrity validation stays structural|drafted generic goals stay blocked|high-risk agent observation|evidence health accepts custom'",
+      "command": "npx vitest run test/core.test.js --testNamePattern 'contract integrity validation stays structural|drafted generic goals stay blocked|high-risk agent observation|evidence health accepts custom'"
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck",
+      "command": "npm run typecheck"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/contract.ts",
+      "path": "src/core/contract.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/draft.ts",
+      "path": "src/cli/commands/acceptance/draft.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/criterion.ts",
+      "path": "src/cli/commands/acceptance/criterion.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/acceptance.ts",
+      "path": "src/acceptance.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Review the listed source files and rerun the commands. The structural validator test proves process-oriented extra fields are not a CLI hard failure; draft/discover/brainstorm code still requires Skill-prepared inputs.",
+  "limitations": "This evidence verifies CLI boundaries and objective tests. It does not prove every future agent will ask ideal AC questions; that remains packaged Skill behavior and user approval.",
+  "gate": "accepted",
+  "created_at": "2026-06-19T05:15:50.768Z"
+}

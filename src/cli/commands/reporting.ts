@@ -3,10 +3,12 @@ import path from "node:path";
 import { defineCommand } from "citty";
 import { reviewAcceptanceQuality } from "../../acceptance.ts";
 import { agentNextForRecommendation } from "../../agent-next.ts";
-import { appendEvent, completionAnswer, currentGap, evidenceHealth, fail, intervention, nextRecommendation, ok, pathsForGoal, refreshSnapshot, recomputeWorkflowStatus, syncAcceptanceMarkdown, writeJson } from "../../core.ts";
+import { appendEvent, completionAnswer, currentGap, evidenceHealth, fail, intervention, nextRecommendation, ok, pathsForGoal, refreshSnapshot, recomputeWorkflowStatus } from "../../core.ts";
 import { architectureState, renderReportWithArchitecture } from "../../architecture.ts";
 import { refreshManifest } from "../../lifecycle.ts";
-import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
+import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../runtime.ts";
+
+type CommandRuntimeOverride = Pick<ActiveGoalRuntime, "loadPair"> & Partial<Pick<ActiveGoalRuntime, "savePair" | "refreshManifest">>;
 
 export const reportCommand = defineCommand({
   meta: {
@@ -65,7 +67,7 @@ export const reportCommand = defineCommand({
   }
 });
 
-export async function runReportCommand(rawArgs: string[], { loadPair }: ActiveGoalRuntime) {
+export async function runReportCommand(rawArgs: string[], { loadPair }: Pick<ActiveGoalRuntime, "loadPair">) {
   return runJsonCommand(reportCommand, rawArgs, { loadPair });
 }
 
@@ -89,47 +91,43 @@ export const archiveCommand = defineCommand({
   },
   run({ args, data }) {
     const root = path.resolve(String(args.root || process.cwd()));
-    const { contract, ledger, acceptancePath, evidencePath } = data.loadPair(args);
+    const { contract, ledger, acceptancePath, evidencePath, goalDir } = data.loadPair(args);
     recomputeWorkflowStatus(contract, ledger);
     if (ledger.status !== "complete" && ledger.status !== "blocked") {
       return fail("not_archivable", `Goal ${contract.goal_id} is ${ledger.status}`, "Only complete or blocked OpenNori goals can be archived.");
     }
 
     const archiveDir = ledger.status === "complete" ? "completed" : "blocked";
-    const targetAcceptance = path.join(root, ".opennori", archiveDir, path.basename(acceptancePath));
-    const targetEvidence = path.join(root, ".opennori", archiveDir, path.basename(evidencePath));
+    const targetGoalDir = path.join(root, ".opennori", archiveDir, contract.goal_id);
     const reportPath = pathsForGoal(root, contract.goal_id).reportPath;
-    for (const target of [targetAcceptance, targetEvidence]) {
-      if (fs.existsSync(target) && !args.force) {
-        return fail("archive_target_exists", `Archive target exists: ${path.relative(root, target) || "."}`, "Pass --force or move the existing archive file.");
-      }
+    if (fs.existsSync(targetGoalDir) && !args.force) {
+      return fail("archive_target_exists", `Archive target exists: ${path.relative(root, targetGoalDir) || "."}`, "Pass --force or move the existing archive directory.");
     }
 
-    writeJson(evidencePath, { contract, ledger });
-    syncAcceptanceMarkdown(acceptancePath, contract, ledger);
+    data.savePair(acceptancePath, evidencePath, contract, ledger);
     fs.mkdirSync(path.dirname(reportPath), { recursive: true });
     fs.writeFileSync(reportPath, renderReportWithArchitecture(root, contract, ledger));
-    fs.mkdirSync(path.dirname(targetAcceptance), { recursive: true });
-    fs.renameSync(acceptancePath, targetAcceptance);
-    fs.renameSync(evidencePath, targetEvidence);
+    fs.mkdirSync(path.dirname(targetGoalDir), { recursive: true });
+    if (fs.existsSync(targetGoalDir) && args.force) fs.rmSync(targetGoalDir, { recursive: true, force: true });
+    fs.renameSync(goalDir, targetGoalDir);
     refreshManifest(root);
     return ok(
       {
         goal_id: contract.goal_id,
         archived_as: archiveDir,
-        acceptance_path: targetAcceptance,
-        evidence_path: targetEvidence,
+        goal_path: targetGoalDir,
+        acceptance_path: path.join(targetGoalDir, "README.md"),
+        evidence_path: path.join(targetGoalDir, "ledger.json"),
         report_path: reportPath
       },
       [
-        { kind: "archived_acceptance_contract", path: targetAcceptance },
-        { kind: "archived_evidence_ledger", path: targetEvidence },
+        { kind: "archived_goal_dossier", path: targetGoalDir },
         { kind: "acceptance_report", path: reportPath }
       ]
     );
   }
 });
 
-export async function runArchiveCommand(rawArgs: string[], { loadPair }: ActiveGoalRuntime) {
-  return runJsonCommand(archiveCommand, rawArgs, { loadPair });
+export async function runArchiveCommand(rawArgs: string[], runtime: CommandRuntimeOverride) {
+  return runJsonCommand(archiveCommand, rawArgs, { savePair, refreshManifest, ...runtime });
 }

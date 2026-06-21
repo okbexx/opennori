@@ -1,0 +1,38 @@
+{
+  "kind": "verification",
+  "basis": "tool-observation",
+  "summary": "Doctor/check/report now expose invalid architecture evidence files with a concrete recovery action when profile-shaped JSON is misplaced under .opennori/architecture/evidence.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/doctor/project-health.ts",
+      "path": "src/lifecycle/doctor/project-health.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/check.ts",
+      "path": "src/cli/commands/check.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Rerun npm run check, node ./bin/opennori.js doctor --root /Users/jarl/code/jarlone/agent-workbench --json, and node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json; inspect the architecture_evidence doctor check and recovery action.",
+  "limitations": "OpenNori intentionally does not auto-delete misplaced user/project files; it reports the broken state and recovery action for user or agent cleanup.",
+  "gate": "accepted",
+  "created_at": "2026-06-20T10:20:09.146Z"
+}

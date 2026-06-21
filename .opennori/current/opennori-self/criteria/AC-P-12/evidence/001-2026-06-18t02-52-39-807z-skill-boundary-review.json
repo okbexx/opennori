@@ -1,0 +1,58 @@
+{
+  "kind": "skill-boundary-review",
+  "basis": "tool-observation",
+  "summary": "Existing-project AC review is now Skill-driven rather than a CLI word-list audit: tests no longer assert natural-language ACs must trigger fixed gap ids/questions; discover tests only cover question-source state; project-health, acceptance, reporting, root Skills, AGENTS, README, and protocol tell agents to inspect vague old ACs and ask user-facing questions without mutating existing contracts.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+      "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+      "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": "examples/opennori-self.json",
+      "path": "examples/opennori-self.json"
+    }
+  ],
+  "reviewability": "Rerun npm run check, inspect discovery/check tests for objective assertions only, and read the packaged Skills to verify agent-side rules for reviewing vague existing ACs.",
+  "limitations": "This protects OpenNori from hard-coded subjective AC-quality tests and validators. Real old-project AC revision still depends on the agent loading the Skills and the user confirming the revised contract.",
+  "gate": "accepted",
+  "created_at": "2026-06-18T02:52:39.807Z"
+}

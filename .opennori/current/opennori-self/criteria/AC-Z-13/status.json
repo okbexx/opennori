@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-Z-13",
+  "status": "passing",
+  "confidence": "high",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 2,
+  "latest_evidence_summary": "Doctor/check/report now expose invalid architecture evidence files with a concrete recovery action when profile-shaped JSON is misplaced under .opennori/architecture/evidence.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

@@ -1,0 +1,38 @@
+{
+  "kind": "confirmed-init-routing-smoke",
+  "basis": "tool-observation",
+  "summary": "Confirmed opennori init on a fresh project creates .opennori state, leaves active goals empty, and returns initialized_no_active_contract with next guidance to turn the stated goal into human-centered AC rather than inspect empty directories or repeat setup.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "tmp=$(mktemp -d /tmp/opennori-step2-fix-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json",
+      "command": "tmp=$(mktemp -d /tmp/opennori-step2-fix-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next.ts",
+      "path": "src/agent-next.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+      "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    }
+  ],
+  "reviewability": "Rerun the smoke and confirm .opennori/active is empty but agent_next.state is initialized_no_active_contract with recommended_skill nori-acceptance.",
+  "limitations": "This validates local source behavior; published users need the next npm/plugin release to receive the updated routing text.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T08:02:36.952Z"
+}

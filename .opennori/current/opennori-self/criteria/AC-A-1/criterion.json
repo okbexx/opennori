@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-1",
+  "layer": "architecture",
+  "user_story": "作为用户，我用自然语言告诉 agent 一个非平凡目标后，能先看到 Product AC 和 Architecture Baseline，让我判断要完成什么以及准备按什么技术架构完成。",
+  "measurement": "在 OpenNori Skill 指引下查看 draft/discover 输出和 architecture baseline preview。",
+  "threshold": "用户能在实现开始前分别确认 Product AC 和 Architecture Baseline；baseline 不呈现为阶段计划或任务列表。",
+  "risk": "high",
+  "required": true,
+  "order": 38
+}

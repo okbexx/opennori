@@ -1,0 +1,43 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "OpenNori report/status now separate reused standard library choices from minimal self-build product semantics: parseArgs is reused for CLI tokenization, schema validation has Ajv/Zod/Valibot candidates recorded for growth, Markdown parsing is explicitly limited to generated-table recovery, and product-domain audits remain local with self-build reasons.",
+  "result": "blocked",
+  "confidence": "user-review-required",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --goal opennori-build-vs-buy-maturity --json",
+      "command": "node ./bin/opennori.js status --root . --goal opennori-build-vs-buy-maturity --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js report --root . --goal opennori-build-vs-buy-maturity --json",
+      "command": "node ./bin/opennori.js report --root . --goal opennori-build-vs-buy-maturity --json"
+    },
+    {
+      "type": "command",
+      "label": "node -p 'JSON.stringify(require(\"./package.json\").dependencies || {})'",
+      "command": "node -p 'JSON.stringify(require(\"./package.json\").dependencies || {})'"
+    },
+    {
+      "type": "artifact",
+      "label": "package.json",
+      "path": "package.json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture.js",
+      "path": "src/architecture.js"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions",
+      "path": ".opennori/architecture/decisions"
+    }
+  ],
+  "reviewability": "Review status/report architecture.build_vs_buy plus package.json and the decision directory.",
+  "limitations": "The implementation still has a growing src/cli.js; the recorded CLI framework decision says to re-evaluate commander/citty/cac if subcommand routing keeps expanding. This was produced before joint user-agent build-vs-buy evaluation and must not be treated as completion evidence.",
+  "gate": "needs_user_review",
+  "created_at": "2026-06-12T05:14:02.418Z"
+}

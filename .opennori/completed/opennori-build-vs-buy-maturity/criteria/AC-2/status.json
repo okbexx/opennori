@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-2",
+  "status": "passing",
+  "confidence": "reviewed",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 3,
+  "latest_evidence_summary": "OpenNori self architecture decisions now include active reusable-library decisions for citty, JSON Schema/Ajv, yaml frontmatter, and directory-based Skill Pack assets; obsolete parseArgs and JS-string Skill decisions are explicitly marked superseded rather than silently treated as current architecture.",
+  "updated_at": "2026-06-13T10:41:22.827Z"
+}

@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-Z-16",
+  "status": "passing",
+  "confidence": "high",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 2,
+  "latest_evidence_summary": "Dogfood found npm link created a global opennori command pointing at dist/bin/opennori.js, but the compiled dist file was not executable, so zsh reported permission denied. OpenNori package bin now points to the executable bin/opennori.js wrapper, which supports source checkouts and published packages; npm link now creates a PATH command that runs opennori init preview correctly.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

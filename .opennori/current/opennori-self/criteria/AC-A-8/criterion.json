@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-8",
+  "layer": "architecture",
+  "user_story": "作为用户，我查看 OpenNori 自身 dogfood 状态时，能知道 Architecture Baseline 已建立，但后续架构修复是否真的完成不能被最小可运行结果误报。",
+  "measurement": "查看 OpenNori 自身 status/report、Architecture Baseline、build-vs-buy decision、代码结构审查和后续架构修复证据。",
+  "threshold": "报告能清楚显示 baseline 已建立、当前仍有哪些架构风险或未完成缺口；如果核心结构仍未完成修复，目标不能显示 complete。",
+  "risk": "high",
+  "required": true,
+  "order": 45
+}

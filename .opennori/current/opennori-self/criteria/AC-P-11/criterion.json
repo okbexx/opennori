@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-11",
+  "layer": "protocol",
+  "user_story": "作为用户，我在 Codex 对话中说“把这次验证作为证据”后，agent 能按 OpenNori 结构记录，而不要求我记住 CLI 参数。",
+  "measurement": "查看 OpenNori Skill 导出的证据记录说明，并检查 agent 使用自然语言到 CLI 的映射。",
+  "threshold": "Skill 明确要求 agent 自由选择验证方式，但记录证据时说明 basis、sources、reviewability、confidence 和 limitations。",
+  "required": true,
+  "risk": "medium",
+  "order": 10
+}

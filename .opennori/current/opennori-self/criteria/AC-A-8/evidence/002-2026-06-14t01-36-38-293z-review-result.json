@@ -1,0 +1,43 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "OpenNori self-dogfood no longer lets Product AC completion hide architecture risk: missing Architecture Baseline, stale agent guide, challenged baseline, or unhealthy build-vs-buy now prevents confident completion while preserving objective_complete and Product current_gap semantics.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js -t 'missing architecture baseline|build-vs-buy'",
+      "command": "npx vitest run test/core.test.js -t 'missing architecture baseline|build-vs-buy'"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+      "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+    }
+  ],
+  "reviewability": "Run npm run check and the targeted tests, then inspect README and reporting Skill for the same review-risk language.",
+  "limitations": "This verifies the current self-dogfood boundary; a real non-OpenNori project dogfood remains a separate AC-A-10 adoption proof.",
+  "gate": "accepted",
+  "created_at": "2026-06-14T01:36:38.293Z"
+}

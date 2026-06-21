@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-4",
+  "layer": "operator",
+  "user_story": "作为用户，我在 Codex 对话里问“现在完成了吗？”后，agent 只能基于 required AC 的状态和证据回答。",
+  "measurement": "向 agent 询问完成状态并检查回答依据。",
+  "threshold": "只有 required AC 全部 passing 或 waived 时才能回答 complete；否则必须指出未通过或 blocked 的 AC。",
+  "required": true,
+  "risk": "high",
+  "order": 16
+}

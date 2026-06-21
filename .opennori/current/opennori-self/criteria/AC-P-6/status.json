@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-P-6",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 2,
+  "latest_evidence_summary": "Report and status expose evidence kind, basis, confidence, sources, reviewability, limitations, and gate for passing, blocked, and waived criteria.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

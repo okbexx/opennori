@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-14",
+  "layer": "productization",
+  "user_story": "作为用户，我让 agent 继续一个已经完成的 OpenNori goal 时，不需要每轮都追问下一步是什么；agent 能看到少量可开启下一份 Nori Contract 的人类目标候选。",
+  "measurement": "运行 opennori resume、opennori status、opennori next、opennori report 和 context export，查看 complete goal 的 next_recommendation。",
+  "threshold": "已完成且无 review risk 的 goal 输出 ready-for-next-loop，并包含 candidate_goals；每个候选包含 goal、user_value、acceptance_directions 和 risks，帮助 agent 进入下一轮 AC discovery，但不呈现为 phase、plan 或 task list。",
+  "required": true,
+  "risk": "high",
+  "order": 34
+}

@@ -1,0 +1,48 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "status/report/context export separate Product decision from Architecture decision: outputs include workflow_status, current_gap, completion, intervention, evidence_health, architecture.decision, and next_recommendation.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js report --root . --goal opennori-self --json",
+      "command": "node ./bin/opennori.js report --root . --goal opennori-self --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js context export --root . --goal opennori-self --json",
+      "command": "node ./bin/opennori.js context export --root . --goal opennori-self --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/runtime-status.ts",
+      "path": "src/cli/commands/acceptance/runtime-status.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/reporting.ts",
+      "path": "src/cli/commands/reporting.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/context-export.ts",
+      "path": "src/lifecycle/context-export.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/report.ts",
+      "path": "src/architecture/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Run report/context export and inspect JSON fields plus reporting/context tests.",
+  "limitations": "This verifies local CLI JSON/report surfaces; external review tools consume the exported context separately.",
+  "gate": "accepted",
+  "created_at": "2026-06-13T15:03:35.596Z"
+}

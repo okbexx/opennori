@@ -11,13 +11,13 @@ import {
   intervention,
   nextRecommendation,
   ok,
-  recomputeWorkflowStatus,
-  syncAcceptanceMarkdown,
-  writeJson
+  recomputeWorkflowStatus
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
-import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
+import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
 import { jsonArg, rootArg } from "./shared.ts";
+
+type CommandRuntimeOverride = Pick<ActiveGoalRuntime, "loadPair"> & Partial<Pick<ActiveGoalRuntime, "savePair" | "refreshManifest">>;
 
 export const nextCommand = defineCommand({
   meta: {
@@ -133,8 +133,7 @@ export const evaluateCommand = defineCommand({
   run({ args, data }) {
     const { contract, ledger, acceptancePath, evidencePath, root } = data.loadPair(args);
     recomputeWorkflowStatus(contract, ledger);
-    writeJson(evidencePath, { contract, ledger });
-    syncAcceptanceMarkdown(acceptancePath, contract, ledger);
+    data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
     return ok({
       goal_id: contract.goal_id,
@@ -145,6 +144,6 @@ export const evaluateCommand = defineCommand({
   }
 });
 
-export async function runEvaluateCommand(rawArgs: string[], { loadPair }: ActiveGoalRuntime) {
-  return runJsonCommand(evaluateCommand, rawArgs, { loadPair });
+export async function runEvaluateCommand(rawArgs: string[], runtime: CommandRuntimeOverride) {
+  return runJsonCommand(evaluateCommand, rawArgs, { savePair, refreshManifest, ...runtime });
 }

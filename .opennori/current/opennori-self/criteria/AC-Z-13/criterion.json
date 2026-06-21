@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-13",
+  "layer": "productization",
+  "user_story": "作为用户，我运行 opennori doctor 后，如果项目状态不健康，能直接看到一组可执行恢复动作。",
+  "measurement": "分别制造缺失 manifest、stale manifest、缺失 package Plugin assets 和损坏 active goal 的项目，然后运行 opennori doctor。",
+  "threshold": "doctor 输出 status、失败 check、active_goal_issues、Plugin asset health 和 recovery_actions；recovery_actions 说明要运行的 OpenNori 命令或要检查的 .opennori/active 文件位置。",
+  "required": true,
+  "risk": "high",
+  "order": 33
+}

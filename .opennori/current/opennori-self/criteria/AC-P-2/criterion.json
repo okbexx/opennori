@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-2",
+  "layer": "protocol",
+  "user_story": "作为用户，我运行 opennori check 后，能区分客观状态健康检查和需要 agent 与我复核的 AC 质量判断，而不是以为 CLI 会替我判断 AC 好坏。",
+  "measurement": "对当前 active goal 运行 opennori check --json，并查看 README、AGENTS.md 和 OpenNori packaged Skills 对 AC 质量边界的说明。",
+  "threshold": "check 只报告 contract/ledger 结构、Architecture Baseline、Profile、build-vs-buy 和 evidence health 等客观状态；不会因为某句自然语言像“修改字段”或“失败时有提示”就生成固定 quality gap；nori / nori-acceptance / nori-reporting Skills 明确要求 agent 自行审查 AC 文字并向用户追问缺失的验收问题。",
+  "required": true,
+  "risk": "medium",
+  "order": 1
+}

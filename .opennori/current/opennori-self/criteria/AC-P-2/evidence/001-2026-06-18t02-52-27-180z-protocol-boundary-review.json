@@ -1,0 +1,63 @@
+{
+  "kind": "protocol-boundary-review",
+  "basis": "tool-observation",
+  "summary": "OpenNori check now stays an objective state-health surface: runtime reviewAcceptanceQuality returns a non-authoritative clear compatibility surface, check describes contract structure/architecture/profile/evidence health, README/protocol/AGENTS and packaged Skills assign subjective AC quality to agent/user review, and npm run check passes.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/acceptance.ts",
+      "path": "src/acceptance.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/check.ts",
+      "path": "src/cli/commands/check.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next.ts",
+      "path": "src/agent-next.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": "AGENTS.md",
+      "path": "AGENTS.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+      "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    }
+  ],
+  "reviewability": "Rerun npm run check, inspect check JSON for objective acceptance_review summary, and read README/AGENTS plus nori/nori-acceptance/nori-reporting Skills for the agent-side AC quality rules.",
+  "limitations": "This proves the OpenNori code and packaged Skills no longer hard-code subjective AC-quality decisions. It does not mean every future agent will ask perfect questions; that remains Skill behavior and user review.",
+  "gate": "accepted",
+  "created_at": "2026-06-18T02:52:27.180Z"
+}

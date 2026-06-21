@@ -1,0 +1,48 @@
+{
+  "kind": "dashboard-review",
+  "basis": "artifact-review",
+  "summary": "React dashboard now presents OpenNori as a local observation surface: desktop and mobile pages show agent activity, current gap, need user, decision, Architecture Baseline, latest event, evidence health, and completion authority, with no browser console errors.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js dashboard --root . --port 0 --no-open --once --json",
+      "command": "node ./bin/opennori.js dashboard --root . --port 0 --no-open --once --json"
+    },
+    {
+      "type": "artifact",
+      "label": "output/playwright/opennori-dashboard-desktop.png",
+      "path": "output/playwright/opennori-dashboard-desktop.png"
+    },
+    {
+      "type": "artifact",
+      "label": "output/playwright/opennori-dashboard-mobile.png",
+      "path": "output/playwright/opennori-dashboard-mobile.png"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/App.tsx",
+      "path": "src/dashboard/src/App.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/AcceptanceLoop.tsx",
+      "path": "src/dashboard/src/components/AcceptanceLoop.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "vite.dashboard.config.ts",
+      "path": "vite.dashboard.config.ts"
+    }
+  ],
+  "reviewability": "Run npm run check; run node ./bin/opennori.js dashboard --root . --port 0 --no-open --json, open the URL, and compare output/playwright/opennori-dashboard-desktop.png plus output/playwright/opennori-dashboard-mobile.png. Playwright console reported Total messages: 0 (Errors: 0, Warnings: 0).",
+  "limitations": "Dashboard is a read-only observation surface over /api/snapshot and /api/events; it does not replace status/report, evidence ledger, or completion authority. The visual check covered desktop 1440x980 and mobile 390x860.",
+  "gate": "accepted",
+  "created_at": "2026-06-16T06:46:56.158Z"
+}

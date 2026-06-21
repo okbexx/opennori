@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-9",
+  "layer": "productization",
+  "user_story": "作为用户，我预览 OpenNori 安装时，能判断每个项目入口会被创建、跳过、更新还是覆盖，并确认 dry-run 不会写入项目。",
+  "measurement": "运行 opennori install --dry-run，查看 install plan，再检查项目文件是否未被写入。",
+  "threshold": "install plan 对每个入口显示 action、kind、managed、would_write、will_write、destructive 和 reason；dry-run 下 will_write 为 0；覆盖类动作必须被标记为 destructive。",
+  "required": true,
+  "risk": "high",
+  "order": 29
+}

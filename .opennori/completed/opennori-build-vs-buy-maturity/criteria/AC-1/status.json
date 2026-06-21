@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-1",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 3,
+  "latest_evidence_summary": "OpenNori status/check/doctor/report now expose build-vs-buy health as clear, needs-action, or broken; missing candidate fields and self-build reasons surface as build_vs_buy warnings and doctor recovery actions, while superseded historical decisions remain reviewable without counting as current health.",
+  "updated_at": "2026-06-13T10:41:22.827Z"
+}

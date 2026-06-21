@@ -8,6 +8,7 @@ import {
   findDraftPairs,
   findHistoryPairs,
   findLegacyActivePairs,
+  readGoalPayload,
   readJson,
   writeJson
 } from "../core.ts";
@@ -16,8 +17,7 @@ import type {
   ActiveGoalSummary,
   Manifest,
   ManifestManagedFile,
-  ManifestWriteAction,
-  NoriEvidencePayload
+  ManifestWriteAction
 } from "../types.ts";
 import {
   MANIFEST_SCHEMA_VERSION,
@@ -31,7 +31,7 @@ import {
 function goalSummaries(root: string, pairs = findCurrentPairs(root)): ActiveGoalSummary[] {
   return pairs.map((pair) => {
     try {
-      const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+      const payload = readGoalPayload(pair);
       return {
         goal_id: pair.goalId,
         location: pair.location,

@@ -1,9 +1,8 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { defineCommand } from "citty";
-import { currentGap, findCurrentPairs, findDraftPairs, ok, readJson } from "../../core.ts";
+import { currentGap, findCurrentPairs, findDraftPairs, ok, readGoalPayload } from "../../core.ts";
 import { runJsonCommand } from "../runtime.ts";
-import type { NoriEvidencePayload } from "../../types.ts";
 
 type ChangedFile = {
   status: string;
@@ -49,7 +48,7 @@ function gitChanges(root: string): GitChanges {
 
 function summarizePairs(pairs: ReturnType<typeof findCurrentPairs>) {
   return pairs.map((pair) => {
-    const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+    const payload = readGoalPayload(pair);
     return {
       goal_id: pair.goalId,
       location: pair.location,

@@ -1,0 +1,38 @@
+{
+  "kind": "local-global-bin-link-fix",
+  "basis": "tool-observation",
+  "summary": "Dogfood found npm link created a global opennori command pointing at dist/bin/opennori.js, but the compiled dist file was not executable, so zsh reported permission denied. OpenNori package bin now points to the executable bin/opennori.js wrapper, which supports source checkouts and published packages; npm link now creates a PATH command that runs opennori init preview correctly.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "command",
+      "label": "opennori init --json in a temporary directory",
+      "command": "opennori init --json in a temporary directory"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "package.json",
+      "path": "package.json"
+    },
+    {
+      "type": "artifact",
+      "label": "package-lock.json",
+      "path": "package-lock.json"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Inspect package bin metadata and the refreshed npm link symlink; rerun opennori init --json from any temporary project to confirm preview works without writing.",
+  "limitations": "This verifies the local npm link development path on the current Node v22.19.0 environment; published npm behavior will be covered when the next package version is packed or published.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T06:05:06.857Z"
+}

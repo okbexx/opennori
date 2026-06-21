@@ -1,0 +1,43 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Architecture Profiles are reviewable before baseline confirmation: architecture profiles --json exposes built-in and project profile validity, suitable use cases, sources, principles, checks, preferred libraries, avoid boundaries, and build-vs-buy policy; tests cover built-in and project profiles.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js architecture profiles --root . --json",
+      "command": "node ./bin/opennori.js architecture profiles --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js -t 'architecture profiles|project architecture profiles'",
+      "command": "npx vitest run test/core.test.js -t 'architecture profiles|project architecture profiles'"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/profile.ts",
+      "path": "src/architecture/profile.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/architecture/profiles.ts",
+      "path": "src/cli/commands/architecture/profiles.ts"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/architecture-profile-review-surface.json",
+      "path": ".opennori/architecture/decisions/architecture-profile-review-surface.json"
+    }
+  ],
+  "reviewability": "Run architecture profiles and targeted tests, then inspect the profile implementation and build-vs-buy decision.",
+  "limitations": "This validates the current built-in/project profile model; richer external registries would need a new build-vs-buy decision.",
+  "gate": "accepted",
+  "created_at": "2026-06-13T15:03:35.283Z"
+}

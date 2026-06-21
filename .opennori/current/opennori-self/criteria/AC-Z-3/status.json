@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-Z-3",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 2,
+  "latest_evidence_summary": "changes groups .opennori/examples acceptance artifacts separately from implementation files so PR review can separate evidence state from code changes.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

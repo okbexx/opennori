@@ -1,0 +1,70 @@
+{
+  "kind": "technical-baseline-profile-verification",
+  "basis": "tool-observation",
+  "summary": "OpenNori Architecture Profile/Baseline now supports concrete technical baselines for both built-in and project profiles. The built-in TypeScript agent-state CLI profile includes runtime topology, source-of-truth, module boundaries, contract surfaces, data flows, dependency decisions, reference mappings, and verification. OpenNori self check/status are architecture-valid, and Agent Workbench check/status validates a non-OpenNori project baseline with populated technical section counts.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "ac-a-3-technical-baseline-sections",
+      "path": ".opennori/architecture/evidence/ac-a-3-technical-baseline-sections.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json",
+      "command": "node ./bin/opennori.js check --root /Users/jarl/code/jarlone/agent-workbench --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root /Users/jarl/code/jarlone/agent-workbench --json",
+      "command": "node ./bin/opennori.js status --root /Users/jarl/code/jarlone/agent-workbench --json"
+    },
+    {
+      "type": "artifact",
+      "label": "schemas/architecture-baseline.schema.json",
+      "path": "schemas/architecture-baseline.schema.json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/profile.ts",
+      "path": "src/architecture/profile.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/baseline.ts",
+      "path": "src/architecture/baseline.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md",
+      "path": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/baseline.md",
+      "path": ".opennori/architecture/baseline.md"
+    }
+  ],
+  "reviewability": "Rerun npm run check, node ./bin/opennori.js check --root . --json, node ./bin/opennori.js status --root . --json, and node ./bin/opennori.js check/status --root /Users/jarl/code/jarlone/agent-workbench --json; inspect schemas/architecture-baseline.schema.json, src/architecture/profile.ts, src/architecture/baseline.ts, packaged architecture Skills, .opennori/architecture/baseline.md, and AW .opennori/architecture/baseline.md.",
+  "limitations": "This verifies objective structure, generated baseline state, Skill guidance, and one AW project baseline. It intentionally does not make CLI judge subjective architecture quality; agents and users still review whether a baseline is specific and appropriate before confirmation.",
+  "gate": "accepted",
+  "created_at": "2026-06-18T09:48:36.705Z"
+}

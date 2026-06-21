@@ -1,5 +1,4 @@
-import type { RadarNode } from "./components/AcceptanceRadarNet";
-import type { NoriEvent, NoriSnapshot } from "./types";
+import type { NoriEvent, NoriSnapshot, RadarNode } from "./types.js";
 
 const RUNNING_AGENT_STATES = new Set(["thinking", "working", "verifying"]);
 

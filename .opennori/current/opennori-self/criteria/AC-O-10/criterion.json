@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-10",
+  "layer": "operator",
+  "user_story": "作为用户，我在非 OpenNori 项目里已经和 agent 讨论过目标和 AC 后，要求 OpenNori 接管这段讨论时，最终看到的是基于已有讨论整理出的标准 Nori Contract Draft，并且状态保持 draft/need user，而不是重新 autogoal、直接开始实现或把讨论记录当作完成证据。",
+  "measurement": "用户在 agent 对话中提供已有目标、AC、假设和未决问题后，说‘用 OpenNori 接管我们刚才讨论的 AC，整理成 Nori Contract Draft，不要开始实现，先给我确认。’",
+  "threshold": "agent 使用 nori-acceptance 将已有讨论材料整理为标准 draft Nori Contract，写入 .opennori/drafts，展示 Goal、AC、衡量方式、通过条件、假设和开放问题；status/report 表达 need user approve/revise，不进入 current/active、不记录 passing evidence、不走 autogoal 的粗略 idea 收敛路径。",
+  "required": true,
+  "risk": "high",
+  "order": 57
+}

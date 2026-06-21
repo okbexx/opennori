@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-P-3",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 2,
+  "latest_evidence_summary": "opennori next/status return current_gap, completion answer, intervention, architecture, and next_recommendation instead of a process-step list.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

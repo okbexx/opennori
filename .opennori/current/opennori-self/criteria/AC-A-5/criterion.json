@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-5",
+  "layer": "architecture",
+  "user_story": "作为用户，我查看 status/report 时，能看到 Product decision 和 Architecture decision 分开呈现。",
+  "measurement": "运行 opennori status、opennori report 和 context export。",
+  "threshold": "输出分别展示产品 AC 状态、Architecture Baseline 状态、open challenges、build-vs-buy decisions、当前缺口和下一步证据。",
+  "risk": "high",
+  "required": true,
+  "order": 42
+}

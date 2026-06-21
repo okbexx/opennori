@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-P-9",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 2,
+  "latest_evidence_summary": "Evidence records and reports show reviewability and limitations, and evidence_health warns when those fields are missing before confident completion.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

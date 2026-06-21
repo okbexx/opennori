@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-A-3",
+  "status": "passing",
+  "confidence": "high",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 7,
+  "latest_evidence_summary": "Project AGENTS guidance now preserves the architecture artifact boundary: profiles, baselines, decisions, challenges, and apply records each have distinct directories, and invalid architecture evidence routes to project health.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

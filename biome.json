@@ -18,7 +18,9 @@
       "src/dashboard/**/*.tsx",
       "src/architecture.js",
       "src/skills.js",
-      "test/core.test.js"
+      "test/**/*.test.js",
+      "test/**/*.test.ts",
+      "test/support/**/*.js"
     ]
   },
   "formatter": {

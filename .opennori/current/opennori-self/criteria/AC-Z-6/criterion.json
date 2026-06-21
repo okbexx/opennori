@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-6",
+  "layer": "productization",
+  "user_story": "作为用户，我在项目目录运行 OpenNori 后，能看到 OpenNori 状态集中在 .opennori 目录里，而不是散落到通用 process 目录。",
+  "measurement": "运行 opennori install、draft、brainstorm、report 或 archive 后查看项目目录。",
+  "threshold": "OpenNori 默认只把协议、active goal、报告、归档和 brainstorm 写入 .opennori；不创建 process/acceptance 或 process/development-protocols。",
+  "required": true,
+  "risk": "medium",
+  "order": 26
+}

@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-1",
+  "layer": "productization",
+  "user_story": "作为用户，我获取 OpenNori 包后，我的 agent 能通过 Codex Plugin 发现 OpenNori Skills，而不需要我记住内部 Skill 名或手动查找能力入口。",
+  "measurement": "查看 Codex Plugin manifest、package Skills、README 和 opennori doctor 输出。",
+  "threshold": "包内包含 .codex-plugin/plugin.json 且 skills 指向 ./skills/；nori 总入口和子 Skills 说明自然语言路由；doctor 报告 plugin_manifest、plugin_skills 和 manifest_plugin_state；用户能判断 Plugin Skills 可用。",
+  "required": true,
+  "risk": "medium",
+  "order": 21
+}

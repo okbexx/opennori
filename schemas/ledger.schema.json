@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opennori.dev/schemas/ledger.schema.json",
+  "title": "OpenNori Evidence Ledger",
+  "type": "object",
+  "required": ["protocol_version", "goal_id", "status", "criteria"],
+  "additionalProperties": true,
+  "properties": {
+    "protocol_version": { "const": "opennori/v1" },
+    "goal_id": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "unknown", "failing", "passing", "blocked", "complete", "waived"]
+    },
+    "updated_at": { "type": "string" },
+    "criteria": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "additionalProperties": true,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["unknown", "failing", "passing", "blocked", "waived"]
+          },
+          "confidence": { "type": "string" },
+          "required": { "type": "boolean" },
+          "risk": { "type": "string" },
+          "evidence": { "type": "array" }
+        }
+      }
+    },
+    "capability_profile": { "type": "object" }
+  }
+}

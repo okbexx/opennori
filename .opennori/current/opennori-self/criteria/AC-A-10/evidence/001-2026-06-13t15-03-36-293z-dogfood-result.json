@@ -1,0 +1,63 @@
+{
+  "kind": "dogfood-result",
+  "basis": "tool-observation",
+  "summary": "OpenNori was dogfooded in the separate opennori-site repo under the current Plugin-first boundary: a natural-language website goal became Product AC, an Astro Architecture Baseline and build-vs-buy decision were confirmed, homepage content was implemented, reviewable evidence was recorded, report/status completed, and the dogfood validated active-goal write locking.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "cd /Users/jarl/code/jarlone/opennori-site && node /Users/jarl/code/jarlone/opennori/bin/opennori.js status --root . --goal opennori-site-plugin-first --json",
+      "command": "cd /Users/jarl/code/jarlone/opennori-site && node /Users/jarl/code/jarlone/opennori/bin/opennori.js status --root . --goal opennori-site-plugin-first --json"
+    },
+    {
+      "type": "command",
+      "label": "cd /Users/jarl/code/jarlone/opennori-site && node /Users/jarl/code/jarlone/opennori/bin/opennori.js report --root . --goal opennori-site-plugin-first --json",
+      "command": "cd /Users/jarl/code/jarlone/opennori-site && node /Users/jarl/code/jarlone/opennori/bin/opennori.js report --root . --goal opennori-site-plugin-first --json"
+    },
+    {
+      "type": "command",
+      "label": "cd /Users/jarl/code/jarlone/opennori-site && npm run build",
+      "command": "cd /Users/jarl/code/jarlone/opennori-site && npm run build"
+    },
+    {
+      "type": "command",
+      "label": "cd /Users/jarl/code/jarlone/opennori && npx vitest run test/core.test.js -t 'concurrent evidence writes'",
+      "command": "cd /Users/jarl/code/jarlone/opennori && npx vitest run test/core.test.js -t 'concurrent evidence writes'"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/opennori-site/.opennori/active/opennori-site-plugin-first.acceptance.md",
+      "path": "/Users/jarl/code/jarlone/opennori-site/.opennori/active/opennori-site-plugin-first.acceptance.md"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/opennori-site/.opennori/active/opennori-site-plugin-first.evidence.json",
+      "path": "/Users/jarl/code/jarlone/opennori-site/.opennori/active/opennori-site-plugin-first.evidence.json"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/opennori-site/.opennori/reports/opennori-site-plugin-first.report.md",
+      "path": "/Users/jarl/code/jarlone/opennori-site/.opennori/reports/opennori-site-plugin-first.report.md"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/opennori-site/.opennori/architecture/baseline.md",
+      "path": "/Users/jarl/code/jarlone/opennori-site/.opennori/architecture/baseline.md"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/runtime.ts",
+      "path": "src/cli/runtime.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Review opennori-site status/report/build output and listed .opennori artifacts; rerun the concurrent evidence test for state consistency.",
+  "limitations": "Dogfood covered a static Astro website repo and local CLI behavior; it did not validate a third-party production app or remote deployed website.",
+  "gate": "accepted",
+  "created_at": "2026-06-13T15:03:36.293Z"
+}

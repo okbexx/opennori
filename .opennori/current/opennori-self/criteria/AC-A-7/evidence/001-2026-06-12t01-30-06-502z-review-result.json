@@ -1,0 +1,18 @@
+{
+  "kind": "review-result",
+  "basis": "artifact-review",
+  "summary": "OpenNori records build-vs-buy decisions before custom infrastructure and includes the current self-build decision for Architecture Baseline CLI state work.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js architecture show --root . --json",
+      "command": "node ./bin/opennori.js architecture show --root . --json"
+    }
+  ],
+  "reviewability": "Open the build-vs-buy decision and verify current project, standard library, official SDK, open source, recommendation, and self-build reason are reviewable.",
+  "limitations": "The recorded decision intentionally permits short-term self-build for the baseline state layer; it also states that later CLI architecture repair must re-evaluate mature CLI libraries.",
+  "gate": "accepted",
+  "created_at": "2026-06-12T01:30:06.502Z"
+}

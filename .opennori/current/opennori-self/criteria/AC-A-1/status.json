@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-A-1",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 3,
+  "latest_evidence_summary": "OpenNori now routes agents to architecture review before non-trivial implementation when Product AC is ready but the Architecture Baseline is missing; after baseline confirmation, agent_next returns to the current Product AC evidence gap.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

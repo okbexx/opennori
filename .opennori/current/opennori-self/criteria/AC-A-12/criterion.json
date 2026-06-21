@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-12",
+  "layer": "architecture",
+  "user_story": "作为用户，我让 agent 用 OpenNori 起草、追问、记录证据或继续下一轮目标时，CLI 不会用内置自然语言模板、词表或候选目标替我判断主观产品语义；这些判断由 packaged Skills、agent 和用户确认完成。",
+  "measurement": "用户或评审者检查 opennori draft/discover/brainstorm/status/report/context export、CLI 源码、测试和 OpenNori Skills。",
+  "threshold": "CLI 只校验和保存 contract/evidence/profile/architecture/report 的客观结构、状态一致性和 review risk；不再内置默认 Product AC、固定 discovery gap 词表、固定 brainstorm 候选、完成后自动生成下一轮产品目标，或把高风险证据强弱直接硬改为主观完成裁判；Skills 明确负责生成/复核 AC、候选目标和证据充分性。",
+  "required": true,
+  "risk": "high",
+  "order": 62
+}

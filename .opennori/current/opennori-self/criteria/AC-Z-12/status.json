@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-Z-12",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 7,
+  "latest_evidence_summary": "OpenNori report and context export now include data.agent_next alongside next_recommendation, so Skills and review tools can use the same deterministic routing surface instead of inferring next actions from report context.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

@@ -1,0 +1,48 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Product AC evidence can now attach Architecture Apply context without letting architecture context prove the AC by itself. Tests show context-only evidence is downgraded, while real user-visible verification plus architecture apply context passes and renders both sources in report.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js -t 'product evidence can reference architecture apply context|architecture apply records do not count|evidence records flexible reviewable sources'",
+      "command": "npx vitest run test/core.test.js -t 'product evidence can reference architecture apply context|architecture apply records do not count|evidence records flexible reviewable sources'"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js -t 'evidence add command module records flexible reviewable sources'",
+      "command": "npx vitest run test/cli-commands.test.js -t 'evidence add command module records flexible reviewable sources'"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit",
+      "command": "npx tsc --noEmit"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence.ts",
+      "path": "src/core/evidence.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/evidence/source-parsing.ts",
+      "path": "src/cli/commands/evidence/source-parsing.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-evidence/SKILL.md",
+      "path": "plugins/opennori/skills/nori-evidence/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Run the listed tests; inspect report/status sources for architecture-apply role=context and command/product evidence side by side.",
+  "limitations": "This verifies evidence semantics and reporting; it does not prove a real external project flow until dogfood.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T10:10:01.782Z"
+}

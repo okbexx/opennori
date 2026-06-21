@@ -1,0 +1,115 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "OpenNori CLI no longer generates subjective product semantics from built-in templates or word lists. Draft now requires a Skill-prepared --brief; discover and brainstorm require Skill-prepared --questions/--candidates; default criteria, discovery gap pattern lists, built-in brainstorm candidates, next candidate goals, and hard high-risk strong/weak evidence lists were removed. The remaining CLI validation is structural state integrity and deterministic routing, while packaged Skills and the agent/user conversation own AC discovery, brainstorm directions, next-loop NoriBrief preparation, AC quality review, and subjective evidence sufficiency.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "ac-a-12-skill-owned-subjective-semantics",
+      "path": ".opennori/architecture/evidence/ac-a-12-skill-owned-subjective-semantics.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck",
+      "command": "npm run typecheck"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js",
+      "command": "npx vitest run test/core.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js --testNamePattern '^(?!.*dashboard).*$'",
+      "command": "npx vitest run test/cli-commands.test.js --testNamePattern '^(?!.*dashboard).*$'"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js --testNamePattern dashboard",
+      "command": "npx vitest run test/cli-commands.test.js --testNamePattern dashboard"
+    },
+    {
+      "type": "command",
+      "label": "rg -n 'PRODUCT_EVIDENCE_SOURCE_TYPES|strong-evidence-required|DEFAULT_CRITERIA|DISCOVERY_GAPS|BRAINSTORM_CANDIDATES|draft --goal|--from-discovery|--from-brainstorm|--from-next-candidate|NextGoalCandidate' src test plugins/opennori/skills README.md .opennori/protocol.md AGENTS.md",
+      "command": "rg -n 'PRODUCT_EVIDENCE_SOURCE_TYPES|strong-evidence-required|DEFAULT_CRITERIA|DISCOVERY_GAPS|BRAINSTORM_CANDIDATES|draft --goal|--from-discovery|--from-brainstorm|--from-next-candidate|NextGoalCandidate' src test plugins/opennori/skills README.md .opennori/protocol.md AGENTS.md"
+    },
+    {
+      "type": "artifact",
+      "label": "src/acceptance.ts",
+      "path": "src/acceptance.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/draft.ts",
+      "path": "src/cli/commands/acceptance/draft.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/brainstorm.ts",
+      "path": "src/cli/commands/acceptance/brainstorm.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next.ts",
+      "path": "src/agent-next.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types.ts",
+      "path": "src/types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+      "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-evidence/SKILL.md",
+      "path": "plugins/opennori/skills/nori-evidence/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "AGENTS.md",
+      "path": "AGENTS.md"
+    }
+  ],
+  "reviewability": "Run the listed typecheck, Vitest, and rg commands; inspect the referenced CLI/domain modules to verify Skill-prepared inputs are required and subjective generators were removed; inspect packaged Skills and docs for agent-owned subjective review behavior.",
+  "limitations": "Compatibility surfaces such as acceptance_review and negative candidate_goals assertions remain to help downstream agents/review tools understand the boundary. This evidence does not evaluate whether a future agent asks ideal questions; Skills and user approval still govern that subjective quality.",
+  "gate": "accepted",
+  "created_at": "2026-06-19T05:05:48.886Z"
+}

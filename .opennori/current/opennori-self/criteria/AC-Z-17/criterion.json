@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-17",
+  "layer": "productization",
+  "user_story": "作为用户，我第一次打开 README 或官网 Quick Start 时，能看到短到可以直接复制的 npx opennori 入口，而不是一串内部安装参数。",
+  "measurement": "阅读 README Try It 和官网首屏 Quick Start / Start 区域。",
+  "threshold": "README 和官网第一眼 Quick Start 展示 npx opennori；更详细的 opennori bootstrap、install、dry-run、confirm 只作为 agent 或高级用户的底层安全路径出现。",
+  "required": true,
+  "risk": "high",
+  "order": 37
+}

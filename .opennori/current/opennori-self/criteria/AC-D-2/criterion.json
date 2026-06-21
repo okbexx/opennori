@@ -1,0 +1,10 @@
+{
+  "id": "AC-D-2",
+  "layer": "acceptance",
+  "user_story": "作为用户，我打开 OpenNori dashboard 观察 agent 工作时，agent 使用 OpenNori Skill 推进当前验收缺口后，我能看到 live activity 显示 agent、Skill、目标、当前 gap、状态和摘要；如果有多个 active goals，agent 不会把活动误绑定到错误目标。",
+  "measurement": "在包含单个和多个 active goals 的项目中运行 activity start/heartbeat/finish，并查看 activity show、dashboard snapshot 和 agent_next.dashboard_activity。",
+  "threshold": "Skill 可从 agent_next.dashboard_activity 或低参数 activity 命令发布 start/heartbeat/finish；唯一当前 gap 可自动绑定 goal/gap，多目标歧义返回明确恢复动作；activity 只进入 .opennori/activity/events/snapshots，不改变 evidence/report completion。",
+  "required": true,
+  "risk": "medium",
+  "order": 52
+}

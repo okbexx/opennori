@@ -1,0 +1,43 @@
+{
+  "kind": "artifact-review",
+  "basis": "tool-observation",
+  "summary": "README, protocol, package Skills, and website describe OpenNori as Product AC plus Architecture Baseline plus Plugin Skills plus flexible evidence and completion judgment, with natural-language examples for users.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "rg -n 'Product AC|Architecture Baseline|Plugin Skills|evidence|completion|npx opennori' README.md .opennori/protocol.md plugins/opennori/skills /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+      "command": "rg -n 'Product AC|Architecture Baseline|Plugin Skills|evidence|completion|npx opennori' README.md .opennori/protocol.md plugins/opennori/skills /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md",
+      "path": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+      "path": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+    }
+  ],
+  "reviewability": "Read README/protocol/Skills and website source, then run the rg command to verify current product language.",
+  "limitations": "Website source is local; public deployment verification is separate.",
+  "gate": "accepted",
+  "created_at": "2026-06-13T15:03:36.060Z"
+}

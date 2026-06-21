@@ -1,19 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { EvidenceRecord, NoriSnapshot } from "../types";
-
-/* 简体中文：定义节点类型以方便统一处理 */
-export type RadarNode = {
-  id: string;
-  type: "goal" | "ac" | "evidence" | "profile";
-  label: string;
-  subLabel?: string; /* 简体中文：支持节点内的第二行副文本展示 */
-  x: number;
-  y: number;
-  status: string;
-  rawData: unknown;
-  radius?: number; /* 简体中文：增加可选的半径以支持每个节点个性化大小 */
-};
+import type { EvidenceRecord, NoriSnapshot, RadarNode } from "../types";
 
 type RadarLink = {
   id: string;

@@ -10,15 +10,15 @@ import {
   nextRecommendation,
   pathsForGoal,
   profileCompliance,
-  readJson
+  readGoalPayload
 } from "../core.ts";
 import { architectureState } from "../architecture.ts";
 import { safeReadManifest } from "./manifest.ts";
 import { manifestPath, relativeTo } from "./shared.ts";
-import type { ContextExport, NoriEvidencePayload } from "../types.ts";
+import type { ContextExport } from "../types.ts";
 
-export function buildContextExport(root: string, pair: { acceptancePath: string; evidencePath: string }): ContextExport {
-  const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+export function buildContextExport(root: string, pair: { goalDir: string; contractPath: string; ledgerPath: string; acceptancePath: string; evidencePath: string }): ContextExport {
+  const payload = readGoalPayload(pair);
   const contract = payload.contract;
   const ledger = payload.ledger;
   const reportPath = pathsForGoal(root, contract.goal_id).reportPath;

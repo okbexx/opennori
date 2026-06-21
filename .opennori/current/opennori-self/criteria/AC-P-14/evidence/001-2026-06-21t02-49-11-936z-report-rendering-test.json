@@ -1,0 +1,55 @@
+{
+  "kind": "report-rendering-test",
+  "basis": "tool-observation",
+  "summary": "OpenNori report rendering now keeps the Acceptance Status table compact and moves long user stories, measurement, thresholds, evidence summary, multiple sources, reviewability, and limitations into per-criterion Acceptance Details blocks. The reporting test creates a long Chinese AC with command/path/url sources and asserts the old oversized table columns are gone, the compact table is present, sources render as a list, and no generated report line exceeds 240 characters.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-p-14-report-readability",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-p-14-report-readability.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run test:reporting",
+      "command": "npm run test:reporting"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:quick",
+      "command": "npm run test:quick"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli",
+      "command": "npm run test:cli"
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck",
+      "command": "npm run typecheck"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/reporting.test.js",
+      "path": "test/reporting.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/evidence/opennori-self-ac-p-14-report-readability.json",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-p-14-report-readability.json"
+    }
+  ],
+  "reviewability": "Inspect src/core/report.ts for the compact Acceptance Status table and Acceptance Details renderer; inspect test/reporting.test.js for the long-report fixture and line-length assertion; rerun npm run test:reporting plus npm run test:quick, npm run test:cli, and npm run typecheck.",
+  "limitations": "This verifies Markdown report readability and evidence preservation for long report content. It does not prove every external Markdown viewer renders identically, and it does not replace human review of the generated report layout.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T02:49:11.936Z"
+}

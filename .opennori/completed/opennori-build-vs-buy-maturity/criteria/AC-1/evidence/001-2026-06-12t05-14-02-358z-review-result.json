@@ -1,0 +1,48 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "OpenNori now exposes build-vs-buy health as architecture.build_vs_buy in status/check/report/architecture show and as a doctor check named build_vs_buy_health; missing candidate fields or self-build reasons produce warnings and recovery actions.",
+  "result": "blocked",
+  "confidence": "user-review-required",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node --test --test-name-pattern 'architecture baseline loop|build-vs-buy health|context export' test/core.test.js",
+      "command": "node --test --test-name-pattern 'architecture baseline loop|build-vs-buy health|context export' test/core.test.js"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --goal opennori-build-vs-buy-maturity --json",
+      "command": "node ./bin/opennori.js check --root . --goal opennori-build-vs-buy-maturity --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js architecture show --root . --goal opennori-build-vs-buy-maturity --json",
+      "command": "node ./bin/opennori.js architecture show --root . --goal opennori-build-vs-buy-maturity --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture.js",
+      "path": "src/architecture.js"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli.js",
+      "path": "src/cli.js"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle.js",
+      "path": "src/lifecycle.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Run the listed targeted tests, then inspect architecture.build_vs_buy.status/findings and doctor check build_vs_buy_health.",
+  "limitations": "This verifies OpenNori-owned health reporting; it does not mean every future infrastructure area has already been migrated to an external library. This was produced before joint user-agent build-vs-buy evaluation and must not be treated as completion evidence.",
+  "gate": "needs_user_review",
+  "created_at": "2026-06-12T05:14:02.358Z"
+}

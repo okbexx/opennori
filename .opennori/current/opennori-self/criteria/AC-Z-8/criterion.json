@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-8",
+  "layer": "productization",
+  "user_story": "作为用户，我运行 opennori doctor 后，能判断当前项目是 ready、needs-action 还是 broken，并知道下一步修复动作。",
+  "measurement": "在已安装项目、缺少接入登记的项目、Plugin 资产异常或 active goal 异常的项目中运行 opennori doctor。",
+  "threshold": "输出包含整体健康状态、逐项检查结果、active goal 可恢复性、packaged Plugin Skill 状态、manifest plugin state 和可执行的 recovery 建议。",
+  "required": true,
+  "risk": "high",
+  "order": 28
+}

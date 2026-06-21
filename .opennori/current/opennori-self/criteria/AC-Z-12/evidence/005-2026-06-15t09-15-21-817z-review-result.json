@@ -1,0 +1,53 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "OpenNori acceptance Skill now has a deterministic discovery-answers path: the agent can turn user answers into a gap-id keyed answers file, run draft --from-discovery, and produce concrete user-facing Product AC without asking the user to memorize CLI parameters or approving generic draft criteria.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js test/cli-commands.test.js",
+      "command": "npx vitest run test/core.test.js test/cli-commands.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "discover -> answers -> draft --from-discovery -> check smoke",
+      "command": "discover -> answers -> draft --from-discovery -> check smoke"
+    },
+    {
+      "type": "artifact",
+      "label": "src/acceptance.ts",
+      "path": "src/acceptance.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/draft.ts",
+      "path": "src/cli/commands/acceptance/draft.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types.ts",
+      "path": "src/types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Run the listed tests and smoke path; check acceptance_review is clear while acceptance_basis remains draft until user approval.",
+  "limitations": "The conversion is a focused OpenNori acceptance-domain mapper for common discovery gaps, not a general natural-language form engine.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T09:15:21.817Z"
+}

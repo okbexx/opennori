@@ -1,0 +1,48 @@
+{
+  "kind": "dashboard-execution-presence-review",
+  "basis": "tool-observation",
+  "summary": "Dashboard event focus now follows execution-relevant OpenNori events beyond activity.started: ac.finished, evidence.added, architecture.changed, profile.changed, gap.changed, report.generated, and activity.finished can refresh the selected current gap, while idle snapshots still show the last agent event instead of looking disconnected.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run typecheck:dashboard",
+      "command": "npm run typecheck:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:quick",
+      "command": "npm run test:quick"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/api.ts",
+      "path": "src/dashboard/src/api.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/selection.ts",
+      "path": "src/dashboard/src/selection.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/App.tsx",
+      "path": "src/dashboard/src/App.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "test/dashboard-selection.test.ts",
+      "path": "test/dashboard-selection.test.ts"
+    }
+  ],
+  "reviewability": "Run the listed dashboard tests and inspect selection.ts to confirm event-to-gap focus behavior; open the dashboard during agent activity to see current execution state and latest agent event without reading raw logs first.",
+  "limitations": "This covers event focus and visible execution presence for the dashboard projection. It does not turn the dashboard into an agent runtime or completion authority.",
+  "gate": "accepted",
+  "created_at": "2026-06-20T13:58:33.394Z"
+}

@@ -1,0 +1,63 @@
+{
+  "kind": "agent-routing-contract",
+  "basis": "tool-observation",
+  "summary": "OpenNori CLI now exposes data.agent_next for init/bootstrap/doctor/check/next/resume/status so packaged Skills route from deterministic state instead of guessing from .opennori/agent-guide.md. Package nori, nori-project-health, and nori-acceptance Skills now prefer agent_next and treat fresh initialized empty state as no active Nori Contract, not broken state.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
+      "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js init --root <temp> --confirm --json && node ./bin/opennori.js doctor --root <temp> --json",
+      "command": "node ./bin/opennori.js init --root <temp> --confirm --json && node ./bin/opennori.js doctor --root <temp> --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next.ts",
+      "path": "src/agent-next.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/bootstrap.ts",
+      "path": "src/lifecycle/bootstrap.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/doctor.ts",
+      "path": "src/lifecycle/doctor.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/runtime-status.ts",
+      "path": "src/cli/commands/acceptance/runtime-status.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/check.ts",
+      "path": "src/cli/commands/check.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+      "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    }
+  ],
+  "reviewability": "Inspect agent_next payloads in the listed CLI outputs and Skill routing language; rerun the Vitest command and temporary-project init/doctor smoke.",
+  "limitations": "This verifies CLI-to-Skill routing in source and local CLI output; published package users need a new release/plugin install to receive the updated Skills.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T06:40:09.040Z"
+}

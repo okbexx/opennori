@@ -1,0 +1,17 @@
+{
+  "kind": "human-confirmation",
+  "basis": "human-confirmation",
+  "summary": "Needs joint user-agent evaluation: the existing build-vs-buy notes are draft evidence from the agent, but Jarl has not yet reviewed the candidates, self-build boundaries, or final recommendation.",
+  "result": "blocked",
+  "confidence": "user-review-required",
+  "sources": [
+    {
+      "type": "reference",
+      "label": "User correction: build-vs-buy should be discussed and evaluated together before completion."
+    }
+  ],
+  "reviewability": "Continue the conversation with Jarl, compare candidate libraries and self-build boundaries, then record a new decision or waiver after explicit agreement.",
+  "limitations": "The current decision files and code changes are draft material until the joint evaluation is complete.",
+  "gate": "needs_user_review",
+  "created_at": "2026-06-12T05:25:23.402Z"
+}

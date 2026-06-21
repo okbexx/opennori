@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-2",
+  "layer": "operator",
+  "user_story": "作为用户，我在 Codex 对话里 approve 或 revise 验收标准后，能控制什么叫完成，而不是让 agent 自动决定完成定义。",
+  "measurement": "查看 active Nori Contract 中是否反映用户确认后的验收标准。",
+  "threshold": "agent 在用户确认前不能进入 complete 判断；用户修改过的 AC 会成为后续状态判断依据。",
+  "required": true,
+  "risk": "high",
+  "order": 14
+}

@@ -1,0 +1,48 @@
+{
+  "kind": "init-agent-guide-clarity",
+  "basis": "tool-observation",
+  "summary": "Dogfood found opennori init produced empty .opennori state directories plus an agent-guide that assumed an existing Architecture Baseline, confusing users in a newly initialized project. The generated agent guide now states empty directories are normal, tells agents not to implement before a Nori Contract exists, and only asks them to read Architecture Baseline files when they exist or non-trivial work requires one. Init/bootstrap user-facing messages also explain that no active Nori Contract exists yet.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "command",
+      "label": "opennori init --root <temp> --confirm --json",
+      "command": "opennori init --root <temp> --confirm --json"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/agent-surface.ts",
+      "path": "src/architecture/agent-surface.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/init.ts",
+      "path": "src/cli/init.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/bootstrap.ts",
+      "path": "src/cli/bootstrap.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/doctor/project-health.ts",
+      "path": "src/lifecycle/doctor/project-health.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Initialize a temporary project and inspect .opennori/agent-guide.md; verify doctor remains ready after managed asset upgrade; rerun npm run check.",
+  "limitations": "Existing projects with the old generated guide need opennori upgrade --dry-run and --confirm to refresh the managed guide.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T06:18:27.747Z"
+}

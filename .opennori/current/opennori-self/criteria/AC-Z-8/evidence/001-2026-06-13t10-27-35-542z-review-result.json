@@ -1,0 +1,28 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Doctor reports ready with checks for packaged Plugin Skills and manifest plugin state: plugin_manifest, plugin_skills, and manifest_plugin_state are passing alongside project structure, active goal recoverability, architecture, manifest, and build-vs-buy health.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js doctor --root . --json",
+      "command": "node ./bin/opennori.js doctor --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/doctor/plugin-health.ts",
+      "path": "src/lifecycle/doctor/plugin-health.ts"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/manifest.json",
+      "path": ".opennori/manifest.json"
+    }
+  ],
+  "reviewability": "Run doctor and inspect data.status, checks, recovery_actions, data.plugin, and active_goals.",
+  "limitations": "This validates current source checkout package assets; a broken published npm package would need package-level smoke testing before release.",
+  "gate": "accepted",
+  "created_at": "2026-06-13T10:27:35.542Z"
+}

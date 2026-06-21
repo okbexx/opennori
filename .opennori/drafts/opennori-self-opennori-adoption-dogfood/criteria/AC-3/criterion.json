@@ -1,0 +1,10 @@
+{
+  "id": "AC-3",
+  "layer": "acceptance",
+  "user_story": "As a user, I can identify the first point where the OpenNori loop felt unclear, repetitive, or too CLI-heavy.",
+  "measurement": "用户或评审者记录本次外部项目使用中首次卡住、重复、CLI 过重或半安装的点，并在证据或报告中复查。",
+  "threshold": "证据或报告明确列出至少一个真实摩擦点，或说明未发现明显摩擦；不会把 OpenNori 自身通过状态当作外部采用证明。",
+  "required": true,
+  "risk": "medium",
+  "order": 2
+}

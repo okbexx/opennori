@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-4",
+  "layer": "architecture",
+  "user_story": "作为用户，当 agent 认为 baseline 不适合当前项目时，我看到明确 Architecture Challenge，而不是 agent 静默改架构。",
+  "measurement": "运行 opennori architecture challenge 后查看 status/report 和 challenge 文件。",
+  "threshold": "challenge 展示当前 baseline、项目证据、冲突说明、建议修正和是否需要用户确认。",
+  "risk": "high",
+  "required": true,
+  "order": 41
+}

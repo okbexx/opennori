@@ -1,6 +1,5 @@
 import { defineCommand } from "citty";
 import fs from "node:fs";
-import path from "node:path";
 import { architectureState } from "../../../architecture.ts";
 import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
@@ -13,8 +12,7 @@ import {
   ok,
   refreshSnapshot,
   recomputeWorkflowStatus,
-  syncAcceptanceMarkdown,
-  writeJson
+  writeGoalDossier
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { withContractLanguage } from "../../../language.ts";
@@ -57,7 +55,7 @@ export const approveCommand = defineCommand({
       );
     }
     const targetPaths = pair.location === "current"
-      ? { acceptancePath: pair.acceptancePath, evidencePath: pair.evidencePath }
+      ? pathsForGoal(root, contract.goal_id, "current")
       : pathsForGoal(root, contract.goal_id, "current");
     contract.acceptance_basis = {
       status: "approved",
@@ -68,11 +66,9 @@ export const approveCommand = defineCommand({
       contract.presentation = withContractLanguage(contract, String(args.language)).presentation;
     }
     recomputeWorkflowStatus(contract, ledger);
-    writeJson(targetPaths.evidencePath, { contract, ledger });
-    syncAcceptanceMarkdown(targetPaths.acceptancePath, contract, ledger);
+    writeGoalDossier(targetPaths.goalDir, contract, ledger);
     if (pair.location === "drafts") {
-      fs.rmSync(pair.acceptancePath, { force: true });
-      fs.rmSync(pair.evidencePath, { force: true });
+      fs.rmSync(pair.goalDir, { recursive: true, force: true });
     }
     refreshManifest(root);
     const architecture = architectureState(root, contract.goal_id);

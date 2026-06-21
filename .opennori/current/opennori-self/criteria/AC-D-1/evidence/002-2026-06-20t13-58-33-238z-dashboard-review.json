@@ -1,0 +1,63 @@
+{
+  "kind": "dashboard-review",
+  "basis": "tool-observation",
+  "summary": "Dashboard inspect panel now stays aligned with the rendered radar state: focused passing AC events map to the Passed aggregate instead of a hidden individual node, latest evidence/architecture/profile/report events can refresh the inspected AC, long Chinese measurement/threshold text renders in one readable column, review-required passing criteria show review risk wording, and architecture valid displays as a healthy decision.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck:dashboard",
+      "command": "npm run typecheck:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:quick",
+      "command": "npm run test:quick"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "git diff --check",
+      "command": "git diff --check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/App.tsx",
+      "path": "src/dashboard/src/App.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/api.ts",
+      "path": "src/dashboard/src/api.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/selection.ts",
+      "path": "src/dashboard/src/selection.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/InspectNodePanel.tsx",
+      "path": "src/dashboard/src/components/InspectNodePanel.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "test/dashboard-selection.test.ts",
+      "path": "test/dashboard-selection.test.ts"
+    }
+  ],
+  "reviewability": "Run npm run lint, npm run typecheck:dashboard, npm run test:quick, npm run test:dashboard, and git diff --check; then open opennori dashboard and trigger evidence/architecture/activity events to confirm the right panel follows the rendered radar node and highlights the focused passed AC inside the aggregate.",
+  "limitations": "This verifies the local dashboard behavior and focused regression coverage. Dashboard remains observation-only and does not write Product AC, evidence, profile, architecture, report, waiver, or completion state.",
+  "gate": "accepted",
+  "created_at": "2026-06-20T13:58:33.238Z"
+}

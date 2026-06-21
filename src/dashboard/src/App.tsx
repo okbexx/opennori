@@ -14,7 +14,8 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchSnapshot, subscribeToEvents } from "./api";
-import { AcceptanceRadarNet, type RadarNode } from "./components/AcceptanceRadarNet";
+import { AcceptanceRadarNet } from "./components/AcceptanceRadarNet";
+import type { RadarNode } from "./types";
 import { InspectNodePanel } from "./components/InspectNodePanel";
 import { gapIdFromFocusEvent, profileNodeFromSnapshot, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "./selection";
 import type { NoriSnapshot } from "./types";

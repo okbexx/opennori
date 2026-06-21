@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-O-14",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 2,
+  "latest_evidence_summary": "AC Review Loop now documents and tests the safe draft criterion add path, preventing agents from manually patching draft acceptance/evidence/manifest files when a missing AC is discovered.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

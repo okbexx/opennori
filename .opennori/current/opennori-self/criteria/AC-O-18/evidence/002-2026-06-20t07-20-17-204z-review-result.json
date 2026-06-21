@@ -1,0 +1,115 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Acceptance Surface Modeling now covers all OpenNori packaged Skill bodies and frontmatter trigger descriptions. The root router and acceptance/autogoal Skills route broad UI/CRUD/dashboard/list/form/settings/admin goals into operation-path modeling; evidence/reporting refuse confident passing/completion without the modeled path; architecture brainstorm/apply/challenge, build-vs-buy, capability profile, and project health route missing product-surface semantics back to nori-acceptance instead of bypassing Product AC. The behavior remains Skill/user review plus asset tests, not a CLI hard validator or fixed natural-language AC-quality test.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-o-18-aligned",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-o-18-aligned.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js --testNamePattern 'protocol v1 example|Codex Plugin manifest'",
+      "command": "npx vitest run test/core.test.js --testNamePattern 'protocol v1 example|Codex Plugin manifest'"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "node -e frontmatter skill metadata read-back",
+      "command": "node -e frontmatter skill metadata read-back"
+    },
+    {
+      "type": "command",
+      "label": "git diff --check",
+      "command": "git diff --check"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-autogoal/SKILL.md",
+      "path": "plugins/opennori/skills/nori-autogoal/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-evidence/SKILL.md",
+      "path": "plugins/opennori/skills/nori-evidence/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+      "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md",
+      "path": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-architecture-apply/SKILL.md",
+      "path": "plugins/opennori/skills/nori-architecture-apply/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-architecture-challenge/SKILL.md",
+      "path": "plugins/opennori/skills/nori-architecture-challenge/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-build-vs-buy/SKILL.md",
+      "path": "plugins/opennori/skills/nori-build-vs-buy/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-capability-profile/SKILL.md",
+      "path": "plugins/opennori/skills/nori-capability-profile/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+      "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "AGENTS.md",
+      "path": "AGENTS.md"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    }
+  ],
+  "reviewability": "Inspect every listed packaged Skill, especially frontmatter description and Misuse Guards. Rerun the targeted Vitest command, npm run check, the Node frontmatter read-back script, and git diff --check.",
+  "limitations": "This proves the packaged Skill behavior protocols, trigger metadata, docs, and tests encode the operation-path boundary. It does not prove every future agent will ask perfect product questions; users still confirm or revise AC through the AC Review Loop.",
+  "gate": "accepted",
+  "created_at": "2026-06-20T07:20:17.204Z"
+}

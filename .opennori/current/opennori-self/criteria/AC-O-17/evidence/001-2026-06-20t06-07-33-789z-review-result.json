@@ -1,0 +1,58 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Draft criterion revisions now preserve draft acceptance state: criterion add/update keeps drafts unapproved, preserves source/mode/coverage metadata, removes approved_at, and routes current_gap to ACCEPTANCE-BASIS even when required profile items exist. Approved current-contract revisions still clear stale evidence and create an evidence gap.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js --testNamePattern 'criterion update command'",
+      "command": "npx vitest run test/cli-commands.test.js --testNamePattern 'criterion update command'"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js --testNamePattern 'criterion update'",
+      "command": "npx vitest run test/core.test.js --testNamePattern 'criterion update'"
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck",
+      "command": "npm run typecheck"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/criterion.ts",
+      "path": "src/cli/commands/acceptance/criterion.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": "AGENTS.md",
+      "path": "AGENTS.md"
+    }
+  ],
+  "reviewability": "Review criterion.ts and the draft/current regression tests. Rerun the listed Vitest commands plus npm run typecheck; inspect status on the draft fixture to confirm current_gap remains ACCEPTANCE-BASIS.",
+  "limitations": "This verifies deterministic CLI state and Skill/protocol guidance. It does not prove every future agent will phrase AC revisions well; the AC Review Loop remains a Skill/user conversation responsibility.",
+  "gate": "accepted",
+  "created_at": "2026-06-20T06:07:33.789Z"
+}

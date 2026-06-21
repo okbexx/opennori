@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-2",
+  "layer": "architecture",
+  "user_story": "作为用户，我确认 Architecture Baseline 后，新开的 agent session 能通过 OpenNori Plugin Skills 和 .opennori 状态识别这条架构约束，并知道后续实现必须沿用它。",
+  "measurement": "在新会话中查看 OpenNori Plugin Skills、.opennori/agent-guide.md、architecture baseline、可选 agent route 和 architecture show/status 输出。",
+  "threshold": "用户能判断新 session 不依赖旧聊天上下文也能通过 Plugin Skills 或 .opennori 状态找到架构约束；报告明确提示 agent 应提出 challenge 而不是静默替换。",
+  "risk": "high",
+  "required": true,
+  "order": 39
+}

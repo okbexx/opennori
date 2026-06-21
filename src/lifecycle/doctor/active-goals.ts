@@ -5,15 +5,14 @@ import {
   findCurrentPairs,
   findDraftPairs,
   findLegacyActivePairs,
-  readJson,
+  readGoalPayload,
   validateContract
 } from "../../core.ts";
 import { validateSchema } from "../../validation.ts";
 import { relativeTo } from "../shared.ts";
 import type {
   ActiveGoalSummary,
-  DoctorIssue,
-  NoriEvidencePayload
+  DoctorIssue
 } from "../../types.ts";
 import { errorMessage } from "./shared.ts";
 
@@ -30,7 +29,7 @@ function inspectPairs(root: string, pairs: ReturnType<typeof findCurrentPairs>):
   for (const pair of pairs) {
     const { goalId, acceptancePath, evidencePath } = pair;
     try {
-      const payload = readJson<NoriEvidencePayload>(evidencePath);
+      const payload = readGoalPayload(pair);
       const schemaResult = validateSchema("evidence-payload", payload);
       const validationIssues = schemaResult.valid
         ? validateContract(payload.contract, payload.ledger)
@@ -64,32 +63,49 @@ function inspectDirectoryCompleteness(root: string, location: "current" | "draft
   const issues: DoctorIssue[] = [];
   if (!fs.existsSync(stateDir)) return issues;
 
-  const files = fs.readdirSync(stateDir);
-  const evidenceGoalIds = new Set(files
-    .filter((fileName) => fileName.endsWith(".evidence.json"))
-    .map((fileName) => fileName.replace(/\.evidence\.json$/, "")));
-  const acceptanceGoalIds = new Set(files
-    .filter((fileName) => fileName.endsWith(".acceptance.md"))
-    .map((fileName) => fileName.replace(/\.acceptance\.md$/, "")));
-  for (const fileName of files.filter((name) => name.endsWith(".acceptance.md"))) {
-    const goalId = fileName.replace(/\.acceptance\.md$/, "");
-    if (!evidenceGoalIds.has(goalId)) {
+  for (const entryName of fs.readdirSync(stateDir)) {
+    const entryPath = path.join(stateDir, entryName);
+    if (!fs.statSync(entryPath).isDirectory()) {
       issues.push({
-        goal_id: goalId,
-        path: `.opennori/${location}/${fileName}`,
-        message: `${location} acceptance contract has no matching evidence record.`
+        goal_id: entryName,
+        path: `.opennori/${location}/${entryName}`,
+        message: `${location} contains a non-directory goal state entry.`
       });
+      continue;
+    }
+    for (const required of ["contract.json", "ledger.json", "README.md", "criteria"]) {
+      if (!fs.existsSync(path.join(entryPath, required))) {
+        issues.push({
+          goal_id: entryName,
+          path: `.opennori/${location}/${entryName}/${required}`,
+          message: `${location} goal dossier is missing ${required}.`
+        });
+      }
+    }
+    const criteriaDir = path.join(entryPath, "criteria");
+    if (!fs.existsSync(criteriaDir)) continue;
+    for (const criterionId of fs.readdirSync(criteriaDir)) {
+      const criterionPath = path.join(criteriaDir, criterionId);
+      if (!fs.statSync(criterionPath).isDirectory()) continue;
+      for (const required of ["criterion.json", "status.json", "README.md", "evidence", "artifacts"]) {
+        if (!fs.existsSync(path.join(criterionPath, required))) {
+          issues.push({
+            goal_id: entryName,
+            path: `.opennori/${location}/${entryName}/criteria/${criterionId}/${required}`,
+            message: `${location} criterion dossier is missing ${required}.`
+          });
+        }
+      }
     }
   }
-  for (const fileName of files.filter((name) => name.endsWith(".evidence.json"))) {
-    const goalId = fileName.replace(/\.evidence\.json$/, "");
-    if (!acceptanceGoalIds.has(goalId)) {
-      issues.push({
-        goal_id: goalId,
-        path: `.opennori/${location}/${fileName}`,
-        message: `${location} evidence record has no matching acceptance contract.`
-      });
-    }
+
+  for (const fileName of fs.readdirSync(stateDir).filter((name) => name.endsWith(".acceptance.md") || name.endsWith(".evidence.json"))) {
+    const goalId = fileName.replace(/\.(acceptance\.md|evidence\.json)$/, "");
+    issues.push({
+      goal_id: goalId,
+      path: `.opennori/${location}/${fileName}`,
+      message: `${location} still contains legacy flat goal state. OpenNori now expects .opennori/${location}/${goalId}/ goal dossiers.`
+    });
   }
   return issues;
 }

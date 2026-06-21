@@ -8,15 +8,11 @@ import {
   nextRecommendation,
   ok,
   pathsForGoal,
-  readJson,
+  readGoalPayload,
   refreshSnapshot
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
-import type {
-  ArchitectureRequirementStatus,
-  EvidenceLedger,
-  NoriContract
-} from "../../../types.ts";
+import type { ArchitectureRequirementStatus } from "../../../types.ts";
 import { runJsonCommand } from "../../runtime.ts";
 import { jsonArg, resolveRoot, rootArg } from "./shared.ts";
 
@@ -87,7 +83,7 @@ export const architectureRequirementCommand = defineCommand({
     let recommendation;
     let agent_next;
     if (fs.existsSync(activePaths.evidencePath)) {
-      const payload = readJson<{ contract: NoriContract; ledger: EvidenceLedger }>(activePaths.evidencePath);
+      const payload = readGoalPayload(activePaths);
       current_gap = currentGap(payload.contract, payload.ledger);
       recommendation = nextRecommendation(payload.contract, payload.ledger, { root, architecture });
       agent_next = agentNextForRecommendation(payload.contract.goal_id, current_gap, recommendation);

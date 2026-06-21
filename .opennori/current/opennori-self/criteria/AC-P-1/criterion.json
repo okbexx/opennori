@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-1",
+  "layer": "protocol",
+  "user_story": "作为用户，我在编辑器或文件浏览器里打开 active Nori Contract 后，能在 60 秒内看懂目标、分层验收标准、每条状态和当前缺口。",
+  "measurement": "打开 .opennori/active/<goal>.acceptance.md 并阅读。",
+  "threshold": "不读聊天历史、不读实现说明，60 秒内能判断任务在验收层面的状态和下一条缺口。",
+  "required": true,
+  "risk": "medium",
+  "order": 0
+}

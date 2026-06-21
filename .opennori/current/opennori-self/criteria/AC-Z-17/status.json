@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-Z-17",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 1,
+  "latest_evidence_summary": "README and website quickstart lead with short commands: try once with npx opennori, pin with npm install -D opennori, then use opennori as the project-local entry.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-O-17",
+  "status": "passing",
+  "confidence": "high",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 1,
+  "latest_evidence_summary": "Draft criterion revisions now preserve draft acceptance state: criterion add/update keeps drafts unapproved, preserves source/mode/coverage metadata, removes approved_at, and routes current_gap to ACCEPTANCE-BASIS even when required profile items exist. Approved current-contract revisions still clear stale evidence and create an evidence gap.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "AC-3",
+  "layer": "acceptance",
+  "user_story": "作为用户，我查看 OpenNori 自身当前报告时，能判断它哪些地方已经复用了标准库或成熟库、哪些地方仍保留最小自研，以及这些自研是否属于 OpenNori 产品语义而不是通用基础设施。",
+  "measurement": "用户查看 opennori report、architecture show、package.json 和相关 build-vs-buy evidence。",
+  "threshold": "报告和证据能区分复用、最小自研和待处理风险；如果 schema、Markdown 或 CLI 仍手写过重但没有充分决策证据，目标不能被判断为 complete。",
+  "required": true,
+  "risk": "high",
+  "order": 2
+}

@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-9",
+  "layer": "operator",
+  "user_story": "作为用户，我给 agent 一个粗略 idea 并要求使用 OpenNori autogoal 后，最终看到并批准的是标准 Nori Contract Draft，而不是新的 autogoal 专用产物、MVP/第一版/原型、过程计划或任务列表。",
+  "measurement": "用户在 Codex 对话中说“用 OpenNori autogoal 把这个 idea 变成可验收目标”，agent 读取项目上下文并输出标准 Nori Contract Draft；用户检查 packaged Skills、Plugin manifest、README/protocol 和生成的 draft 形态。",
+  "threshold": "autogoal 由 packaged Skill 驱动，并明确要求保持用户完整意图、不把大目标降级为 MVP/第一版/原型；输出形态与手动多轮澄清后的 Nori Contract Draft 一致，包含 Goal、用户视角 AC、Measure/Passes when、假设和只影响完成定义的问题；approve 后进入普通 OpenNori current gap/evidence/status/report 生命周期；CLI 只保存标准 draft 或 brief source，不把主观 AC 质量写成硬 validator。",
+  "required": true,
+  "risk": "high",
+  "order": 56
+}

@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-P-13",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 2,
+  "latest_evidence_summary": "Acceptance report starts with Decision Summary before the detailed AC table, then includes Evidence Health before user intervention and conclusion.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

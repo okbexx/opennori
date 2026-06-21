@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-6",
+  "layer": "operator",
+  "user_story": "作为用户，我发现新事实后在对话中修改某条 AC，agent 后续只按更新后的验收标准判断完成。",
+  "measurement": "用户提出 AC 修改后，查看 active contract、status 和 report。",
+  "threshold": "更新后的 AC 成为后续 completion 和 current_gap 的唯一验收依据；旧标准不会继续被当成完成条件。",
+  "required": true,
+  "risk": "high",
+  "order": 18
+}

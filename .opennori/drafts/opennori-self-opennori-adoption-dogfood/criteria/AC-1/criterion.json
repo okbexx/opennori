@@ -1,0 +1,10 @@
+{
+  "id": "AC-1",
+  "layer": "acceptance",
+  "user_story": "As a user, I can start OpenNori in a non-OpenNori project from natural language and see a draft Nori Contract.",
+  "measurement": "用户在一个非 OpenNori 仓库中用自然语言要求 agent 使用 OpenNori，然后查看 agent 展示的 draft Nori Contract。",
+  "threshold": "draft 包含该项目目标、人类视角 AC、acceptance basis 和当前 approval 缺口；用户不需要记住 --from-next-candidate、--root 或内部 Skill 名。",
+  "required": true,
+  "risk": "medium",
+  "order": 0
+}

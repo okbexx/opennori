@@ -45,7 +45,10 @@ full deterministic payload for agents and automation.
 
 Before implementing, first inspect OpenNori status and Architecture Requirement:
 
-- `.opennori/current/*.acceptance.md`
+- `.opennori/current/<goal>/README.md`
+- `.opennori/current/<goal>/contract.json`
+- `.opennori/current/<goal>/ledger.json`
+- `.opennori/current/<goal>/criteria/<AC>/README.md` for the current gap
 - `.opennori/architecture/requirements/*.json` when present
 - `opennori status --root . --json` or `opennori architecture show --root . --json`
 
@@ -157,9 +160,9 @@ profile, architecture, implementation, or evidence routing begin until final
 approval happens after every AC is confirmed.
 If the review loop discovers a missing acceptance boundary, add it with
 `opennori criterion add --from-draft --goal <goal-id>` so the draft contract,
-ledger, markdown, and manifest stay synchronized. Do not manually patch
-`.acceptance.md`, `.evidence.json`, or manifest files for normal draft AC
-additions.
+ledger, goal README, per-criterion dossier, and manifest stay synchronized. Do
+not manually patch `contract.json`, `ledger.json`, criterion dossier files, or
+manifest files for normal draft AC additions.
 
 Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, or implementation tasks into user AC. They can influence Nori Profile, Architecture Baseline, evidence risk, or recovery guidance, but Product AC must remain human-visible operations or judgments.
 
@@ -218,6 +221,14 @@ state behavior: drafts remain drafts until approval, check/report do not mutate
 contracts, invalid schemas fail, evidence drives status, and Skills contain the
 rules agents must follow.
 
+Do not prove Skill behavior by matching long lists of words in `SKILL.md`.
+For packaged Skills, unit tests may check objective asset structure only:
+plugin manifest points at the skills directory, expected Skill directories
+exist, `SKILL.md` has frontmatter and required behavior-protocol sections, and
+deprecated install/copy routes are absent. Whether the Skill actually improves
+agent judgment belongs to Skill review, eval prompts, dogfood, and user
+confirmation, not brittle `core.test` keyword assertions.
+
 Use layered verification instead of defaulting every local change to the full
 suite. `npm test` runs the quick tagged Vitest subset, and `npm run check` runs
 lint, typecheck, build, quick tests, and doctor. For focused changes, prefer the
@@ -228,6 +239,12 @@ matching domain script such as `npm run test:acceptance`,
 Run `npm run check:full` for releases, broad architecture/CLI lifecycle
 changes, or before pushing a large batch. New tests should carry one or more
 declared Vitest tags; do not introduce undeclared ad hoc tags.
+
+The test suite is intentionally layered. Follow `docs/testing.md`: keep
+`test/core.test.js` narrow, put new coverage in the matching domain test file,
+and verify only objective state, schema, file, command, report, and asset
+behavior in automated tests. Skill judgment quality belongs to Skills, evals,
+dogfood, and user review.
 
 When changing Skill behavior, update package-local `plugins/opennori/skills/nori*/SKILL.md`, `plugins/opennori/.codex-plugin/plugin.json`, and marketplace metadata first.
 Do not add compatibility shims for old `adaw`, `nori`, `opennori skill export`, `install --skill`, or `refresh-skill` entry points.

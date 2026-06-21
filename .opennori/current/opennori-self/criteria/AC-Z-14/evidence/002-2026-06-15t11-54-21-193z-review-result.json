@@ -1,0 +1,48 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Completed-goal candidate goals are now actionable draft sources: opennori draft --from-next-candidate converts a selected candidate into a draft Nori Contract with ACCEPTANCE-BASIS as the current gap, preserves source goal/candidate/user value/risks in acceptance_basis, and refuses sources that are not ready-for-next-loop.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm test -- --run test/cli-commands.test.js test/core.test.js",
+      "command": "npm test -- --run test/cli-commands.test.js test/core.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js draft --from-next-candidate next-loop-usability --source-goal opennori-self --goal-id next-loop-usability-contract --root . --json",
+      "command": "node ./bin/opennori.js draft --from-next-candidate next-loop-usability --source-goal opennori-self --goal-id next-loop-usability-contract --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/acceptance.ts",
+      "path": "src/acceptance.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/draft.ts",
+      "path": "src/cli/commands/acceptance/draft.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    }
+  ],
+  "reviewability": "Rerun the listed tests and run the draft command against the completed opennori-self goal; inspect the generated draft acceptance basis and current_gap.",
+  "limitations": "This proves candidate-to-draft behavior for completed goals in the current repository; the generated draft still requires user approval before implementation or evidence can complete the next loop.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T11:54:21.193Z"
+}

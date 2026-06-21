@@ -1,0 +1,45 @@
+{
+  "kind": "verification",
+  "basis": "artifact-review",
+  "summary": "Project AGENTS guidance now preserves the architecture artifact boundary: profiles, baselines, decisions, challenges, and apply records each have distinct directories, and invalid architecture evidence routes to project health.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "ac-a-3-architecture-evidence-boundary",
+      "path": ".opennori/architecture/evidence/ac-a-3-architecture-evidence-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "artifact",
+      "label": "AGENTS.md",
+      "path": "AGENTS.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md",
+      "path": "plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-architecture-apply/SKILL.md",
+      "path": "plugins/opennori/skills/nori-architecture-apply/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    }
+  ],
+  "reviewability": "Inspect AGENTS.md, packaged architecture Skills, README, and protocol for the same directory boundary.",
+  "limitations": "This is guidance and state-boundary evidence; it does not judge subjective profile quality.",
+  "gate": "accepted",
+  "created_at": "2026-06-20T10:25:55.423Z"
+}

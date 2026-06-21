@@ -1,0 +1,38 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Unhealthy build-vs-buy decisions now appear as build_vs_buy review risks in completion and next_recommendation without creating synthetic Product AC or current_gap; tests cover missing reuse candidates and missing self-build reason.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js -t 'build-vs-buy'",
+      "command": "npx vitest run test/core.test.js -t 'build-vs-buy'"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/build-vs-buy.ts",
+      "path": "src/architecture/build-vs-buy.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-build-vs-buy/SKILL.md",
+      "path": "plugins/opennori/skills/nori-build-vs-buy/SKILL.md"
+    }
+  ],
+  "reviewability": "Run the build-vs-buy targeted test and inspect the build-vs-buy health plus completion review-risk assertions.",
+  "limitations": "This proves build-vs-buy health reporting and completion confidence semantics, not the quality of every individual future architecture decision.",
+  "gate": "accepted",
+  "created_at": "2026-06-14T01:36:21.106Z"
+}

@@ -1,0 +1,43 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "opennori check/report/context export are clean for opennori-self after architecture/build-vs-buy completion-risk wiring: architecture_check is clear, build_vs_buy is clear, evidence_health is clear, and completion is confident.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --goal opennori-self --json",
+      "command": "node ./bin/opennori.js check --root . --goal opennori-self --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js report --root . --goal opennori-self --json",
+      "command": "node ./bin/opennori.js report --root . --goal opennori-self --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js context export --root . --goal opennori-self --output .opennori/reports/opennori-self.context.json --json",
+      "command": "node ./bin/opennori.js context export --root . --goal opennori-self --output .opennori/reports/opennori-self.context.json --json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/reports/opennori-self.report.md",
+      "path": ".opennori/reports/opennori-self.report.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/reports/opennori-self.context.json",
+      "path": ".opennori/reports/opennori-self.context.json"
+    }
+  ],
+  "reviewability": "Rerun the listed commands and inspect report/context export for confident completion and clear architecture/build-vs-buy state.",
+  "limitations": "This records the current repository health; later managed-file or Skill asset changes should rerun doctor/check.",
+  "gate": "accepted",
+  "created_at": "2026-06-14T01:36:08.467Z"
+}

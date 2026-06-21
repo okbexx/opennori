@@ -1,0 +1,28 @@
+{
+  "kind": "test-summary",
+  "basis": "tool-observation",
+  "summary": "Architecture Baseline loop now lets a user preview and confirm the architecture separately from Product AC before implementation.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm test",
+      "command": "npm test"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/baseline.md",
+      "path": ".opennori/architecture/baseline.md"
+    }
+  ],
+  "reviewability": "Run npm test, then inspect architecture baseline commands and nori-architecture-brainstorm Skill output.",
+  "limitations": "This proves the local OpenNori Architecture Baseline loop; true external-user validation still requires a non-OpenNori dogfood project.",
+  "gate": "accepted",
+  "created_at": "2026-06-12T00:38:17.848Z"
+}

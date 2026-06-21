@@ -4,14 +4,14 @@ import {
   inferCriterionLayer,
   ok,
   recomputeWorkflowStatus,
-  syncAcceptanceMarkdown,
-  validateContract,
-  writeJson
+  validateContract
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
-import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
+import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
 import type { AcceptanceBasis, AcceptanceCriterion } from "../../../types.ts";
 import { jsonArg, rootArg } from "./shared.ts";
+
+type CommandRuntimeOverride = Pick<ActiveGoalRuntime, "loadPair"> & Partial<Pick<ActiveGoalRuntime, "savePair" | "refreshManifest">>;
 
 function revisedAcceptanceBasis(pairLocation: string, existing: AcceptanceBasis | undefined, summary: unknown, fallbackSummary: string): AcceptanceBasis {
   const summaryText = String(summary || fallbackSummary);
@@ -117,8 +117,7 @@ export const criterionAddCommand = defineCommand({
     }
 
     recomputeWorkflowStatus(contract, ledger);
-    writeJson(evidencePath, { contract, ledger });
-    syncAcceptanceMarkdown(acceptancePath, contract, ledger);
+    data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
     return ok({
       goal_id: contract.goal_id,
@@ -210,8 +209,7 @@ export const criterionUpdateCommand = defineCommand({
     }
 
     recomputeWorkflowStatus(contract, ledger);
-    writeJson(evidencePath, { contract, ledger });
-    syncAcceptanceMarkdown(acceptancePath, contract, ledger);
+    data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
     return ok({
       goal_id: contract.goal_id,
@@ -223,10 +221,10 @@ export const criterionUpdateCommand = defineCommand({
   }
 });
 
-export async function runCriterionUpdateCommand(rawArgs: string[], { loadPair }: ActiveGoalRuntime) {
-  return runJsonCommand(criterionUpdateCommand, rawArgs, { loadPair });
+export async function runCriterionUpdateCommand(rawArgs: string[], runtime: CommandRuntimeOverride) {
+  return runJsonCommand(criterionUpdateCommand, rawArgs, { savePair, refreshManifest, ...runtime });
 }
 
-export async function runCriterionAddCommand(rawArgs: string[], { loadPair }: ActiveGoalRuntime) {
-  return runJsonCommand(criterionAddCommand, rawArgs, { loadPair });
+export async function runCriterionAddCommand(rawArgs: string[], runtime: CommandRuntimeOverride) {
+  return runJsonCommand(criterionAddCommand, rawArgs, { savePair, refreshManifest, ...runtime });
 }

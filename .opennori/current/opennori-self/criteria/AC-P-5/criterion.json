@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-5",
+  "layer": "protocol",
+  "user_story": "作为用户，我运行 opennori report 后，能看到目标、分层 AC 状态、证据摘要、当前缺口、是否需要我介入和结论。",
+  "measurement": "运行 opennori report 或让 Codex 生成 OpenNori 报告。",
+  "threshold": "报告默认围绕验收状态和证据组织，不把过程任务当作主线。",
+  "required": true,
+  "risk": "medium",
+  "order": 4
+}

@@ -3,9 +3,19 @@ import os from "node:os";
 import path from "node:path";
 import type { CommandDef } from "citty";
 import { runCommand } from "citty";
-import { findCurrentPairs, findDraftPairs, findGoalPairs, inferGoalLocation, pruneInvalidEvidence, readJson, syncAcceptanceMarkdown, writeJson, type GoalStateLocation } from "../core.ts";
+import {
+  findCurrentPairs,
+  findDraftPairs,
+  findGoalPairs,
+  inferGoalLocation,
+  pruneInvalidEvidence,
+  readGoalPayload,
+  writeJson,
+  writeGoalDossierFromPaths,
+  type GoalStateLocation
+} from "../core.ts";
 import { refreshManifest } from "../lifecycle.ts";
-import type { EvidenceLedger, NoriContract, NoriEvidencePayload } from "../types.ts";
+import type { EvidenceLedger, NoriContract } from "../types.ts";
 
 export type CliCommand = CommandDef<any>;
 export type ActiveGoalArgs = {
@@ -28,11 +38,11 @@ export const activeGoalArgs = {
   },
   acceptance: {
     type: "string",
-    description: "Explicit acceptance markdown path."
+    description: "Explicit goal README path."
   },
   evidence: {
     type: "string",
-    description: "Explicit evidence JSON path."
+    description: "Explicit goal ledger JSON path."
   },
   fromDraft: {
     type: "boolean",
@@ -44,6 +54,9 @@ export const activeGoalArgs = {
 export type ActiveGoalPair = {
   contract: NoriContract;
   ledger: EvidenceLedger;
+  goalDir: string;
+  contractPath: string;
+  ledgerPath: string;
   acceptancePath: string;
   evidencePath: string;
   root: string;
@@ -97,8 +110,7 @@ export async function runJsonCommand(command: CliCommand, rawArgs: string[], dat
 }
 
 export function savePair(acceptancePath: string, evidencePath: string, contract: NoriContract, ledger: EvidenceLedger): void {
-  writeJson(evidencePath, { contract, ledger });
-  syncAcceptanceMarkdown(acceptancePath, contract, ledger);
+  writeGoalDossierFromPaths(acceptancePath, evidencePath, contract, ledger);
 }
 
 function preparePair(pair: Omit<ActiveGoalPair, "evidencePrune">): ActiveGoalPair {
@@ -214,10 +226,19 @@ export function loadPair(args: ActiveGoalArgs = {}): ActiveGoalPair {
     }
     const acceptancePath = path.resolve(explicitAcceptance);
     const evidencePath = path.resolve(explicitEvidence);
-    const payload = readJson<NoriEvidencePayload>(evidencePath);
+    const goalDir = path.dirname(acceptancePath);
+    const contractPath = path.join(goalDir, "contract.json");
+    const payload = readGoalPayload({
+      goalDir,
+      contractPath,
+      ledgerPath: evidencePath
+    });
     return preparePair({
       contract: payload.contract,
       ledger: payload.ledger,
+      goalDir,
+      contractPath,
+      ledgerPath: evidencePath,
       acceptancePath,
       evidencePath,
       root: inferRootFromAcceptancePath(acceptancePath),
@@ -251,10 +272,13 @@ export function loadPair(args: ActiveGoalArgs = {}): ActiveGoalPair {
         : "OpenNori current state is invalid: multiple current goals found. Run opennori doctor --root <project> --json."
     });
   }
-  const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+  const payload = readGoalPayload(pair);
   return preparePair({
     contract: payload.contract,
     ledger: payload.ledger,
+    goalDir: pair.goalDir,
+    contractPath: pair.contractPath,
+    ledgerPath: pair.ledgerPath,
     acceptancePath: pair.acceptancePath,
     evidencePath: pair.evidencePath,
     root,
@@ -267,10 +291,13 @@ export function loadGoalFromLocation(root: string, goalId: string, location: Goa
   if (!pair) {
     throw new Error(`No OpenNori ${location} goal found: ${goalId}`);
   }
-  const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+  const payload = readGoalPayload(pair);
   return preparePair({
     contract: payload.contract,
     ledger: payload.ledger,
+    goalDir: pair.goalDir,
+    contractPath: pair.contractPath,
+    ledgerPath: pair.ledgerPath,
     acceptancePath: pair.acceptancePath,
     evidencePath: pair.evidencePath,
     root,

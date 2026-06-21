@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-11",
+  "layer": "operator",
+  "user_story": "作为用户，我给 agent 一个包含页面、应用、Dashboard、Desktop、工作台、表单或其他可见交互界面的目标时，OpenNori 能引导 agent 自动挖掘 UI/UX 体验验收，而不是只生成数据、状态或功能完成 AC。",
+  "measurement": "阅读 nori、nori-acceptance、nori-autogoal packaged Skills、OpenNori protocol、README 和自验收报告，并用界面类目标检查 agent 应追问或补齐哪些体验维度。",
+  "threshold": "Skills 明确要求界面类目标覆盖入口与导航、信息层级、空态/加载/错误/成功状态、操作反馈、可读性、视觉一致性、恢复路径和不应暴露的 UI 边界；这些要求以 agent 行为协议和用户确认表达，不写成 CLI hard validator 或固定词表测试。",
+  "required": true,
+  "risk": "medium",
+  "order": 58
+}

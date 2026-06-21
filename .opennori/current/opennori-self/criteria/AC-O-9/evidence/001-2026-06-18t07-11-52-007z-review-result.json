@@ -1,0 +1,65 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "OpenNori autogoal is implemented as a packaged Skill-driven convergence mode that outputs the standard Nori Contract Draft. The root and acceptance Skills route rough-idea/autogoal requests to nori-autogoal, the new Skill instructs agents to preserve the full idea and avoid MVP/phase/task-list downgrades, draft --brief renders assumptions and open questions in ordinary acceptance markdown, and README plus the public site explain the user-facing behavior.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "ac-o-9-autogoal-standard-contract-draft",
+      "path": "/Users/jarl/code/jarlone/opennori/.opennori/architecture/evidence/ac-o-9-autogoal-standard-contract-draft.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "pnpm build (opennori-site)",
+      "command": "pnpm build (opennori-site)"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-autogoal/SKILL.md",
+      "path": "plugins/opennori/skills/nori-autogoal/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/contract.ts",
+      "path": "src/core/contract.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+      "path": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+    }
+  ],
+  "reviewability": "Rerun npm run check in /Users/jarl/code/jarlone/opennori, rerun pnpm build in /Users/jarl/code/jarlone/opennori-site, inspect the packaged nori-autogoal/root/acceptance Skills, and inspect the core.test autogoal brief case showing a normal Nori Contract Draft with assumptions and open questions.",
+  "limitations": "This verifies local implementation, packaged Skill behavior text, CLI standard draft rendering, README, and site content. It does not publish a new npm package or deploy the website in this slice, and future agent output quality still depends on the loaded Skill and user approval.",
+  "gate": "accepted",
+  "created_at": "2026-06-18T07:11:52.007Z"
+}

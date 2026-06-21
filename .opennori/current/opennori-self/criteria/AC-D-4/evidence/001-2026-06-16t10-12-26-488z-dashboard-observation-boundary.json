@@ -1,0 +1,68 @@
+{
+  "kind": "dashboard-observation-boundary",
+  "basis": "tool-observation",
+  "summary": "Dashboard now presents user intervention as an agent-conversation reply boundary, not an in-dashboard confirmation flow. The built React app shows Agent reply / Control boundary / reply in agent chat, packaged Skills and docs forbid dashboard confirmation controls, and dashboard HTTP rejects confirmation-style POST control paths with method_not_allowed.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run typecheck:dashboard && npm run build:dashboard && npx vitest run test/cli-commands.test.js -t \"dashboard rejects non-GET|dashboard exposes observation only|dashboard serves the built React app|dashboard command can start|dashboard SSE emits\"",
+      "command": "npm run typecheck:dashboard && npm run build:dashboard && npx vitest run test/cli-commands.test.js -t \"dashboard rejects non-GET|dashboard exposes observation only|dashboard serves the built React app|dashboard command can start|dashboard SSE emits\""
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/App.tsx",
+      "path": "src/dashboard/src/App.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/AcceptanceLoop.tsx",
+      "path": "src/dashboard/src/components/AcceptanceLoop.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/http/app.ts",
+      "path": "src/kernel/http/app.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": "AGENTS.md",
+      "path": "AGENTS.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+      "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+      "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/.codex-plugin/plugin.json",
+      "path": "plugins/opennori/.codex-plugin/plugin.json"
+    }
+  ],
+  "reviewability": "Run npm run check, inspect the dashboard bundle/source for Agent reply and reply in agent chat, and rerun the dashboard control-write tests to confirm POST confirmation endpoints are rejected.",
+  "limitations": "This verifies the current local dashboard and package assets. It does not add a browser screenshot for a forced need_user fixture, and future UI work must keep the same observation-only boundary.",
+  "gate": "accepted",
+  "created_at": "2026-06-16T10:12:26.488Z"
+}

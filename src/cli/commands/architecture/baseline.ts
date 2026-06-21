@@ -6,12 +6,11 @@ import {
   buildArchitectureBaseline,
   writeArchitectureBaseline
 } from "../../../architecture.ts";
-import { appendEvent, currentGap, nextRecommendation, ok, pathsForGoal, readJson, refreshSnapshot, slugify } from "../../../core.ts";
+import { appendEvent, currentGap, nextRecommendation, ok, pathsForGoal, readGoalPayload, refreshSnapshot, slugify } from "../../../core.ts";
 import { agentNextForRecommendation } from "../../../agent-next.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
 import { jsonArg, relativeTo, resolveRoot, rootArg } from "./shared.ts";
-import type { EvidenceLedger, NoriContract } from "../../../types.ts";
 
 export const architectureBaselineCommand = defineCommand({
   meta: {
@@ -84,7 +83,7 @@ export const architectureBaselineCommand = defineCommand({
     if (confirmed) {
       const activePaths = pathsForGoal(root, goalId);
       if (fs.existsSync(activePaths.evidencePath)) {
-        const payload = readJson<{ contract: NoriContract; ledger: EvidenceLedger }>(activePaths.evidencePath);
+        const payload = readGoalPayload(activePaths);
         current_gap = currentGap(payload.contract, payload.ledger);
         recommendation = nextRecommendation(payload.contract, payload.ledger, { root, architecture });
         agent_next = agentNextForRecommendation(payload.contract.goal_id, current_gap, recommendation);

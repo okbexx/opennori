@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-6",
+  "layer": "architecture",
+  "user_story": "作为用户，我运行 doctor/check 时，能知道 Architecture Baseline 是否可用、Plugin Skills 是否随包可用、manifest 是否记录该能力，以及项目提示是否过期。",
+  "measurement": "运行 opennori doctor/check，并查看缺失 baseline、缺失 Plugin assets、manifest stale 或项目提示过期时的输出。",
+  "threshold": "doctor/check 返回 ready、needs-action 或 broken，并显示用户能执行或交给 agent 执行的恢复建议；恢复建议不要求把 OpenNori Skills 复制进用户项目。",
+  "risk": "high",
+  "required": true,
+  "order": 43
+}

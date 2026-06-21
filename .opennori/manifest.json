@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.9",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-20T14:35:01.667Z",
+  "updated_at": "2026-06-21T08:14:49.131Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -151,8 +151,8 @@
       "location": "current",
       "status": "complete",
       "current_gap": null,
-      "acceptance_path": ".opennori/current/opennori-self.acceptance.md",
-      "evidence_path": ".opennori/current/opennori-self.evidence.json",
+      "acceptance_path": ".opennori/current/opennori-self/README.md",
+      "evidence_path": ".opennori/current/opennori-self/ledger.json",
       "recoverable": true
     }
   ],
@@ -161,8 +161,8 @@
     "location": "current",
     "status": "complete",
     "current_gap": null,
-    "acceptance_path": ".opennori/current/opennori-self.acceptance.md",
-    "evidence_path": ".opennori/current/opennori-self.evidence.json",
+    "acceptance_path": ".opennori/current/opennori-self/README.md",
+    "evidence_path": ".opennori/current/opennori-self/ledger.json",
     "recoverable": true
   },
   "draft_goals": [
@@ -176,8 +176,8 @@
         "status": "unknown",
         "reason": "Acceptance criteria have not been approved by the user yet."
       },
-      "acceptance_path": ".opennori/drafts/opennori-self-opennori-adoption-dogfood.acceptance.md",
-      "evidence_path": ".opennori/drafts/opennori-self-opennori-adoption-dogfood.evidence.json",
+      "acceptance_path": ".opennori/drafts/opennori-self-opennori-adoption-dogfood/README.md",
+      "evidence_path": ".opennori/drafts/opennori-self-opennori-adoption-dogfood/ledger.json",
       "recoverable": true
     }
   ],
@@ -187,8 +187,8 @@
       "location": "completed",
       "status": "complete",
       "current_gap": null,
-      "acceptance_path": ".opennori/completed/opennori-build-vs-buy-maturity.acceptance.md",
-      "evidence_path": ".opennori/completed/opennori-build-vs-buy-maturity.evidence.json",
+      "acceptance_path": ".opennori/completed/opennori-build-vs-buy-maturity/README.md",
+      "evidence_path": ".opennori/completed/opennori-build-vs-buy-maturity/ledger.json",
       "recoverable": true
     }
   ],
@@ -459,6 +459,39 @@
         "summary": "Acceptance Surface Modeling stays in packaged Skills, protocol, README, AGENTS, and asset tests while CLI remains deterministic state storage rather than a subjective AC validator.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-ac-o-18-aligned.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-ac-p-14-report-readability",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-P-14",
+        "status": "aligned",
+        "summary": "Report readability work stays inside the confirmed TypeScript agent-state CLI baseline: src/core/report.ts owns human report rendering, tests stay in reporting/domain suites, and .opennori remains the evidence source of truth.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-p-14-report-readability.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-ac-p-15-test-system-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-P-15",
+        "status": "aligned",
+        "summary": "The test-system refactor follows the confirmed TypeScript agent-state CLI baseline by preserving domain modules and deterministic test surfaces while moving subjective agent judgment out of hard-coded tests.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-p-15-test-system-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-ac-p-16-goal-dossiers",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-P-16",
+        "status": "aligned",
+        "summary": "Goal and criterion dossier state follows the confirmed TypeScript agent-state CLI baseline: structured JSON remains authoritative, generated README files are review surfaces, and CLI/domain modules keep deterministic .opennori writes.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-p-16-goal-dossiers.json",
         "schema_valid": true,
         "schema_errors": []
       }

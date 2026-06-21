@@ -1,0 +1,38 @@
+{
+  "kind": "review-result",
+  "basis": "artifact-review",
+  "summary": "OpenNori self decisions now record reviewable candidates for protocol-state validation, editable Markdown parsing, and CLI subcommand surface, including current project state, Node standard library boundaries, official SDK applicability, mature MIT npm candidates, and self-build limits where applicable.",
+  "result": "blocked",
+  "confidence": "user-review-required",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm view ajv zod valibot micromark commander citty cac version license description repository.url --json",
+      "command": "npm view ajv zod valibot micromark commander citty cac version license description repository.url --json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/protocol-state-validation-reuse-json-schema-validator-when-contracts-grow.json",
+      "path": ".opennori/architecture/decisions/protocol-state-validation-reuse-json-schema-validator-when-contracts-grow.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json",
+      "path": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/cli-subcommand-surface-reuse-node-parseargs-before-framework.json",
+      "path": ".opennori/architecture/decisions/cli-subcommand-surface-reuse-node-parseargs-before-framework.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/baseline.md",
+      "path": ".opennori/architecture/baseline.md"
+    }
+  ],
+  "reviewability": "Open the listed decision files and verify each includes current_project, standard_library, official_sdk, open_source, recommendation, and self_build_reason when recommendation is self-build.",
+  "limitations": "The npm candidate versions are a point-in-time check on 2026-06-12 and should be refreshed before adding dependencies. This was produced before joint user-agent build-vs-buy evaluation and must not be treated as completion evidence.",
+  "gate": "needs_user_review",
+  "created_at": "2026-06-12T05:14:02.405Z"
+}

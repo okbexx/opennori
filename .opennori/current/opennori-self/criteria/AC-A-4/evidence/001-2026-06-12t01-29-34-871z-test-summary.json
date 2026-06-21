@@ -1,0 +1,23 @@
+{
+  "kind": "test-summary",
+  "basis": "tool-observation",
+  "summary": "Architecture Challenge command records evidence-backed baseline conflicts and marks architecture as challenged instead of allowing silent replacement.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm test",
+      "command": "npm test"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Run npm test and inspect the architecture challenge regression test and Skill rules.",
+  "limitations": "The self repo currently has no open challenge because the current baseline is valid; behavior is covered in isolated test projects.",
+  "gate": "accepted",
+  "created_at": "2026-06-12T01:29:34.871Z"
+}

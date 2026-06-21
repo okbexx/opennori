@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-1",
+  "layer": "operator",
+  "user_story": "作为用户，我在 Codex 对话里说“用 OpenNori 跑这个任务：目标是 X”后，能看到一份待确认的人类视角验收草案。",
+  "measurement": "在 Codex 对话中查看 agent 返回的验收草案。",
+  "threshold": "草案只描述用户通过工具执行操作后能完成的判断或动作；用户能直接 approve 或 revise。",
+  "required": true,
+  "risk": "medium",
+  "order": 13
+}

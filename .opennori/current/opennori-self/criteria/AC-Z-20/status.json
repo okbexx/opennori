@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-Z-20",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 2,
+  "latest_evidence_summary": "Draft Nori Contracts now keep workflow status as draft until user approval; temporary project draft output and the Agent Workbench draft both show ledger.status=draft while AC rows remain unknown.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

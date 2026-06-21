@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-14",
+  "layer": "protocol",
+  "user_story": "作为用户，我打开包含长 AC、长证据、多来源、reviewability 和 limitations 的 opennori report 后，仍然能顺畅阅读每条验收状态和证据依据，而不会被超长 Markdown 表格行破坏阅读体验。",
+  "measurement": "生成一份包含长中文 AC、多个证据 sources、长 reviewability 和 limitations 的 OpenNori report，并用真实 AW 报告类场景检查 Acceptance Status 和后续详情排版。",
+  "threshold": "Acceptance Status 只保留短摘要列；长 user story、证据摘要、来源、reviewability 和 limitations 进入逐条 AC 详情块；常见 Markdown 渲染器中不会出现几千字符的证据表格行，sources 以列表形式可复查。",
+  "required": true,
+  "risk": "medium",
+  "order": 69
+}

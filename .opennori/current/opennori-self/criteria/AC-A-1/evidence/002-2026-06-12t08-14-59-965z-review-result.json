@@ -1,0 +1,38 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "OpenNori package bin now points to dist/bin/opennori.js, the built CLI can run doctor and read package-root skills/schemas/protocol assets through a shared package-root resolver, and tests cover the built dist bin export path.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "npm run build && node ./dist/bin/opennori.js doctor --root . --json",
+      "command": "npm run build && node ./dist/bin/opennori.js doctor --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "npm pack --dry-run --json",
+      "command": "npm pack --dry-run --json"
+    },
+    {
+      "type": "artifact",
+      "label": "package.json",
+      "path": "package.json"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Run npm run check and the dist doctor command, then inspect package.json bin, src/package-root.js, and the built-dist regression test.",
+  "limitations": "The source code is still mostly JavaScript with allowJs; this slice only moves the publish/runtime entry toward built output and keeps the later citty command-module migration separate.",
+  "gate": "accepted",
+  "created_at": "2026-06-12T08:14:59.965Z"
+}

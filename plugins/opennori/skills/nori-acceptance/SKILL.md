@@ -182,7 +182,7 @@ Useful state commands:
 - User answers discovery questions -> convert the answers into a complete NoriBrief with concrete Product AC, run `opennori draft --brief`, then show the draft overview and start the one-AC-at-a-time AC Review Loop before final approval.
 - "confirm AC-1", "AC-1 对", "确认 AC-1" -> mark that AC as conversation-confirmed and continue the AC Review Loop with the next unconfirmed AC. Do not run `opennori approve` until every AC has been confirmed.
 - "revise AC-1: ...", "AC-1 应该是..." -> revise that existing draft criterion or the draft assumptions with `criterion update --from-draft`, then restart review for the changed AC before continuing. This keeps `acceptance_basis.status` as `draft`; do not treat the revision as approval.
-- "add AC-14", "补一条设置 AC", "还缺一个 AC", or the AC Review Loop discovers a missing acceptance boundary while the contract is still a draft -> add that missing draft criterion with `criterion add --from-draft --goal <goal-id>`, not `apply_patch` or manual JSON/Markdown edits. The CLI updates the draft contract, evidence ledger, acceptance markdown, and manifest together while keeping `acceptance_basis.status` as `draft`.
+- "add AC-14", "补一条设置 AC", "还缺一个 AC", or the AC Review Loop discovers a missing acceptance boundary while the contract is still a draft -> add that missing draft criterion with `criterion add --from-draft --goal <goal-id>`, not `apply_patch` or manual JSON/Markdown edits. The CLI updates the draft contract, evidence ledger, goal README, per-criterion dossier, and manifest together while keeping `acceptance_basis.status` as `draft`.
 - "Approve these AC" -> if every AC has not already been confirmed one by one in this conversation, do not approve yet. Start or continue the AC Review Loop from the first unconfirmed AC. Only after all ACs are confirmed should you write approval, read `agent_next`, and route to architecture review, evidence, or reporting from that returned state.
 - "Change AC-2 to mean..." on an approved current contract -> update that criterion and treat older evidence for it as stale.
 - Complete goal with `agent_next.state: ready_for_next_loop` -> infer or ask for the next human-facing outcome, prepare a complete NoriBrief, run `opennori draft --brief`, then show the draft overview and start the AC Review Loop with concrete Measure / Passes when text.
@@ -289,8 +289,8 @@ May write brainstorms, draft contracts, approved acceptance basis, and criterion
 
 When adding or revising draft AC, prefer `opennori criterion add --from-draft`
 and `opennori criterion update --from-draft`. Do not use manual file patches to
-keep `.acceptance.md`, `.evidence.json`, and manifest in sync unless the CLI is
-broken and project-health recovery has failed.
+keep `contract.json`, `ledger.json`, criterion dossier files, and manifest in
+sync unless the CLI is broken and project-health recovery has failed.
 
 When adopting an in-progress AC discussion, write only a draft under `.opennori/drafts/`. Do not approve it, activate it, implement it, or record passing evidence until the user approves or revises the Nori Contract.
 

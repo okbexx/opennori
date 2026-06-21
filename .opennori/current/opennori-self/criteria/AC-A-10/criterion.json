@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-10",
+  "layer": "architecture",
+  "user_story": "作为用户，我能在一个非 OpenNori 核心仓库里，按新的 Plugin-first 边界完整跑通自然语言目标、Product AC、Architecture Baseline、执行、证据、报告和完成判断。",
+  "measurement": "选择一个非 OpenNori 核心仓库，使用当前 OpenNori 从目标到报告跑完；过程中只通过 Plugin Skills 和 .opennori 状态驱动 OpenNori 能力。",
+  "threshold": "报告同时呈现产品完成状态、架构健康状态、Plugin package 能力、证据、未解决风险和是否需要用户确认；用户不需要记住 CLI 参数；doctor/check 不依赖项目内 Skill 资产副本。",
+  "risk": "high",
+  "required": true,
+  "order": 47
+}

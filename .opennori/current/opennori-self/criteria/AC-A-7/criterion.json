@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-7",
+  "layer": "architecture",
+  "user_story": "作为用户，我在 agent 准备自研基础设施前，能看到它已经比较过可复用选择，并说明为什么仍要自研或复用。",
+  "measurement": "查看 architecture build-vs-buy 输出、architecture decisions 记录、status 或 report。",
+  "threshold": "报告能让我判断 agent 是否检查过项目现有依赖、标准库、官方方案、成熟开源方案和自研理由；自研不能只有口头总结。",
+  "risk": "high",
+  "required": true,
+  "order": 44
+}

@@ -1,0 +1,370 @@
+{
+  "protocol_version": "opennori/v1",
+  "goal_id": "opennori-build-vs-buy-maturity",
+  "status": "complete",
+  "updated_at": "2026-06-13T10:41:22.827Z",
+  "criteria": {
+    "AC-1": {
+      "status": "passing",
+      "confidence": "verified",
+      "required": true,
+      "risk": "high",
+      "evidence": [
+        {
+          "kind": "review-result",
+          "basis": "tool-observation",
+          "summary": "OpenNori now exposes build-vs-buy health as architecture.build_vs_buy in status/check/report/architecture show and as a doctor check named build_vs_buy_health; missing candidate fields or self-build reasons produce warnings and recovery actions.",
+          "result": "blocked",
+          "confidence": "user-review-required",
+          "sources": [
+            {
+              "type": "command",
+              "label": "node --test --test-name-pattern 'architecture baseline loop|build-vs-buy health|context export' test/core.test.js",
+              "command": "node --test --test-name-pattern 'architecture baseline loop|build-vs-buy health|context export' test/core.test.js"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js check --root . --goal opennori-build-vs-buy-maturity --json",
+              "command": "node ./bin/opennori.js check --root . --goal opennori-build-vs-buy-maturity --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js architecture show --root . --goal opennori-build-vs-buy-maturity --json",
+              "command": "node ./bin/opennori.js architecture show --root . --goal opennori-build-vs-buy-maturity --json"
+            },
+            {
+              "type": "artifact",
+              "label": "src/architecture.js",
+              "path": "src/architecture.js"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli.js",
+              "path": "src/cli.js"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle.js",
+              "path": "src/lifecycle.js"
+            },
+            {
+              "type": "artifact",
+              "label": "test/core.test.js",
+              "path": "test/core.test.js"
+            }
+          ],
+          "reviewability": "Run the listed targeted tests, then inspect architecture.build_vs_buy.status/findings and doctor check build_vs_buy_health.",
+          "limitations": "This verifies OpenNori-owned health reporting; it does not mean every future infrastructure area has already been migrated to an external library. This was produced before joint user-agent build-vs-buy evaluation and must not be treated as completion evidence.",
+          "gate": "needs_user_review",
+          "created_at": "2026-06-12T05:14:02.358Z"
+        },
+        {
+          "kind": "human-confirmation",
+          "basis": "human-confirmation",
+          "summary": "Needs joint user-agent evaluation: the existing build-vs-buy notes are draft evidence from the agent, but Jarl has not yet reviewed the candidates, self-build boundaries, or final recommendation.",
+          "result": "blocked",
+          "confidence": "user-review-required",
+          "sources": [
+            {
+              "type": "reference",
+              "label": "User correction: build-vs-buy should be discussed and evaluated together before completion."
+            }
+          ],
+          "reviewability": "Continue the conversation with Jarl, compare candidate libraries and self-build boundaries, then record a new decision or waiver after explicit agreement.",
+          "limitations": "The current decision files and code changes are draft material until the joint evaluation is complete.",
+          "gate": "needs_user_review",
+          "created_at": "2026-06-12T05:25:23.402Z"
+        },
+        {
+          "kind": "review-result",
+          "basis": "tool-observation",
+          "summary": "OpenNori status/check/doctor/report now expose build-vs-buy health as clear, needs-action, or broken; missing candidate fields and self-build reasons surface as build_vs_buy warnings and doctor recovery actions, while superseded historical decisions remain reviewable without counting as current health.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "command",
+              "label": "npm run check",
+              "command": "npm run check"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js check --root . --goal opennori-build-vs-buy-maturity --json",
+              "command": "node ./bin/opennori.js check --root . --goal opennori-build-vs-buy-maturity --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js doctor --root . --json",
+              "command": "node ./bin/opennori.js doctor --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js status --root . --goal opennori-build-vs-buy-maturity --json",
+              "command": "node ./bin/opennori.js status --root . --goal opennori-build-vs-buy-maturity --json"
+            },
+            {
+              "type": "artifact",
+              "label": "src/architecture.js",
+              "path": "src/architecture.js"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli.js",
+              "path": "src/cli.js"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle.js",
+              "path": "src/lifecycle.js"
+            },
+            {
+              "type": "artifact",
+              "label": "test/core.test.js",
+              "path": "test/core.test.js"
+            }
+          ],
+          "reviewability": "Run npm run check, then inspect architecture.build_vs_buy in status/check/report and doctor check build_vs_buy_health; the test suite includes missing-field and superseded-decision regressions.",
+          "limitations": "This verifies the build-vs-buy health surface and current OpenNori self decisions; it does not mean every future infrastructure area is already migrated.",
+          "gate": "accepted",
+          "created_at": "2026-06-12T08:00:57.318Z"
+        }
+      ]
+    },
+    "AC-2": {
+      "status": "passing",
+      "confidence": "reviewed",
+      "required": true,
+      "risk": "high",
+      "evidence": [
+        {
+          "kind": "review-result",
+          "basis": "artifact-review",
+          "summary": "OpenNori self decisions now record reviewable candidates for protocol-state validation, editable Markdown parsing, and CLI subcommand surface, including current project state, Node standard library boundaries, official SDK applicability, mature MIT npm candidates, and self-build limits where applicable.",
+          "result": "blocked",
+          "confidence": "user-review-required",
+          "sources": [
+            {
+              "type": "command",
+              "label": "npm view ajv zod valibot micromark commander citty cac version license description repository.url --json",
+              "command": "npm view ajv zod valibot micromark commander citty cac version license description repository.url --json"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions/protocol-state-validation-reuse-json-schema-validator-when-contracts-grow.json",
+              "path": ".opennori/architecture/decisions/protocol-state-validation-reuse-json-schema-validator-when-contracts-grow.json"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json",
+              "path": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions/cli-subcommand-surface-reuse-node-parseargs-before-framework.json",
+              "path": ".opennori/architecture/decisions/cli-subcommand-surface-reuse-node-parseargs-before-framework.json"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/baseline.md",
+              "path": ".opennori/architecture/baseline.md"
+            }
+          ],
+          "reviewability": "Open the listed decision files and verify each includes current_project, standard_library, official_sdk, open_source, recommendation, and self_build_reason when recommendation is self-build.",
+          "limitations": "The npm candidate versions are a point-in-time check on 2026-06-12 and should be refreshed before adding dependencies. This was produced before joint user-agent build-vs-buy evaluation and must not be treated as completion evidence.",
+          "gate": "needs_user_review",
+          "created_at": "2026-06-12T05:14:02.405Z"
+        },
+        {
+          "kind": "human-confirmation",
+          "basis": "human-confirmation",
+          "summary": "Needs joint user-agent evaluation: the existing build-vs-buy notes are draft evidence from the agent, but Jarl has not yet reviewed the candidates, self-build boundaries, or final recommendation.",
+          "result": "blocked",
+          "confidence": "user-review-required",
+          "sources": [
+            {
+              "type": "reference",
+              "label": "User correction: build-vs-buy should be discussed and evaluated together before completion."
+            }
+          ],
+          "reviewability": "Continue the conversation with Jarl, compare candidate libraries and self-build boundaries, then record a new decision or waiver after explicit agreement.",
+          "limitations": "The current decision files and code changes are draft material until the joint evaluation is complete.",
+          "gate": "needs_user_review",
+          "created_at": "2026-06-12T05:25:23.402Z"
+        },
+        {
+          "kind": "review-result",
+          "basis": "artifact-review",
+          "summary": "OpenNori self architecture decisions now include active reusable-library decisions for citty, JSON Schema/Ajv, yaml frontmatter, and directory-based Skill Pack assets; obsolete parseArgs and JS-string Skill decisions are explicitly marked superseded rather than silently treated as current architecture.",
+          "result": "passing",
+          "confidence": "reviewed",
+          "sources": [
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js architecture show --root . --json",
+              "command": "node ./bin/opennori.js architecture show --root . --json"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.json",
+              "path": ".opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.json"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions/skill-pack-directory-assets.json",
+              "path": ".opennori/architecture/decisions/skill-pack-directory-assets.json"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions/protocol-state-validation-reuse-json-schema-validator-when-contracts-grow.json",
+              "path": ".opennori/architecture/decisions/protocol-state-validation-reuse-json-schema-validator-when-contracts-grow.json"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json",
+              "path": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions/cli-argument-parsing-replace-growing-ad-hoc-option-scanning-with.json",
+              "path": ".opennori/architecture/decisions/cli-argument-parsing-replace-growing-ad-hoc-option-scanning-with.json"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions/skill-pack-将-opennori-skill-pack-从-cli-入口拆到独立产品面模块.json",
+              "path": ".opennori/architecture/decisions/skill-pack-将-opennori-skill-pack-从-cli-入口拆到独立产品面模块.json"
+            }
+          ],
+          "reviewability": "Open architecture show output or the listed decision JSON files and verify current_project, standard_library, official_sdk, open_source, recommendation, status, superseded_by, and self_build_reason where applicable.",
+          "limitations": "Some active decisions intentionally keep OpenNori product-domain semantics local; the current CLI implementation is still an incremental migration, not a completed citty rewrite.",
+          "gate": "accepted",
+          "created_at": "2026-06-12T08:00:57.421Z"
+        }
+      ]
+    },
+    "AC-3": {
+      "status": "passing",
+      "confidence": "verified",
+      "required": true,
+      "risk": "high",
+      "evidence": [
+        {
+          "kind": "review-result",
+          "basis": "tool-observation",
+          "summary": "OpenNori report/status now separate reused standard library choices from minimal self-build product semantics: parseArgs is reused for CLI tokenization, schema validation has Ajv/Zod/Valibot candidates recorded for growth, Markdown parsing is explicitly limited to generated-table recovery, and product-domain audits remain local with self-build reasons.",
+          "result": "blocked",
+          "confidence": "user-review-required",
+          "sources": [
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js status --root . --goal opennori-build-vs-buy-maturity --json",
+              "command": "node ./bin/opennori.js status --root . --goal opennori-build-vs-buy-maturity --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js report --root . --goal opennori-build-vs-buy-maturity --json",
+              "command": "node ./bin/opennori.js report --root . --goal opennori-build-vs-buy-maturity --json"
+            },
+            {
+              "type": "command",
+              "label": "node -p 'JSON.stringify(require(\"./package.json\").dependencies || {})'",
+              "command": "node -p 'JSON.stringify(require(\"./package.json\").dependencies || {})'"
+            },
+            {
+              "type": "artifact",
+              "label": "package.json",
+              "path": "package.json"
+            },
+            {
+              "type": "artifact",
+              "label": "src/architecture.js",
+              "path": "src/architecture.js"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions",
+              "path": ".opennori/architecture/decisions"
+            }
+          ],
+          "reviewability": "Review status/report architecture.build_vs_buy plus package.json and the decision directory.",
+          "limitations": "The implementation still has a growing src/cli.js; the recorded CLI framework decision says to re-evaluate commander/citty/cac if subcommand routing keeps expanding. This was produced before joint user-agent build-vs-buy evaluation and must not be treated as completion evidence.",
+          "gate": "needs_user_review",
+          "created_at": "2026-06-12T05:14:02.418Z"
+        },
+        {
+          "kind": "human-confirmation",
+          "basis": "human-confirmation",
+          "summary": "Needs joint user-agent evaluation: the existing build-vs-buy notes are draft evidence from the agent, but Jarl has not yet reviewed the candidates, self-build boundaries, or final recommendation.",
+          "result": "blocked",
+          "confidence": "user-review-required",
+          "sources": [
+            {
+              "type": "reference",
+              "label": "User correction: build-vs-buy should be discussed and evaluated together before completion."
+            }
+          ],
+          "reviewability": "Continue the conversation with Jarl, compare candidate libraries and self-build boundaries, then record a new decision or waiver after explicit agreement.",
+          "limitations": "The current decision files and code changes are draft material until the joint evaluation is complete.",
+          "gate": "needs_user_review",
+          "created_at": "2026-06-12T05:25:23.402Z"
+        },
+        {
+          "kind": "review-result",
+          "basis": "tool-observation",
+          "summary": "OpenNori report/status now let a user distinguish active reuse decisions, superseded historical decisions, and minimal self-build product glue; Skill Pack source of truth has moved to skills/*/SKILL.md, package dependencies now include citty/Ajv/yaml/Clack, and build-vs-buy health reports 9 active decisions plus 3 superseded decisions with no findings.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js report --root . --goal opennori-build-vs-buy-maturity --json",
+              "command": "node ./bin/opennori.js report --root . --goal opennori-build-vs-buy-maturity --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js architecture show --root . --json",
+              "command": "node ./bin/opennori.js architecture show --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js skill export --pack --json",
+              "command": "node ./bin/opennori.js skill export --pack --json"
+            },
+            {
+              "type": "artifact",
+              "label": "package.json",
+              "path": "package.json"
+            },
+            {
+              "type": "artifact",
+              "label": "src/skills.js",
+              "path": "src/skills.js"
+            },
+            {
+              "type": "artifact",
+              "label": "skills/nori/SKILL.md",
+              "path": "skills/nori/SKILL.md"
+            },
+            {
+              "type": "artifact",
+              "label": "skills/nori-build-vs-buy/SKILL.md",
+              "path": "skills/nori-build-vs-buy/SKILL.md"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/reports/opennori-build-vs-buy-maturity.report.md",
+              "path": ".opennori/reports/opennori-build-vs-buy-maturity.report.md"
+            }
+          ],
+          "reviewability": "Run report and architecture show, then inspect package.json, src/skills.js, skills/*/SKILL.md, and the generated report to verify active/superseded/self-build distinctions.",
+          "limitations": "This slice fixes Skill Pack asset architecture and build-vs-buy reporting; the later TypeScript/citty command-module migration and public JSON Schema validation are still future implementation slices.",
+          "gate": "accepted",
+          "created_at": "2026-06-12T08:00:57.468Z"
+        }
+      ]
+    }
+  },
+  "capability_profile": {
+    "items": [],
+    "evidence": []
+  }
+}

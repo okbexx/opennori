@@ -1,0 +1,175 @@
+{
+  "kind": "test-system-refactor-review",
+  "basis": "tool-observation",
+  "summary": "OpenNori test coverage has been reorganized around objective protocol boundaries instead of one giant core/CLI suite. core.test.js now contains only narrow core invariants; the former CLI mega-suite is split into focused cli-domain files; acceptance, evidence, reporting, profile, lifecycle, architecture, docs-schema, and dashboard tests own their domains. docs/testing.md, AGENTS.md, and the local nori-product-development Skill state that automated tests must not prove subjective AC quality, UI/CRUD/Dashboard discovery quality, enhanced autogoal judgment, or exact prompt wording; those belong to Skills, dogfood, eval prompts, and user review.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-p-15-test-system-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-p-15-test-system-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck",
+      "command": "npm run typecheck"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:quick",
+      "command": "npm run test:quick"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:docs",
+      "command": "npm run test:docs"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:schema",
+      "command": "npm run test:schema"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:reporting",
+      "command": "npm run test:reporting"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli",
+      "command": "npm run test:cli"
+    },
+    {
+      "type": "command",
+      "label": "rg -n 'cli-commands\\.test|test/cli-commands' AGENTS.md docs test package.json /Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md",
+      "command": "rg -n 'cli-commands\\.test|test/cli-commands' AGENTS.md docs test package.json /Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "docs/testing.md",
+      "path": "docs/testing.md"
+    },
+    {
+      "type": "artifact",
+      "label": "AGENTS.md",
+      "path": "AGENTS.md"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md",
+      "path": "/Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/acceptance.test.js",
+      "path": "test/acceptance.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/evidence.test.js",
+      "path": "test/evidence.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/reporting.test.js",
+      "path": "test/reporting.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/profile.test.js",
+      "path": "test/profile.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/lifecycle.test.js",
+      "path": "test/lifecycle.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/architecture.test.js",
+      "path": "test/architecture.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/docs-schema.test.js",
+      "path": "test/docs-schema.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-core.test.js",
+      "path": "test/cli-core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-lifecycle.test.js",
+      "path": "test/cli-lifecycle.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-human-output.test.js",
+      "path": "test/cli-human-output.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-acceptance.test.js",
+      "path": "test/cli-acceptance.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-reporting.test.js",
+      "path": "test/cli-reporting.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-architecture.test.js",
+      "path": "test/cli-architecture.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-profile.test.js",
+      "path": "test/cli-profile.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-dashboard.test.js",
+      "path": "test/cli-dashboard.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-evidence.test.js",
+      "path": "test/cli-evidence.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/support/cli.js",
+      "path": "test/support/cli.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/support/command-fixtures.js",
+      "path": "test/support/command-fixtures.js"
+    },
+    {
+      "type": "artifact",
+      "label": "package.json",
+      "path": "package.json"
+    }
+  ],
+  "reviewability": "Open docs/testing.md, AGENTS.md, package.json scripts, and the listed test files. Confirm core.test.js is narrow, there is no remaining test/cli-commands reference, the CLI suite is split by command domain, and the docs/Skill explicitly keep subjective agent ability out of automated tests. Rerun the listed lint/typecheck/domain commands.",
+  "limitations": "This proves the repository test architecture and current focused verification. It does not prove future Skills will always produce ideal ACs; that remains an agent Skill, dogfood, eval, and human review responsibility.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T02:51:17.013Z"
+}

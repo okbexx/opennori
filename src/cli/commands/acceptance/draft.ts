@@ -1,5 +1,4 @@
 import { defineCommand } from "citty";
-import fs from "node:fs";
 import path from "node:path";
 import { briefFromSkillPreparedBrief } from "../../../acceptance.ts";
 import {
@@ -11,9 +10,8 @@ import {
   ok,
   pathsForGoal,
   readJson,
-  renderAcceptanceMarkdown,
   validateContract,
-  writeJson
+  writeGoalDossier
 } from "../../../core.ts";
 import { bootstrap, refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
@@ -71,9 +69,7 @@ export const draftCommand = defineCommand({
       return { ...fail("invalid_acceptance", "Draft does not produce a valid OpenNori contract", "Fix the reported contract or ledger structure issues."), issues };
     }
     const paths = pathsForGoal(root, contract.goal_id, "drafts");
-    fs.mkdirSync(path.dirname(paths.acceptancePath), { recursive: true });
-    fs.writeFileSync(paths.acceptancePath, renderAcceptanceMarkdown(contract, ledger));
-    writeJson(paths.evidencePath, { contract, ledger });
+    writeGoalDossier(paths.goalDir, contract, ledger);
     refreshManifest(root);
     appendEvent(root, {
       type: "contract.drafted",

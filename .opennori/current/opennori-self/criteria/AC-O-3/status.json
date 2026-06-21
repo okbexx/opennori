@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-O-3",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 2,
+  "latest_evidence_summary": "resume/status recover active goals from .opennori active files, including current_gap, completion, evidence_health, architecture, and next_recommendation.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

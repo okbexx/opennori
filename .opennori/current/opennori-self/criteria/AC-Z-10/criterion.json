@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-10",
+  "layer": "productization",
+  "user_story": "作为用户，我执行可能覆盖已有 OpenNori 入口的安装时，必须先看到预览并显式确认，才能真正写入项目。",
+  "measurement": "在已有 OpenNori 入口的项目中运行 opennori install --force、opennori install --force --dry-run 和确认后的安装。",
+  "threshold": "未确认的真实 --force 安装会失败并提示先 dry-run；dry-run 可展示 destructive overwrite；只有带显式确认的 --force 才会执行覆盖写入。",
+  "required": true,
+  "risk": "high",
+  "order": 30
+}

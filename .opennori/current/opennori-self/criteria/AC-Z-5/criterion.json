@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-5",
+  "layer": "productization",
+  "user_story": "作为用户，我运行归档入口后，completed 或 blocked 中保留报告，active 中不再出现这个目标。",
+  "measurement": "对 complete 或 blocked goal 执行归档，再运行 opennori list 并打开归档产物。",
+  "threshold": "归档不会丢失 Nori Contract、evidence record 或 report；active 列表只显示仍需推进的目标。",
+  "required": true,
+  "risk": "high",
+  "order": 25
+}

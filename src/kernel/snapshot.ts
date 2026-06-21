@@ -5,8 +5,8 @@ import { reviewAcceptanceQuality } from "../acceptance.ts";
 import { currentGap, evidenceHealth } from "../core/evidence.ts";
 import { profileCompliance } from "../core/profile.ts";
 import { completionAnswer, intervention } from "../core/report.ts";
-import { findCurrentPairs, readJson, writeJson } from "../core/shared.ts";
-import type { EvidenceLedger, NoriEvidencePayload, NoriSnapshot } from "../types.ts";
+import { findCurrentPairs, readGoalPayload, writeJson } from "../core/shared.ts";
+import type { EvidenceLedger, NoriSnapshot } from "../types.ts";
 import { readActivity } from "./activity.ts";
 import { latestEvent, readEvents } from "./events.ts";
 
@@ -93,7 +93,7 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
     };
   }
 
-  const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+  const payload = readGoalPayload(pair);
   const { contract, ledger } = payload;
   const architecture = architectureState(root, contract.goal_id);
   const gap = currentGap(contract, ledger);

@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-4",
+  "layer": "productization",
+  "user_story": "作为用户，我运行 opennori list 后，能看到多个 active goals，并能明确选择要继续的目标。",
+  "measurement": "创建多个 active goals 后运行 opennori list，并用 --goal 指定 resume/status/report 的目标。",
+  "threshold": "多个目标不会被 agent 随机选择；用户能看见目标列表、状态、当前缺口和对应路径。",
+  "required": true,
+  "risk": "high",
+  "order": 24
+}

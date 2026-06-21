@@ -1,0 +1,38 @@
+{
+  "kind": "behavior-test",
+  "basis": "protocol-check",
+  "summary": "Draft Nori Contracts now keep workflow status as draft until user approval; temporary project draft output and the Agent Workbench draft both show ledger.status=draft while AC rows remain unknown.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js -t 'draft requires user approval|next-loop candidates'",
+      "command": "npx vitest run test/core.test.js -t 'draft requires user approval|next-loop candidates'"
+    },
+    {
+      "type": "command",
+      "label": "tmp project: opennori draft reports ledger_status=draft and current_gap=ACCEPTANCE-BASIS",
+      "command": "tmp project: opennori draft reports ledger_status=draft and current_gap=ACCEPTANCE-BASIS"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/contract.ts",
+      "path": "src/core/contract.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence.ts",
+      "path": "src/core/evidence.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Inspect the listed files and rerun the targeted vitest command or create a temporary draft contract.",
+  "limitations": "This evidence covers draft workflow semantics, not the subjective quality of each drafted AC.",
+  "gate": "accepted",
+  "created_at": "2026-06-17T09:18:38.874Z"
+}

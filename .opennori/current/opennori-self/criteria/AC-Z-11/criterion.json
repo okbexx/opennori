@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-11",
+  "layer": "productization",
+  "user_story": "作为用户，我卸载 OpenNori 前，能预览将移除什么，并确认默认卸载不会丢失 active goals、证据、报告或归档。",
+  "measurement": "在已安装且有 active goal 的项目中运行 opennori uninstall --dry-run、未确认 uninstall、确认 uninstall 和 include-state uninstall。",
+  "threshold": "默认 uninstall plan 标明 entry assets 会被移除、验收状态会被 preserve；未确认真实卸载会失败；确认后只移除入口资产；只有显式 --include-state --confirm 才会删除 .opennori 状态目录。",
+  "required": true,
+  "risk": "high",
+  "order": 31
+}

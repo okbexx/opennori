@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-16",
+  "layer": "operator",
+  "user_story": "作为用户，我要求 OpenNori autogoal 增强模式后，能从 agent 回复、draft 状态和 report/status 中看出 Enhanced Discovery 是否真的被使用，而不是只能相信 agent 自称用了增强模式。",
+  "measurement": "查看 nori-autogoal/nori Skills、OpenNori protocol、AGENTS、README、draft markdown/status/report 输出和测试。",
+  "threshold": "增强 autogoal 的用户可见回复必须包含 Enhanced Discovery checked；标准 Nori Contract Draft 的 acceptance_basis 必须持久化 source=autogoal、mode=enhanced、coverage_summary、assumptions、open_questions 和可选 out_of_scope；opennori status/resume/report 和 acceptance markdown 能展示这些来源元数据；缺少该确认面时 Skill 不得要求用户 approve；该机制不创建新 CLI、新产物、过程日志或主观 hard validator。",
+  "required": true,
+  "risk": "medium",
+  "order": 65
+}

@@ -1,12 +1,11 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { currentGap, findCurrentPairs, findDraftPairs, findHistoryPairs, ok, readJson } from "../../core.ts";
+import { currentGap, findCurrentPairs, findDraftPairs, findHistoryPairs, ok, readGoalPayload } from "../../core.ts";
 import { runJsonCommand } from "../runtime.ts";
-import type { NoriEvidencePayload } from "../../types.ts";
 
 function summarizePairs(pairs: ReturnType<typeof findCurrentPairs>) {
   return pairs.map((pair) => {
-    const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+    const payload = readGoalPayload(pair);
     return {
       goal_id: pair.goalId,
       location: pair.location,

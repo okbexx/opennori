@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-7",
+  "layer": "productization",
+  "user_story": "作为用户，我运行 opennori install 后，能看到当前项目的 OpenNori 接入登记信息，并判断版本、托管入口、active goals、Plugin Skill 状态和协议能力是否可信。",
+  "measurement": "运行 opennori install --dry-run 或 opennori install 后查看输出和 .opennori/manifest.json。",
+  "threshold": "输出包含 create、skip、overwrite 或 update 语义；manifest 说明 OpenNori 版本、managed files、active goals、plugin 状态、architecture 状态和协议能力；已有用户内容默认不被覆盖。",
+  "required": true,
+  "risk": "high",
+  "order": 27
+}

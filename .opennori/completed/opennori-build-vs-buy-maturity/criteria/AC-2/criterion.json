@@ -1,0 +1,10 @@
+{
+  "id": "AC-2",
+  "layer": "acceptance",
+  "user_story": "作为用户，我查看 OpenNori 自身的架构决策时，能复查每个通用产品基础能力是否优先评估了可复用方案，而不是把用户入口、项目状态、可编辑文档和安装升级卸载体验默认手写。",
+  "measurement": "用户打开 .opennori/architecture/decisions 下的 build-vs-buy 决策，或查看 opennori architecture show / report 输出。",
+  "threshold": "与通用产品基础能力相关的决策记录包含 current project、standard library、official SDK、open source candidates、recommendation；recommendation 为 self-build 时还必须说明许可证、维护性、安全、包体积、性能或产品边界理由。",
+  "required": true,
+  "risk": "high",
+  "order": 1
+}

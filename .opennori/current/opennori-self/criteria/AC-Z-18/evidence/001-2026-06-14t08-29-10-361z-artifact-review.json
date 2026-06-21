@@ -1,0 +1,58 @@
+{
+  "kind": "artifact-review",
+  "basis": "tool-observation",
+  "summary": "README, Plugin metadata, package Skills, protocol, tests, and website now present OpenNori as one agent capability bundle: Plugin discovery, packaged Skills, opennori deterministic state layer, and .opennori project state work together. The old split-path language is removed, and nori/project-health Skills route missing bundle parts to doctor/health recovery instead of half-installed use.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "rg -n 'Install OpenNori Capability Bundle|capability bundle|deterministic state layer|not a separate product path|Do not treat Plugin|Do not split OpenNori|half-installed|Install one OpenNori capability bundle|Advanced state-layer commands|Choose one path|Try CLI once|Pin CLI' README.md plugins/opennori/.codex-plugin/plugin.json plugins/opennori/skills/nori/SKILL.md plugins/opennori/skills/nori-project-health/SKILL.md .opennori/protocol.md test/core.test.js /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+      "command": "rg -n 'Install OpenNori Capability Bundle|capability bundle|deterministic state layer|not a separate product path|Do not treat Plugin|Do not split OpenNori|half-installed|Install one OpenNori capability bundle|Advanced state-layer commands|Choose one path|Try CLI once|Pin CLI' README.md plugins/opennori/.codex-plugin/plugin.json plugins/opennori/skills/nori/SKILL.md plugins/opennori/skills/nori-project-health/SKILL.md .opennori/protocol.md test/core.test.js /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/.codex-plugin/plugin.json",
+      "path": "plugins/opennori/.codex-plugin/plugin.json"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+      "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+      "path": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+    }
+  ],
+  "reviewability": "Read README Install/Quick Start, Plugin longDescription, nori and nori-project-health Skill frontmatter/body, protocol AC-Z-18, website Start section, and test/core.test.js public product surface assertions; rerun npm run check and the rg command.",
+  "limitations": "This proves source, packaged assets, tests, and local website source. Live Codex plugin behavior still depends on installing the updated package/plugin in a new session after publish.",
+  "gate": "accepted",
+  "created_at": "2026-06-14T08:29:10.361Z"
+}

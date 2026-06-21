@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-O-1",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 3,
+  "latest_evidence_summary": "A natural-language goal no longer becomes a blindly approvable generic Nori Contract: generic draft output carries a discovery-required acceptance basis, and nori-acceptance instructs agents to show ACCEPTANCE-BASIS questions before asking for approval.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

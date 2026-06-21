@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-16",
+  "layer": "protocol",
+  "user_story": "As an OpenNori maintainer or agent user, I can open the current goal directory and each criterion dossier README to understand the goal, AC status, evidence, and next gap without reading a flat ledger first.",
+  "measurement": "Inspect .opennori/current/<goal-id>/README.md and .opennori/current/<goal-id>/criteria/<AC-id>/README.md after drafting, approving, recording evidence, reporting, or archiving a goal.",
+  "threshold": "Goal state is stored as a goal directory; every Product AC has its own criteria/<AC-id>/ directory with criterion.json as the AC source of truth, status.json as rebuildable status projection, evidence/ and artifacts/ subdirectories, and README.md as a generated human review surface; status/report/dashboard/doctor/manifest use the directory model and no normal current/draft/completed/blocked state relies on flat <goal>.acceptance.md + <goal>.evidence.json pairs.",
+  "required": true,
+  "risk": "high",
+  "order": 71
+}

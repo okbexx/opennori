@@ -1,0 +1,43 @@
+{
+  "kind": "dashboard-execution-presence-review",
+  "basis": "tool-observation",
+  "summary": "Dashboard now gives live agent execution a first-screen visual presence: agent/state, Skill, freshness, activity summary, current gap, and live/idle status are visible without opening the detail panel or reading event logs. Browser screenshots on desktop and mobile show the active verifying state, and snapshot selection follows the explicit activity target when multiple goals exist.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js -t 'dashboard snapshot follows|activity start refuses|activity commands infer|dashboard serves'",
+      "command": "npx vitest run test/cli-commands.test.js -t 'dashboard snapshot follows|activity start refuses|activity commands infer|dashboard serves'"
+    },
+    {
+      "type": "artifact",
+      "label": "output/playwright/opennori-dashboard-execution-desktop.png",
+      "path": "output/playwright/opennori-dashboard-execution-desktop.png"
+    },
+    {
+      "type": "artifact",
+      "label": "output/playwright/opennori-dashboard-execution-mobile.png",
+      "path": "output/playwright/opennori-dashboard-execution-mobile.png"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/App.tsx",
+      "path": "src/dashboard/src/App.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot.ts",
+      "path": "src/kernel/snapshot.ts"
+    }
+  ],
+  "reviewability": "Run npm run check; start opennori dashboard --root . --goal opennori-self; publish activity start/heartbeat for AC-D-3; inspect the desktop and mobile screenshots for visible live state, Skill, summary, gap, stale/freshness, and completion boundary.",
+  "limitations": "Verified with local Chrome screenshots and API snapshots. The dashboard remains a read-only observation surface; it does not execute agent work, replace evidence, or certify completion. Long-running real project watching is still broader dogfood coverage.",
+  "gate": "accepted",
+  "created_at": "2026-06-16T08:31:23.288Z"
+}

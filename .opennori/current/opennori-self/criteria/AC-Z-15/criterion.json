@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-15",
+  "layer": "productization",
+  "user_story": "作为用户，我让 agent 记录验收证据时，不需要 agent 为常见来源手写复杂结构。",
+  "measurement": "运行 opennori evidence add，分别使用 --source-command、--source-path、--source-url 和自由 --source 记录证据，再查看 status/report。",
+  "threshold": "证据来源能显示为 command、artifact、url 或自由 reference；report/status 中仍保留 basis、reviewability、limitations 和 confidence。",
+  "required": true,
+  "risk": "medium",
+  "order": 35
+}

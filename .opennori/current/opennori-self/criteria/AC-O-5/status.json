@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-O-5",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 2,
+  "latest_evidence_summary": "Blocked criteria and violated required profile items produce intervention.required with a concrete user action instead of vague process status.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

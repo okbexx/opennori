@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-3",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 3,
+  "latest_evidence_summary": "OpenNori report/status now let a user distinguish active reuse decisions, superseded historical decisions, and minimal self-build product glue; Skill Pack source of truth has moved to skills/*/SKILL.md, package dependencies now include citty/Ajv/yaml/Clack, and build-vs-buy health reports 9 active decisions plus 3 superseded decisions with no findings.",
+  "updated_at": "2026-06-13T10:41:22.827Z"
+}

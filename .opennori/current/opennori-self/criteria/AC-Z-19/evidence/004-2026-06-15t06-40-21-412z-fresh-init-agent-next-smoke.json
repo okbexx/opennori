@@ -1,0 +1,33 @@
+{
+  "kind": "fresh-init-agent-next-smoke",
+  "basis": "tool-observation",
+  "summary": "Temporary project smoke confirms opennori init --confirm creates .opennori state and returns agent_next.state initialized_no_active_contract; subsequent doctor is ready with zero active goals and routes to nori-acceptance. This makes empty .opennori directories understandable to agents and users without relying on agent-guide discovery.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "tmp=/tmp/opennori-agent-next-3oNmf6; node ./bin/opennori.js init --root \"\" --confirm --json; node ./bin/opennori.js doctor --root \"\" --json",
+      "command": "tmp=/tmp/opennori-agent-next-3oNmf6; node ./bin/opennori.js init --root \"\" --confirm --json; node ./bin/opennori.js doctor --root \"\" --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next.ts",
+      "path": "src/agent-next.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+      "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    }
+  ],
+  "reviewability": "Rerun the temporary-project command and confirm agent_next.state is initialized_no_active_contract with recommended_skill nori-acceptance.",
+  "limitations": "The smoke uses local source checkout; npm users require the next published package to get the same behavior.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T06:40:21.412Z"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "AC-A-3",
+  "layer": "architecture",
+  "user_story": "作为用户，我可以选择 OpenNori 内置优秀架构 profile，也可以声明自己的项目架构 profile，并让它影响 baseline 和完成判断。",
+  "measurement": "运行 architecture profiles、architecture profile --from 和 architecture baseline --profile。",
+  "threshold": "内置 profile 和项目 profile 都能列出；项目 profile 可生成 baseline；技术偏好不会被写成 Product AC。",
+  "risk": "high",
+  "required": true,
+  "order": 40
+}

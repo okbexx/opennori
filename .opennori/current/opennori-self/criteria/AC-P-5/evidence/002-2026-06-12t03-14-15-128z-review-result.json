@@ -1,0 +1,33 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "opennori report leads with decision summary, goal, acceptance basis, Nori Profile, acceptance status, evidence health, user intervention, and conclusion.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    }
+  ],
+  "reviewability": "Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and generated report.",
+  "limitations": "This is local repository evidence for the current worktree; npm publishing and public site deployment are separate release steps.",
+  "gate": "accepted",
+  "created_at": "2026-06-12T03:14:15.128Z"
+}

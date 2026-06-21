@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-8",
+  "layer": "protocol",
+  "user_story": "作为用户，我能区分证据是来自工具观察、人类确认、产物审查、协议校验，还是 agent 的判断。",
+  "measurement": "给不同 basis 的证据运行 status/report。",
+  "threshold": "输出明确展示证据 basis；agent 判断可以记录，但不会伪装成工具验证或人类确认。",
+  "required": true,
+  "risk": "high",
+  "order": 7
+}

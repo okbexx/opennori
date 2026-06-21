@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-7",
+  "layer": "protocol",
+  "user_story": "作为用户，我不需要限制 agent 使用哪种取证工具，但我能复查 agent 引用的证据来源。",
+  "measurement": "让 agent 用任意验证方式完成一条 AC，并查看该 AC 的证据来源。",
+  "threshold": "证据来源可以是命令、产物、URL、截图、diff、人类确认或其他引用；每个来源都包含用户可理解的 label 或复查线索。",
+  "required": true,
+  "risk": "high",
+  "order": 6
+}

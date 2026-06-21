@@ -1,0 +1,38 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Install preview only manages OpenNori project state: .opennori directories, protocol, guide, manifest, agent routes, and architecture directories are create/skip/update actions, with no destructive writes unless explicitly confirmed.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js install --root . --dry-run --json",
+      "command": "node ./bin/opennori.js install --root . --dry-run --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/install.ts",
+      "path": "src/lifecycle/install.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/managed-files.ts",
+      "path": "src/lifecycle/managed-files.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    }
+  ],
+  "reviewability": "Run install dry-run and inspect install_plan actions plus lifecycle install tests.",
+  "limitations": "Dry-run proves the plan surface; actual overwrite paths still require explicit confirmation and should be retested in fixture projects.",
+  "gate": "accepted",
+  "created_at": "2026-06-13T15:02:52.322Z"
+}

@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-O-2",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 2,
+  "latest_evidence_summary": "Approval and criterion update flows preserve the acceptance basis and keep completion blocked until the user approves or revises the criteria.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

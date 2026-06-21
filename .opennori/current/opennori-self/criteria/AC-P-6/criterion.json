@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-6",
+  "layer": "protocol",
+  "user_story": "作为用户，我查看 OpenNori 报告时，能知道每条通过、阻塞或豁免的 AC 是基于什么证据判断的。",
+  "measurement": "给 AC 添加不同来源的证据后运行 opennori report 或 opennori status。",
+  "threshold": "报告或状态输出展示证据摘要、判断基础、证据强度和剩余限制；不会只显示 agent 自我结论。",
+  "required": true,
+  "risk": "high",
+  "order": 5
+}

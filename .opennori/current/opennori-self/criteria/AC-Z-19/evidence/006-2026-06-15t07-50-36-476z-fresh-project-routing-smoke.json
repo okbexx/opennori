@@ -1,0 +1,43 @@
+{
+  "kind": "fresh-project-routing-smoke",
+  "basis": "tool-observation",
+  "summary": "Fresh-project doctor now routes agents to a safe init preview instead of repeated raw recovery actions: agent_next reports missing .opennori state, recommends nori-project-health, provides safe_next_command for opennori init preview, and the init preview does not create .opennori until confirmation.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "tmp=$(mktemp -d /tmp/opennori-step1-fix-XXXXXX); node ./bin/opennori.js doctor --root \"$tmp\" --json; node ./bin/opennori.js init --root \"$tmp\" --json",
+      "command": "tmp=$(mktemp -d /tmp/opennori-step1-fix-XXXXXX); node ./bin/opennori.js doctor --root \"$tmp\" --json; node ./bin/opennori.js init --root \"$tmp\" --json"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next.ts",
+      "path": "src/agent-next.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types.ts",
+      "path": "src/types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+      "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Rerun the temporary-project smoke and confirm doctor.data.agent_next.safe_next_command points to opennori init --root <tmp> --json; confirm init preview leaves .opennori absent until --confirm; inspect nori-project-health Skill for concise human summary guidance.",
+  "limitations": "This validates installed-machine/new-project routing in local source checkout; published npm users need a later package release to receive it.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T07:50:36.476Z"
+}

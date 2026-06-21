@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-3",
+  "layer": "protocol",
+  "user_story": "作为用户，我运行 opennori next 或 opennori status 后，看到的是当前验收缺口和完成判断，而不是任务步骤列表。",
+  "measurement": "运行 opennori next/status 并查看返回的 current_gap、completion 和 intervention。",
+  "threshold": "输出默认回答“当前差哪条 AC、是否完成、是否需要人类动作”，不把过程任务当作主线。",
+  "required": true,
+  "risk": "medium",
+  "order": 2
+}

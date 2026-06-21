@@ -36,7 +36,7 @@ export function doctorRecoveryActions(checks: DoctorCheck[], activeIssues: Docto
       path: issue.path,
       action: issue.path
         ? `Inspect ${basePath} and fix ${issue.path}: ${issue.message}`
-        : `Inspect .opennori/current/${issue.goal_id}.acceptance.md and .opennori/current/${issue.goal_id}.evidence.json: ${issue.message}`
+        : `Inspect .opennori/current/${issue.goal_id}/contract.json, ledger.json, and README.md: ${issue.message}`
     });
   }
 

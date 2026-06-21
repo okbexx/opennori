@@ -1,0 +1,48 @@
+{
+  "kind": "asset-review",
+  "basis": "artifact_review",
+  "summary": "Enhanced autogoal discovery is documented as nori-autogoal Skill behavior and surfaced in product docs/site/tests without adding a new CLI artifact.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-autogoal/SKILL.md",
+      "path": "plugins/opennori/skills/nori-autogoal/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": "examples/opennori-self.json",
+      "path": "examples/opennori-self.json"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "../opennori-site/src/pages/index.astro",
+      "path": "../opennori-site/src/pages/index.astro"
+    }
+  ],
+  "reviewability": "Review the listed assets for Enhanced Discovery, self-grill/todolist routing, standard Nori Contract Draft output, and no new CLI command or artifact.",
+  "limitations": "This verifies packaged behavior instructions and documentation surfaces; real project quality still depends on the agent applying the Skill and the user confirming AC in conversation.",
+  "gate": "accepted",
+  "created_at": "2026-06-20T03:09:12.733Z"
+}

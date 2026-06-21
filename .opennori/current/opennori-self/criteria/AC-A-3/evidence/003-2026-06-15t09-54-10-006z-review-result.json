@@ -1,0 +1,63 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "OpenNori now records architecture apply records separately from Product AC evidence. In the settings-page smoke, architecture apply created .opennori/architecture/evidence/*.json with schema_valid=true and appeared in status/report, while AC-1 remained unknown until real Product AC evidence is recorded.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js -t 'architecture apply command module|architecture baseline command module previews'",
+      "command": "npx vitest run test/cli-commands.test.js -t 'architecture apply command module|architecture baseline command module previews'"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js -t 'architecture apply records do not count|public JSON Schemas validate'",
+      "command": "npx vitest run test/core.test.js -t 'architecture apply records do not count|public JSON Schemas validate'"
+    },
+    {
+      "type": "command",
+      "label": "architecture apply smoke: apply record visible, AC remains unknown",
+      "command": "architecture apply smoke: apply record visible, AC remains unknown"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/apply.ts",
+      "path": "src/architecture/apply.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/architecture/apply.ts",
+      "path": "src/cli/commands/architecture/apply.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/state.ts",
+      "path": "src/architecture/state.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/report.ts",
+      "path": "src/architecture/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "schemas/architecture-apply.schema.json",
+      "path": "schemas/architecture-apply.schema.json"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-architecture-apply/SKILL.md",
+      "path": "plugins/opennori/skills/nori-architecture-apply/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Run the listed tests and smoke path; inspect status/report for architecture apply records and unchanged Product AC status.",
+  "limitations": "Architecture apply records document baseline alignment; they intentionally do not prove user-facing acceptance by themselves.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T09:54:10.006Z"
+}

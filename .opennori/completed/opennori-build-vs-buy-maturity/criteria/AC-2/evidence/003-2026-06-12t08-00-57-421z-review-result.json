@@ -1,0 +1,48 @@
+{
+  "kind": "review-result",
+  "basis": "artifact-review",
+  "summary": "OpenNori self architecture decisions now include active reusable-library decisions for citty, JSON Schema/Ajv, yaml frontmatter, and directory-based Skill Pack assets; obsolete parseArgs and JS-string Skill decisions are explicitly marked superseded rather than silently treated as current architecture.",
+  "result": "passing",
+  "confidence": "reviewed",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js architecture show --root . --json",
+      "command": "node ./bin/opennori.js architecture show --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.json",
+      "path": ".opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/skill-pack-directory-assets.json",
+      "path": ".opennori/architecture/decisions/skill-pack-directory-assets.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/protocol-state-validation-reuse-json-schema-validator-when-contracts-grow.json",
+      "path": ".opennori/architecture/decisions/protocol-state-validation-reuse-json-schema-validator-when-contracts-grow.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json",
+      "path": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/cli-argument-parsing-replace-growing-ad-hoc-option-scanning-with.json",
+      "path": ".opennori/architecture/decisions/cli-argument-parsing-replace-growing-ad-hoc-option-scanning-with.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/skill-pack-将-opennori-skill-pack-从-cli-入口拆到独立产品面模块.json",
+      "path": ".opennori/architecture/decisions/skill-pack-将-opennori-skill-pack-从-cli-入口拆到独立产品面模块.json"
+    }
+  ],
+  "reviewability": "Open architecture show output or the listed decision JSON files and verify current_project, standard_library, official_sdk, open_source, recommendation, status, superseded_by, and self_build_reason where applicable.",
+  "limitations": "Some active decisions intentionally keep OpenNori product-domain semantics local; the current CLI implementation is still an incremental migration, not a completed citty rewrite.",
+  "gate": "accepted",
+  "created_at": "2026-06-12T08:00:57.421Z"
+}

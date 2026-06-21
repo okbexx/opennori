@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-D-5",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 1,
+  "latest_evidence_summary": "Dashboard now exposes a readonly Nori Profile drawer from the header Profile icon. The snapshot includes capability_profile and capability_compliance; the drawer shows item counts, must/prefer/avoid distribution, compliance, blocking/review counts, item metadata, and latest evidence; Profile remains outside Product AC radar criteria. Playwright measured the radar SVG width before and after opening the drawer as 1118px both times, confirming the right-side drawer is an overlay and does not affect main layout sizing.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

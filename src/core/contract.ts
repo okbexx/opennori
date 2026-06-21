@@ -263,6 +263,10 @@ export function validateContractIntegrity(contract: NoriContract, ledger: Eviden
     if (ledger.protocol_version !== PROTOCOL_VERSION) {
       issues.push({ path: "ledger.protocol_version", message: `Must be ${PROTOCOL_VERSION}` });
     }
+    if (!ledger.criteria || typeof ledger.criteria !== "object" || Array.isArray(ledger.criteria)) {
+      issues.push({ path: "ledger.criteria", message: "Evidence ledger criteria object is required" });
+      return issues;
+    }
     for (const [criterionId, state] of Object.entries(ledger.criteria || {})) {
       if (!ids.has(criterionId)) {
         issues.push({ path: `ledger.criteria.${criterionId}`, message: "Evidence ledger has an unknown criterion" });

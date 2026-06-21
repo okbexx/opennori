@@ -1,0 +1,33 @@
+{
+  "kind": "review-result",
+  "basis": "protocol-check",
+  "summary": "The confirmed Architecture Baseline now identifies Plugin Skills and .opennori state as the agent discovery surface: baseline agent_surfaces includes .codex-plugin/plugin.json and skills/nori-architecture-apply/SKILL.md, package nori Skill routes architecture apply/challenge/build-vs-buy, and .opennori/agent-guide.md remains in sync for project-local context.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js architecture show --root . --json",
+      "command": "node ./bin/opennori.js architecture show --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/baseline.json",
+      "path": ".opennori/architecture/baseline.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/baseline.md",
+      "path": ".opennori/architecture/baseline.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/agent-guide.md",
+      "path": ".opennori/agent-guide.md"
+    }
+  ],
+  "reviewability": "Inspect baseline agent_surfaces, nori routing, architecture apply Skill, and architecture show output.",
+  "limitations": "This proves repo-local and package asset discoverability; it does not prove a fresh external Codex Plugin install until plugin installation is tested after publish.",
+  "gate": "accepted",
+  "created_at": "2026-06-13T10:26:03.551Z"
+}

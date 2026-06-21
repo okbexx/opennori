@@ -117,9 +117,24 @@ OpenNori writes its project-local state under `.opennori/`.
   manifest.json
   protocol.md
   agent-guide.md
-  active/
-    <goal>.acceptance.md
-    <goal>.evidence.json
+  current/
+    <goal>/
+      contract.json
+      ledger.json
+      README.md
+      criteria/
+        <AC-id>/
+          criterion.json
+          status.json
+          README.md
+          evidence/
+          artifacts/
+  drafts/
+    <goal>/
+      contract.json
+      ledger.json
+      README.md
+      criteria/
   completed/
   blocked/
   reports/
@@ -141,8 +156,13 @@ OpenNori writes its project-local state under `.opennori/`.
 
 Each current or draft goal has:
 
-- `<goal>.acceptance.md` for human review of one Nori Contract or Nori Contract Draft
-- `<goal>.evidence.json` for the matching deterministic agent/tool evidence ledger
+- `<goal>/contract.json` as the goal-level Nori Contract source of truth
+- `<goal>/ledger.json` as the deterministic aggregate evidence/status ledger
+- `<goal>/README.md` as the human/agent review surface for the goal
+- `<goal>/criteria/<AC-id>/criterion.json` as each AC source of truth
+- `<goal>/criteria/<AC-id>/status.json` as a rebuildable status projection
+- `<goal>/criteria/<AC-id>/README.md` as the per-AC review surface
+- `<goal>/criteria/<AC-id>/evidence/*.json` for reviewable evidence records
 
 `.opennori/manifest.json` records the project-local OpenNori registration:
 
@@ -576,7 +596,7 @@ user operation-path detail. Route those cases to `nori-acceptance`.
 12. Before implementing an acceptance gap, read `.opennori/architecture/baseline.md` and keep Product AC separate from Architecture Checks.
 13. Before self-building infrastructure, record a build-vs-buy decision.
 14. If project evidence conflicts with the baseline, run `opennori architecture challenge`; do not silently replace the baseline.
-15. If the user adds a new acceptance boundary while reviewing a draft, run `opennori criterion add --root <repo> --from-draft --goal <goal-id> --id <id> ... --json`; the draft remains unapproved, the new criterion becomes part of the draft review surface, and the CLI keeps the draft contract, evidence ledger, acceptance markdown, and manifest in sync. Do not patch the draft files manually unless the CLI is broken and project-health recovery has failed.
+15. If the user adds a new acceptance boundary while reviewing a draft, run `opennori criterion add --root <repo> --from-draft --goal <goal-id> --id <id> ... --json`; the draft remains unapproved, the new criterion becomes part of the draft review surface, and the CLI keeps the draft contract, evidence ledger, goal README, per-criterion dossier, and manifest in sync. Do not patch the draft files manually unless the CLI is broken and project-health recovery has failed.
 16. If the user adds a new acceptance boundary after approval, run `opennori criterion add --root <repo> --id <id> ... --json`; the new criterion becomes an evidence gap without forcing the agent to edit state files manually.
 17. If the user revises a criterion while reviewing a draft, run `opennori criterion update --root <repo> --from-draft --goal <goal-id> --criterion <id> ... --json`; the draft remains unapproved and the AC Review Loop restarts from the changed AC. If the user revises an already approved current contract, run `opennori criterion update --root <repo> --criterion <id> ... --json`; old evidence for the changed criterion is cleared and the revised AC becomes the current evidence gap.
 18. If the user asks to update an existing OpenNori project, run `opennori doctor`, use `opennori upgrade --dry-run/--confirm` for manifest/protocol/guide refreshes, then run `opennori check`; use `nori-acceptance` to review existing AC wording with the user instead of relying on fixed CLI quality gaps. If packaged Plugin Skills are missing, reinstall or update the OpenNori package instead of copying Skills into the project.

@@ -1,0 +1,38 @@
+{
+  "kind": "skill-routing-review",
+  "basis": "tool-observation",
+  "summary": "The project-health Skill now consumes agent_next.safe_next_command for fresh projects, runs the safe preview before asking for confirmation, and forbids pasting raw doctor/setup/init JSON or repeated recovery_actions to users. This keeps natural-language OpenNori use routed through Skills while CLI JSON remains the agent state layer.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
+      "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
+      "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next.ts",
+      "path": "src/agent-next.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Inspect the Skill reply-shape and misuse guards, then rerun the targeted tests checking safe_next_command and package Skill asset text.",
+  "limitations": "This covers project-health handoff behavior; broader AC discovery remains the next dogfood step.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T07:50:36.655Z"
+}

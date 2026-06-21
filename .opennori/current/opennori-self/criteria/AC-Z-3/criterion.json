@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-3",
+  "layer": "productization",
+  "user_story": "作为用户，我在 Git 或 PR diff 中审查 agent 本轮改动后，能区分验收证据变化和实现过程噪音。",
+  "measurement": "查看本轮 diff 或报告变更摘要。",
+  "threshold": "默认摘要围绕 AC 状态变化、证据变化和用户影响组织；实现过程只作为附属证据出现。",
+  "required": true,
+  "risk": "medium",
+  "order": 23
+}

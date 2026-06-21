@@ -1,0 +1,28 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "README and website quickstart lead with short commands: try once with npx opennori, pin with npm install -D opennori, then use opennori as the project-local entry.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "rg -n 'npx opennori|npm install -D opennori|opennori' README.md /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+      "command": "rg -n 'npx opennori|npm install -D opennori|opennori' README.md /Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro",
+      "path": "/Users/jarl/code/jarlone/opennori-site/src/pages/index.astro"
+    }
+  ],
+  "reviewability": "Open README and website source, or run the rg command, to verify the visible quickstart copy.",
+  "limitations": "This verifies local website source; public site deployment is a separate release step.",
+  "gate": "accepted",
+  "created_at": "2026-06-13T15:02:53.305Z"
+}

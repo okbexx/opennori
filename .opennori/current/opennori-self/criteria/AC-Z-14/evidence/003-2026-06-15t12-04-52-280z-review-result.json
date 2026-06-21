@@ -1,0 +1,48 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Candidate next goals now carry agent-usable draft metadata: each candidate includes draft_args, draft_command, and draft_rule so Skills can create the next draft Nori Contract without reconstructing CLI flags, while the rule keeps candidates separate from approved AC, phases, task lists, and evidence.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm test -- --run test/cli-commands.test.js test/core.test.js",
+      "command": "npm test -- --run test/cli-commands.test.js test/core.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types.ts",
+      "path": "src/types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    }
+  ],
+  "reviewability": "Rerun the listed checks and inspect resume/status/context export candidate_goals for draft_args, draft_command, and draft_rule.",
+  "limitations": "This improves agent routing metadata for generated candidates; the user or agent must still select or revise a candidate and approve the resulting draft before any next-loop implementation counts.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T12:04:52.280Z"
+}

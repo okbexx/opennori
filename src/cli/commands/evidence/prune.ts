@@ -3,12 +3,12 @@ import {
   criterionStatusRows,
   currentGap,
   ok,
-  pruneCriterionEvidence,
-  syncAcceptanceMarkdown,
-  writeJson
+  pruneCriterionEvidence
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
-import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
+import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
+
+type CommandRuntimeOverride = Pick<ActiveGoalRuntime, "loadPair"> & Partial<Pick<ActiveGoalRuntime, "savePair" | "refreshManifest">>;
 
 export const evidencePruneCommand = defineCommand({
   meta: {
@@ -45,8 +45,7 @@ export const evidencePruneCommand = defineCommand({
     const criterionId = String(args.criterion);
     const reason = String(args.reason || "Evidence no longer proves the current acceptance criterion.");
     const prune = pruneCriterionEvidence(contract, ledger, criterionId, { reason });
-    writeJson(evidencePath, { contract, ledger });
-    syncAcceptanceMarkdown(acceptancePath, contract, ledger);
+    data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
 
     return ok({
@@ -62,6 +61,6 @@ export const evidencePruneCommand = defineCommand({
   }
 });
 
-export async function runEvidencePruneCommand(rawArgs: string[], { loadPair }: ActiveGoalRuntime) {
-  return runJsonCommand(evidencePruneCommand, rawArgs, { loadPair, rawArgs });
+export async function runEvidencePruneCommand(rawArgs: string[], runtime: CommandRuntimeOverride) {
+  return runJsonCommand(evidencePruneCommand, rawArgs, { savePair, refreshManifest, ...runtime, rawArgs });
 }

@@ -6,7 +6,9 @@ import type { JsonObject } from "./types.ts";
 
 const SCHEMA_DIR = packagePath("schemas");
 const SCHEMA_FILES = {
+  contract: "contract.schema.json",
   "evidence-payload": "evidence-payload.schema.json",
+  ledger: "ledger.schema.json",
   manifest: "manifest.schema.json",
   "architecture-baseline": "architecture-baseline.schema.json",
   "architecture-requirement": "architecture-requirement.schema.json",

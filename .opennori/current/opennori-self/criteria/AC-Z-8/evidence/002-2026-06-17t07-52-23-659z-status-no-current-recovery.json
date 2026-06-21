@@ -1,0 +1,53 @@
+{
+  "kind": "status-no-current-recovery",
+  "basis": "tool-observation",
+  "summary": "OpenNori status/resume/report now return routeable no-current-goal or health recovery state instead of unexpected_error when a project has no current Nori Contract. In agent-workbench, status now returns ok true with status needs-action, reason no_current_goal, agent_next health_needs_recovery, failed checks for missing .opennori/current and .opennori/drafts, and a short TTY summary pointing to recovery.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root /Users/jarl/code/jarlone/agent-workbench --json",
+      "command": "node ./bin/opennori.js status --root /Users/jarl/code/jarlone/agent-workbench --json"
+    },
+    {
+      "type": "command",
+      "label": "script -q /dev/null node ./bin/opennori.js status --root /Users/jarl/code/jarlone/agent-workbench",
+      "command": "script -q /dev/null node ./bin/opennori.js status --root /Users/jarl/code/jarlone/agent-workbench"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js -t 'status commands return|status routes incomplete'",
+      "command": "npx vitest run test/cli-commands.test.js -t 'status commands return|status routes incomplete'"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run",
+      "command": "npx vitest run"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/runtime.ts",
+      "path": "src/cli/runtime.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/command-tree.ts",
+      "path": "src/cli/command-tree.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/human-output.ts",
+      "path": "src/cli/human-output.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Rerun the status command against a project with initialized but empty or incomplete .opennori state and confirm there is no unexpected_error; inspect agent_next.state and the TTY summary.",
+  "limitations": "This validates local source behavior. npm/global users receive it after the next publish or local plugin/CLI sync.",
+  "gate": "accepted",
+  "created_at": "2026-06-17T07:52:23.659Z"
+}

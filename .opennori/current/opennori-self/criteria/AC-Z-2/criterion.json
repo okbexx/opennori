@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-2",
+  "layer": "productization",
+  "user_story": "作为用户，我运行 opennori install 后，能把 OpenNori 放入当前项目的可用入口，并且不会意外覆盖已有内容。",
+  "measurement": "在一个已有项目中运行安装入口并查看安装结果。",
+  "threshold": "安装前能看到将创建或跳过的入口；已有内容默认不被覆盖；失败时说明用户需要做什么。",
+  "required": true,
+  "risk": "high",
+  "order": 22
+}

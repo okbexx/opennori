@@ -1,0 +1,48 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Status, report, and context export now pass ArchitectureState into completionAnswer/nextRecommendation so Product AC completion and Architecture decision are shown separately; missing or challenged architecture becomes architecture_review without replacing current_gap.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js -t 'architecture|build-vs-buy'",
+      "command": "npx vitest run test/core.test.js -t 'architecture|build-vs-buy'"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/report.ts",
+      "path": "src/architecture/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/runtime-status.ts",
+      "path": "src/cli/commands/acceptance/runtime-status.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/context-export.ts",
+      "path": "src/lifecycle/context-export.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Run the targeted tests and inspect status/report/context export wiring plus the missing architecture baseline test.",
+  "limitations": "This verifies CLI/report surfaces; downstream UI or website renderers should continue to mirror the same fields.",
+  "gate": "accepted",
+  "created_at": "2026-06-14T01:35:54.741Z"
+}

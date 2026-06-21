@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-10",
+  "layer": "protocol",
+  "user_story": "作为用户，我能看到一条 AC 可以由多个证据来源共同支撑，而不要求 agent 把它们拆成固定适配器。",
+  "measurement": "为一条 AC 添加包含多个来源的证据后查看 evidence record 和 report。",
+  "threshold": "同一条证据可以包含多个 sources；报告能合并展示这些来源，并保留 agent 的自由取证空间。",
+  "required": true,
+  "risk": "medium",
+  "order": 9
+}

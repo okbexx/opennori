@@ -1,0 +1,53 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "OpenNori status/check/doctor/report now expose build-vs-buy health as clear, needs-action, or broken; missing candidate fields and self-build reasons surface as build_vs_buy warnings and doctor recovery actions, while superseded historical decisions remain reviewable without counting as current health.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --goal opennori-build-vs-buy-maturity --json",
+      "command": "node ./bin/opennori.js check --root . --goal opennori-build-vs-buy-maturity --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js doctor --root . --json",
+      "command": "node ./bin/opennori.js doctor --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --goal opennori-build-vs-buy-maturity --json",
+      "command": "node ./bin/opennori.js status --root . --goal opennori-build-vs-buy-maturity --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture.js",
+      "path": "src/architecture.js"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli.js",
+      "path": "src/cli.js"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle.js",
+      "path": "src/lifecycle.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Run npm run check, then inspect architecture.build_vs_buy in status/check/report and doctor check build_vs_buy_health; the test suite includes missing-field and superseded-decision regressions.",
+  "limitations": "This verifies the build-vs-buy health surface and current OpenNori self decisions; it does not mean every future infrastructure area is already migrated.",
+  "gate": "accepted",
+  "created_at": "2026-06-12T08:00:57.318Z"
+}

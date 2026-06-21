@@ -1,0 +1,80 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "High-risk passing evidence now preserves the agent-submitted objective result while exposing review risk through confidence and evidence_health instead of hard-downgrading by a fixed strong/weak evidence list. Evidence health also treats non-context custom sources such as screenshot, diff, log, command, artifact, URL, label, and summary-bearing sources as reviewable, so agent evidence remains flexible while context-only architecture sources still cannot prove Product AC by themselves.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "ac-p-4-high-risk-review-risk-boundary",
+      "path": ".opennori/architecture/evidence/ac-p-4-high-risk-review-risk-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck",
+      "command": "npm run typecheck"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js",
+      "command": "npx vitest run test/core.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js --testNamePattern 'evidence health|flexible reviewable sources|custom non-context source|high-risk agent observation'",
+      "command": "npx vitest run test/core.test.js --testNamePattern 'evidence health|flexible reviewable sources|custom non-context source|high-risk agent observation'"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js --testNamePattern dashboard",
+      "command": "npx vitest run test/cli-commands.test.js --testNamePattern dashboard"
+    },
+    {
+      "type": "command",
+      "label": "rg -n 'PRODUCT_EVIDENCE_SOURCE_TYPES|strong-evidence-required|DEFAULT_CRITERIA|DISCOVERY_GAPS|BRAINSTORM_CANDIDATES|draft --goal|--from-discovery|--from-brainstorm|--from-next-candidate' src test plugins/opennori/skills README.md .opennori/protocol.md AGENTS.md",
+      "command": "rg -n 'PRODUCT_EVIDENCE_SOURCE_TYPES|strong-evidence-required|DEFAULT_CRITERIA|DISCOVERY_GAPS|BRAINSTORM_CANDIDATES|draft --goal|--from-discovery|--from-brainstorm|--from-next-candidate' src test plugins/opennori/skills README.md .opennori/protocol.md AGENTS.md"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence.ts",
+      "path": "src/core/evidence.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next.ts",
+      "path": "src/agent-next.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-evidence/SKILL.md",
+      "path": "plugins/opennori/skills/nori-evidence/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    }
+  ],
+  "reviewability": "Run the listed typecheck, Vitest, and rg commands; inspect src/core/evidence.ts for objective risk-gate/evidence-health behavior and test/core.test.js for high-risk and custom source coverage.",
+  "limitations": "This verifies the CLI boundary and evidence-health state behavior in the local worktree. It does not prove future agents will choose strong enough evidence; Skills and user review still decide subjective sufficiency.",
+  "gate": "accepted",
+  "created_at": "2026-06-19T05:05:19.709Z"
+}

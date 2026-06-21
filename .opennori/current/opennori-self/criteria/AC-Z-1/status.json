@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-Z-1",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 1,
+  "latest_evidence_summary": "OpenNori exposes package-local Codex Plugin Skills for agent discovery: the marketplace points to plugins/opennori, plugin.json points to ./skills, package Skills describe natural-language routing, and doctor reports Plugin manifest, marketplace, Skills, and manifest state as healthy.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

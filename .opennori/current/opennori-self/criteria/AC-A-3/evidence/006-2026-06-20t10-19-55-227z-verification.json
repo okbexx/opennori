@@ -1,0 +1,45 @@
+{
+  "kind": "verification",
+  "basis": "tool-observation",
+  "summary": "Project Architecture Profile import now writes only the managed profile file under .opennori/architecture/profiles, and architecture/evidence is validated as apply-record-only state.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "ac-a-3-architecture-evidence-boundary",
+      "path": ".opennori/architecture/evidence/ac-a-3-architecture-evidence-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js doctor --root /Users/jarl/code/jarlone/agent-workbench --json",
+      "command": "node ./bin/opennori.js doctor --root /Users/jarl/code/jarlone/agent-workbench --json"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/apply.ts",
+      "path": "src/architecture/apply.ts"
+    }
+  ],
+  "reviewability": "Rerun npm run check, OpenNori self check, and doctor against the AW project with the misplaced .profile.json; inspect the profile import test and architecture evidence health test.",
+  "limitations": "This verifies objective artifact boundaries and recovery surfacing; it does not make CLI judge whether a project Architecture Profile is subjectively good.",
+  "gate": "accepted",
+  "created_at": "2026-06-20T10:19:55.227Z"
+}

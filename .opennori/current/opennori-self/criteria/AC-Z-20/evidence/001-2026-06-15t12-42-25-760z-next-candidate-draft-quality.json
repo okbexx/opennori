@@ -1,0 +1,38 @@
+{
+  "kind": "next-candidate-draft-quality",
+  "basis": "tool-observation",
+  "summary": "draft --from-next-candidate now turns completed-goal candidates into reviewable draft AC with concrete measurement and threshold text. The generated opennori-adoption-dogfood draft keeps ACCEPTANCE-BASIS pending approval while telling the user how to judge non-OpenNori adoption friction, and tests prevent the old generic candidate-direction template from returning.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js -t 'evidence can drive the workflow'",
+      "command": "npx vitest run test/core.test.js -t 'evidence can drive the workflow'"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js -t 'draft command module creates draft contracts from completed goal candidates'",
+      "command": "npx vitest run test/cli-commands.test.js -t 'draft command module creates draft contracts from completed goal candidates'"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js draft --from-next-candidate opennori-adoption-dogfood --source-goal opennori-self --root . --json",
+      "command": "node ./bin/opennori.js draft --from-next-candidate opennori-adoption-dogfood --source-goal opennori-self --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/acceptance.ts",
+      "path": "src/acceptance.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Rerun the two targeted tests and the draft command, then inspect the generated draft criteria for concrete user action, report/evidence review, friction judgment, and ACCEPTANCE-BASIS pending approval.",
+  "limitations": "This proves candidate-to-draft quality for built-in next-loop candidates; the new dogfood draft is still unapproved and does not prove external project adoption by itself.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T12:42:25.760Z"
+}

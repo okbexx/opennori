@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-P-16",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 2,
+  "latest_evidence_summary": "Full OpenNori verification passed after goal dossier state and physical contract/ledger schemas were introduced.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

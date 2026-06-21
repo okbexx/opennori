@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-20",
+  "layer": "productization",
+  "user_story": "作为用户，我让 agent 从已完成目标的 candidate_goals 继续生成下一份 Nori Contract 草案时，看到的不是空泛候选包装，而是能指导我怎么验收的用户动作、结果和通过标准。",
+  "measurement": "运行 opennori draft --from-next-candidate 生成 opennori-adoption-dogfood、real-user-validation 或 next-loop-usability 草案，并阅读每条 AC 的 measurement 和 threshold。",
+  "threshold": "草案仍保持 draft/ACCEPTANCE-BASIS 待用户批准；每条 AC 的 measurement/threshold 说明用户入口、操作、报告/证据复查或摩擦点判断方式；不再出现“按这条候选方向检查新的目标结果、状态或报告”这类空泛模板。",
+  "required": true,
+  "risk": "medium",
+  "order": 50
+}

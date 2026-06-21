@@ -1,0 +1,33 @@
+{
+  "protocol_version": "opennori/v1",
+  "goal_id": "opennori-self-opennori-adoption-dogfood",
+  "status": "draft",
+  "updated_at": "2026-06-17T09:31:57.774Z",
+  "criteria": {
+    "AC-1": {
+      "status": "unknown",
+      "confidence": "none",
+      "required": true,
+      "risk": "medium",
+      "evidence": []
+    },
+    "AC-2": {
+      "status": "unknown",
+      "confidence": "none",
+      "required": true,
+      "risk": "medium",
+      "evidence": []
+    },
+    "AC-3": {
+      "status": "unknown",
+      "confidence": "none",
+      "required": true,
+      "risk": "medium",
+      "evidence": []
+    }
+  },
+  "capability_profile": {
+    "items": [],
+    "evidence": []
+  }
+}

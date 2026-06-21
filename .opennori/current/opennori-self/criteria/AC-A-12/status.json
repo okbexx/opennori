@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-A-12",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 3,
+  "latest_evidence_summary": "OpenNori validation is split into layered Vitest tags and npm scripts: npm test/test:quick runs a true fast smoke subset, domain scripts run acceptance/architecture/dashboard/docs/evidence/lifecycle/profile/reporting/schema tests, and check:full remains the release-grade full gate. Test-internal duplicate npm run build calls were removed from built-dist package tests so full validation does not rebuild twice inside Vitest.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

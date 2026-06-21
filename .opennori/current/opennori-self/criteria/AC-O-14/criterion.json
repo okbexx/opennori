@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-14",
+  "layer": "operator",
+  "user_story": "作为用户，我在 agent 生成 Nori Contract Draft 后，不会一次面对一大段所有 AC 的理解，而是能从 AC-1 开始逐条确认 agent 对当前 AC 的具体理解，全部确认后再决定 approve。",
+  "measurement": "阅读 nori、nori-acceptance、nori-autogoal packaged Skills、README、protocol、AGENTS、agent_next 输出和 draft next_actions，检查 draft 后是否要求 AC Review Loop：先概览，再逐条确认当前 AC。",
+  "threshold": "agent 在请求最终 approve 前必须先展示 compact overview，然后一次只解释当前 AC 的具体理解：精确用户入口、对象或字段、可见状态/提示/结果、不通过样例和具体证据对象；用户用 confirm AC-<n> 或 revise AC-<n>: ... 推进；全部 AC 逐条确认前不得运行 approve；批量解释、早期 approve 或泛化理解不能作为批准依据；该规则只在 Skill 行为协议、文档、agent_next 提示和资产测试中表达，不写成 CLI 主观 validator、实现计划或证据声明。",
+  "required": true,
+  "risk": "high",
+  "order": 63
+}

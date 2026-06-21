@@ -1,0 +1,33 @@
+{
+  "kind": "verification",
+  "basis": "tool-observation",
+  "summary": "Full OpenNori verification passed after goal dossier state and physical contract/ledger schemas were introduced.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run check:full",
+      "command": "npm run check:full"
+    },
+    {
+      "type": "artifact",
+      "label": "schemas/contract.schema.json",
+      "path": "schemas/contract.schema.json"
+    },
+    {
+      "type": "artifact",
+      "label": "schemas/ledger.schema.json",
+      "path": "schemas/ledger.schema.json"
+    },
+    {
+      "type": "artifact",
+      "label": "test/docs-schema.test.js",
+      "path": "test/docs-schema.test.js"
+    }
+  ],
+  "reviewability": "Run npm run check:full from the OpenNori repository; inspect .opennori/current/opennori-self/README.md and criteria/AC-P-16/README.md for the dossier state.",
+  "limitations": "This verifies repository behavior and OpenNori self-state; external projects still need their own upgrade/check run after installing the updated package.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T08:14:39.026Z"
+}

@@ -1,0 +1,201 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { test } from "vitest";
+import { buildContractFromBrief, buildEvidenceLedger, renderAcceptanceMarkdown, validateContract } from "../src/core.ts";
+import { validateSchema } from "../src/validation.ts";
+import { ROOT, run, tempRoot, draftArgsFromGoal, draftAndApprove, recordArchitectureRequirement } from "./support/cli.js";
+
+test("protocol v1 example is structurally loadable", { tags: ["docs", "quick"] }, () => {
+  const brief = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "opennori-self.json"), "utf8"));
+  const contract = buildContractFromBrief(brief);
+  const ledger = buildEvidenceLedger(contract);
+  const ids = contract.criteria.map((criterion) => criterion.id);
+  assert.equal(contract.goal_id, brief.goal_id);
+  assert.equal(contract.criteria.length > 0, true);
+  assert.equal(new Set(ids).size, ids.length);
+  for (const criterion of contract.criteria) {
+    assert.equal(Boolean(criterion.id), true);
+    assert.equal(Boolean(criterion.user_story), true);
+    assert.equal(Boolean(criterion.measurement), true);
+    assert.equal(Boolean(criterion.threshold), true);
+    assert.equal(["protocol", "operator", "productization", "architecture", "acceptance"].includes(criterion.layer || "acceptance"), true);
+  }
+  const markdown = renderAcceptanceMarkdown(contract, ledger);
+  assert.match(markdown, /## (User Acceptance Criteria|用户验收标准)/);
+  assert.match(markdown, /## (Rule|规则)/);
+});
+
+test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", { tags: ["docs"] }, () => {
+  const pluginRoot = path.join(ROOT, "plugins", "opennori");
+  const plugin = JSON.parse(fs.readFileSync(path.join(pluginRoot, ".codex-plugin", "plugin.json"), "utf8"));
+  const marketplace = JSON.parse(fs.readFileSync(path.join(ROOT, ".agents", "plugins", "marketplace.json"), "utf8"));
+  assert.equal(plugin.name, "opennori");
+  assert.equal(plugin.skills, "./skills/");
+  assert.equal(plugin.interface.displayName, "OpenNori");
+  assert.equal(plugin.interface.defaultPrompt.length >= 5, true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /Set up OpenNori/.test(prompt)), true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /autogoal/i.test(prompt)), true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /AC we just discussed/i.test(prompt)), true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /acceptance criteria/.test(prompt)), true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /dashboard.*live agent activity/i.test(prompt)), true);
+  assert.equal(marketplace.name, "opennori");
+  assert.equal(marketplace.interface.displayName, "OpenNori");
+  assert.equal(marketplace.plugins.length, 1);
+  assert.equal(marketplace.plugins[0].name, "opennori");
+  assert.equal(marketplace.plugins[0].source.source, "local");
+  assert.equal(marketplace.plugins[0].source.path, "./plugins/opennori");
+  assert.equal(marketplace.plugins[0].policy.installation, "AVAILABLE");
+  assert.equal(marketplace.plugins[0].policy.authentication, "ON_INSTALL");
+
+  const names = fs.readdirSync(path.join(pluginRoot, "skills"))
+    .filter((name) => fs.existsSync(path.join(pluginRoot, "skills", name, "SKILL.md")))
+    .sort();
+  assert.deepEqual(names.sort(), [
+    "nori",
+    "nori-acceptance",
+    "nori-architecture-apply",
+    "nori-architecture-brainstorm",
+    "nori-architecture-challenge",
+    "nori-autogoal",
+    "nori-build-vs-buy",
+    "nori-capability-profile",
+    "nori-evidence",
+    "nori-project-health",
+    "nori-reporting"
+  ].sort());
+
+  const behaviorProtocolSections = [
+    "## Mission",
+    "## Start Here",
+    "## Natural-Language Mapping",
+    "## State Writes",
+    "## Handoffs",
+    "## User Reply Shape",
+    "## Misuse Guards"
+  ];
+  for (const name of names) {
+    const asset = fs.readFileSync(path.join(pluginRoot, "skills", name, "SKILL.md"), "utf8");
+    assert.match(asset, /^---\nname: /);
+    assert.match(asset, /\ndescription: /);
+    for (const section of behaviorProtocolSections) {
+      assert.match(asset, new RegExp(section.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    }
+    assert.match(asset, /handoff|hand off/i);
+    assert.doesNotMatch(asset, /install --skill/);
+    assert.doesNotMatch(asset, /refresh-skill/);
+    assert.doesNotMatch(asset, /skill export/);
+  }
+});
+
+test("public product surfaces present OpenNori as one capability bundle", { tags: ["docs", "quick"] }, () => {
+  const readme = fs.readFileSync(path.join(ROOT, "README.md"), "utf8");
+  const plugin = JSON.parse(fs.readFileSync(path.join(ROOT, "plugins", "opennori", ".codex-plugin", "plugin.json"), "utf8"));
+  const nori = fs.readFileSync(path.join(ROOT, "plugins", "opennori", "skills", "nori", "SKILL.md"), "utf8");
+  const health = fs.readFileSync(path.join(ROOT, "plugins", "opennori", "skills", "nori-project-health", "SKILL.md"), "utf8");
+  const protocol = fs.readFileSync(path.join(ROOT, ".opennori", "protocol.md"), "utf8");
+
+  for (const text of [readme, plugin.interface.longDescription, nori, health, protocol]) {
+    assert.match(text, /capability bundle/);
+  }
+  assert.match(readme, /deterministic state layer/);
+  assert.match(readme, /not a separate product\s+path/);
+  assert.match(readme, /npx opennori setup/);
+  assert.match(readme, /opennori init/);
+  assert.match(plugin.interface.longDescription, /npx opennori setup installs/);
+  assert.match(plugin.interface.longDescription, /Do not treat Plugin, Skills, and CLI as separate user paths/);
+  assert.match(nori, /Do not split OpenNori into separate Plugin, Skill, and CLI user paths/);
+  assert.match(nori, /npx opennori setup/);
+  assert.match(health, /half-installed/);
+  assert.match(health, /opennori init/);
+  assert.match(protocol, /Direct CLI use\s+is an advanced, automation, or debugging route/);
+  assert.match(readme, /one user-facing Nori Contract stored as a goal\s+dossier/);
+  assert.match(readme, /each `criteria\/<AC-id>\/` directory keeps that AC's criterion/);
+  assert.match(readme, /每个 current 或 draft goal 对用户来说是一份 Nori Contract，物理上保存为 goal dossier/);
+  assert.match(readme, /每条 AC 在 `criteria\/<AC-id>\/` 下拥有自己的 `criterion\.json`/);
+  assert.match(protocol, /Language Preference/);
+  assert.match(protocol, /<goal>\/contract\.json` as the goal-level Nori Contract source of truth/);
+  assert.match(protocol, /<goal>\/ledger\.json` as the deterministic aggregate evidence\/status ledger/);
+  assert.match(protocol, /<goal>\/criteria\/<AC-id>\/criterion\.json` as each AC source of truth/);
+  assert.match(protocol, /<goal>\/criteria\/<AC-id>\/status\.json` as a rebuildable status projection/);
+
+  for (const text of [readme, protocol]) {
+    assert.doesNotMatch(text, /Choose one path/);
+    assert.doesNotMatch(text, /Try the CLI once/);
+    assert.doesNotMatch(text, /Pin the CLI to a project/);
+    assert.doesNotMatch(text, /npm install -D opennori/);
+  }
+});
+
+test("public JSON Schemas validate persisted OpenNori state and separate structure from semantics", { tags: ["schema"] }, () => {
+  const root = tempRoot();
+  run(["install", "--root", root, "--json"]);
+  const current = draftAndApprove(draftArgsFromGoal(root, "Ship schema-backed OpenNori state"));
+  recordArchitectureRequirement(
+    root,
+    current.data.goal_id,
+    "required",
+    "Schema-backed OpenNori state touches protocol, manifest, and architecture evidence files."
+  );
+  run([
+    "architecture", "baseline",
+    "--root", root,
+    "--goal", "Ship schema-backed OpenNori state",
+    "--goal-id", "ship-schema-backed-opennori-state",
+    "--confirm",
+    "--json"
+  ]);
+  run([
+    "architecture", "build-vs-buy",
+    "--root", root,
+    "--id", "schema-validation",
+    "--area", "schema-validation",
+    "--need", "Validate persisted OpenNori state",
+    "--recommendation", "reuse",
+    "--summary", "Use JSON Schema and Ajv for structural validation.",
+    "--current-project", "OpenNori writes JSON state files under .opennori.",
+    "--standard-library", "JSON.parse only validates syntax.",
+    "--official-sdk", "No official SDK applies.",
+    "--open-source", "Ajv is the selected JSON Schema validator.",
+    "--json"
+  ]);
+  run([
+    "architecture", "apply",
+    "--root", root,
+    "--goal", "ship-schema-backed-opennori-state",
+    "--criterion", "AC-1",
+    "--summary", "AC-1 follows the confirmed schema-backed architecture.",
+    "--fit", "The architecture apply record uses public schema-backed state.",
+    "--implementation-focus", "Keep schema validation as structural protocol validation.",
+    "--evidence", "Reviewed baseline and schema files.",
+    "--json"
+  ]);
+
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "manifest.json"), "utf8"));
+  const contract = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "current", current.data.goal_id, "contract.json"), "utf8"));
+  const ledger = JSON.parse(fs.readFileSync(current.data.evidence_path, "utf8"));
+  const evidence = { contract, ledger };
+  const requirement = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "requirements", "ship-schema-backed-opennori-state.json"), "utf8"));
+  const baseline = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "baseline.json"), "utf8"));
+  const decision = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "decisions", "schema-validation.json"), "utf8"));
+  const applyRecord = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "architecture", "evidence", "ship-schema-backed-opennori-state-ac-1-aligned.json"), "utf8"));
+
+  assert.equal(validateSchema("manifest", manifest).valid, true);
+  assert.equal(validateSchema("contract", contract).valid, true);
+  assert.equal(validateSchema("ledger", ledger).valid, true);
+  assert.equal(validateSchema("evidence-payload", evidence).valid, true);
+  assert.equal(validateSchema("architecture-requirement", requirement).valid, true);
+  assert.equal(validateSchema("architecture-baseline", baseline).valid, true);
+  assert.equal(validateSchema("build-vs-buy", decision).valid, true);
+  assert.equal(validateSchema("architecture-apply", applyRecord).valid, true);
+
+  const invalidShape = validateSchema("evidence-payload", { contract: { goal: "missing required fields" }, ledger: {} });
+  assert.equal(invalidShape.valid, false);
+  assert.equal(invalidShape.errors.some((error) => error.path.includes("/contract")), true);
+
+  contract.criteria[0].user_story = "Implementation detail only";
+  assert.equal(validateSchema("contract", contract).valid, true);
+  evidence.contract.criteria[0].user_story = "Implementation detail only";
+  assert.equal(validateSchema("evidence-payload", evidence).valid, true);
+  assert.equal(validateContract(evidence.contract, evidence.ledger).some((issue) => issue.path === "criteria[0].user_story"), false);
+});

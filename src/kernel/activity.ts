@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { currentGap } from "../core/evidence.ts";
-import { findCurrentPairs, nowIso, readJson, writeJson } from "../core/shared.ts";
-import type { NoriActivity, NoriActivityInput, NoriActivityState, NoriActivityTarget, NoriEvidencePayload } from "../types.ts";
+import { findCurrentPairs, nowIso, readGoalPayload, readJson, writeJson } from "../core/shared.ts";
+import type { NoriActivity, NoriActivityInput, NoriActivityState, NoriActivityTarget } from "../types.ts";
 import { appendEvent } from "./events.ts";
 
 export const ACTIVITY_SCHEMA_VERSION = "opennori/activity-v1";
@@ -66,7 +66,7 @@ type TargetCandidate = NoriActivityTarget & {
 
 function readTargetCandidate(pair: ReturnType<typeof findCurrentPairs>[number]): TargetCandidate | null {
   try {
-    const payload = readJson<NoriEvidencePayload>(pair.evidencePath);
+    const payload = readGoalPayload(pair);
     const gap = currentGap(payload.contract, payload.ledger);
     return {
       goal_id: payload.contract.goal_id || pair.goalId,

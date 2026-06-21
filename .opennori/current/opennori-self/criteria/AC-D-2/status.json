@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-D-2",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 1,
+  "latest_evidence_summary": "OpenNori now gives Skills a dashboard_activity routing surface, lets activity start/heartbeat/finish infer the unique current goal/gap, refuses ambiguous multi-goal activity, and keeps activity out of evidence/completion state.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

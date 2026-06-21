@@ -1,0 +1,10 @@
+{
+  "id": "AC-1",
+  "layer": "acceptance",
+  "user_story": "作为用户，我让 agent 用 OpenNori 推进 OpenNori 自身的通用基础设施改动时，能在 status、check、doctor 或 report 中看到 build-vs-buy 健康状态，而不是只看到 agent 说已经考虑过复用。",
+  "measurement": "用户让 agent 运行 opennori status、opennori check、opennori doctor 或 opennori report，并查看 Architecture / build-vs-buy 区域。",
+  "threshold": "输出显示 build-vs-buy 是 clear、needs-action 或 broken；如果某个基础设施决策缺少当前项目、标准库、官方 SDK、成熟开源库或自研理由，用户能看到具体 decision、问题和恢复动作。",
+  "required": true,
+  "risk": "high",
+  "order": 0
+}

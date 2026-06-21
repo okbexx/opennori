@@ -1,0 +1,38 @@
+{
+  "kind": "review-result",
+  "basis": "tool-observation",
+  "summary": "Doctor provides actionable recovery for unhealthy OpenNori state: tests cover missing manifest, stale manifest, invalid manifest, missing baseline routes, broken active goals, and Plugin asset health; current doctor output reports ready with no recovery actions.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js doctor --root . --json",
+      "command": "node ./bin/opennori.js doctor --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/doctor.ts",
+      "path": "src/lifecycle/doctor.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/doctor/plugin-health.ts",
+      "path": "src/lifecycle/doctor/plugin-health.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/doctor/active-goals.ts",
+      "path": "src/lifecycle/doctor/active-goals.ts"
+    }
+  ],
+  "reviewability": "Run doctor and inspect doctor tests for unhealthy fixtures and recovery_actions assertions.",
+  "limitations": "Current repo is healthy, so broken-state behavior is verified through test fixtures rather than by damaging this checkout.",
+  "gate": "accepted",
+  "created_at": "2026-06-13T15:02:52.802Z"
+}

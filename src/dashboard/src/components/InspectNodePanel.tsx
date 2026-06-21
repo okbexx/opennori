@@ -12,7 +12,7 @@ import {
   ListChecks,
   ShieldAlert
 } from "lucide-react";
-import type { RadarNode } from "./AcceptanceRadarNet";
+import type { RadarNode } from "../types";
 import type { CapabilityProfile, EvidenceRecord, ProfileCompliance } from "../types";
 
 /* 简体中文：定义可视化节点视图组件的参数属性 */

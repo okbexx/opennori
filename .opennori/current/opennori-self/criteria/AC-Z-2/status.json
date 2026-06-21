@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-Z-2",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "high",
+  "evidence_count": 1,
+  "latest_evidence_summary": "Install preview only manages OpenNori project state: .opennori directories, protocol, guide, manifest, agent routes, and architecture directories are create/skip/update actions, with no destructive writes unless explicitly confirmed.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "AC-O-3",
+  "layer": "operator",
+  "user_story": "作为用户，我在新的 Codex 会话里说“继续 OpenNori”后，agent 能恢复当前 active goal 并告诉我当前关键验收缺口。",
+  "measurement": "在新会话触发 OpenNori 恢复流程，观察 agent 返回内容。",
+  "threshold": "不依赖旧聊天上下文；能返回 goal id、当前状态、当前关键缺口和下一条需要证据的 AC。",
+  "required": true,
+  "risk": "high",
+  "order": 15
+}

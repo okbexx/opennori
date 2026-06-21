@@ -1,0 +1,10 @@
+{
+  "criterion_id": "AC-P-5",
+  "status": "passing",
+  "confidence": "verified",
+  "required": true,
+  "risk": "medium",
+  "evidence_count": 2,
+  "latest_evidence_summary": "opennori report leads with decision summary, goal, acceptance basis, Nori Profile, acceptance status, evidence health, user intervention, and conclusion.",
+  "updated_at": "2026-06-21T08:14:39.026Z"
+}

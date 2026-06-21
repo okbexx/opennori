@@ -1,0 +1,10 @@
+{
+  "id": "AC-Z-16",
+  "layer": "productization",
+  "user_story": "作为用户，我通过 npm 获取 OpenNori 后，能用 opennori 或 npx opennori 这个短入口开始，而不需要理解 install、root、dry-run、confirm 或内部 Skill 参数。",
+  "measurement": "在全新临时项目中运行 opennori 或 npx opennori 等价入口，再确认 bootstrap 后运行 opennori doctor。",
+  "threshold": "npm 包只提供 opennori 这个 bin；短入口默认展示首次接入 preview 且不写入项目；显式确认后只创建 .opennori 状态；不会向项目写入 package Skill assets；doctor 为 ready。",
+  "required": true,
+  "risk": "high",
+  "order": 36
+}

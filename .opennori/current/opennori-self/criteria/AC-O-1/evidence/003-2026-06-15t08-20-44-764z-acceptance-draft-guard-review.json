@@ -1,0 +1,38 @@
+{
+  "kind": "acceptance-draft-guard-review",
+  "basis": "tool-observation",
+  "summary": "A natural-language goal no longer becomes a blindly approvable generic Nori Contract: generic draft output carries a discovery-required acceptance basis, and nori-acceptance instructs agents to show ACCEPTANCE-BASIS questions before asking for approval.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
+      "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/acceptance.ts",
+      "path": "src/acceptance.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    }
+  ],
+  "reviewability": "Inspect the nori-acceptance Skill and run tests covering generic draft review findings.",
+  "limitations": "This does not generate a fully specific final contract by itself; it prevents premature approval and routes the agent back to discovery questions.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T08:20:44.764Z"
+}

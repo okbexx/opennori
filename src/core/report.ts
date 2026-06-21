@@ -391,6 +391,37 @@ function escapeTableCell(value: unknown): string {
     .replace(/\r?\n/g, " ");
 }
 
+function compactText(value: unknown, maxLength = 96): string {
+  const text = String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= maxLength) return text || "<none>";
+  return `${text.slice(0, Math.max(0, maxLength - 1)).trimEnd()}…`;
+}
+
+function wrapMarkdownText(value: unknown, maxLength = 100): string[] {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (!text) return ["<none>"];
+  const chunks: string[] = [];
+  let rest = text;
+  while (rest.length > maxLength) {
+    let index = rest.lastIndexOf(" ", maxLength);
+    if (index < Math.floor(maxLength * 0.5)) index = maxLength;
+    chunks.push(rest.slice(0, index).trim());
+    rest = rest.slice(index).trim();
+  }
+  if (rest) chunks.push(rest);
+  return chunks;
+}
+
+function pushWrappedField(lines: string[], label: string, value: unknown): void {
+  const chunks = wrapMarkdownText(value);
+  lines.push(`- ${label}: ${chunks[0]}`);
+  for (const chunk of chunks.slice(1)) {
+    lines.push(`  ${chunk}`);
+  }
+}
+
 function formatEvidenceValue(value: unknown): string {
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
@@ -413,11 +444,20 @@ function formatEvidenceSource(source: EvidenceSource | string): string {
   return parts.join(", ") || "<none>";
 }
 
-function formatEvidenceSources(evidence: EvidenceRecord | null | undefined, { root = process.cwd() } = {}): string {
+function formatEvidenceSources(evidence: EvidenceRecord | null | undefined, { root = process.cwd() } = {}): string[] {
   const view = evidenceView(evidence, { root });
-  if (!view) return "<none>";
-  if (view.sources.length === 0) return view.path || "<none>";
-  return view.sources.map((source) => formatEvidenceSource(source)).join("; ");
+  if (!view) return ["<none>"];
+  if (view.sources.length === 0) return [view.path || "<none>"];
+  return view.sources.map((source) => formatEvidenceSource(source));
+}
+
+function pushEvidenceSources(lines: string[], evidence: EvidenceRecord | null | undefined, { root = process.cwd() } = {}): void {
+  lines.push("- Sources:");
+  for (const source of formatEvidenceSources(evidence, { root })) {
+    for (const [index, chunk] of wrapMarkdownText(source, 112).entries()) {
+      lines.push(index === 0 ? `  - ${chunk}` : `    ${chunk}`);
+    }
+  }
 }
 
 export function renderReport(contract: NoriContract, ledger: EvidenceLedger, { root = process.cwd(), architecture = undefined }: CompletionContext = {}): string {
@@ -491,8 +531,8 @@ export function renderReport(contract: NoriContract, ledger: EvidenceLedger, { r
       : []),
     "## Acceptance Status",
     "",
-    "| ID | Layer | User acceptance criterion | Status | Confidence | Evidence summary | Basis | Sources | Reviewability | Limitations |",
-    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"
+    "| ID | Layer | Status | Confidence | Evidence | Basis |",
+    "| --- | --- | --- | --- | --- | --- |"
   ];
 
   for (const criterion of contract.criteria) {
@@ -500,7 +540,34 @@ export function renderReport(contract: NoriContract, ledger: EvidenceLedger, { r
     const latest = state?.evidence?.at(-1);
     const view = evidenceView(latest, { root });
     const evidence = view ? `${view.kind}: ${view.summary}` : "<none>";
-    lines.push(`| ${criterion.id} | ${criterion.layer || inferCriterionLayer(criterion.id)} | ${escapeTableCell(criterion.user_story)} | ${state?.status || "unknown"} | ${state?.confidence || "none"} | ${escapeTableCell(evidence)} | ${view?.basis || "<none>"} | ${escapeTableCell(formatEvidenceSources(latest, { root }))} | ${view?.reviewability || "<none>"} | ${escapeTableCell(view?.limitations || "<none>")} |`);
+    lines.push(`| ${criterion.id} | ${criterion.layer || inferCriterionLayer(criterion.id)} | ${state?.status || "unknown"} | ${state?.confidence || "none"} | ${escapeTableCell(compactText(evidence))} | ${view?.basis || "<none>"} |`);
+  }
+
+  lines.push("", "## Acceptance Details", "");
+  for (const criterion of contract.criteria) {
+    const state = ledger.criteria[criterion.id];
+    const latest = state?.evidence?.at(-1);
+    const view = evidenceView(latest, { root });
+    lines.push(`### ${criterion.id}`, "");
+    lines.push(`- Layer: ${criterion.layer || inferCriterionLayer(criterion.id)}`);
+    lines.push(`- Status: ${state?.status || "unknown"}`);
+    lines.push(`- Confidence: ${state?.confidence || "none"}`);
+    pushWrappedField(lines, "User acceptance criterion", criterion.user_story);
+    pushWrappedField(lines, "Measurement", criterion.measurement);
+    pushWrappedField(lines, "Passing threshold", criterion.threshold);
+    if (view) {
+      pushWrappedField(lines, "Evidence", `${view.kind}: ${view.summary}`);
+      lines.push(`- Basis: ${view.basis}`);
+      if (view.result) lines.push(`- Evidence result: ${view.result}`);
+      if (view.gate) lines.push(`- Evidence gate: ${view.gate}`);
+      if (view.created_at) lines.push(`- Evidence recorded: ${view.created_at}`);
+      pushEvidenceSources(lines, latest, { root });
+      pushWrappedField(lines, "Reviewability", view.reviewability || "<none>");
+      pushWrappedField(lines, "Limitations", view.limitations || "<none>");
+    } else {
+      lines.push("- Evidence: <none>");
+    }
+    lines.push("");
   }
 
   lines.push("", "## Current Acceptance Gap", "");

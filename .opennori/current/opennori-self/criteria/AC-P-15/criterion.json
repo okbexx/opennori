@@ -1,0 +1,10 @@
+{
+  "id": "AC-P-15",
+  "layer": "protocol",
+  "user_story": "作为 OpenNori 维护者或用户，我查看测试体系时，能清楚区分自动化测试只保护客观协议、状态、CLI、schema、report 和资产结构，而 AC 质量、UI/CRUD/Dashboard 操作路径挖掘、Enhanced Discovery 和 Skill 判断效果留给 Skills、dogfood、eval prompts 与用户复核。",
+  "measurement": "打开 docs/testing.md、AGENTS.md、test/ 目录、package.json 测试脚本和本机 nori-product-development Skill；再运行 quick 与对应领域测试脚本。",
+  "threshold": "test/core.test.js 只保留窄核心不变量；原 cli-commands 巨型测试被拆成 test/cli-*.test.js；acceptance/evidence/reporting/profile/lifecycle/architecture/docs-schema 等领域测试各自覆盖客观状态；文档和 Skill 明确禁止用自然语言词表或固定 prompt 断言来证明 agent 主观能力；npm run test:quick 和领域脚本可单独运行并通过。",
+  "required": true,
+  "risk": "medium",
+  "order": 70
+}

@@ -1,0 +1,90 @@
+{
+  "kind": "verification",
+  "basis": "tool-observation",
+  "summary": "Goal and per-AC dossiers are now the normal OpenNori state shape: current/drafts/completed goals are directories with contract.json, ledger.json, README.md, and criteria/<AC-id>/ criterion/status/README/evidence/artifacts entries; resume/status/doctor/manifest/reporting tests read the directory model.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-p-16-goal-dossiers",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-p-16-goal-dossiers.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck",
+      "command": "npm run typecheck"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:acceptance",
+      "command": "npm run test:acceptance"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:profile",
+      "command": "npm run test:profile"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:reporting",
+      "command": "npm run test:reporting"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:evidence",
+      "command": "npm run test:evidence"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:architecture",
+      "command": "npm run test:architecture"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:lifecycle",
+      "command": "npm run test:lifecycle"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/current/opennori-self/README.md",
+      "path": ".opennori/current/opennori-self/README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/current/opennori-self/criteria/AC-P-16/README.md",
+      "path": ".opennori/current/opennori-self/criteria/AC-P-16/README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/manifest.json",
+      "path": ".opennori/manifest.json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/shared.ts",
+      "path": "src/core/shared.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/runtime.ts",
+      "path": "src/cli/runtime.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/doctor/active-goals.ts",
+      "path": "src/lifecycle/doctor/active-goals.ts"
+    }
+  ],
+  "reviewability": "Open .opennori/current/opennori-self/README.md and .opennori/current/opennori-self/criteria/AC-P-16/README.md, then run opennori resume/doctor/status to see paths reported as goal dossier README plus ledger.json.",
+  "limitations": "Full npm run check still needs to be rerun after report/context refresh and final git diff review.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T08:05:14.282Z"
+}

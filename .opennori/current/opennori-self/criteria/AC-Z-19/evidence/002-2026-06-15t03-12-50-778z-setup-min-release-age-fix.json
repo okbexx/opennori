@@ -1,0 +1,43 @@
+{
+  "kind": "setup-min-release-age-fix",
+  "basis": "tool-observation",
+  "summary": "User reproduced npx opennori setup failing after confirmation because setup's internal global npm install did not inherit the command-local npm min-release-age exemption. OpenNori now runs npm install -g opennori@<version> --min-release-age=0 for its own CLI install, detects stale Codex Plugin versions instead of treating any enabled plugin as ready, and prints a readable setup_failed recovery message instead of throwing on missing data.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm install -g opennori@0.1.9 --dry-run",
+      "command": "npm install -g opennori@0.1.9 --dry-run"
+    },
+    {
+      "type": "command",
+      "label": "npm install -g opennori@0.1.9 --dry-run --min-release-age=0",
+      "command": "npm install -g opennori@0.1.9 --dry-run --min-release-age=0"
+    },
+    {
+      "type": "command",
+      "label": "npm exec -- vitest run test/cli-commands.test.js -t 'setup command|interactive setup'",
+      "command": "npm exec -- vitest run test/cli-commands.test.js -t 'setup command|interactive setup'"
+    },
+    {
+      "type": "command",
+      "label": "npm run check",
+      "command": "npm run check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/setup.ts",
+      "path": "src/lifecycle/setup.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/setup.ts",
+      "path": "src/cli/setup.ts"
+    }
+  ],
+  "reviewability": "Review the changed setup plan generation and interactive setup error rendering; rerun npm dry-run commands to see min-release-age behavior; rerun npm run check for full coverage.",
+  "limitations": "This records source-level and local verification. Published npm users need a new OpenNori release before npx opennori setup includes the fix.",
+  "gate": "accepted",
+  "created_at": "2026-06-15T03:12:50.778Z"
+}

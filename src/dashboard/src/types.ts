@@ -17,6 +17,18 @@ export type NoriEvent = {
   created_at: string;
 };
 
+export type RadarNode = {
+  id: string;
+  type: "goal" | "ac" | "evidence" | "profile";
+  label: string;
+  subLabel?: string;
+  x: number;
+  y: number;
+  status: string;
+  rawData: unknown;
+  radius?: number;
+};
+
 export type EvidenceRecord = {
   kind?: string;
   basis?: string;

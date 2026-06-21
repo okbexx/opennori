@@ -10,13 +10,13 @@ import {
   ok,
   pruneInvalidEvidence,
   refreshSnapshot,
-  syncAcceptanceMarkdown,
-  writeJson
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
-import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
+import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
 import type { EvidenceBasis, EvidenceInput } from "../../../types.ts";
 import { evidenceResult, evidenceSourcesFromArgs } from "./source-parsing.ts";
+
+type CommandRuntimeOverride = Pick<ActiveGoalRuntime, "loadPair"> & Partial<Pick<ActiveGoalRuntime, "savePair" | "refreshManifest">>;
 
 export const evidenceAddCommand = defineCommand({
   meta: {
@@ -109,8 +109,7 @@ export const evidenceAddCommand = defineCommand({
     if (!evidence.summary) throw new Error("--summary is required");
     addEvidence(contract, ledger, criterionId, evidence);
     pruneInvalidEvidence(contract, ledger, { root });
-    writeJson(evidencePath, { contract, ledger });
-    syncAcceptanceMarkdown(acceptancePath, contract, ledger);
+    data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
     const architecture = architectureState(root, contract.goal_id);
     const gap = currentGap(contract, ledger);
@@ -144,6 +143,6 @@ export const evidenceAddCommand = defineCommand({
   }
 });
 
-export async function runEvidenceAddCommand(rawArgs: string[], { loadPair }: ActiveGoalRuntime) {
-  return runJsonCommand(evidenceAddCommand, rawArgs, { loadPair, rawArgs });
+export async function runEvidenceAddCommand(rawArgs: string[], runtime: CommandRuntimeOverride) {
+  return runJsonCommand(evidenceAddCommand, rawArgs, { savePair, refreshManifest, ...runtime, rawArgs });
 }
