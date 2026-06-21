@@ -21,7 +21,7 @@ export { runEvidenceAddCommand, runEvidencePruneCommand } from "../../src/cli/co
 export { runInstallCommand } from "../../src/cli/commands/install.ts";
 export { runListCommand } from "../../src/cli/commands/list.ts";
 export { runPluginSyncCommand } from "../../src/cli/commands/plugin.ts";
-export { runProfileAddCommand, runProfileEvidenceCommand, runProfileShowCommand } from "../../src/cli/commands/profile.ts";
+export { runProfileAddCommand, runProfileCheckCommand, runProfileEvidenceCommand, runProfileShowCommand } from "../../src/cli/commands/profile.ts";
 export { runArchiveCommand, runReportCommand } from "../../src/cli/commands/reporting.ts";
 export { runSetupCommand } from "../../src/cli/commands/setup.ts";
 export { runSetup } from "../../src/cli/setup.ts";

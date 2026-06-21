@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-21T11:20:28.659Z",
+  "updated_at": "2026-06-21T13:40:55.807Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -93,6 +93,24 @@
     {
       "path": ".opennori/brainstorms",
       "kind": "directory",
+      "required": true,
+      "exists": true
+    },
+    {
+      "path": ".opennori/profile",
+      "kind": "directory",
+      "required": true,
+      "exists": true
+    },
+    {
+      "path": ".opennori/profile/profile.json",
+      "kind": "project-profile",
+      "required": true,
+      "exists": true
+    },
+    {
+      "path": ".opennori/profile/README.md",
+      "kind": "project-profile",
       "required": true,
       "exists": true
     },
@@ -441,6 +459,17 @@
         "schema_errors": []
       },
       {
+        "id": "opennori-self-ac-d-5-project-profile-dashboard",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-D-5",
+        "status": "aligned",
+        "summary": "Dashboard observes Project Profile and current-goal compliance without becoming a write surface.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-d-5-project-profile-dashboard.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
         "id": "opennori-self-ac-o-10-aligned",
         "goal_id": "opennori-self",
         "criterion_id": "AC-O-10",
@@ -452,6 +481,17 @@
         "schema_errors": []
       },
       {
+        "id": "opennori-self-ac-o-17-project-profile-draft-revision",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-O-17",
+        "status": "aligned",
+        "summary": "Draft criterion revision semantics remain goal-scoped while Project Profile stays project-scoped.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-o-17-project-profile-draft-revision.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
         "id": "opennori-self-ac-o-18-aligned",
         "goal_id": "opennori-self",
         "criterion_id": "AC-O-18",
@@ -459,6 +499,17 @@
         "summary": "Acceptance Surface Modeling stays in packaged Skills, protocol, README, AGENTS, and asset tests while CLI remains deterministic state storage rather than a subjective AC validator.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-ac-o-18-aligned.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-ac-o-8-project-profile-scope",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-O-8",
+        "status": "aligned",
+        "summary": "Project Profile scope is now project-level while current goal ledgers store only profile_evidence compliance records.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-o-8-project-profile-scope.json",
         "schema_valid": true,
         "schema_errors": []
       },

@@ -18,9 +18,9 @@ Workflow status: complete
 ## Acceptance Basis
 
 Status: approved
-Summary: Add acceptance for per-AC dossier goal state.
+Summary: Refresh completion judgment evidence to Project Profile terminology.
 
-## Nori Profile
+## Project Profile Compliance
 
 <none>
 
@@ -28,11 +28,11 @@ Summary: Add acceptance for per-AC dossier goal state.
 
 | ID | Layer | Status | Confidence | Evidence | Basis |
 | --- | --- | --- | --- | --- | --- |
-| AC-P-1 | protocol | passing | verified | review-result: Active Nori Contract markdown shows the goal, layered criteria, criterion status… | tool-observation |
+| AC-P-1 | protocol | passing | verified | project-profile-report-surface-review: Active Nori Contract dossier shows goal, layered criteri… | tool-observation |
 | AC-P-2 | protocol | passing | verified | protocol-boundary-review: OpenNori check now stays an objective state-health surface: runtime r… | tool-observation |
 | AC-P-3 | protocol | passing | verified | review-result: opennori next/status return current_gap, completion answer, intervention, archit… | tool-observation |
 | AC-P-4 | protocol | passing | verified | review-result: High-risk passing evidence now preserves the agent-submitted objective result wh… | tool-observation |
-| AC-P-5 | protocol | passing | verified | review-result: opennori report leads with decision summary, goal, acceptance basis, Nori Profil… | tool-observation |
+| AC-P-5 | protocol | passing | verified | project-profile-report-rendering-review: OpenNori report leads with decision summary, goal, acc… | tool-observation |
 | AC-P-6 | protocol | passing | verified | review-result: Report and status expose evidence kind, basis, confidence, sources, reviewabilit… | tool-observation |
 | AC-P-7 | protocol | passing | verified | review-result: Evidence sources remain flexible but reviewable: commands, artifacts, URLs, path… | tool-observation |
 | AC-P-8 | protocol | passing | verified | review-result: Evidence basis distinguishes tool observations, artifact reviews, protocol check… | tool-observation |
@@ -44,11 +44,11 @@ Summary: Add acceptance for per-AC dossier goal state.
 | AC-O-1 | operator | passing | verified | acceptance-draft-guard-review: A natural-language goal no longer becomes a blindly approvable g… | tool-observation |
 | AC-O-2 | operator | passing | verified | review-result: Approval and criterion update flows preserve the acceptance basis and keep compl… | tool-observation |
 | AC-O-3 | operator | passing | verified | review-result: resume/status recover active goals from .opennori active files, including curren… | tool-observation |
-| AC-O-4 | operator | passing | verified | review-result: When the user asks if work is done, status/report answer from current_gap, requi… | tool-observation |
+| AC-O-4 | operator | passing | verified | completion-judgment-project-profile-review: When the user asks if work is done, status/report a… | tool-observation |
 | AC-O-5 | operator | passing | verified | review-result: Blocked criteria and violated required profile items produce intervention.requir… | tool-observation |
 | AC-O-6 | operator | passing | verified | review-result: criterion update rewrites the user-facing AC, clears stale criterion evidence, p… | tool-observation |
 | AC-O-7 | operator | passing | verified | review-result: brainstorm produces selectable acceptance directions with user value, observable… | tool-observation |
-| AC-O-8 | operator | passing | verified | review-result: Nori Profile now separates blocking compliance from review risk: must/violated a… | tool-observation |
+| AC-O-8 | operator | passing | verified | project-profile-source-directory-verification: OpenNori initializes .opennori/profile/profile.j… | tool-observation |
 | AC-Z-1 | productization | passing | verified | review-result: OpenNori exposes package-local Codex Plugin Skills for agent discovery: the mark… | tool-observation |
 | AC-Z-2 | productization | passing | verified | review-result: Install preview only manages OpenNori project state: .opennori directories, prot… | tool-observation |
 | AC-Z-3 | productization | passing | verified | review-result: changes groups .opennori/examples acceptance artifacts separately from implement… | tool-observation |
@@ -83,7 +83,7 @@ Summary: Add acceptance for per-AC dossier goal state.
 | AC-D-2 | acceptance | passing | verified | dashboard-activity-workflow: OpenNori now gives Skills a dashboard_activity routing surface, le… | tool-observation |
 | AC-D-3 | acceptance | passing | verified | dashboard-execution-presence-review: Dashboard event focus now follows execution-relevant OpenN… | tool-observation |
 | AC-D-4 | acceptance | passing | verified | dashboard-observation-boundary: Dashboard now presents user intervention as an agent-conversati… | tool-observation |
-| AC-Z-21 | productization | passing | verified | review-result: OpenNori now preserves language preference across user-reviewable profile assets… | tool-observation |
+| AC-Z-21 | productization | passing | verified | project-profile-language-boundary-review: OpenNori preserves language preference across user-re… | tool-observation |
 | AC-O-9 | operator | passing | verified | review-result: OpenNori autogoal is implemented as a packaged Skill-driven convergence mode tha… | tool-observation |
 | AC-O-10 | operator | passing | verified | review-result: OpenNori now supports adopting an in-progress AC discussion as a standard draft… | tool-observation |
 | AC-O-11 | operator | passing | verified | review-result: OpenNori now directs visible interface goals through UI/UX acceptance discovery… | tool-observation |
@@ -94,9 +94,9 @@ Summary: Add acceptance for per-AC dossier goal state.
 | AC-O-14 | operator | passing | verified | review-result: AC Review Loop now documents and tests the safe draft criterion add path, preven… | artifact-review |
 | AC-O-15 | operator | passing | high | asset-review: Enhanced autogoal discovery is documented as nori-autogoal Skill behavior and sur… | artifact_review |
 | AC-O-16 | operator | passing | high | review-result: Enhanced autogoal now leaves a user-visible confirmation surface: Skill replies… | tool-observation |
-| AC-O-17 | operator | passing | high | review-result: Draft criterion revisions now preserve draft acceptance state: criterion add/upd… | tool-observation |
+| AC-O-17 | operator | passing | verified | draft-revision-boundary-verification: Draft criterion revision remains goal-dossier state while… | tool-observation |
 | AC-O-18 | operator | passing | high | review-result: Acceptance Surface Modeling now covers all OpenNori packaged Skill bodies and fr… | tool-observation |
-| AC-D-5 | acceptance | passing | verified | dashboard-profile-idle-state-verification: Dashboard Profile drawer now distinguishes no-curren… | tool-observation |
+| AC-D-5 | acceptance | passing | verified | dashboard-project-profile-verification: Dashboard now exposes Project Profile as a readonly pro… | tool-observation |
 | AC-P-14 | protocol | passing | verified | report-rendering-test: OpenNori report rendering now keeps the Acceptance Status table compact… | tool-observation |
 | AC-P-15 | protocol | passing | verified | test-system-refactor-review: OpenNori test coverage has been reorganized around objective proto… | tool-observation |
 | AC-P-16 | protocol | passing | verified | protocol-dashboard-review: Dashboard status projection now uses the goal dossier model directly… | tool-observation |
@@ -111,22 +111,25 @@ Summary: Add acceptance for per-AC dossier goal state.
 - User acceptance criterion: 作为用户，我在编辑器或文件浏览器里打开 active Nori Contract 后，能在 60 秒内看懂目标、分层验收标准、每条状态和当前缺口。
 - Measurement: 打开 .opennori/active/<goal>.acceptance.md 并阅读。
 - Passing threshold: 不读聊天历史、不读实现说明，60 秒内能判断任务在验收层面的状态和下一条缺口。
-- Evidence: review-result: Active Nori Contract markdown shows the goal, layered criteria, criterion statuses,
-  Nori Profile section, and current rule in one readable file.
+- Evidence: project-profile-report-surface-review: Active Nori Contract dossier shows goal, layered criteria,
+  criterion statuses, Project Profile compliance, and the current rule in one readable review surface.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-12T03:14:14.917Z
+- Evidence recorded: 2026-06-21T13:34:19.202Z
 - Sources:
-  - type=command, label=npm run check, command=npm run check
-  - type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root .
-    --json
-  - type=artifact, label=test/core.test.js, path=test/core.test.js
-  - type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md
-- Reviewability: Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and
-  generated report.
-- Limitations: This is local repository evidence for the current worktree; npm publishing and public site
-  deployment are separate release steps.
+  - type=command, label=node ./bin/opennori.js status --root . --json, command=node ./bin/opennori.js status --root
+    . --json
+  - type=artifact, label=.opennori/current/opennori-self/README.md, path=.opennori/current/opennori-self/README.md
+  - type=artifact, label=.opennori/current/opennori-self/contract.json,
+    path=.opennori/current/opennori-self/contract.json
+  - type=artifact, label=.opennori/current/opennori-self/ledger.json,
+    path=.opennori/current/opennori-self/ledger.json
+- Reviewability: Open .opennori/current/opennori-self/README.md and confirm the readable contract surface leads with
+  goal, criteria, status, Project Profile compliance, and current gap/rule without requiring chat
+  history.
+- Limitations: This verifies the generated active goal dossier and status projection. It does not replace user
+  review of whether future contract prose is sufficiently detailed.
 
 ### AC-P-2
 
@@ -250,22 +253,23 @@ Summary: Add acceptance for per-AC dossier goal state.
 - User acceptance criterion: 作为用户，我运行 opennori report 后，能看到目标、分层 AC 状态、证据摘要、当前缺口、是否需要我介入和结论。
 - Measurement: 运行 opennori report 或让 Codex 生成 OpenNori 报告。
 - Passing threshold: 报告默认围绕验收状态和证据组织，不把过程任务当作主线。
-- Evidence: review-result: opennori report leads with decision summary, goal, acceptance basis, Nori Profile,
-  acceptance status, evidence health, user intervention, and conclusion.
+- Evidence: project-profile-report-rendering-review: OpenNori report leads with decision summary, goal,
+  acceptance basis, Project Profile Compliance, acceptance status, evidence health, user intervention,
+  and conclusion.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-12T03:14:15.128Z
+- Evidence recorded: 2026-06-21T13:34:39.553Z
 - Sources:
-  - type=command, label=npm run check, command=npm run check
-  - type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root .
-    --json
-  - type=artifact, label=test/core.test.js, path=test/core.test.js
-  - type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md
-- Reviewability: Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and
-  generated report.
-- Limitations: This is local repository evidence for the current worktree; npm publishing and public site
-  deployment are separate release steps.
+  - type=command, label=node ./bin/opennori.js report --root . --json, command=node ./bin/opennori.js report --root
+    . --json
+  - type=artifact, label=src/core/report.ts, path=src/core/report.ts
+  - type=artifact, label=.opennori/reports/opennori-self.report.md, path=.opennori/reports/opennori-self.report.md
+- Reviewability: Run opennori report and inspect the generated Markdown. Confirm it separates Product acceptance,
+  Project Profile Compliance, Architecture Baseline, evidence health, user intervention, and final
+  conclusion without making process tasks the main storyline.
+- Limitations: This verifies current report structure and terminology. It does not prove every future report will
+  have ideal natural-language wording.
 
 ### AC-P-6
 
@@ -567,22 +571,26 @@ Summary: Add acceptance for per-AC dossier goal state.
 - User acceptance criterion: 作为用户，我在 Codex 对话里问“现在完成了吗？”后，agent 只能基于 required AC 的状态和证据回答。
 - Measurement: 向 agent 询问完成状态并检查回答依据。
 - Passing threshold: 只有 required AC 全部 passing 或 waived 时才能回答 complete；否则必须指出未通过或 blocked 的 AC。
-- Evidence: review-result: When the user asks if work is done, status/report answer from current_gap, required
-  AC evidence, Nori Profile compliance, Architecture Baseline state, and evidence_health.
+- Evidence: completion-judgment-project-profile-review: When the user asks if work is done, status/report answer
+  from current_gap, required AC evidence, Project Profile compliance, Architecture Baseline state, and
+  evidence_health.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-12T03:14:15.793Z
+- Evidence recorded: 2026-06-21T13:34:58.861Z
 - Sources:
-  - type=command, label=npm run check, command=npm run check
-  - type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root .
-    --json
-  - type=artifact, label=test/core.test.js, path=test/core.test.js
-  - type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md
-- Reviewability: Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and
-  generated report.
-- Limitations: This is local repository evidence for the current worktree; npm publishing and public site
-  deployment are separate release steps.
+  - type=command, label=node ./bin/opennori.js status --root . --json, command=node ./bin/opennori.js status --root
+    . --json
+  - type=command, label=node ./bin/opennori.js report --root . --json, command=node ./bin/opennori.js report --root
+    . --json
+  - type=artifact, label=src/core/contract.ts, path=src/core/contract.ts
+  - type=artifact, label=src/core/report.ts, path=src/core/report.ts
+  - type=artifact, label=src/core/profile.ts, path=src/core/profile.ts
+- Reviewability: Ask for status/report and confirm the completion answer is based on objective current_gap and
+  required AC evidence, with Project Profile compliance and Architecture Baseline surfaced as review
+  context instead of hidden agent self-certification.
+- Limitations: This verifies completion routing and report/status surfaces in the current repository. It does not
+  replace human acceptance of subjective product quality.
 
 ### AC-O-5
 
@@ -664,24 +672,35 @@ Summary: Add acceptance for per-AC dossier goal state.
 - Layer: operator
 - Status: passing
 - Confidence: verified
-- User acceptance criterion: 作为用户，我在 Codex 对话里声明必须使用某个 Skill、偏好某个技术栈或避免某个工具后，agent 能记录这些偏好并在完成前告诉我是否遵守。
-- Measurement: 在 Codex 对话中提出能力偏好后，查看 active contract、status 或 report 中的 Nori Profile。
-- Passing threshold: 用户不需要记住 CLI；must 或 avoid 的违反会阻止 complete，prefer 会被展示但不阻止 complete；这些偏好不会被写成用户 AC。
-- Evidence: review-result: Nori Profile now separates blocking compliance from review risk: must/violated avoid
-  still block, while unknown or violated prefer items surface as profile_review and make objective
-  completion review-risk rather than confidently complete.
+- User acceptance criterion: 作为用户，我在 Codex 对话里声明必须使用某个 Skill、偏好某个技术栈、避免某个工具或指定安装策略后，agent 能把它记录为项目级 Project Profile，并在当前 goal
+  完成前告诉我该 goal 是否遵守。
+- Measurement: 在 Codex 对话中提出能力偏好后，查看 .opennori/profile/、status、report 或 dashboard 的 Project Profile compliance。
+- Passing threshold: 用户不需要记住 CLI；Project Profile 保存在 .opennori/profile/，不被复制进 Nori Contract 或写成 Product AC；current goal 的
+  ledger 只记录 profile_evidence；must 或 avoid 的违反会阻止 complete，prefer 作为 review risk 展示；没有 current goal
+  时可查看/编辑 Project Profile 但不评价合规。
+- Evidence: project-profile-source-directory-verification: OpenNori initializes .opennori/profile/profile.json
+  as the project-level Project Profile source and .opennori/profile/README.md as a generated review
+  surface; goal ledgers store only profile_evidence compliance records.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-14T01:10:50.024Z
+- Evidence recorded: 2026-06-21T13:40:42.523Z
 - Sources:
-  - type=command, label=npx vitest run test/core.test.js -t 'profile|completion-review|required skills', command=npx
-    vitest run test/core.test.js -t 'profile|completion-review|required skills'
-  - type=command, label=npm run typecheck, command=npm run typecheck
-- Reviewability: Run the targeted profile/completion tests and inspect profileCompliance, completionAnswer, check
-  output, and the new preferred-profile regression.
-- Limitations: This verifies local CLI semantics; agent/user still decides whether a preference risk should be
-  accepted, waived, or resolved.
+  - type=command, label=node ./bin/opennori.js init --root . --confirm --json, command=node ./bin/opennori.js init
+    --root . --confirm --json
+  - type=command, label=npm run test:profile, command=npm run test:profile
+  - type=artifact, label=src/core/profile.ts, path=src/core/profile.ts
+  - type=artifact, label=src/lifecycle/install.ts, path=src/lifecycle/install.ts
+  - type=artifact, label=src/lifecycle/manifest.ts, path=src/lifecycle/manifest.ts
+  - type=artifact, label=test/cli-lifecycle.test.js, path=test/cli-lifecycle.test.js
+  - type=artifact, label=.opennori/profile/profile.json, path=.opennori/profile/profile.json
+  - type=artifact, label=.opennori/profile/README.md, path=.opennori/profile/README.md
+- Reviewability: Inspect .opennori/profile/profile.json and README.md, lifecycle install actions, manifest managed
+  files, and profile tests. Confirm profile.json is source data, README is generated from it, and
+  current goal ledgers contain only compliance evidence.
+- Limitations: This verifies project-state initialization and scope boundaries. It does not add Project Profile
+  preferences to this repository; the current Project Profile remains empty until a user or agent
+  records preferences.
 
 ### AC-Z-1
 
@@ -1746,42 +1765,30 @@ Summary: Add acceptance for per-AC dossier goal state.
   contract 做普通证据写入和显式语言确认，观察可读契约标题、字段说明和报告/候选目标语言变化。
 - Passing threshold: 新目标的可读内容按用户要求显示中文或英文；用户不需要记忆底层参数；旧 contract 在普通 status/report/check/evidence
   写入后仍保持原展示语言；只有用户明确批准改变展示语言后，后续契约和报告才显示新语言；底层协议字段保持稳定，不影响 agent 继续读取状态。
-- Evidence: review-result: OpenNori now preserves language preference across user-reviewable profile assets:
-  packaged Skills route wrong-language Nori Profile and project Architecture Profile content back to
-  profile/architecture Skills; project profile prose follows explicit user language or
-  presentation.language while stable ids and protocol fields remain English. CLI help now defaults to
-  human-readable text, and draft human output presents one Nori Contract Draft with an internal
-  evidence ledger instead of two user-facing deliverables.
+- Evidence: project-profile-language-boundary-review: OpenNori preserves language preference across
+  user-reviewable contract assets and Project Profile prose: packaged Skills route wrong-language
+  Project Profile and project Architecture Profile content back to profile/architecture Skills; stable
+  ids and protocol fields remain English, and CLI does not auto-translate existing approved contracts
+  without explicit user-approved revision.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-20T10:51:39.262Z
+- Evidence recorded: 2026-06-21T13:35:19.621Z
 - Sources:
-  - type=command, label=npm run check, command=npm run check
-  - type=command, label=npx vitest run test/cli-commands.test.js test/core.test.js, command=npx vitest run
-    test/cli-commands.test.js test/core.test.js
-  - type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root .
-    --json
-  - type=command, label=node ./bin/opennori.js status --root . --json, command=node ./bin/opennori.js status --root
-    . --json
   - type=artifact, label=plugins/opennori/skills/nori/SKILL.md, path=plugins/opennori/skills/nori/SKILL.md
+  - type=artifact, label=plugins/opennori/skills/nori-acceptance/SKILL.md,
+    path=plugins/opennori/skills/nori-acceptance/SKILL.md
+  - type=artifact, label=plugins/opennori/skills/nori-autogoal/SKILL.md,
+    path=plugins/opennori/skills/nori-autogoal/SKILL.md
   - type=artifact, label=plugins/opennori/skills/nori-capability-profile/SKILL.md,
     path=plugins/opennori/skills/nori-capability-profile/SKILL.md
-  - type=artifact, label=plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md,
-    path=plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md
   - type=artifact, label=README.md, path=README.md
   - type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md
-  - type=artifact, label=AGENTS.md, path=AGENTS.md
-  - type=artifact, label=src/cli.ts, path=src/cli.ts
-  - type=artifact, label=src/cli/command-tree.ts, path=src/cli/command-tree.ts
-  - type=artifact, label=src/cli/human-output.ts, path=src/cli/human-output.ts
-  - type=artifact, label=src/cli/commands/acceptance/draft.ts, path=src/cli/commands/acceptance/draft.ts
-  - type=artifact, label=test/core.test.js, path=test/core.test.js
-- Reviewability: Review the listed Skill, protocol, README, AGENTS, CLI, and test files; rerun npm run check and the
-  targeted Vitest command to confirm profile-language rules and human output behavior.
-- Limitations: This records the behavior rule and objective asset/CLI tests. It does not translate existing project
-  profiles automatically; agents should revise or recreate wrong-language profile prose after user
-  review.
+- Reviewability: Inspect packaged Skills, README, protocol, and .opennori/profile/README.md. Confirm language
+  preference is handled in Skill/user-review behavior, Project Profile user-readable prose is treated
+  as project-level content, and protocol field names remain stable English.
+- Limitations: This verifies product rules and current assets. It does not implement CLI auto-translation, by
+  design; wrong-language prose is corrected through Skill-driven revision and user confirmation.
 
 ### AC-O-9
 
@@ -2237,42 +2244,44 @@ Summary: Add acceptance for per-AC dossier goal state.
 
 - Layer: operator
 - Status: passing
-- Confidence: high
+- Confidence: verified
 - User acceptance criterion: 作为用户，我在 draft 的 AC Review Loop 里修订某条 AC 后，OpenNori 仍然把这份 Nori Contract 保持为待确认草案，而不会把
   acceptance_basis 自动标成 approved、不会跳到 profile/architecture/implementation，也不会把修订本身当作 evidence。
-- Measurement: 在一个带有 required Nori Profile 的 draft 上运行 criterion update --from-draft，然后查看 status/current_gap、draft
-  evidence JSON、acceptance markdown、nori-acceptance Skill 和协议文档。
+- Measurement: 在一个带有 required Project Profile 的 draft 上运行 criterion update --from-draft，然后查看
+  status/current_gap、draft evidence JSON、acceptance markdown、nori-acceptance Skill 和协议文档。
 - Passing threshold: 修订 draft AC 后 acceptance_basis.status 仍为 draft，approved_at 不存在，source/mode/coverage 等 basis metadata
   保留，workflow_status 为 draft，current_gap 为 ACCEPTANCE-BASIS；只有最终 approve 后才能进入
   profile、architecture、implementation 或 evidence 路由。已批准 current contract 的 criterion update 仍会清理该 AC
   的旧 evidence 并产生新的 evidence gap。
-- Evidence: review-result: Draft criterion revisions now preserve draft acceptance state: criterion add/update
-  keeps drafts unapproved, preserves source/mode/coverage metadata, removes approved_at, and routes
-  current_gap to ACCEPTANCE-BASIS even when required profile items exist. Approved current-contract
-  revisions still clear stale evidence and create an evidence gap.
+- Evidence: draft-revision-boundary-verification: Draft criterion revision remains goal-dossier state while
+  Project Profile is separate project state. The criterion update path synchronizes contract.json,
+  ledger.json, criterion README/status, and manifest for draft/current AC revisions; Project Profile
+  requirements are created through profile add under .opennori/profile and no longer embedded into
+  draft ledgers. The acceptance tests exercise a draft with a required Project Profile preference and
+  verify acceptance_basis remains draft after criterion update.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-20T06:07:33.789Z
+- Evidence recorded: 2026-06-21T13:27:23.872Z
 - Sources:
-  - type=command, label=npx vitest run test/cli-commands.test.js --testNamePattern 'criterion update command',
-    command=npx vitest run test/cli-commands.test.js --testNamePattern 'criterion update command'
-  - type=command, label=npx vitest run test/core.test.js --testNamePattern 'criterion update', command=npx vitest
-    run test/core.test.js --testNamePattern 'criterion update'
-  - type=command, label=npm run typecheck, command=npm run typecheck
+  - type=architecture-apply, label=opennori-self-ac-o-17-project-profile-draft-revision,
+    path=.opennori/architecture/evidence/opennori-self-ac-o-17-project-profile-draft-revision.json,
+    summary=Architecture Baseline alignment context. This is not Product AC evidence by itself., role=context
+  - type=command, label=npm run test:acceptance, command=npm run test:acceptance
+  - type=command, label=npm run test:profile, command=npm run test:profile
+  - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
   - type=artifact, label=src/cli/commands/acceptance/criterion.ts, path=src/cli/commands/acceptance/criterion.ts
-  - type=artifact, label=test/core.test.js, path=test/core.test.js
-  - type=artifact, label=plugins/opennori/skills/nori-acceptance/SKILL.md,
-    path=plugins/opennori/skills/nori-acceptance/SKILL.md
+  - type=artifact, label=src/cli/commands/profile/add.ts, path=src/cli/commands/profile/add.ts
+  - type=artifact, label=test/cli-acceptance.test.js, path=test/cli-acceptance.test.js
+  - type=artifact, label=test/cli-profile.test.js, path=test/cli-profile.test.js
   - type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md
-  - type=artifact, label=README.md, path=README.md
   - type=artifact, label=AGENTS.md, path=AGENTS.md
-- Reviewability: Review criterion.ts and the draft/current regression tests. Rerun the listed Vitest commands plus
-  npm run typecheck; inspect status on the draft fixture to confirm current_gap remains
-  ACCEPTANCE-BASIS.
-- Limitations: This verifies deterministic CLI state and Skill/protocol guidance. It does not prove every future
-  agent will phrase AC revisions well; the AC Review Loop remains a Skill/user conversation
-  responsibility.
+- Reviewability: Inspect the listed command modules and tests. In test/cli-acceptance.test.js, verify the draft
+  revision fixture creates Project Profile with profile add and still asserts acceptance_basis.status
+  remains draft after criterion update. Rerun acceptance/profile tests and typecheck.
+- Limitations: This proves state synchronization and Project Profile separation for draft AC revision. It does not
+  replace the user's AC Review Loop confirmation of whether the revised AC wording is semantically
+  correct.
 
 ### AC-O-18
 
@@ -2350,42 +2359,50 @@ Summary: Add acceptance for per-AC dossier goal state.
 - Layer: acceptance
 - Status: passing
 - Confidence: verified
-- User acceptance criterion: 作为用户，我打开 OpenNori dashboard 后，能点击顶部 Profile 图标，在右侧只读浮窗查看当前 Nori Profile 的执行偏好、合规状态、阻塞或 review
-  风险和证据摘要，而不需要回到 CLI 才知道 agent 是否遵守了我声明的 Skill、技术栈或 avoid 约束。
-- Measurement: 启动 dashboard，在存在和不存在 Nori Profile items 的项目中点击顶部 Profile 图标，并切换 UI Panel / Raw JSON 查看浮窗内容。
-- Passing threshold: 右侧 overlay 浮窗展示 Profile item 总数、must/prefer/avoid 分布、complete/blocking/review 状态、每个 item 的
-  type/name/strength/purpose/scope/install policy/latest evidence summary；没有 profile 时显示空态；浮窗只读，不提供
+- User acceptance criterion: 作为用户，我打开 OpenNori dashboard 后，能点击顶部 Project Profile 图标，在右侧只读浮窗查看项目级 Profile 偏好，以及当前 goal
+  对这些偏好的合规状态、阻塞项、review 风险和证据摘要。
+- Measurement: 启动 dashboard，在有 current goal、没有 current goal、存在和不存在 Project Profile items 的项目中点击顶部 Project Profile
+  图标，并切换 UI Panel / Raw JSON 查看浮窗内容。
+- Passing threshold: 右侧 overlay 浮窗展示 Project Profile item 总数、must/prefer/avoid 分布、当前 goal compliance
+  complete/blocking/review 状态、每个 item 的 type/name/strength/purpose/scope/install policy/latest
+  compliance evidence；没有 current goal 时显示 Project Profile 已加载但合规未评价，而不是显示完成；没有 profile 时显示空态；浮窗只读，不提供
   add/check/evidence/waive/confirm 等写状态按钮；Profile 不被渲染为 Product AC 节点；打开或关闭浮窗前后，radar/main
-  区域不重新分配布局宽度，浮窗只覆盖在右侧观察层上。
-- Evidence: dashboard-profile-idle-state-verification: Dashboard Profile drawer now distinguishes
-  no-current-goal from satisfied compliance: when there is no current Nori Contract, the Profile icon
-  opens a readonly drawer that shows NOT EVALUATED, explains Profile is current-contract-scoped, and
-  says no current goal profile is active instead of reporting empty Profile as COMPLETE.
+  区域不重新分配布局宽度。
+- Evidence: dashboard-project-profile-verification: Dashboard now exposes Project Profile as a readonly
+  project-level overlay and evaluates compliance only when a current goal exists. The header button is
+  labeled Inspect Project Profile, the profile node raw data distinguishes project_only from
+  current_goal_compliance, no-current-goal snapshots still include Project Profile but mark compliance
+  not evaluated, and the overlay stays read-only without add/check/evidence/waive/confirm controls.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-21T11:20:20.581Z
+- Evidence recorded: 2026-06-21T13:27:41.043Z
 - Sources:
-  - type=reference, label=Playwright observation: clicked Inspect Nori Profile on the no-current Agent Workbench
-    dashboard; drawer showed PROFILE: Profile, compliance NOT EVALUATED, No Current Goal Profile, and No current
-    goal profile is active.
-  - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
-  - type=command, label=npm run typecheck:dashboard, command=npm run typecheck:dashboard
-  - type=command, label=npm run build:dashboard, command=npm run build:dashboard
+  - type=architecture-apply, label=opennori-self-ac-d-5-project-profile-dashboard,
+    path=.opennori/architecture/evidence/opennori-self-ac-d-5-project-profile-dashboard.json, summary=Architecture
+    Baseline alignment context. This is not Product AC evidence by itself., role=context
   - type=command, label=npm run test:dashboard, command=npm run test:dashboard
-  - type=command, label=npm run test:quick, command=npm run test:quick
-  - type=command, label=git diff --check, command=git diff --check
+  - type=command, label=npm run test:profile, command=npm run test:profile
+  - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
+  - type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root .
+    --json
+  - type=artifact, label=src/kernel/snapshot.ts, path=src/kernel/snapshot.ts
+  - type=artifact, label=src/dashboard/src/App.tsx, path=src/dashboard/src/App.tsx
   - type=artifact, label=src/dashboard/src/selection.ts, path=src/dashboard/src/selection.ts
   - type=artifact, label=src/dashboard/src/components/InspectNodePanel.tsx,
     path=src/dashboard/src/components/InspectNodePanel.tsx
   - type=artifact, label=src/dashboard/src/types.ts, path=src/dashboard/src/types.ts
+  - type=artifact, label=test/cli-dashboard.test.js, path=test/cli-dashboard.test.js
   - type=artifact, label=test/dashboard-selection.test.ts, path=test/dashboard-selection.test.ts
-- Reviewability: Run the listed commands, start dashboard against a no-current-goal project, click the header Profile
-  icon, and verify the drawer says NOT EVALUATED with no-current explanatory copy rather than
-  COMPLETE.
-- Limitations: This verifies current dashboard Profile semantics and selection state. It does not restore
-  historical Profile items into a new active contract; completed goal details remain report/history
-  state.
+  - type=artifact, label=dashboard/index.html, path=dashboard/index.html
+- Reviewability: Inspect the listed dashboard and kernel files. Confirm the header icon label is Inspect Project
+  Profile, profile rawData scope is project_only when there is no current goal and
+  current_goal_compliance when active, no-current snapshots include Project Profile without marking
+  compliance complete, and the panel exposes no write actions. Rerun dashboard/profile tests and
+  typecheck.
+- Limitations: This verifies the dashboard state model, built assets, and test coverage. It does not include a
+  fresh browser screenshot in this evidence record; visual inspection can still be done by running
+  opennori dashboard locally.
 
 ### AC-P-14
 
@@ -2558,7 +2575,7 @@ Requirement: required - OpenNori self-goal changes architecture requirement rout
 Baseline: typescript-agent-state-cli (active)
 Technical baseline: 4 runtime, 6 module, 4 contract, 4 flow, 6 dependency, 5 reference items
 Challenge: none
-Architecture apply records: 17
+Architecture apply records: 20
 Architecture evidence health: clear
 Build-vs-buy: clear (15 decisions)
 Agent guide: installed
@@ -2580,8 +2597,11 @@ Architecture apply records:
 - AC-P-4: aligned (typescript-agent-state-cli) - High-risk evidence handling now preserves objective evidence results while surfacing confidence and evidence_health review risks; the CLI does not use fixed strong/weak natural-language evidence lists to rewrite subjective sufficiency.
 - AC-A-12: aligned (typescript-agent-state-cli) - CLI boundary audit kept subjective product semantics in Skills and narrowed hard validation to objective contract, ledger, evidence, architecture, lifecycle, and schema integrity.
 - AC-D-5: aligned (typescript-agent-state-cli) - Dashboard Profile drawer follows the confirmed dashboard web architecture: React/Vite/Tailwind/Motion renders a readonly overlay, kernel snapshot exposes capability_profile and capability_compliance, and .opennori remains the source of truth.
+- AC-D-5: aligned (typescript-agent-state-cli) - Dashboard observes Project Profile and current-goal compliance without becoming a write surface.
 - AC-O-10: aligned (typescript-agent-state-cli) - Conversation-to-contract adoption is implemented as Skill-driven nori-acceptance behavior backed by the existing standard draft path, without adding a new CLI workflow or autogoal artifact.
+- AC-O-17: aligned (typescript-agent-state-cli) - Draft criterion revision semantics remain goal-scoped while Project Profile stays project-scoped.
 - AC-O-18: aligned (typescript-agent-state-cli) - Acceptance Surface Modeling stays in packaged Skills, protocol, README, AGENTS, and asset tests while CLI remains deterministic state storage rather than a subjective AC validator.
+- AC-O-8: aligned (typescript-agent-state-cli) - Project Profile scope is now project-level while current goal ledgers store only profile_evidence compliance records.
 - AC-P-14: aligned (typescript-agent-state-cli) - Report readability work stays inside the confirmed TypeScript agent-state CLI baseline: src/core/report.ts owns human report rendering, tests stay in reporting/domain suites, and .opennori remains the evidence source of truth.
 - AC-P-15: aligned (typescript-agent-state-cli) - The test-system refactor follows the confirmed TypeScript agent-state CLI baseline by preserving domain modules and deterministic test surfaces while moving subjective agent judgment out of hard-coded tests.
 - AC-P-16: aligned (typescript-agent-state-cli) - Goal and criterion dossier state follows the confirmed TypeScript agent-state CLI baseline: structured JSON remains authoritative, generated README files are review surfaces, and CLI/domain modules keep deterministic .opennori writes.

@@ -6,6 +6,7 @@ import {
   findDraftPairs,
   findLegacyActivePairs,
   readGoalPayload,
+  readProjectProfile,
   validateContract
 } from "../../core.ts";
 import { validateSchema } from "../../validation.ts";
@@ -24,6 +25,7 @@ export type ActiveGoalInspection = {
 };
 
 function inspectPairs(root: string, pairs: ReturnType<typeof findCurrentPairs>): { details: ActiveGoalSummary[]; issues: DoctorIssue[] } {
+  const profile = readProjectProfile(root);
   const details: ActiveGoalSummary[] = [];
   const issues: DoctorIssue[] = [];
   for (const pair of pairs) {
@@ -39,7 +41,7 @@ function inspectPairs(root: string, pairs: ReturnType<typeof findCurrentPairs>):
         goal_id: goalId,
         location: pair.location,
         status: payload.ledger?.status || "unknown",
-        current_gap: recoverable ? currentGap(payload.contract, payload.ledger) : null,
+        current_gap: recoverable ? currentGap(payload.contract, payload.ledger, profile) : null,
         acceptance_path: relativeTo(root, acceptancePath),
         evidence_path: relativeTo(root, evidencePath),
         recoverable,

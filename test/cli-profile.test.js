@@ -2,21 +2,22 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 import { tempRoot, runProfileAddCommand, runProfileEvidenceCommand, runProfileShowCommand, addEvidence, buildEvidenceLedger, goalPaths, readGoalPayloadFromPaths, writeGoalDossier } from "./support/command-fixtures.js";
 
-test("profile show command module reads the current goal via injected loader", { tags: ["cli", "profile", "acceptance", "quick"] }, async () => {
-  const contract = {
-    goal_id: "module-goal",
-    criteria: [],
-    acceptance_basis: { status: "approved" }
-  };
-  const ledger = { status: "active", criteria: {}, capability_profile: { items: [], evidence: [] } };
+test("profile show reads the project Profile without requiring a current goal", { tags: ["cli", "profile", "acceptance", "quick"] }, async () => {
+  const root = tempRoot();
+  await runProfileAddCommand([
+    "--root", root,
+    "--type", "constraint",
+    "--name", "avoid duplicated CSS",
+    "--strength", "avoid",
+    "--purpose", "Keep implementation maintainable.",
+    "--json"
+  ]);
 
-  const profile = await runProfileShowCommand(["--json"], {
-    loadPair: () => ({ contract, ledger })
-  });
+  const profile = await runProfileShowCommand(["--root", root, "--json"]);
   assert.equal(profile.ok, true);
-  assert.equal(profile.data.goal_id, "module-goal");
-  assert.equal(profile.data.workflow_status, "active");
-  assert.equal(profile.data.profile.items.length, 0);
+  assert.equal(profile.data.scope, "project");
+  assert.equal(profile.data.current_goal, null);
+  assert.equal(profile.data.profile.items.length, 1);
 });
 
 test("profile add and evidence modules update compliance and workflow state", { tags: ["cli", "profile", "evidence", "acceptance", "quick"] }, async () => {
@@ -42,33 +43,33 @@ test("profile add and evidence modules update compliance and workflow state", { 
   const ledger = buildEvidenceLedger(contract);
   addEvidence(contract, ledger, "AC-1", { kind: "test-summary", summary: "AC-1 passes.", result: "passing" });
   writeGoalDossier(paths.goalDir, contract, ledger);
-  const data = {
-    loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root }),
-    savePair: (_nextAcceptancePath, _nextEvidencePath, nextContract, nextLedger) => writeGoalDossier(paths.goalDir, nextContract, nextLedger),
-    refreshManifest: () => {}
-  };
-
   const added = await runProfileAddCommand([
+    "--root", root,
     "--type", "skill",
     "--name", "design-taste-frontend",
     "--strength", "must",
     "--purpose", "Generate a design read before implementation.",
     "--install-policy", "existing_only",
     "--json"
-  ], data);
+  ]);
   assert.equal(added.ok, true);
-  assert.equal(added.data.workflow_status, "blocked");
-  assert.equal(added.data.current_gap.id, "PROFILE-skill-design-taste-frontend");
+  assert.equal(added.data.touched_current_goals[0].workflow_status, "blocked");
+  assert.equal(added.data.compliance.blocking[0].id, "skill-design-taste-frontend");
 
   const evidenced = await runProfileEvidenceCommand([
+    "--root", root,
     "--item", "skill-design-taste-frontend",
     "--result", "satisfied",
     "--summary", "Agent used design-taste-frontend.",
     "--path", "/Users/jarl/.agents/skills/design-taste-frontend/SKILL.md",
     "--json"
-  ], data);
+  ], {
+    loadPair: () => ({ contract: readGoalPayloadFromPaths(acceptancePath, evidencePath).contract, ledger: readGoalPayloadFromPaths(acceptancePath, evidencePath).ledger, acceptancePath, evidencePath, root }),
+    savePair: (_nextAcceptancePath, _nextEvidencePath, nextContract, nextLedger) => writeGoalDossier(paths.goalDir, nextContract, nextLedger),
+    refreshManifest: () => {}
+  });
   assert.equal(evidenced.ok, true);
   assert.equal(evidenced.data.workflow_status, "complete");
   assert.equal(evidenced.data.current_gap, null);
-  assert.equal(readGoalPayloadFromPaths(acceptancePath, evidencePath).ledger.capability_profile.items.length, 1);
+  assert.equal(readGoalPayloadFromPaths(acceptancePath, evidencePath).ledger.profile_evidence.length, 1);
 });

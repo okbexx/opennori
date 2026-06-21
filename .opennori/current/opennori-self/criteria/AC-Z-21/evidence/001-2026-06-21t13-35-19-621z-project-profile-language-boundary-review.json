@@ -1,0 +1,43 @@
+{
+  "kind": "project-profile-language-boundary-review",
+  "basis": "tool-observation",
+  "summary": "OpenNori preserves language preference across user-reviewable contract assets and Project Profile prose: packaged Skills route wrong-language Project Profile and project Architecture Profile content back to profile/architecture Skills; stable ids and protocol fields remain English, and CLI does not auto-translate existing approved contracts without explicit user-approved revision.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
+      "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-autogoal/SKILL.md",
+      "path": "plugins/opennori/skills/nori-autogoal/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-capability-profile/SKILL.md",
+      "path": "plugins/opennori/skills/nori-capability-profile/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    }
+  ],
+  "reviewability": "Inspect packaged Skills, README, protocol, and .opennori/profile/README.md. Confirm language preference is handled in Skill/user-review behavior, Project Profile user-readable prose is treated as project-level content, and protocol field names remain stable English.",
+  "limitations": "This verifies product rules and current assets. It does not implement CLI auto-translation, by design; wrong-language prose is corrected through Skill-driven revision and user confirmation.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T13:35:19.621Z"
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-ac-o-8-project-profile-scope",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-O-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Project Profile scope is now project-level while current goal ledgers store only profile_evidence compliance records.",
+  "fit": "The change follows the TypeScript agent-state CLI baseline: .opennori/profile/profile.json is project source data, evidence ledgers remain goal-scoped, and CLI commands recompute current goal status from Project Profile plus ledger evidence without embedding Profile items in contracts.",
+  "implementation_focus": "Separate Project Profile source-of-truth from current-goal compliance evidence and status/report/dashboard surfaces.",
+  "evidence": "src/core/profile.ts, src/types.ts, profile command modules, lifecycle profile checks, README, protocol, packaged Skills, and profile/dashboard tests.",
+  "limitations": "This record proves architecture alignment for OpenNori implementation; user acceptance is proven separately by Product AC evidence.",
+  "created_at": "2026-06-21T13:26:55.877Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

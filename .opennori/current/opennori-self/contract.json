@@ -5,8 +5,8 @@
   "created_at": "2026-06-11T09:50:03.223Z",
   "acceptance_basis": {
     "status": "approved",
-    "summary": "Add acceptance for per-AC dossier goal state.",
-    "approved_at": "2026-06-21T07:22:24.137Z"
+    "summary": "Refresh completion judgment evidence to Project Profile terminology.",
+    "approved_at": "2026-06-21T13:29:32.973Z"
   },
   "criteria": [
     {
@@ -212,9 +212,9 @@
     {
       "id": "AC-O-8",
       "layer": "operator",
-      "user_story": "作为用户，我在 Codex 对话里声明必须使用某个 Skill、偏好某个技术栈或避免某个工具后，agent 能记录这些偏好并在完成前告诉我是否遵守。",
-      "measurement": "在 Codex 对话中提出能力偏好后，查看 active contract、status 或 report 中的 Nori Profile。",
-      "threshold": "用户不需要记住 CLI；must 或 avoid 的违反会阻止 complete，prefer 会被展示但不阻止 complete；这些偏好不会被写成用户 AC。",
+      "user_story": "作为用户，我在 Codex 对话里声明必须使用某个 Skill、偏好某个技术栈、避免某个工具或指定安装策略后，agent 能把它记录为项目级 Project Profile，并在当前 goal 完成前告诉我该 goal 是否遵守。",
+      "measurement": "在 Codex 对话中提出能力偏好后，查看 .opennori/profile/、status、report 或 dashboard 的 Project Profile compliance。",
+      "threshold": "用户不需要记住 CLI；Project Profile 保存在 .opennori/profile/，不被复制进 Nori Contract 或写成 Product AC；current goal 的 ledger 只记录 profile_evidence；must 或 avoid 的违反会阻止 complete，prefer 作为 review risk 展示；没有 current goal 时可查看/编辑 Project Profile 但不评价合规。",
       "required": true,
       "risk": "high",
       "order": 20
@@ -673,7 +673,7 @@
       "id": "AC-O-17",
       "layer": "operator",
       "user_story": "作为用户，我在 draft 的 AC Review Loop 里修订某条 AC 后，OpenNori 仍然把这份 Nori Contract 保持为待确认草案，而不会把 acceptance_basis 自动标成 approved、不会跳到 profile/architecture/implementation，也不会把修订本身当作 evidence。",
-      "measurement": "在一个带有 required Nori Profile 的 draft 上运行 criterion update --from-draft，然后查看 status/current_gap、draft evidence JSON、acceptance markdown、nori-acceptance Skill 和协议文档。",
+      "measurement": "在一个带有 required Project Profile 的 draft 上运行 criterion update --from-draft，然后查看 status/current_gap、draft evidence JSON、acceptance markdown、nori-acceptance Skill 和协议文档。",
       "threshold": "修订 draft AC 后 acceptance_basis.status 仍为 draft，approved_at 不存在，source/mode/coverage 等 basis metadata 保留，workflow_status 为 draft，current_gap 为 ACCEPTANCE-BASIS；只有最终 approve 后才能进入 profile、architecture、implementation 或 evidence 路由。已批准 current contract 的 criterion update 仍会清理该 AC 的旧 evidence 并产生新的 evidence gap。",
       "required": true,
       "risk": "medium",
@@ -692,9 +692,9 @@
     {
       "id": "AC-D-5",
       "layer": "acceptance",
-      "user_story": "作为用户，我打开 OpenNori dashboard 后，能点击顶部 Profile 图标，在右侧只读浮窗查看当前 Nori Profile 的执行偏好、合规状态、阻塞或 review 风险和证据摘要，而不需要回到 CLI 才知道 agent 是否遵守了我声明的 Skill、技术栈或 avoid 约束。",
-      "measurement": "启动 dashboard，在存在和不存在 Nori Profile items 的项目中点击顶部 Profile 图标，并切换 UI Panel / Raw JSON 查看浮窗内容。",
-      "threshold": "右侧 overlay 浮窗展示 Profile item 总数、must/prefer/avoid 分布、complete/blocking/review 状态、每个 item 的 type/name/strength/purpose/scope/install policy/latest evidence summary；没有 profile 时显示空态；浮窗只读，不提供 add/check/evidence/waive/confirm 等写状态按钮；Profile 不被渲染为 Product AC 节点；打开或关闭浮窗前后，radar/main 区域不重新分配布局宽度，浮窗只覆盖在右侧观察层上。",
+      "user_story": "作为用户，我打开 OpenNori dashboard 后，能点击顶部 Project Profile 图标，在右侧只读浮窗查看项目级 Profile 偏好，以及当前 goal 对这些偏好的合规状态、阻塞项、review 风险和证据摘要。",
+      "measurement": "启动 dashboard，在有 current goal、没有 current goal、存在和不存在 Project Profile items 的项目中点击顶部 Project Profile 图标，并切换 UI Panel / Raw JSON 查看浮窗内容。",
+      "threshold": "右侧 overlay 浮窗展示 Project Profile item 总数、must/prefer/avoid 分布、当前 goal compliance complete/blocking/review 状态、每个 item 的 type/name/strength/purpose/scope/install policy/latest compliance evidence；没有 current goal 时显示 Project Profile 已加载但合规未评价，而不是显示完成；没有 profile 时显示空态；浮窗只读，不提供 add/check/evidence/waive/confirm 等写状态按钮；Profile 不被渲染为 Product AC 节点；打开或关闭浮窗前后，radar/main 区域不重新分配布局宽度。",
       "required": true,
       "risk": "medium",
       "order": 68

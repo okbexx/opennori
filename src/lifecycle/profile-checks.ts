@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { addProfileEvidence, readJson } from "../core.ts";
-import type { AutoProfileCheck, EvidenceLedger, JsonObject, ProfileEvidenceResult } from "../types.ts";
+import type { AutoProfileCheck, CapabilityProfile, EvidenceLedger, JsonObject, ProfileEvidenceResult } from "../types.ts";
 
 function skillSearchPaths(name: string): string[] {
   const home = process.env.HOME || "";
@@ -28,9 +28,8 @@ function stackIsPresent(root: string, name: string): boolean | null {
   }
 }
 
-export function autoProfileChecks(root: string, ledger: EvidenceLedger): AutoProfileCheck[] {
-  const items = ledger.capability_profile?.items || [];
-  return items.map((item) => {
+export function autoProfileChecks(root: string, profile: CapabilityProfile): AutoProfileCheck[] {
+  return (profile.items || []).map((item) => {
     if (item.type === "skill") {
       const paths = skillSearchPaths(item.name);
       const foundPath = paths.find((candidate) => fs.existsSync(candidate));
@@ -105,13 +104,13 @@ export function autoProfileChecks(root: string, ledger: EvidenceLedger): AutoPro
   });
 }
 
-export function recordAutoProfileChecks(ledger: EvidenceLedger, checks: AutoProfileCheck[]): EvidenceLedger {
+export function recordAutoProfileChecks(profile: CapabilityProfile, ledger: EvidenceLedger, checks: AutoProfileCheck[]): EvidenceLedger {
   for (const check of checks.filter((entry) => entry.can_auto_record)) {
     if (!["satisfied", "violated", "waived"].includes(check.result)) continue;
-    const item = ledger.capability_profile?.items?.find((entry) => entry.id === check.item_id);
-    const latest = item?.evidence?.at(-1);
+    const item = profile.items.find((entry) => entry.id === check.item_id);
+    const latest = ledger.profile_evidence?.filter((entry) => entry.item_id === check.item_id).at(-1);
     if (latest?.result === check.result && latest?.summary === check.summary) continue;
-    addProfileEvidence(ledger, check.item_id, {
+    addProfileEvidence(profile, ledger, check.item_id, {
       result: check.result as ProfileEvidenceResult,
       summary: check.summary,
       path: check.sources?.[0]?.path

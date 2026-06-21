@@ -5,6 +5,7 @@ import {
   ok,
   pruneCriterionEvidence
 } from "../../../core.ts";
+import { readProjectProfile } from "../../../core/profile.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
 
@@ -33,12 +34,13 @@ export const evidencePruneCommand = defineCommand({
   },
   run({ args, data }) {
     const { contract, ledger, acceptancePath, evidencePath, root, evidencePrune } = data.loadPair(args);
+    const profile = readProjectProfile(root);
     if (!args.criterion) {
       return ok({
         goal_id: contract.goal_id,
         evidence_prune: evidencePrune || { changed: false, removed_records: 0, removed_sources: 0 },
         workflow_status: ledger.status,
-        current_gap: currentGap(contract, ledger)
+        current_gap: currentGap(contract, ledger, profile)
       });
     }
 
@@ -56,7 +58,7 @@ export const evidencePruneCommand = defineCommand({
       confidence: ledger.criteria[criterionId]?.confidence || "none",
       latest_evidence: criterionStatusRows(contract, ledger, { root }).find((row) => row.id === criterionId)?.latest_evidence || null,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger)
+      current_gap: currentGap(contract, ledger, profile)
     });
   }
 });

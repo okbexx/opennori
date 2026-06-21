@@ -80,7 +80,7 @@ Useful state commands:
 
 ## State Writes
 
-May write or prune evidence records for active criteria. Do not rewrite Product AC, Architecture Baseline, Nori Profile, or reports directly.
+May write or prune evidence records for active criteria. Do not rewrite Product AC, Architecture Baseline, Project Profile, or reports directly.
 
 Must write live activity state when a dashboard is being observed and a current goal/gap exists. Prefer `agent_next.dashboard_activity` command templates when present. Activity is not evidence and must not be cited as proof of Product AC.
 

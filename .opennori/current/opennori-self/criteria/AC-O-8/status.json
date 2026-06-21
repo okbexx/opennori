@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 3,
-  "latest_evidence_summary": "Nori Profile now separates blocking compliance from review risk: must/violated avoid still block, while unknown or violated prefer items surface as profile_review and make objective completion review-risk rather than confidently complete.",
-  "updated_at": "2026-06-21T11:20:20.581Z"
+  "evidence_count": 2,
+  "latest_evidence_summary": "OpenNori initializes .opennori/profile/profile.json as the project-level Project Profile source and .opennori/profile/README.md as a generated review surface; goal ledgers store only profile_evidence compliance records.",
+  "updated_at": "2026-06-21T13:40:42.527Z"
 }

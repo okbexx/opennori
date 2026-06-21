@@ -26,7 +26,7 @@ function passedGroupRawDataWithFocus(criteria: NonNullable<NoriSnapshot["criteri
 }
 
 export function profileNodeFromSnapshot(snapshot: NoriSnapshot): RadarNode {
-  const profile = snapshot.capability_profile || { items: [], evidence: [] };
+  const profile = snapshot.capability_profile || { items: [] };
   const compliance = snapshot.capability_compliance || {
     required: false,
     complete: true,
@@ -43,8 +43,8 @@ export function profileNodeFromSnapshot(snapshot: NoriSnapshot): RadarNode {
     x: 0,
     y: 0,
     rawData: {
-      title: "Nori Profile",
-      scope: hasCurrentGoal ? "current_goal" : "no_current_goal",
+      title: "Project Profile",
+      scope: hasCurrentGoal ? "current_goal_compliance" : "project_only",
       idle_summary: snapshot.idle_summary,
       profile,
       compliance

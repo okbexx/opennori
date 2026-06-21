@@ -3,8 +3,8 @@ import path from "node:path";
 import { architectureState } from "../architecture.ts";
 import { reviewAcceptanceQuality } from "../acceptance.ts";
 import { currentGap, evidenceHealth } from "../core/evidence.ts";
-import { profileCompliance } from "../core/profile.ts";
-import { completionAnswer, intervention } from "../core/report.ts";
+import { profileCompliance, readProjectProfile } from "../core/profile.ts";
+import { completionAnswer, interventionForProfile } from "../core/report.ts";
 import { findCurrentPairs, findHistoryPairs, readGoalPayload, writeJson } from "../core/shared.ts";
 import type { EvidenceLedger, NoriIdleSummary, NoriSnapshot } from "../types.ts";
 import { readActivity } from "./activity.ts";
@@ -112,6 +112,7 @@ function criterionDossier(root: string, pair: SnapshotGoalPair, criterionId: str
 
 export function buildSnapshot(root: string, options: { goalId?: string } = {}): NoriSnapshot {
   const activity = readActivity(root);
+  const projectProfile = readProjectProfile(root);
   const pair = chooseActivePair(root, options.goalId, activity?.expired ? undefined : activity?.goal_id);
   const event = latestEvent(root);
   if (!pair) {
@@ -145,10 +146,10 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
         decision: "unknown",
         profile: null
       },
-      capability_profile: { items: [], evidence: [] },
+      capability_profile: projectProfile,
       capability_compliance: {
-        required: false,
-        complete: true,
+        required: projectProfile.items.length > 0,
+        complete: false,
         blocking: [],
         review: [],
         statuses: []
@@ -170,13 +171,12 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
   const payload = readGoalPayload(pair);
   const { contract, ledger } = payload;
   const architecture = architectureState(root, contract.goal_id);
-  const gap = currentGap(contract, ledger);
-  const completion = completionAnswer(contract, ledger, { root, architecture });
-  const userIntervention = intervention(contract, ledger);
+  const gap = currentGap(contract, ledger, projectProfile);
+  const completion = completionAnswer(contract, ledger, { root, architecture, profile: projectProfile });
+  const userIntervention = interventionForProfile(contract, ledger, projectProfile);
   const acceptanceReview = reviewAcceptanceQuality(contract);
   const evidence = evidenceHealth(contract, ledger, { root });
-  const capabilityProfile = ledger.capability_profile || { items: [], evidence: [] };
-  const capabilityCompliance = profileCompliance(ledger);
+  const capabilityCompliance = profileCompliance(projectProfile, ledger);
   const activityState = activity?.state || "idle";
   const decision = completion.complete
     ? completion.confidence === "review-risk" ? "review_risk" : "complete"
@@ -238,7 +238,7 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
       profile_title: architecture.baseline?.profile_title || null,
       open_challenges: architecture.open_challenges?.length || 0
     },
-    capability_profile: capabilityProfile,
+    capability_profile: projectProfile,
     capability_compliance: capabilityCompliance,
     loop: {
       goal: "ready",

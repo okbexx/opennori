@@ -19,7 +19,7 @@ import type {
 } from "../types.ts";
 import fs from "node:fs";
 import path from "node:path";
-import { profileCompliance } from "./profile.ts";
+import { emptyProjectProfile, profileCompliance } from "./profile.ts";
 import { inferCriterionLayer, nowIso } from "./shared.ts";
 
 export const VALID_EVIDENCE_RESULTS = new Set(["failing", "passing", "blocked", "waived"]);
@@ -156,12 +156,12 @@ export function confidenceForEvidence(risk: RiskLevel | undefined, result: Evide
   return "human-required";
 }
 
-export function recomputeWorkflowStatus(contract: NoriContract, ledger: EvidenceLedger): EvidenceLedger {
+export function recomputeWorkflowStatus(contract: NoriContract, ledger: EvidenceLedger, profile = emptyProjectProfile()): EvidenceLedger {
   const requiredStates = contract.criteria
     .filter((criterion) => criterion.required !== false)
     .map((criterion) => ledger.criteria[criterion.id]?.status || "unknown");
   const approved = contract.acceptance_basis?.status === "approved";
-  const compliance = profileCompliance(ledger);
+  const compliance = profileCompliance(profile, ledger);
 
   if (!approved) {
     ledger.status = "draft";
@@ -178,7 +178,7 @@ export function recomputeWorkflowStatus(contract: NoriContract, ledger: Evidence
   return ledger;
 }
 
-export function currentGap(contract: NoriContract, ledger: EvidenceLedger): CurrentGap | null {
+export function currentGap(contract: NoriContract, ledger: EvidenceLedger, profile = emptyProjectProfile()): CurrentGap | null {
   if (contract.acceptance_basis?.status !== "approved") {
     return {
       id: "ACCEPTANCE-BASIS",
@@ -188,7 +188,7 @@ export function currentGap(contract: NoriContract, ledger: EvidenceLedger): Curr
     };
   }
 
-  const compliance = profileCompliance(ledger);
+  const compliance = profileCompliance(profile, ledger);
   if (compliance.required && !compliance.complete) {
     const item = compliance.blocking[0];
     if (!item) return null;

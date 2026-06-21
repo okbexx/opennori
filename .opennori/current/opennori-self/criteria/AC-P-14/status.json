@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 1,
   "latest_evidence_summary": "OpenNori report rendering now keeps the Acceptance Status table compact and moves long user stories, measurement, thresholds, evidence summary, multiple sources, reviewability, and limitations into per-criterion Acceptance Details blocks. The reporting test creates a long Chinese AC with command/path/url sources and asserts the old oversized table columns are gone, the compact table is present, sources render as a list, and no generated report line exceeds 240 characters.",
-  "updated_at": "2026-06-21T11:20:20.581Z"
+  "updated_at": "2026-06-21T13:40:42.527Z"
 }

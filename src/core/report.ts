@@ -2,6 +2,7 @@ import type {
   AcceptanceQualityAudit,
   ArchitectureState,
   AgentSkill,
+  CapabilityProfile,
   CompletionAnswer,
   EvidenceLedger,
   EvidenceRecord,
@@ -11,7 +12,7 @@ import type {
   UserIntervention
 } from "../types.ts";
 import { evidenceHealth, currentGap, evidenceView } from "./evidence.ts";
-import { profileCompliance, renderProfileLines } from "./profile.ts";
+import { emptyProjectProfile, profileCompliance, renderProfileLines } from "./profile.ts";
 import { inferCriterionLayer } from "./shared.ts";
 import { reviewAcceptanceQuality } from "../acceptance.ts";
 import { contractLanguage } from "../language.ts";
@@ -19,6 +20,7 @@ import { contractLanguage } from "../language.ts";
 type CompletionContext = {
   root?: string;
   architecture?: ArchitectureState;
+  profile?: CapabilityProfile;
 };
 
 function reviewRiskSources(acceptanceReview: AcceptanceQualityAudit, health = { status: "clear" }): string[] {
@@ -55,8 +57,12 @@ export function acceptanceBasisView(contract: NoriContract): {
   };
 }
 
-function profileReviewRisks(ledger: EvidenceLedger): string[] {
-  return profileCompliance(ledger).review.length > 0 ? ["profile_review"] : [];
+function projectProfile(context: CompletionContext = {}): CapabilityProfile {
+  return context.profile || emptyProjectProfile();
+}
+
+function profileReviewRisks(ledger: EvidenceLedger, context: CompletionContext = {}): string[] {
+  return profileCompliance(projectProfile(context), ledger).review.length > 0 ? ["profile_review"] : [];
 }
 
 function architectureReviewRisks(architecture: ArchitectureState | undefined): string[] {
@@ -107,7 +113,7 @@ function architectureReviewActions(architecture: ArchitectureState): string[] {
   }
   if (architecture.decision === "missing") {
     return [
-      "Preview an Architecture Baseline from the current goal, Product AC, Nori Profile, project evidence, and available profiles.",
+      "Preview an Architecture Baseline from the current goal, Product AC, Project Profile, project evidence, and available profiles.",
       "Ask the user to confirm the baseline or explicitly waive architecture review before non-trivial implementation continues."
     ];
   }
@@ -156,25 +162,6 @@ function reviewRiskSkill(input: {
 }
 
 export function intervention(contract: NoriContract, ledger: EvidenceLedger): UserIntervention {
-  const compliance = profileCompliance(ledger);
-  if (compliance.required && !compliance.complete) {
-    const item = compliance.blocking[0];
-    if (!item) {
-      return {
-        required: true,
-        action: "Capability profile compliance is incomplete; inspect Nori Profile evidence."
-      };
-    }
-    return {
-      required: true,
-      criterion: `PROFILE-${item.id}`,
-      user_story: `作为用户，我需要确认 agent 是否必须遵守能力偏好：${item.name}。`,
-      action: item.status === "violated"
-        ? `Capability profile item ${item.name} was violated. Waive it or revise the work.`
-        : `Provide evidence that Nori Profile item ${item.name} was satisfied, or waive it.`
-    };
-  }
-
   for (const criterion of contract.criteria) {
     const state = ledger.criteria[criterion.id];
     if (state?.status === "blocked") {
@@ -194,14 +181,36 @@ export function intervention(contract: NoriContract, ledger: EvidenceLedger): Us
   };
 }
 
-export function completionAnswer(contract: NoriContract, ledger: EvidenceLedger, { root = process.cwd(), architecture = undefined }: CompletionContext = {}): CompletionAnswer {
-  const gap = currentGap(contract, ledger);
+export function interventionForProfile(contract: NoriContract, ledger: EvidenceLedger, profile: CapabilityProfile): UserIntervention {
+  const compliance = profileCompliance(profile, ledger);
+  if (compliance.required && !compliance.complete) {
+    const item = compliance.blocking[0];
+    if (!item) {
+      return {
+        required: true,
+        action: "Project Profile compliance is incomplete; inspect profile evidence."
+      };
+    }
+    return {
+      required: true,
+      criterion: `PROFILE-${item.id}`,
+      user_story: `作为用户，我需要确认 agent 是否遵守项目画像：${item.name}。`,
+      action: item.status === "violated"
+        ? `Project Profile item ${item.name} was violated. Waive it or revise the work.`
+        : `Provide evidence that Project Profile item ${item.name} was satisfied, or waive it.`
+    };
+  }
+  return intervention(contract, ledger);
+}
+
+export function completionAnswer(contract: NoriContract, ledger: EvidenceLedger, { root = process.cwd(), architecture = undefined, profile = emptyProjectProfile() }: CompletionContext = {}): CompletionAnswer {
+  const gap = currentGap(contract, ledger, profile);
   const objectiveComplete = !gap && ledger.status === "complete";
   const acceptanceReview = reviewAcceptanceQuality(contract);
   const health = evidenceHealth(contract, ledger, { root });
   const risks = objectiveComplete ? [
     ...reviewRiskSources(acceptanceReview, health),
-    ...profileReviewRisks(ledger),
+    ...profileReviewRisks(ledger, { profile }),
     ...architectureReviewRisks(architecture)
   ] : [];
   if (objectiveComplete && risks.length > 0) {
@@ -231,12 +240,12 @@ export function completionAnswer(contract: NoriContract, ledger: EvidenceLedger,
   };
 }
 
-export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedger, { root = process.cwd(), architecture = undefined }: CompletionContext = {}): NextRecommendation {
-  const gap = currentGap(contract, ledger);
-  const needed = intervention(contract, ledger);
+export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedger, { root = process.cwd(), architecture = undefined, profile = emptyProjectProfile() }: CompletionContext = {}): NextRecommendation {
+  const gap = currentGap(contract, ledger, profile);
+  const needed = interventionForProfile(contract, ledger, profile);
   const acceptanceReview = reviewAcceptanceQuality(contract);
   const health = evidenceHealth(contract, ledger, { root });
-  const profile = profileCompliance(ledger);
+  const profileStatus = profileCompliance(profile, ledger);
 
   if (needed.required) {
     return {
@@ -316,7 +325,7 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
 
   const reviewRisks = [
     ...reviewRiskSources(acceptanceReview, health),
-    ...profileReviewRisks(ledger),
+    ...profileReviewRisks(ledger, { profile }),
     ...architectureReviewRisks(architecture)
   ];
   if (ledger.status === "complete" && reviewRisks.length > 0) {
@@ -329,8 +338,8 @@ export function nextRecommendation(contract: NoriContract, ledger: EvidenceLedge
       actions.push("Review evidence_health findings.");
       actions.push("Refresh stale, broad, or summary-only evidence with reviewable sources, reviewability, and limitations.");
     }
-    if (profile.review.length > 0) {
-      actions.push("Review Nori Profile preference risks.");
+    if (profileStatus.review.length > 0) {
+      actions.push("Review Project Profile preference risks.");
       actions.push("Record profile evidence, waive the preference, or ask the user whether the remaining profile risk is acceptable.");
     }
     if (architecture && architectureReviewRisks(architecture).includes("architecture_review")) {
@@ -460,14 +469,14 @@ function pushEvidenceSources(lines: string[], evidence: EvidenceRecord | null | 
   }
 }
 
-export function renderReport(contract: NoriContract, ledger: EvidenceLedger, { root = process.cwd(), architecture = undefined }: CompletionContext = {}): string {
-  const gap = currentGap(contract, ledger);
-  const needed = intervention(contract, ledger);
-  const completion = completionAnswer(contract, ledger, { root, architecture });
+export function renderReport(contract: NoriContract, ledger: EvidenceLedger, { root = process.cwd(), architecture = undefined, profile = emptyProjectProfile() }: CompletionContext = {}): string {
+  const gap = currentGap(contract, ledger, profile);
+  const needed = interventionForProfile(contract, ledger, profile);
+  const completion = completionAnswer(contract, ledger, { root, architecture, profile });
   const health = evidenceHealth(contract, ledger, { root });
   const acceptanceReview = reviewAcceptanceQuality(contract);
-  const profile = profileCompliance(ledger);
-  const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+  const profileStatus = profileCompliance(profile, ledger);
+  const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
   const basis = acceptanceBasisView(contract);
   const lines = [
     `# ${contract.goal_id} Acceptance Report`,
@@ -518,14 +527,14 @@ export function renderReport(contract: NoriContract, ledger: EvidenceLedger, { r
         ]
       : []),
     "",
-    "## Nori Profile",
+    "## Project Profile Compliance",
     "",
-    ...renderProfileLines(ledger),
+    ...renderProfileLines(profile, ledger),
     "",
-    ...(profile.review.length > 0
+    ...(profileStatus.review.length > 0
       ? [
           "Profile review risks:",
-          ...profile.review.map((item) => `- ${item.id}: ${item.name} is ${item.status} (${item.strength})`),
+          ...profileStatus.review.map((item) => `- ${item.id}: ${item.name} is ${item.status} (${item.strength})`),
           ""
         ]
       : []),

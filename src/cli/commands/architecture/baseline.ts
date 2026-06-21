@@ -6,7 +6,7 @@ import {
   buildArchitectureBaseline,
   writeArchitectureBaseline
 } from "../../../architecture.ts";
-import { appendEvent, currentGap, nextRecommendation, ok, pathsForGoal, readGoalPayload, refreshSnapshot, slugify } from "../../../core.ts";
+import { appendEvent, currentGap, nextRecommendation, ok, pathsForGoal, readGoalPayload, readProjectProfile, refreshSnapshot, slugify } from "../../../core.ts";
 import { agentNextForRecommendation } from "../../../agent-next.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
@@ -84,8 +84,9 @@ export const architectureBaselineCommand = defineCommand({
       const activePaths = pathsForGoal(root, goalId);
       if (fs.existsSync(activePaths.evidencePath)) {
         const payload = readGoalPayload(activePaths);
-        current_gap = currentGap(payload.contract, payload.ledger);
-        recommendation = nextRecommendation(payload.contract, payload.ledger, { root, architecture });
+        const projectProfile = readProjectProfile(root);
+        current_gap = currentGap(payload.contract, payload.ledger, projectProfile);
+        recommendation = nextRecommendation(payload.contract, payload.ledger, { root, architecture, profile: projectProfile });
         agent_next = agentNextForRecommendation(payload.contract.goal_id, current_gap, recommendation);
       }
       refreshSnapshot(root, { goalId });

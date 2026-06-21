@@ -17,28 +17,19 @@ Passing threshold: 新目标的可读内容按用户要求显示中文或英文�
 
 ## Evidence
 
-Latest: review-result - OpenNori now preserves language preference across user-reviewable profile assets: packaged Skills route wrong-language Nori Profile and project Architecture Profile content back to profile/architecture Skills; project profile prose follows explicit user language or presentation.language while stable ids and protocol fields remain English. CLI help now defaults to human-readable text, and draft human output presents one Nori Contract Draft with an internal evidence ledger instead of two user-facing deliverables.
+Latest: project-profile-language-boundary-review - OpenNori preserves language preference across user-reviewable contract assets and Project Profile prose: packaged Skills route wrong-language Project Profile and project Architecture Profile content back to profile/architecture Skills; stable ids and protocol fields remain English, and CLI does not auto-translate existing approved contracts without explicit user-approved revision.
 Result: passing
 Basis: tool-observation
-Reviewability: Review the listed Skill, protocol, README, AGENTS, CLI, and test files; rerun npm run check and the targeted Vitest command to confirm profile-language rules and human output behavior.
-Limitations: This records the behavior rule and objective asset/CLI tests. It does not translate existing project profiles automatically; agents should revise or recreate wrong-language profile prose after user review.
+Reviewability: Inspect packaged Skills, README, protocol, and .opennori/profile/README.md. Confirm language preference is handled in Skill/user-review behavior, Project Profile user-readable prose is treated as project-level content, and protocol field names remain stable English.
+Limitations: This verifies product rules and current assets. It does not implement CLI auto-translation, by design; wrong-language prose is corrected through Skill-driven revision and user confirmation.
 
 Sources:
-- npm run check
-- npx vitest run test/cli-commands.test.js test/core.test.js
-- node ./bin/opennori.js check --root . --json
-- node ./bin/opennori.js status --root . --json
 - plugins/opennori/skills/nori/SKILL.md
+- plugins/opennori/skills/nori-acceptance/SKILL.md
+- plugins/opennori/skills/nori-autogoal/SKILL.md
 - plugins/opennori/skills/nori-capability-profile/SKILL.md
-- plugins/opennori/skills/nori-architecture-brainstorm/SKILL.md
 - README.md
 - .opennori/protocol.md
-- AGENTS.md
-- src/cli.ts
-- src/cli/command-tree.ts
-- src/cli/human-output.ts
-- src/cli/commands/acceptance/draft.ts
-- test/core.test.js
 
 ## Files
 

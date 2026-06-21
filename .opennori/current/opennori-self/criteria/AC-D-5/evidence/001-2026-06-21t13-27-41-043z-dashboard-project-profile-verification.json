@@ -1,0 +1,80 @@
+{
+  "kind": "dashboard-project-profile-verification",
+  "basis": "tool-observation",
+  "summary": "Dashboard now exposes Project Profile as a readonly project-level overlay and evaluates compliance only when a current goal exists. The header button is labeled Inspect Project Profile, the profile node raw data distinguishes project_only from current_goal_compliance, no-current-goal snapshots still include Project Profile but mark compliance not evaluated, and the overlay stays read-only without add/check/evidence/waive/confirm controls.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-d-5-project-profile-dashboard",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-d-5-project-profile-dashboard.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:profile",
+      "command": "npm run test:profile"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot.ts",
+      "path": "src/kernel/snapshot.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/App.tsx",
+      "path": "src/dashboard/src/App.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/selection.ts",
+      "path": "src/dashboard/src/selection.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/InspectNodePanel.tsx",
+      "path": "src/dashboard/src/components/InspectNodePanel.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/types.ts",
+      "path": "src/dashboard/src/types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-dashboard.test.js",
+      "path": "test/cli-dashboard.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/dashboard-selection.test.ts",
+      "path": "test/dashboard-selection.test.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "dashboard/index.html",
+      "path": "dashboard/index.html"
+    }
+  ],
+  "reviewability": "Inspect the listed dashboard and kernel files. Confirm the header icon label is Inspect Project Profile, profile rawData scope is project_only when there is no current goal and current_goal_compliance when active, no-current snapshots include Project Profile without marking compliance complete, and the panel exposes no write actions. Rerun dashboard/profile tests and typecheck.",
+  "limitations": "This verifies the dashboard state model, built assets, and test coverage. It does not include a fresh browser screenshot in this evidence record; visual inspection can still be done by running opennori dashboard locally.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T13:27:41.043Z"
+}

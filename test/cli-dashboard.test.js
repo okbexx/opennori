@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import http from "node:http";
 import { test } from "vitest";
-import { tempRoot, writeBriefFile, writeActiveGoal, writeActiveGoalWithId, runDraftCommand, runInitCommand, runActivityFinishCommand, runActivityHeartbeatCommand, runActivityShowCommand, runActivityStartCommand, runDashboardCommand, runDoctorCommand, appendEvent, readEvents, refreshSnapshot, snapshotPath, writeJson, startDashboardServer, goalPaths, readGoalPayloadFromPaths } from "./support/command-fixtures.js";
+import { tempRoot, writeBriefFile, writeActiveGoal, writeActiveGoalWithId, runDraftCommand, runInitCommand, runActivityFinishCommand, runActivityHeartbeatCommand, runActivityShowCommand, runActivityStartCommand, runDashboardCommand, runDoctorCommand, runProfileAddCommand, appendEvent, readEvents, refreshSnapshot, snapshotPath, writeJson, startDashboardServer, goalPaths, readGoalPayloadFromPaths } from "./support/command-fixtures.js";
 
 test("kernel events activity and snapshot expose dashboard state without replacing source files", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();
@@ -71,27 +71,19 @@ test("kernel events activity and snapshot expose dashboard state without replaci
   assert.equal(fs.existsSync(goalPaths(root, "module-goal").evidencePath), true);
 });
 
-test("dashboard snapshot exposes Nori Profile without turning it into an AC node", { tags: ["cli", "dashboard", "profile", "quick"] }, async () => {
+test("dashboard snapshot exposes Project Profile without turning it into an AC node", { tags: ["cli", "dashboard", "profile", "quick"] }, async () => {
   const root = tempRoot();
   writeActiveGoalWithId(root, "module-goal");
-  const paths = goalPaths(root, "module-goal");
-  const payload = readGoalPayloadFromPaths(paths.acceptancePath, paths.evidencePath);
-  payload.ledger.capability_profile = {
-    items: [
-      {
-        id: "skill-design-taste-frontend",
-        type: "skill",
-        name: "design-taste-frontend",
-        strength: "must",
-        purpose: "Generate a design read before implementation.",
-        scope: "frontend UI work",
-        install_policy: "existing_only",
-        evidence: []
-      }
-    ],
-    evidence: []
-  };
-  writeJson(paths.evidencePath, payload.ledger);
+  await runProfileAddCommand([
+    "--root", root,
+    "--type", "skill",
+    "--name", "design-taste-frontend",
+    "--strength", "must",
+    "--purpose", "Generate a design read before implementation.",
+    "--scope", "frontend UI work",
+    "--install-policy", "existing_only",
+    "--json"
+  ]);
 
   const snapshot = refreshSnapshot(root, { goalId: "module-goal" });
   assert.equal(snapshot.capability_profile.items.length, 1);

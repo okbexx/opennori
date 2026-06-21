@@ -209,7 +209,7 @@ export default function App() {
                 {connection}
               </span>
               <IconButton
-                label="Inspect Nori Profile"
+                label="Inspect Project Profile"
                 onClick={() => {
                   if (!snapshot) return;
                   setSelectedNode(profileNodeFromSnapshot(snapshot));

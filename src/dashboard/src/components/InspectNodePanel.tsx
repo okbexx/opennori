@@ -316,10 +316,10 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
     );
   }
 
-  // 3. 简体中文：Nori Profile 只读面板，不提供任何写状态动作
+  // 3. 简体中文：Project Profile 只读面板，不提供任何写状态动作
   if (node.type === "profile") {
     const rawProfile = node.rawData as {
-      scope?: "current_goal" | "no_current_goal" | string;
+      scope?: "current_goal_compliance" | "project_only" | string;
       idle_summary?: {
         last_goal?: {
           id: string;
@@ -330,8 +330,8 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
       profile?: CapabilityProfile;
       compliance?: ProfileCompliance;
     };
-    const hasCurrentGoal = rawProfile.scope !== "no_current_goal";
-    const profile = rawProfile.profile || { items: [], evidence: [] };
+    const hasCurrentGoal = rawProfile.scope === "current_goal_compliance";
+    const profile = rawProfile.profile || { items: [] };
     const compliance = rawProfile.compliance || {
       required: false,
       complete: true,
@@ -369,7 +369,7 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
                 <ListChecks size={17} />
               </div>
               <div>
-                <span className="text-[10px] font-mono font-bold tracking-widest text-slate-400">NORI PROFILE</span>
+                <span className="text-[10px] font-mono font-bold tracking-widest text-slate-400">PROJECT PROFILE</span>
                 <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                   <span className="rounded bg-slate-900 px-1.5 py-0.5 text-[8px] font-mono font-bold text-slate-300">
                     ITEMS {counts.total}
@@ -397,9 +397,9 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
 
         {!hasCurrentGoal && (
           <div className="rounded border border-slate-800 bg-slate-950/40 p-3">
-            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-500">No Current Goal Profile</span>
+            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-500">Project Profile Loaded</span>
             <p className="text-xs leading-relaxed text-slate-300">
-              Nori Profile is evaluated against the current Nori Contract. There is no current contract right now, so this panel is not claiming profile compliance.
+              Project Profile is configured at project level. There is no current Nori Contract right now, so OpenNori is not evaluating compliance for a goal.
             </p>
             {rawProfile.idle_summary?.last_goal ? (
               <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
@@ -425,7 +425,6 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
             <div className="flex flex-col gap-2">
               {profile.items.map((item) => {
                 const row = statusById.get(item.id);
-                const latest = item.evidence?.at(-1);
                 const status = row?.status || "unknown";
                 const statusColor = profileStatusColor(status);
                 const strengthColor = profileStrengthColor(item.strength);
@@ -463,7 +462,7 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
                       </div>
                       <div className="rounded bg-slate-950/30 p-1.5">
                         <span className="font-mono text-[8px] uppercase text-slate-500">latest evidence </span>
-                        {latest?.summary || row?.summary || "<none>"}
+                        {row?.summary || "<none>"}
                       </div>
                     </div>
                   </div>
@@ -476,12 +475,12 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
                 <ListChecks size={17} />
               </div>
               <p className="text-xs font-semibold text-slate-400">
-                {hasCurrentGoal ? "No Nori Profile items recorded for this current goal." : "No current goal profile is active."}
+                {hasCurrentGoal ? "No Project Profile items configured." : "No Project Profile items configured."}
               </p>
               <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
                 {hasCurrentGoal
-                  ? "Required Skills, preferred stacks, and avoided tools will appear here after the agent records them through OpenNori Profile."
-                  : "Open a current Nori Contract to inspect its required Skills, preferred stacks, avoided tools, and compliance evidence."}
+                  ? "Required Skills, preferred stacks, and avoided tools will appear here after the agent records them through OpenNori Project Profile."
+                  : "Ask the agent to record project-level Skills, stacks, constraints, or install policy through OpenNori Project Profile."}
               </p>
             </div>
           )}

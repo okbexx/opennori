@@ -3,7 +3,7 @@ import path from "node:path";
 import { defineCommand } from "citty";
 import { reviewAcceptanceQuality } from "../../acceptance.ts";
 import { agentNextForRecommendation } from "../../agent-next.ts";
-import { appendEvent, completionAnswer, currentGap, evidenceHealth, fail, intervention, nextRecommendation, ok, pathsForGoal, refreshSnapshot, recomputeWorkflowStatus } from "../../core.ts";
+import { appendEvent, completionAnswer, currentGap, evidenceHealth, fail, interventionForProfile, nextRecommendation, ok, pathsForGoal, readProjectProfile, refreshSnapshot, recomputeWorkflowStatus } from "../../core.ts";
 import { architectureState, renderReportWithArchitecture } from "../../architecture.ts";
 import { refreshManifest } from "../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../runtime.ts";
@@ -30,12 +30,13 @@ export const reportCommand = defineCommand({
   run({ args, data }) {
     const { contract, ledger, root } = data.loadPair(args);
     const architecture = architectureState(root, contract.goal_id);
+    const profile = readProjectProfile(root);
     const output = path.resolve(args.output || pathsForGoal(root, contract.goal_id).reportPath);
     fs.mkdirSync(path.dirname(output), { recursive: true });
     fs.writeFileSync(output, renderReportWithArchitecture(root, contract, ledger));
     refreshManifest(root);
-    const gap = currentGap(contract, ledger);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+    const gap = currentGap(contract, ledger, profile);
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
     appendEvent(root, {
       type: "report.generated",
       goal_id: contract.goal_id,
@@ -52,8 +53,8 @@ export const reportCommand = defineCommand({
         report_path: output,
         workflow_status: ledger.status,
         current_gap: gap,
-        completion: completionAnswer(contract, ledger, { root, architecture }),
-        intervention: intervention(contract, ledger),
+        completion: completionAnswer(contract, ledger, { root, architecture, profile }),
+        intervention: interventionForProfile(contract, ledger, profile),
         acceptance_review: reviewAcceptanceQuality(contract),
         evidence_health: evidenceHealth(contract, ledger, { root }),
         architecture,
@@ -92,7 +93,8 @@ export const archiveCommand = defineCommand({
   run({ args, data }) {
     const root = path.resolve(String(args.root || process.cwd()));
     const { contract, ledger, acceptancePath, evidencePath, goalDir } = data.loadPair(args);
-    recomputeWorkflowStatus(contract, ledger);
+    const profile = readProjectProfile(root);
+    recomputeWorkflowStatus(contract, ledger, profile);
     if (ledger.status !== "complete" && ledger.status !== "blocked") {
       return fail("not_archivable", `Goal ${contract.goal_id} is ${ledger.status}`, "Only complete or blocked OpenNori goals can be archived.");
     }

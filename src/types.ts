@@ -148,8 +148,9 @@ export type CapabilityProfileItem = {
 };
 
 export type CapabilityProfile = {
+  schema_version?: "opennori/project-profile-v1" | (string & {});
+  updated_at?: string;
   items: CapabilityProfileItem[];
-  evidence: CapabilityProfileEvidence[];
 };
 
 export type EvidenceLedger = {
@@ -158,7 +159,7 @@ export type EvidenceLedger = {
   status: WorkflowStatus;
   updated_at: string;
   criteria: Record<string, CriterionLedgerState>;
-  capability_profile?: CapabilityProfile;
+  profile_evidence?: CapabilityProfileEvidence[];
   [key: string]: unknown;
 };
 

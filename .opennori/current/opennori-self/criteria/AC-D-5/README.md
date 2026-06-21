@@ -9,32 +9,34 @@ Risk: medium
 
 ## Criterion
 
-User story: 作为用户，我打开 OpenNori dashboard 后，能点击顶部 Profile 图标，在右侧只读浮窗查看当前 Nori Profile 的执行偏好、合规状态、阻塞或 review 风险和证据摘要，而不需要回到 CLI 才知道 agent 是否遵守了我声明的 Skill、技术栈或 avoid 约束。
+User story: 作为用户，我打开 OpenNori dashboard 后，能点击顶部 Project Profile 图标，在右侧只读浮窗查看项目级 Profile 偏好，以及当前 goal 对这些偏好的合规状态、阻塞项、review 风险和证据摘要。
 
-Measurement: 启动 dashboard，在存在和不存在 Nori Profile items 的项目中点击顶部 Profile 图标，并切换 UI Panel / Raw JSON 查看浮窗内容。
+Measurement: 启动 dashboard，在有 current goal、没有 current goal、存在和不存在 Project Profile items 的项目中点击顶部 Project Profile 图标，并切换 UI Panel / Raw JSON 查看浮窗内容。
 
-Passing threshold: 右侧 overlay 浮窗展示 Profile item 总数、must/prefer/avoid 分布、complete/blocking/review 状态、每个 item 的 type/name/strength/purpose/scope/install policy/latest evidence summary；没有 profile 时显示空态；浮窗只读，不提供 add/check/evidence/waive/confirm 等写状态按钮；Profile 不被渲染为 Product AC 节点；打开或关闭浮窗前后，radar/main 区域不重新分配布局宽度，浮窗只覆盖在右侧观察层上。
+Passing threshold: 右侧 overlay 浮窗展示 Project Profile item 总数、must/prefer/avoid 分布、当前 goal compliance complete/blocking/review 状态、每个 item 的 type/name/strength/purpose/scope/install policy/latest compliance evidence；没有 current goal 时显示 Project Profile 已加载但合规未评价，而不是显示完成；没有 profile 时显示空态；浮窗只读，不提供 add/check/evidence/waive/confirm 等写状态按钮；Profile 不被渲染为 Product AC 节点；打开或关闭浮窗前后，radar/main 区域不重新分配布局宽度。
 
 ## Evidence
 
-Latest: dashboard-profile-idle-state-verification - Dashboard Profile drawer now distinguishes no-current-goal from satisfied compliance: when there is no current Nori Contract, the Profile icon opens a readonly drawer that shows NOT EVALUATED, explains Profile is current-contract-scoped, and says no current goal profile is active instead of reporting empty Profile as COMPLETE.
+Latest: dashboard-project-profile-verification - Dashboard now exposes Project Profile as a readonly project-level overlay and evaluates compliance only when a current goal exists. The header button is labeled Inspect Project Profile, the profile node raw data distinguishes project_only from current_goal_compliance, no-current-goal snapshots still include Project Profile but mark compliance not evaluated, and the overlay stays read-only without add/check/evidence/waive/confirm controls.
 Result: passing
 Basis: tool-observation
-Reviewability: Run the listed commands, start dashboard against a no-current-goal project, click the header Profile icon, and verify the drawer says NOT EVALUATED with no-current explanatory copy rather than COMPLETE.
-Limitations: This verifies current dashboard Profile semantics and selection state. It does not restore historical Profile items into a new active contract; completed goal details remain report/history state.
+Reviewability: Inspect the listed dashboard and kernel files. Confirm the header icon label is Inspect Project Profile, profile rawData scope is project_only when there is no current goal and current_goal_compliance when active, no-current snapshots include Project Profile without marking compliance complete, and the panel exposes no write actions. Rerun dashboard/profile tests and typecheck.
+Limitations: This verifies the dashboard state model, built assets, and test coverage. It does not include a fresh browser screenshot in this evidence record; visual inspection can still be done by running opennori dashboard locally.
 
 Sources:
-- Playwright observation: clicked Inspect Nori Profile on the no-current Agent Workbench dashboard; drawer showed PROFILE: Profile, compliance NOT EVALUATED, No Current Goal Profile, and No current goal profile is active.
-- npx tsc --noEmit --pretty false
-- npm run typecheck:dashboard
-- npm run build:dashboard
+- .opennori/architecture/evidence/opennori-self-ac-d-5-project-profile-dashboard.json
 - npm run test:dashboard
-- npm run test:quick
-- git diff --check
+- npm run test:profile
+- npx tsc --noEmit --pretty false
+- node ./bin/opennori.js check --root . --json
+- src/kernel/snapshot.ts
+- src/dashboard/src/App.tsx
 - src/dashboard/src/selection.ts
 - src/dashboard/src/components/InspectNodePanel.tsx
 - src/dashboard/src/types.ts
+- test/cli-dashboard.test.js
 - test/dashboard-selection.test.ts
+- dashboard/index.html
 
 ## Files
 

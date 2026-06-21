@@ -164,7 +164,7 @@ ledger, goal README, per-criterion dossier, and manifest stay synchronized. Do
 not manually patch `contract.json`, `ledger.json`, criterion dossier files, or
 manifest files for normal draft AC additions.
 
-Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, or implementation tasks into user AC. They can influence Nori Profile, Architecture Baseline, evidence risk, or recovery guidance, but Product AC must remain human-visible operations or judgments.
+Do not turn architecture choices, Skills, technology stacks, hooks, AW exports, or implementation tasks into user AC. They can influence Project Profile, Architecture Baseline, evidence risk, or recovery guidance, but Product AC must remain human-visible operations or judgments. Project Profile is project-level state under `.opennori/profile/`; goal ledgers only record compliance evidence against it.
 
 For user-visible interface goals, OpenNori Skills must discover UI/UX acceptance, not only functional completion. Pages, apps, dashboards, desktop tools, workbenches, forms, settings screens, and admin consoles need user-facing checks for entry/navigation, information hierarchy, empty/loading/error/success states, operation feedback, readability, visual and interaction consistency, recovery paths, and UI boundaries. Keep this in Skill behavior and user confirmation; do not implement it as a CLI hard validator or fixed word-list test.
 

@@ -1,0 +1,95 @@
+{
+  "kind": "project-profile-scope-verification",
+  "basis": "tool-observation",
+  "summary": "Project Profile is now the project-level source of truth under .opennori/profile, while current goals only store profile_evidence compliance. profile add/show/check work without requiring a current goal; profile evidence and profile check --record write current-goal compliance evidence. status/report/check/dashboard compute completion risk from Project Profile plus the current goal ledger without embedding Profile items in Product AC or contract JSON.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-o-8-project-profile-scope",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-o-8-project-profile-scope.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:profile",
+      "command": "npm run test:profile"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:acceptance",
+      "command": "npm run test:acceptance"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/profile.ts",
+      "path": "src/core/profile.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types.ts",
+      "path": "src/types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/profile/add.ts",
+      "path": "src/cli/commands/profile/add.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/profile/show.ts",
+      "path": "src/cli/commands/profile/show.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/profile/check.ts",
+      "path": "src/cli/commands/profile/check.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/profile/evidence.ts",
+      "path": "src/cli/commands/profile/evidence.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/profile-checks.ts",
+      "path": "src/lifecycle/profile-checks.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-capability-profile/SKILL.md",
+      "path": "plugins/opennori/skills/nori-capability-profile/SKILL.md"
+    }
+  ],
+  "reviewability": "Inspect the listed source files and docs. Run profile add/show/check in an empty temp project to confirm Project Profile can exist without a current goal; run profile evidence or check --record with a current goal to confirm only profile_evidence is written to that goal ledger; rerun the listed typecheck/tests/check.",
+  "limitations": "This proves OpenNori state semantics and command behavior. It does not prove every future agent will describe Profile perfectly; packaged Skills and user review still carry that language boundary.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T13:27:10.024Z"
+}

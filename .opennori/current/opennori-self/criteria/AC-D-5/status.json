@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "medium",
-  "evidence_count": 2,
-  "latest_evidence_summary": "Dashboard Profile drawer now distinguishes no-current-goal from satisfied compliance: when there is no current Nori Contract, the Profile icon opens a readonly drawer that shows NOT EVALUATED, explains Profile is current-contract-scoped, and says no current goal profile is active instead of reporting empty Profile as COMPLETE.",
-  "updated_at": "2026-06-21T11:20:20.581Z"
+  "evidence_count": 1,
+  "latest_evidence_summary": "Dashboard now exposes Project Profile as a readonly project-level overlay and evaluates compliance only when a current goal exists. The header button is labeled Inspect Project Profile, the profile node raw data distinguishes project_only from current_goal_compliance, no-current-goal snapshots still include Project Profile but mark compliance not evaluated, and the overlay stays read-only without add/check/evidence/waive/confirm controls.",
+  "updated_at": "2026-06-21T13:40:42.527Z"
 }

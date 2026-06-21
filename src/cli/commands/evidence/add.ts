@@ -9,7 +9,9 @@ import {
   nextRecommendation,
   ok,
   pruneInvalidEvidence,
+  readProjectProfile,
   refreshSnapshot,
+  recomputeWorkflowStatus,
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
@@ -92,6 +94,7 @@ export const evidenceAddCommand = defineCommand({
   },
   run({ args, data }) {
     const { contract, ledger, acceptancePath, evidencePath, root } = data.loadPair(args);
+    const profile = readProjectProfile(root);
     const criterionId = args.criterion;
     if (!criterionId) throw new Error("--criterion is required");
     const sources = evidenceSourcesFromArgs(args, data.rawArgs || []);
@@ -109,11 +112,12 @@ export const evidenceAddCommand = defineCommand({
     if (!evidence.summary) throw new Error("--summary is required");
     addEvidence(contract, ledger, criterionId, evidence);
     pruneInvalidEvidence(contract, ledger, { root });
+    recomputeWorkflowStatus(contract, ledger, profile);
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
     const architecture = architectureState(root, contract.goal_id);
-    const gap = currentGap(contract, ledger);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+    const gap = currentGap(contract, ledger, profile);
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
     appendEvent(root, {
       type: "evidence.added",
       goal_id: contract.goal_id,

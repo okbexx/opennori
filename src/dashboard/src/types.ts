@@ -72,8 +72,9 @@ export type ProfileItem = {
 };
 
 export type CapabilityProfile = {
+  schema_version?: string;
+  updated_at?: string;
   items: ProfileItem[];
-  evidence: ProfileEvidenceRecord[];
 };
 
 export type ProfileStatusRow = {

@@ -7,9 +7,17 @@ description: Capture and check OpenNori execution preferences such as required S
 
 Keep the user's execution preferences visible to the agent and completion report without polluting Product AC.
 
-Nori Profile answers "how should the agent work" and "what constraints affect completion confidence". Product AC still answers "what can the human user accept".
+Project Profile answers "how should the agent work in this project" and
+"what constraints affect completion confidence". Product AC still answers
+"what can the human user accept".
 
-Nori Profile is a user-reviewable asset. Keep machine fields such as `id`,
+Project Profile is project-level source data stored under `.opennori/profile/`.
+It is not goal-level state, not copied into a Nori Contract, and not an
+Acceptance Criterion. Current goals may record Profile compliance evidence in
+their ledgers, and status/report/dashboard may show compliance for the current
+goal, but the Profile itself belongs to the project.
+
+Project Profile is a user-reviewable asset. Keep machine fields such as `id`,
 `type`, `strength`, and `install_policy` stable, but write human-readable values
 such as `name`, `purpose`, `scope`, profile evidence summaries, and user-facing
 explanations in the current Nori Contract presentation language. Prefer an
@@ -30,9 +38,9 @@ product behavior.
 
 ## Start Here
 
-1. Read current profile, current/draft status, and `presentation.language`
-   before adding duplicate preferences. If no contract exists, infer language
-   from the user's prompt.
+1. Read the Project Profile, current/draft status, and `presentation.language`
+   before adding duplicate preferences. If no contract exists, still allow
+   project-level Profile edits and infer language from the user's prompt.
 2. Classify the user's statement as `skill`, `stack`, or `constraint`.
 3. Classify strength:
    - `must`: completion is blocked until satisfied or waived.
@@ -43,13 +51,15 @@ product behavior.
    feedback, persistence, or destructive boundary, hand off to
    `nori-acceptance` so it becomes user-confirmed Product AC instead of hidden
    Profile semantics.
-6. Record compliance evidence before confident completion.
+6. Record current-goal compliance evidence before confident completion.
 7. If a dashboard is being watched or `agent_next.dashboard_activity` is present and a current goal/gap exists, publish live profile activity while recording or checking preferences: start before profile work, heartbeat only during longer work, and finish when the turn ends. Prefer the returned command template; otherwise use `opennori activity start --root <repo> --skill nori-capability-profile --state working --summary "..." --json`.
 
 Useful state commands:
 
 - `opennori profile show --root <repo> --json`
 - `opennori profile add --root <repo> --type <skill|stack|constraint> --name "<name>" --strength <must|prefer|avoid> --purpose "<why>" --install-policy <existing_only|ask_before_install|allowed> --json`
+- `opennori profile check --root <repo> --json`
+- `opennori profile check --root <repo> --record --json` when a current goal exists and automatic checks should be recorded as compliance evidence
 - `opennori profile evidence --root <repo> --item <item-id> --result <satisfied|violated|waived> --summary "<evidence>" --json`
 - `opennori activity start|heartbeat|finish --root <repo> --skill nori-capability-profile --state working --summary "..." --json` (required dashboard signal when the dashboard is observed and a current goal/gap exists)
 
@@ -61,14 +71,20 @@ Useful state commands:
 - "Ask me before installing packages" -> set install policy to `ask_before_install`.
 - "Profile 内容为什么是英文", "profile 应该用中文", or "keep profile in English" -> revise or recreate user-readable profile values in the requested or current contract language. Do not change stable ids or protocol field names just to translate labels.
 - "Use Radix for this CRUD page", "use a design Skill first", or "avoid
-  duplicate CSS" -> record the stack/Skill/constraint in Profile, then route
+  duplicate CSS" -> record the stack/Skill/constraint in the Project Profile, then route
   any missing user operation path or UI behavior detail to `nori-acceptance`.
 - "This preference can be waived" -> record profile evidence as `waived` with the user's reason.
-- "Did we follow my stack preference" -> show profile items and compliance evidence.
+- "Did we follow my stack preference" -> show Project Profile items and current-goal compliance evidence.
+
+No-current-goal behavior:
+
+- `profile show`, `profile add`, and `profile check` are valid project-level operations.
+- `profile evidence` and `profile check --record` require a current goal because they write compliance evidence into that goal's ledger.
+- If there is no current goal, explain that the Project Profile is configured but compliance is not evaluated yet.
 
 ## State Writes
 
-May write Nori Profile items and profile compliance evidence. Do not write Product AC, evidence for acceptance criteria, Architecture Baseline, or reports directly.
+May write Project Profile items and Project Profile compliance evidence into the current goal ledger. Do not write Product AC, evidence for acceptance criteria, Architecture Baseline, or reports directly.
 
 Must write live dashboard activity for profile work when the dashboard is observed and a current goal/gap exists. Activity is not profile compliance evidence and is not Product AC evidence.
 
@@ -101,6 +117,7 @@ agent state.
 ## Misuse Guards
 
 - Do not turn Skills, libraries, architecture, or install policy into Product AC.
+- Do not describe Profile as current-goal state. It is project-level state; only compliance evidence is goal-scoped.
 - Do not write profile `name`, `purpose`, `scope`, evidence summaries, or
   user-facing profile explanations in a different language from the user's
   explicit request or current Nori Contract presentation language. Stable ids

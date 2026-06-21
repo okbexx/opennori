@@ -136,7 +136,7 @@ test("dashboard focus events include evidence and architecture changes", { tags:
   }), "AC-4");
 });
 
-test("dashboard profile node syncs Nori Profile compliance from snapshots", { tags: ["dashboard", "quick"] }, () => {
+test("dashboard profile node syncs Project Profile compliance from snapshots", { tags: ["dashboard", "quick"] }, () => {
   const snapshot = snapshotWithCriteria([]);
   snapshot.capability_profile = {
     items: [
@@ -150,8 +150,7 @@ test("dashboard profile node syncs Nori Profile compliance from snapshots", { ta
         install_policy: "existing_only",
         evidence: []
       }
-    ],
-    evidence: []
+    ]
   };
   snapshot.capability_compliance = {
     required: true,
@@ -231,10 +230,10 @@ test("dashboard profile node is not evaluated when there is no current goal", { 
       report_path: ".opennori/reports/completed-goal.report.md"
     }
   };
-  snapshot.capability_profile = { items: [], evidence: [] };
+  snapshot.capability_profile = { items: [] };
   snapshot.capability_compliance = {
     required: false,
-    complete: true,
+    complete: false,
     blocking: [],
     review: [],
     statuses: []
@@ -244,6 +243,6 @@ test("dashboard profile node is not evaluated when there is no current goal", { 
   const rawData = node.rawData as { scope: string; idle_summary: NonNullable<NoriSnapshot["idle_summary"]> };
 
   assert.equal(node.status, "not_evaluated");
-  assert.equal(rawData.scope, "no_current_goal");
+  assert.equal(rawData.scope, "project_only");
   assert.equal(rawData.idle_summary.last_goal?.id, "completed-goal");
 });

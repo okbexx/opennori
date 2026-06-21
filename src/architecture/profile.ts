@@ -204,7 +204,7 @@ const BUILTIN_ARCHITECTURE_PROFILES: Record<string, ArchitectureProfile> = {
         {
           name: "architecture-before-implementation",
           steps: [
-            "Agent reads current goal, Product AC, Nori Profile, project evidence, and references.",
+            "Agent reads current goal, Product AC, Project Profile, project evidence, and references.",
             "Skill selects or creates an Architecture Profile with product charter and concrete technical baseline.",
             "CLI previews a baseline without side effects.",
             "User confirms or revises the baseline.",
@@ -276,7 +276,7 @@ const BUILTIN_ARCHITECTURE_PROFILES: Record<string, ArchitectureProfile> = {
         },
         {
           name: "ECC",
-          decision: "Map profiles/components/manifest/doctor thinking into Nori Profile, lifecycle manifest, doctor, and Architecture Profile review.",
+          decision: "Map profiles/components/manifest/doctor thinking into Project Profile, lifecycle manifest, doctor, and Architecture Profile review.",
           reason: "Productized recovery and capability checks matter, but they must serve the acceptance loop."
         },
         {

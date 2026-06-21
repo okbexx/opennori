@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import type { ManagedAction } from "../types.ts";
 import {
@@ -14,6 +15,7 @@ import {
   writeAgentRoute,
   writeIfSafe
 } from "./managed-files.ts";
+import { emptyProjectProfile, readProjectProfile, renderProjectProfileMarkdown } from "../core/profile.ts";
 import { writeManifest } from "./manifest.ts";
 import { protocolTemplate } from "./shared.ts";
 
@@ -23,6 +25,28 @@ type InstallOptions = {
   mergeAgentRoute?: boolean;
 };
 
+function projectProfileReadmeAction(root: string, { dryRun = false } = {}): ManagedAction {
+  const target = path.join(root, ".opennori", "profile", "README.md");
+  const exists = fs.existsSync(target);
+  const profile = readProjectProfile(root);
+  const content = renderProjectProfileMarkdown(profile);
+  const current = exists ? fs.readFileSync(target, "utf8") : null;
+  const action = exists ? (current === content ? "exists" : "update") : "create";
+  if (!dryRun && action !== "exists") {
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, content);
+  }
+  return {
+    path: target,
+    action,
+    kind: "project-profile",
+    managed: true,
+    reason: action === "exists"
+      ? "Project Profile README already matches profile.json."
+      : "Project Profile README will be generated from profile.json."
+  };
+}
+
 export function installActions(root: string, { dryRun = false, force = false, mergeAgentRoute = false }: InstallOptions = {}): ManagedAction[] {
   const actions: ManagedAction[] = [
     ensureDir(path.join(root, ".opennori", "current"), { dryRun }),
@@ -31,6 +55,9 @@ export function installActions(root: string, { dryRun = false, force = false, me
     ensureDir(path.join(root, ".opennori", "blocked"), { dryRun }),
     ensureDir(path.join(root, ".opennori", "reports"), { dryRun }),
     ensureDir(path.join(root, ".opennori", "brainstorms"), { dryRun }),
+    ensureDir(path.join(root, ".opennori", "profile"), { dryRun }),
+    writeIfSafe(path.join(root, ".opennori", "profile", "profile.json"), `${JSON.stringify(emptyProjectProfile(), null, 2)}\n`, { dryRun, force: false, kind: "project-profile" }),
+    projectProfileReadmeAction(root, { dryRun }),
     ensureDir(path.join(root, ".opennori", "architecture"), { dryRun }),
     ...REQUIRED_ARCHITECTURE_DIRS.map((dir) => ensureDir(path.join(root, ".opennori", "architecture", dir), { dryRun })),
     writeIfSafe(path.join(root, ".opennori", "protocol.md"), protocolTemplate(), { dryRun, force, kind: "protocol" }),

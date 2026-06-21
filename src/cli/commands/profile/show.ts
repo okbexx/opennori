@@ -1,35 +1,59 @@
+import path from "node:path";
 import { defineCommand } from "citty";
 import {
   currentGap,
+  findCurrentPairs,
   ok,
+  readGoalPayload,
+  readProjectProfile,
   profileCompliance
 } from "../../../core.ts";
-import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
+import { runJsonCommand } from "../../runtime.ts";
 import {
-  jsonArg
+  jsonArg,
+  rootArg
 } from "./shared.ts";
 
 export const profileShowCommand = defineCommand({
   meta: {
     name: "show",
-    description: "Show the Nori Profile attached to the current goal."
+    description: "Show the OpenNori Project Profile and current-goal compliance when available."
   },
   args: {
-    ...activeGoalArgs,
+    root: rootArg,
+    goal: {
+      type: "string",
+      description: "Optional current goal id for compliance."
+    },
     json: jsonArg
   },
-  run({ args, data }) {
-    const { contract, ledger } = data.loadPair(args);
+  run({ args }) {
+    const root = path.resolve(String(args.root || process.cwd()));
+    const profile = readProjectProfile(root);
+    const pair = (args.goal
+      ? findCurrentPairs(root).find((entry) => entry.goalId === String(args.goal))
+      : findCurrentPairs(root)[0]) || null;
+    if (!pair) {
+      return ok({
+        scope: "project",
+        profile,
+        compliance: null,
+        current_goal: null,
+        current_gap: null
+      });
+    }
+    const { contract, ledger } = readGoalPayload(pair);
     return ok({
+      scope: "project",
       goal_id: contract.goal_id,
-      profile: ledger.capability_profile || { items: [], evidence: [] },
-      compliance: profileCompliance(ledger),
+      profile,
+      compliance: profileCompliance(profile, ledger),
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger)
+      current_gap: currentGap(contract, ledger, profile)
     });
   }
 });
 
-export async function runProfileShowCommand(rawArgs: string[], { loadPair }: ActiveGoalRuntime) {
-  return runJsonCommand(profileShowCommand, rawArgs, { loadPair });
+export async function runProfileShowCommand(rawArgs: string[]) {
+  return runJsonCommand(profileShowCommand, rawArgs);
 }

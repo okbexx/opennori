@@ -1,16 +1,17 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { currentGap, findCurrentPairs, findDraftPairs, findHistoryPairs, ok, readGoalPayload } from "../../core.ts";
+import { currentGap, findCurrentPairs, findDraftPairs, findHistoryPairs, ok, readGoalPayload, readProjectProfile } from "../../core.ts";
 import { runJsonCommand } from "../runtime.ts";
 
-function summarizePairs(pairs: ReturnType<typeof findCurrentPairs>) {
+function summarizePairs(root: string, pairs: ReturnType<typeof findCurrentPairs>) {
+  const profile = readProjectProfile(root);
   return pairs.map((pair) => {
     const payload = readGoalPayload(pair);
     return {
       goal_id: pair.goalId,
       location: pair.location,
       status: payload.ledger?.status || "unknown",
-      current_gap: currentGap(payload.contract, payload.ledger),
+      current_gap: currentGap(payload.contract, payload.ledger, profile),
       acceptance_path: pair.acceptancePath,
       evidence_path: pair.evidencePath
     };
@@ -36,14 +37,14 @@ export const listCommand = defineCommand({
   },
   run({ args }) {
     const root = path.resolve(String(args.root || process.cwd()));
-    const currentGoals = summarizePairs(findCurrentPairs(root));
+    const currentGoals = summarizePairs(root, findCurrentPairs(root));
     return ok({
       root,
       current_goal: currentGoals[0] || null,
       current_goals: currentGoals,
       active_goals: currentGoals,
-      draft_goals: summarizePairs(findDraftPairs(root)),
-      history_goals: summarizePairs(findHistoryPairs(root))
+      draft_goals: summarizePairs(root, findDraftPairs(root)),
+      history_goals: summarizePairs(root, findHistoryPairs(root))
     });
   }
 });

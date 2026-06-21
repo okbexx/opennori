@@ -5,7 +5,7 @@ import type { JsonObject } from "../types.ts";
 
 export const PACKAGE_JSON = JSON.parse(fs.readFileSync(packagePath("package.json"), "utf8")) as JsonObject;
 export const MANIFEST_SCHEMA_VERSION = "opennori/manifest-v1";
-export const REQUIRED_NORI_DIRS = ["current", "drafts", "completed", "blocked", "reports", "brainstorms"];
+export const REQUIRED_NORI_DIRS = ["current", "drafts", "completed", "blocked", "reports", "brainstorms", "profile"];
 export const NORI_CAPABILITIES = [
   "acceptance-contract",
   "evidence-ledger",

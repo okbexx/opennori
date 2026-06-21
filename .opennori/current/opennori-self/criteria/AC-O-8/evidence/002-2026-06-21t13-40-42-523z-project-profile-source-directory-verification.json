@@ -1,0 +1,53 @@
+{
+  "kind": "project-profile-source-directory-verification",
+  "basis": "tool-observation",
+  "summary": "OpenNori initializes .opennori/profile/profile.json as the project-level Project Profile source and .opennori/profile/README.md as a generated review surface; goal ledgers store only profile_evidence compliance records.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js init --root . --confirm --json",
+      "command": "node ./bin/opennori.js init --root . --confirm --json"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:profile",
+      "command": "npm run test:profile"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/profile.ts",
+      "path": "src/core/profile.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/install.ts",
+      "path": "src/lifecycle/install.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/manifest.ts",
+      "path": "src/lifecycle/manifest.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-lifecycle.test.js",
+      "path": "test/cli-lifecycle.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/profile/profile.json",
+      "path": ".opennori/profile/profile.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/profile/README.md",
+      "path": ".opennori/profile/README.md"
+    }
+  ],
+  "reviewability": "Inspect .opennori/profile/profile.json and README.md, lifecycle install actions, manifest managed files, and profile tests. Confirm profile.json is source data, README is generated from it, and current goal ledgers contain only compliance evidence.",
+  "limitations": "This verifies project-state initialization and scope boundaries. It does not add Project Profile preferences to this repository; the current Project Profile remains empty until a user or agent records preferences.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T13:40:42.523Z"
+}

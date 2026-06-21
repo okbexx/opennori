@@ -8,7 +8,6 @@ import type {
   ValidationIssue
 } from "../types.ts";
 import { contractLanguage, contractLanguageFromBrief } from "../language.ts";
-import { renderProfileLines, VALID_PROFILE_ITEM_TYPES, VALID_PROFILE_STRENGTHS } from "./profile.ts";
 import { inferCriterionLayer, nowIso, slugify, PROTOCOL_VERSION } from "./shared.ts";
 
 export const VALID_STATUSES = new Set(["unknown", "failing", "passing", "blocked", "waived"]);
@@ -57,11 +56,7 @@ export function buildEvidenceLedger(contract: NoriContract): EvidenceLedger {
     goal_id: contract.goal_id,
     status: contract.acceptance_basis?.status === "approved" ? "active" : "draft",
     updated_at: nowIso(),
-    criteria,
-    capability_profile: {
-      items: [],
-      evidence: []
-    }
+    criteria
   };
 }
 
@@ -83,7 +78,7 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
         openQuestions: "开放问题",
         outOfScope: "范围外",
         none: "<无>",
-        profile: "Nori Profile",
+        profile: "项目画像",
         criteria: "用户验收标准",
         userAcceptanceCriterion: "用户验收标准",
         measurement: "衡量方式",
@@ -106,7 +101,7 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
         openQuestions: "Open Questions",
         outOfScope: "Out of scope",
         none: "<none>",
-        profile: "Nori Profile",
+        profile: "Project Profile",
         criteria: "User Acceptance Criteria",
         userAcceptanceCriterion: "User acceptance criterion",
         measurement: "Measurement",
@@ -156,10 +151,6 @@ export function renderAcceptanceMarkdown(contract: NoriContract, ledger: Evidenc
     `## ${labels.acceptanceBasis}`,
     "",
     ...basisLines,
-    "",
-    `## ${labels.profile}`,
-    "",
-    ...renderProfileLines(ledger),
     "",
     `## ${labels.criteria}`,
     "",
@@ -273,14 +264,6 @@ export function validateContractIntegrity(contract: NoriContract, ledger: Eviden
       }
       if (!VALID_STATUSES.has(state.status)) {
         issues.push({ path: `ledger.criteria.${criterionId}.status`, message: `Invalid status: ${state.status}` });
-      }
-    }
-    for (const item of ledger.capability_profile?.items || []) {
-      if (!VALID_PROFILE_ITEM_TYPES.has(item.type)) {
-        issues.push({ path: `ledger.capability_profile.items.${item.id}.type`, message: `Invalid profile item type: ${item.type}` });
-      }
-      if (!VALID_PROFILE_STRENGTHS.has(item.strength)) {
-        issues.push({ path: `ledger.capability_profile.items.${item.id}.strength`, message: `Invalid profile strength: ${item.strength}` });
       }
     }
   }

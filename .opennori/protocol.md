@@ -77,7 +77,7 @@ The operator layer proves that Codex can actually use OpenNori as the work proto
 | AC-O-5 | Codex conversation | Ask "what do I need to do?" | If blocked, the user sees a concrete human action. | Blocked output asks for a decision, input, permission, cost approval, or similar human action. |
 | AC-O-6 | Codex conversation | Revise an AC after new facts appear | The changed acceptance basis is preserved. | Updated ACs become the basis for `current_gap` and completion; old criteria are not silently reused. |
 | AC-O-7 | Codex conversation | Ask OpenNori to brainstorm a fuzzy idea | The user sees selectable acceptance directions without remembering CLI syntax. | Brainstorm candidates describe user value, observable acceptance direction, and risk; they are not treated as a contract or completion evidence. |
-| AC-O-8 | Codex conversation | State required Skills, preferred stacks, avoided tools, or execution constraints | The agent records a Nori Profile without making the user remember CLI syntax. | Must/avoid profile items are shown in contract and report; unsatisfied must items or violated avoid items block completion unless waived. |
+| AC-O-8 | Codex conversation | State required Skills, preferred stacks, avoided tools, or execution constraints | The agent records a project-level Project Profile without making the user remember CLI syntax. | Must/avoid profile items live under `.opennori/profile/`; current goal status/report/dashboard show compliance against that Project Profile; unsatisfied must items or violated avoid items block completion unless waived. |
 | AC-O-9 | Codex conversation | Ask OpenNori to use a good architecture for a non-trivial goal | The user sees Product AC and an Architecture Baseline before implementation starts. | The baseline is not a plan; it names the architecture profile, boundaries, build-vs-buy policy, and challenge rule. |
 | AC-O-14 | Codex conversation | Review a newly generated Nori Contract Draft | The user can tell whether the agent understood every AC before approving. | After draft generation, the agent shows a compact overview and then reviews one AC at a time: exact user entry, object or field, visible state/message/result, non-passing examples, and specific evidence object for the current AC; the user confirms or revises that AC before the next AC; final approval is requested only after every AC has been confirmed one by one. If the explanation is generic, adds or changes completion meaning, or cannot be made specific from the draft, the draft is revised instead of approved. |
 | AC-O-18 | Codex conversation | Give the agent a visible product goal such as UI, CRUD, dashboard, form, list, settings, or admin work | The agent models the actual user operation path before drafting, recording evidence, or reporting confident completion. | The Skill-owned Acceptance Surface Model identifies actor, entry, visible trigger, object, action, interaction surface, required information, feedback, state change, persistence, destructive boundary, and evidence shape; broad outcome AC such as "CRUD works" or "dashboard shows state" are routed back to acceptance revision, not treated as confidently acceptable. |
@@ -100,7 +100,7 @@ a durable workflow asset.
 | AC-Z-9 | CLI | Preview install with `opennori install --dry-run` | The user can judge what OpenNori would create, skip, update, or overwrite before writing to the project. | Install plan lists action, kind, managed status, write intent, destructive flag, and reason; dry-run reports zero actual writes. |
 | AC-Z-10 | CLI | Apply force install | The user must preview and explicitly confirm destructive install actions before files are overwritten. | Real `opennori install --force` fails without confirmation; dry-run previews destructive overwrites; confirmed force install may write. |
 | AC-Z-11 | CLI | Preview and apply uninstall | The user can uninstall OpenNori entry assets without losing acceptance state by default. | Uninstall plan shows removals and preserved state; real uninstall requires confirmation; `.opennori` state is deleted only with `--include-state --confirm`. |
-| AC-Z-12 | Codex Plugin / Codex Skills | Use OpenNori Plugin Skills | The agent gets focused OpenNori Skills for acceptance, evidence, Nori Profile, architecture, project health, reporting, and next-loop handoff while the user keeps using natural language. | The npm package ships `.agents/plugins/marketplace.json`, `plugins/opennori/.codex-plugin/plugin.json`, and `plugins/opennori/skills/nori*/SKILL.md`; each Skill is an agent behavior protocol with trigger semantics, state reading, natural-language mapping, state write boundaries, handoffs, user reply shape, and misuse guards; install does not copy Skills into the project; manifest records `plugin`; doctor detects missing packaged Plugin Skills. |
+| AC-Z-12 | Codex Plugin / Codex Skills | Use OpenNori Plugin Skills | The agent gets focused OpenNori Skills for acceptance, evidence, Project Profile, architecture, project health, reporting, and next-loop handoff while the user keeps using natural language. | The npm package ships `.agents/plugins/marketplace.json`, `plugins/opennori/.codex-plugin/plugin.json`, and `plugins/opennori/skills/nori*/SKILL.md`; each Skill is an agent behavior protocol with trigger semantics, state reading, natural-language mapping, state write boundaries, handoffs, user reply shape, and misuse guards; install does not copy Skills into the project; manifest records `plugin`; doctor detects missing packaged Plugin Skills. |
 | AC-Z-13 | CLI / project file browser | Establish an Architecture Baseline | The user can see what architecture the agent must follow while implementing Product AC. | `.opennori/architecture/baseline.json`, `.opennori/architecture/baseline.md`, and `.opennori/agent-guide.md` expose the baseline to agents and reviewers. |
 | AC-Z-14 | CLI / project file browser | Add a project Architecture Profile | The user can extend built-in profiles with a reviewed project profile without polluting architecture evidence. | `opennori architecture profile --from <profile.json>` writes `.opennori/architecture/profiles/<id>.json`; `architecture profiles` lists it before built-ins; `.opennori/architecture/evidence/` is not used for profile source or duplicate profile files. |
 | AC-Z-15 | CLI / report | Challenge a baseline | The user can review evidence before an agent changes architecture. | `opennori architecture challenge` records current baseline, conflict evidence, recommendation, and user confirmation requirement. |
@@ -191,7 +191,7 @@ OpenNori may maintain a local observation surface for users:
 These files are not Product AC, not implementation plans, and not completion
 evidence. They help users observe the acceptance loop while it runs. The source
 of truth for completion remains the current Nori Contract, evidence ledger,
-Nori Profile, Architecture Baseline, and report state.
+Project Profile compliance evidence, Architecture Baseline, and report state.
 
 `opennori dashboard --root <project>` starts a local loopback HTTP/SSE kernel
 and serves a static visual dashboard. `opennori activity ...` lets an agent
@@ -346,10 +346,10 @@ on stale, broad, source-free, or non-reviewable evidence. It does not rewrite ex
 evidence, reports, archives, brainstorms, or baselines. The user decides whether to revise affected
 criteria, confirm assumptions, accept review risk, revise architecture, or refresh evidence.
 
-## Nori Profile
+## Project Profile
 
-Acceptance criteria remain human-facing outcomes. A Nori Profile is separate execution
-guidance for the agent when the user says things like:
+Acceptance criteria remain human-facing outcomes. Project Profile is separate
+project-level execution guidance for the agent when the user says things like:
 
 - must use an existing Skill
 - prefer a library or stack
@@ -357,7 +357,13 @@ guidance for the agent when the user says things like:
 - ask before installing a dependency
 - follow a project-specific constraint
 
-Profile items have:
+Project Profile lives under `.opennori/profile/` and is not copied into a Nori
+Contract. A current goal may record compliance evidence against the Project
+Profile in that goal's ledger, and status/report/dashboard may show current-goal
+compliance. If there is no current goal, the Project Profile can still be viewed
+or edited, but compliance is not evaluated.
+
+Project Profile items have:
 
 - `type`: `skill`, `stack`, or `constraint`
 - `strength`: `must`, `prefer`, or `avoid`
@@ -370,7 +376,7 @@ Completion rules:
 - `prefer` does not block objective completion, but unknown or violated preferences become `profile_review` risk before confident completion.
 - `avoid` blocks completion if violated.
 
-Agents translate the user's natural-language preferences into profile records. Users should not
+Agents translate the user's natural-language preferences into Project Profile records. Users should not
 need to remember `opennori profile` commands.
 
 ## Language Preference
@@ -379,12 +385,12 @@ Language preference is presentation metadata, not Product AC. OpenNori stores
 `presentation.language` on brainstorms, discoveries, and Nori Contracts so
 generated goals, acceptance checks, discovery questions, and next loop
 candidates stay in the language the user expects. The same preference is carried
-by Skills into user-reviewable Nori Profile and project Architecture Profile
+by Skills into user-reviewable Project Profile and project Architecture Profile
 wording.
 
 Only human-readable values follow the presentation language. Stable ids,
 protocol field names, enum-like values such as `must`, `prefer`, `avoid`, and
-import paths remain stable. If a project profile was created in the wrong
+import paths remain stable. If a Project Profile was created in the wrong
 language, the agent revises or recreates that profile after user review.
 OpenNori should not add a hard-coded language ratio validator or CLI
 auto-translation layer.

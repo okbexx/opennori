@@ -1,0 +1,28 @@
+{
+  "kind": "project-profile-report-rendering-review",
+  "basis": "tool-observation",
+  "summary": "OpenNori report leads with decision summary, goal, acceptance basis, Project Profile Compliance, acceptance status, evidence health, user intervention, and conclusion.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js report --root . --json",
+      "command": "node ./bin/opennori.js report --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/reports/opennori-self.report.md",
+      "path": ".opennori/reports/opennori-self.report.md"
+    }
+  ],
+  "reviewability": "Run opennori report and inspect the generated Markdown. Confirm it separates Product acceptance, Project Profile Compliance, Architecture Baseline, evidence health, user intervention, and final conclusion without making process tasks the main storyline.",
+  "limitations": "This verifies current report structure and terminology. It does not prove every future report will have ideal natural-language wording.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T13:34:39.553Z"
+}

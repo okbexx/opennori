@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { test } from "vitest";
-import { tempRoot, writeBriefFile, renderHuman, runApproveCommand, runBrainstormCommand, runCriterionAddCommand, runCriterionUpdateCommand, runDiscoverCommand, runDraftCommand, runInitCommand, runNextCommand, runResumeCommand, runStatusCommand, runDoctorCommand, resolveCliCommand, runCliCommand, buildArchitectureBaseline, renderAgentGuideMarkdown, writeArchitectureBaseline, writeArchitectureRequirement, addEvidence, buildEvidenceLedger, goalPaths, writeGoalDossier, writeJson } from "./support/command-fixtures.js";
+import { tempRoot, writeBriefFile, renderHuman, runApproveCommand, runBrainstormCommand, runCriterionAddCommand, runCriterionUpdateCommand, runDiscoverCommand, runDraftCommand, runInitCommand, runNextCommand, runResumeCommand, runStatusCommand, runDoctorCommand, runProfileAddCommand, resolveCliCommand, runCliCommand, buildArchitectureBaseline, renderAgentGuideMarkdown, writeArchitectureBaseline, writeArchitectureRequirement, addEvidence, buildEvidenceLedger, goalPaths, writeGoalDossier, writeJson } from "./support/command-fixtures.js";
 
 test("status commands return routeable no-current-goal state instead of unexpected errors", { tags: ["cli", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
@@ -285,7 +285,7 @@ test("resume command module includes completion, health, architecture, and next 
     criteria: [],
     acceptance_basis: { status: "approved" }
   };
-  const ledger = { status: "complete", criteria: {}, capability_profile: { items: [], evidence: [] } };
+  const ledger = { status: "complete", criteria: {} };
 
   const resume = await runResumeCommand(["--json"], {
     loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root })
@@ -317,7 +317,7 @@ test("resume command module returns next-loop handoff without CLI candidate goal
     criteria: [],
     acceptance_basis: { status: "approved" }
   };
-  const ledger = { status: "complete", criteria: {}, capability_profile: { items: [], evidence: [] } };
+  const ledger = { status: "complete", criteria: {} };
   writeArchitectureRequirement(root, {
     goalId: contract.goal_id,
     status: "required",
@@ -357,7 +357,7 @@ test("status command module includes criteria and completion state", { tags: ["c
     ],
     acceptance_basis: { status: "approved" }
   };
-  const ledger = { status: "active", criteria: { "AC-1": { status: "unknown", evidence: [] } }, capability_profile: { items: [], evidence: [] } };
+  const ledger = { status: "active", criteria: { "AC-1": { status: "unknown", evidence: [] } } };
 
   const status = await runStatusCommand(["--json"], {
     loadPair: () => ({ contract, ledger, root })
@@ -559,22 +559,18 @@ test("criterion update command keeps draft revisions awaiting acceptance review"
     }
   };
   const ledger = buildEvidenceLedger(contract);
-  ledger.capability_profile = {
-    items: [
-      {
-        id: "ui-component-library-first",
-        type: "constraint",
-        name: "Use existing component library first",
-        strength: "must",
-        purpose: "Keep implementation aligned with user preference.",
-        scope: "UI work",
-        install_policy: "ask_before_install",
-        evidence: []
-      }
-    ],
-    evidence: []
-  };
   writeGoalDossier(paths.goalDir, contract, ledger);
+  await runProfileAddCommand([
+    "--root", root,
+    "--id", "ui-component-library-first",
+    "--type", "constraint",
+    "--name", "Use existing component library first",
+    "--strength", "must",
+    "--purpose", "Keep implementation aligned with user preference.",
+    "--scope", "UI work",
+    "--install-policy", "ask_before_install",
+    "--json"
+  ]);
 
   const updated = await runCriterionUpdateCommand([
     "--criterion", "AC-1",

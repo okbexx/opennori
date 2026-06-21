@@ -17,17 +17,18 @@ Passing threshold: 只有 required AC 全部 passing 或 waived 时才能回答 
 
 ## Evidence
 
-Latest: review-result - When the user asks if work is done, status/report answer from current_gap, required AC evidence, Nori Profile compliance, Architecture Baseline state, and evidence_health.
+Latest: completion-judgment-project-profile-review - When the user asks if work is done, status/report answer from current_gap, required AC evidence, Project Profile compliance, Architecture Baseline state, and evidence_health.
 Result: passing
 Basis: tool-observation
-Reviewability: Run npm run check and opennori check, then inspect the referenced source, tests, protocol, and generated report.
-Limitations: This is local repository evidence for the current worktree; npm publishing and public site deployment are separate release steps.
+Reviewability: Ask for status/report and confirm the completion answer is based on objective current_gap and required AC evidence, with Project Profile compliance and Architecture Baseline surfaced as review context instead of hidden agent self-certification.
+Limitations: This verifies completion routing and report/status surfaces in the current repository. It does not replace human acceptance of subjective product quality.
 
 Sources:
-- npm run check
-- node ./bin/opennori.js check --root . --json
-- test/core.test.js
-- .opennori/protocol.md
+- node ./bin/opennori.js status --root . --json
+- node ./bin/opennori.js report --root . --json
+- src/core/contract.ts
+- src/core/report.ts
+- src/core/profile.ts
 
 ## Files
 

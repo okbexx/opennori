@@ -12,6 +12,7 @@ import {
   readJson,
   writeJson
 } from "../core.ts";
+import { readProjectProfile } from "../core/profile.ts";
 import { pluginState } from "../plugin.ts";
 import type {
   ActiveGoalSummary,
@@ -29,6 +30,7 @@ import {
 } from "./shared.ts";
 
 function goalSummaries(root: string, pairs = findCurrentPairs(root)): ActiveGoalSummary[] {
+  const profile = readProjectProfile(root);
   return pairs.map((pair) => {
     try {
       const payload = readGoalPayload(pair);
@@ -36,7 +38,7 @@ function goalSummaries(root: string, pairs = findCurrentPairs(root)): ActiveGoal
         goal_id: pair.goalId,
         location: pair.location,
         status: payload.ledger?.status || "unknown",
-        current_gap: currentGap(payload.contract, payload.ledger),
+        current_gap: currentGap(payload.contract, payload.ledger, profile),
         acceptance_path: relativeTo(root, pair.acceptancePath),
         evidence_path: relativeTo(root, pair.evidencePath),
         recoverable: true
@@ -64,6 +66,8 @@ export function managedFiles(root: string, { assumeManifestExists = false } = {}
     { path: "AGENTS.md", kind: "agent-route", required: false },
     { path: "CLAUDE.md", kind: "agent-route", required: false },
     ...REQUIRED_NORI_DIRS.map((dir) => ({ path: `.opennori/${dir}`, kind: "directory", required: true })),
+    { path: ".opennori/profile/profile.json", kind: "project-profile", required: true },
+    { path: ".opennori/profile/README.md", kind: "project-profile", required: true },
     { path: ".opennori/architecture", kind: "directory", required: true },
     ...REQUIRED_ARCHITECTURE_DIRS.map((dir) => ({ path: `.opennori/architecture/${dir}`, kind: "directory", required: true })),
     { path: ".opennori/architecture/baseline.json", kind: "architecture-baseline", required: false },

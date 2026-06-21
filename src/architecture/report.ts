@@ -1,4 +1,5 @@
 import { renderReport } from "../core.ts";
+import { readProjectProfile } from "../core/profile.ts";
 import type { EvidenceLedger, NoriContract } from "../types.ts";
 import { architectureState } from "./state.ts";
 
@@ -64,6 +65,7 @@ function renderArchitectureReportSection(root: string, goalId: string | undefine
 
 export function renderReportWithArchitecture(root: string, contract: NoriContract, ledger: EvidenceLedger): string {
   const architecture = architectureState(root, contract.goal_id);
-  const base = renderReport(contract, ledger, { root, architecture }).trimEnd();
+  const profile = readProjectProfile(root);
+  const base = renderReport(contract, ledger, { root, architecture, profile }).trimEnd();
   return `${base}\n\n${renderArchitectureReportSection(root, contract.goal_id).trimEnd()}\n`;
 }

@@ -37,6 +37,8 @@ test("bootstrap command module previews before confirmed setup", { tags: ["cli",
   assert.equal(confirmed.data.install_plan.dry_run, false);
   assert.equal(confirmed.data.install_plan.summary.will_write > 0, true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "manifest.json")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "profile", "profile.json")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "profile", "README.md")), true);
   assert.equal(fs.existsSync(path.join(root, ".agents", "skills", "nori", "SKILL.md")), false);
 });
 
@@ -203,11 +205,38 @@ test("install command module preserves preview and confirm safety", { tags: ["cl
   assert.equal(installed.data.confirmed, false);
   assert.equal(installed.data.install_plan.summary.will_write > 0, true);
   assert.equal(fs.existsSync(path.join(root, ".opennori", "manifest.json")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "profile", "profile.json")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "profile", "README.md")), true);
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori", "manifest.json"), "utf8"));
+  assert.equal(manifest.managed_files.some((entry) => entry.path === ".opennori/profile/profile.json" && entry.exists), true);
+  assert.equal(manifest.managed_files.some((entry) => entry.path === ".opennori/profile/README.md" && entry.exists), true);
 
   const unconfirmed = await runInstallCommand(["--root", root, "--force", "--json"]);
   assert.equal(unconfirmed.ok, false);
   assert.equal(unconfirmed.error.type, "confirm_required");
   assert.match(unconfirmed.error.fix, /--dry-run --force --json/);
+
+  const profilePath = path.join(root, ".opennori", "profile", "profile.json");
+  fs.writeFileSync(profilePath, JSON.stringify({
+    schema_version: "opennori/project-profile-v1",
+    items: [
+      {
+        id: "constraint-keep-user-profile",
+        type: "constraint",
+        name: "keep user Project Profile",
+        strength: "must",
+        purpose: "Project Profile is user/agent-maintained source data.",
+        scope: "project",
+        install_policy: "ask_before_install"
+      }
+    ]
+  }, null, 2));
+  const forced = await runInstallCommand(["--root", root, "--force", "--confirm", "--json"]);
+  assert.equal(forced.ok, true);
+  const preservedProfile = JSON.parse(fs.readFileSync(profilePath, "utf8"));
+  assert.equal(preservedProfile.items[0].id, "constraint-keep-user-profile");
+  const refreshedProfileReadme = fs.readFileSync(path.join(root, ".opennori", "profile", "README.md"), "utf8");
+  assert.match(refreshedProfileReadme, /keep user Project Profile/);
 });
 
 test("uninstall command module preserves state unless include-state is confirmed", { tags: ["cli", "lifecycle"] }, async () => {

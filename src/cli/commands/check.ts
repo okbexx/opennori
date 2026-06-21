@@ -2,7 +2,7 @@ import { defineCommand } from "citty";
 import { reviewAcceptanceQuality } from "../../acceptance.ts";
 import { architectureState } from "../../architecture.ts";
 import { agentNextForRecommendation } from "../../agent-next.ts";
-import { currentGap, evidenceHealth, fail, nextRecommendation, ok, profileCompliance, validateContract } from "../../core.ts";
+import { currentGap, evidenceHealth, fail, nextRecommendation, ok, readProjectProfile, profileCompliance, validateContract } from "../../core.ts";
 import type { JsonObject } from "../../types.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
 
@@ -26,6 +26,7 @@ export const checkCommand = defineCommand({
       return { ...fail("invalid_acceptance", "Acceptance contract failed validation", "Fix reported issues before continuing"), issues };
     }
     const acceptanceReview = reviewAcceptanceQuality(contract);
+    const projectProfile = readProjectProfile(root);
     const warnings = acceptanceReview.findings.map((finding: JsonObject) => ({
       type: "acceptance_review",
       criterion_id: finding.criterion_id,
@@ -120,13 +121,13 @@ export const checkCommand = defineCommand({
       message: finding.message,
       recovery: finding.recovery
     }));
-    const profile = profileCompliance(ledger);
+    const profile = profileCompliance(projectProfile, ledger);
     const profileWarnings = profile.review.map((item: JsonObject) => ({
       type: "profile_review",
       item_id: item.id,
       strength: item.strength,
       status: item.status,
-      message: `Nori Profile item ${item.name} is ${item.status}.`,
+      message: `Project Profile item ${item.name} is ${item.status}.`,
       recovery: "Record profile evidence, waive the preference, or ask the user whether the remaining profile risk is acceptable."
     }));
     const combinedWarnings = [...warnings, ...architectureWarnings, ...buildVsBuyWarnings, ...evidenceHealthWarnings, ...profileWarnings];
@@ -147,8 +148,8 @@ export const checkCommand = defineCommand({
     if (profile.review.length > 0) {
       nextActions.push("Review profile_review warnings before treating this goal as confidently complete.");
     }
-    const gap = currentGap(contract, ledger);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+    const gap = currentGap(contract, ledger, projectProfile);
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile: projectProfile });
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
@@ -156,6 +157,7 @@ export const checkCommand = defineCommand({
       current_gap: gap,
       statuses: Object.fromEntries(Object.entries(ledger.criteria).map(([id, state]) => [id, (state as any).status])),
       acceptance_review: acceptanceReview,
+      capability_profile: projectProfile,
       capability_compliance: profile,
       architecture_check: {
         status: architectureStatus,

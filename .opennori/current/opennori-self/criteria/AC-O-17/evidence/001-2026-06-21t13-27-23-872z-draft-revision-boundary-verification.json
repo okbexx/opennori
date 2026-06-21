@@ -1,0 +1,65 @@
+{
+  "kind": "draft-revision-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "Draft criterion revision remains goal-dossier state while Project Profile is separate project state. The criterion update path synchronizes contract.json, ledger.json, criterion README/status, and manifest for draft/current AC revisions; Project Profile requirements are created through profile add under .opennori/profile and no longer embedded into draft ledgers. The acceptance tests exercise a draft with a required Project Profile preference and verify acceptance_basis remains draft after criterion update.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-o-17-project-profile-draft-revision",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-o-17-project-profile-draft-revision.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run test:acceptance",
+      "command": "npm run test:acceptance"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:profile",
+      "command": "npm run test:profile"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/criterion.ts",
+      "path": "src/cli/commands/acceptance/criterion.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/profile/add.ts",
+      "path": "src/cli/commands/profile/add.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-acceptance.test.js",
+      "path": "test/cli-acceptance.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-profile.test.js",
+      "path": "test/cli-profile.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "AGENTS.md",
+      "path": "AGENTS.md"
+    }
+  ],
+  "reviewability": "Inspect the listed command modules and tests. In test/cli-acceptance.test.js, verify the draft revision fixture creates Project Profile with profile add and still asserts acceptance_basis.status remains draft after criterion update. Rerun acceptance/profile tests and typecheck.",
+  "limitations": "This proves state synchronization and Project Profile separation for draft AC revision. It does not replace the user's AC Review Loop confirmation of whether the revised AC wording is semantically correct.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T13:27:23.872Z"
+}

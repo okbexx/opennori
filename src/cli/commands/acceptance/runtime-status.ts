@@ -8,9 +8,10 @@ import {
   criterionStatusRows,
   currentGap,
   evidenceHealth,
-  intervention,
+  interventionForProfile,
   nextRecommendation,
   ok,
+  readProjectProfile,
   recomputeWorkflowStatus
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
@@ -31,8 +32,9 @@ export const nextCommand = defineCommand({
   run({ args, data }) {
     const { contract, ledger, root = process.cwd() } = data.loadPair(args);
     const architecture = architectureState(root, contract.goal_id);
-    const gap = currentGap(contract, ledger);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+    const profile = readProjectProfile(root);
+    const gap = currentGap(contract, ledger, profile);
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
@@ -60,16 +62,17 @@ export const resumeCommand = defineCommand({
   run({ args, data }) {
     const { contract, ledger, acceptancePath, evidencePath, root } = data.loadPair(args);
     const architecture = architectureState(root, contract.goal_id);
-    const gap = currentGap(contract, ledger);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+    const profile = readProjectProfile(root);
+    const gap = currentGap(contract, ledger, profile);
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
       acceptance_basis: acceptanceBasisView(contract),
       workflow_status: ledger.status,
       current_gap: gap,
-      completion: completionAnswer(contract, ledger, { root, architecture }),
-      intervention: intervention(contract, ledger),
+      completion: completionAnswer(contract, ledger, { root, architecture, profile }),
+      intervention: interventionForProfile(contract, ledger, profile),
       acceptance_review: reviewAcceptanceQuality(contract),
       evidence_health: evidenceHealth(contract, ledger, { root }),
       architecture,
@@ -97,16 +100,17 @@ export const statusCommand = defineCommand({
   run({ args, data }) {
     const { contract, ledger, root } = data.loadPair(args);
     const architecture = architectureState(root, contract.goal_id);
-    const gap = currentGap(contract, ledger);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+    const profile = readProjectProfile(root);
+    const gap = currentGap(contract, ledger, profile);
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
       acceptance_basis: acceptanceBasisView(contract),
       workflow_status: ledger.status,
       current_gap: gap,
-      completion: completionAnswer(contract, ledger, { root, architecture }),
-      intervention: intervention(contract, ledger),
+      completion: completionAnswer(contract, ledger, { root, architecture, profile }),
+      intervention: interventionForProfile(contract, ledger, profile),
       acceptance_review: reviewAcceptanceQuality(contract),
       evidence_health: evidenceHealth(contract, ledger, { root }),
       architecture,
@@ -132,14 +136,15 @@ export const evaluateCommand = defineCommand({
   },
   run({ args, data }) {
     const { contract, ledger, acceptancePath, evidencePath, root } = data.loadPair(args);
-    recomputeWorkflowStatus(contract, ledger);
+    const profile = readProjectProfile(root);
+    recomputeWorkflowStatus(contract, ledger, profile);
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger)
+      current_gap: currentGap(contract, ledger, profile)
     });
   }
 });

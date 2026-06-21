@@ -87,11 +87,11 @@ const criterionCommand = groupCommand("criterion", "Revise human-centered accept
   update: withPolicy(asCommand(criterionUpdateCommand), { activeGoal: true, activeGoalWrite: true, commandResult: true })
 });
 
-const profileCommand = groupCommand("profile", "Manage Nori Profile execution preferences.", {
-  add: withPolicy(asCommand(profileAddCommand), { activeGoal: true, activeGoalWrite: true }),
+const profileCommand = groupCommand("profile", "Manage Project Profile execution preferences.", {
+  add: withPolicy(asCommand(profileAddCommand), { activeGoalWrite: true }),
   evidence: withPolicy(asCommand(profileEvidenceCommand), { activeGoal: true, activeGoalWrite: true }),
-  show: withPolicy(asCommand(profileShowCommand), { activeGoal: true }),
-  check: withPolicy(asCommand(profileCheckCommand), { activeGoal: true, activeGoalWrite: true })
+  show: asCommand(profileShowCommand),
+  check: withPolicy(asCommand(profileCheckCommand), { activeGoalWrite: true })
 });
 
 const evidenceCommand = groupCommand("evidence", "Record OpenNori acceptance evidence.", {
@@ -368,7 +368,7 @@ export async function runCliCommand(resolved: Extract<ResolvedCliCommand, { ok: 
     return result;
   };
   try {
-    return await (resolved.policy.activeGoal
+    return await (resolved.policy.activeGoalWrite
       ? withActiveGoalWriteLock(resolved.rawArgs, execute)
       : execute());
   } catch (error) {

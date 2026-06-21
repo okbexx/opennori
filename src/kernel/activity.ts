@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { currentGap } from "../core/evidence.ts";
+import { readProjectProfile } from "../core/profile.ts";
 import { findCurrentPairs, nowIso, readGoalPayload, readJson, writeJson } from "../core/shared.ts";
 import type { NoriActivity, NoriActivityInput, NoriActivityState, NoriActivityTarget } from "../types.ts";
 import { appendEvent } from "./events.ts";
@@ -64,10 +65,11 @@ type TargetCandidate = NoriActivityTarget & {
   active: boolean;
 };
 
-function readTargetCandidate(pair: ReturnType<typeof findCurrentPairs>[number]): TargetCandidate | null {
+function readTargetCandidate(root: string, pair: ReturnType<typeof findCurrentPairs>[number]): TargetCandidate | null {
   try {
     const payload = readGoalPayload(pair);
-    const gap = currentGap(payload.contract, payload.ledger);
+    const profile = readProjectProfile(root);
+    const gap = currentGap(payload.contract, payload.ledger, profile);
     return {
       goal_id: payload.contract.goal_id || pair.goalId,
       gap_id: gap?.id ?? null,
@@ -94,7 +96,7 @@ export function inferActivityTarget(root: string, input: Pick<NoriActivityInput,
     if (!pair) {
       throw new Error(`No current OpenNori goal found for activity: ${input.goal_id}`);
     }
-    const candidate = readTargetCandidate(pair);
+    const candidate = readTargetCandidate(root, pair);
     if (!candidate) {
       throw new Error(`OpenNori activity target is not recoverable: ${input.goal_id}`);
     }
@@ -106,7 +108,7 @@ export function inferActivityTarget(root: string, input: Pick<NoriActivityInput,
   }
 
   const candidates = pairs
-    .map((pair) => readTargetCandidate(pair))
+    .map((pair) => readTargetCandidate(root, pair))
     .filter((candidate): candidate is TargetCandidate => candidate !== null);
   if (candidates.length === 0) return null;
 

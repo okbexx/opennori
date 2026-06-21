@@ -209,7 +209,7 @@ test("report command module renders a report artifact", { tags: ["cli", "evidenc
     criteria: [],
     acceptance_basis: { status: "approved" }
   };
-  const ledger = { status: "complete", criteria: {}, capability_profile: { items: [], evidence: [] } };
+  const ledger = { status: "complete", criteria: {} };
 
   const report = await runReportCommand(["--output", outputPath, "--json"], {
     loadPair: () => ({ contract, ledger, root })

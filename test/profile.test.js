@@ -4,7 +4,7 @@ import path from "node:path";
 import { test } from "vitest";
 import { run, tempRoot, draftAndApprove, readGoalPayloadFromPaths } from "./support/cli.js";
 
-test("Nori Profile records required skills and blocks completion until satisfied", { tags: ["profile"] }, () => {
+test("Project Profile records required skills and blocks completion until satisfied", { tags: ["profile"] }, () => {
   const root = tempRoot();
   const init = draftAndApprove([
     "--goal", "Build a frontend page",
@@ -38,6 +38,7 @@ test("Nori Profile records required skills and blocks completion until satisfied
   ]);
   assert.equal(must.data.workflow_status, "blocked");
   assert.equal(must.data.current_gap.id, "PROFILE-skill-design-taste-frontend");
+  assert.equal(fs.existsSync(path.join(root, ".opennori", "profile", "profile.json")), true);
 
   const prefer = run([
     "profile", "add",
@@ -64,7 +65,7 @@ test("Nori Profile records required skills and blocks completion until satisfied
 
   const report = run(["report", "--root", root, "--json"]);
   const text = fs.readFileSync(report.data.report_path, "utf8");
-  assert.match(text, /Nori Profile/);
+  assert.match(text, /Project Profile Compliance/);
   assert.match(text, /design-taste-frontend/);
   assert.match(text, /radix-ui/);
 });
@@ -174,12 +175,12 @@ test("profile check automatically checks local Skills and package stacks without
   assert.equal(checked.data.checks.some((item) => item.item_id === "stack-radix-ui" && item.result === "satisfied"), true);
   assert.equal(checked.data.checks.some((item) => item.item_id === "stack-forbidden-lib" && item.result === "violated"), true);
   let payload = readGoalPayloadFromPaths(init.data.acceptance_path, init.data.evidence_path);
-  assert.equal(payload.ledger.capability_profile.evidence.length, 0);
+  assert.equal((payload.ledger.profile_evidence || []).length, 0);
 
   const recorded = run(["profile", "check", "--root", root, "--record", "--json"]);
   assert.equal(recorded.data.recorded, true);
   assert.equal(recorded.data.compliance.statuses.some((item) => item.id === "stack-forbidden-lib" && item.status === "violated"), true);
   assert.equal(recorded.data.workflow_status, "blocked");
   payload = readGoalPayloadFromPaths(init.data.acceptance_path, init.data.evidence_path);
-  assert.equal(payload.ledger.capability_profile.evidence.length, 3);
+  assert.equal(payload.ledger.profile_evidence.length, 3);
 });

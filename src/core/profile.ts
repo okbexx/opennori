@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import type {
   CapabilityProfile,
   CapabilityProfileEvidence,
@@ -8,19 +10,62 @@ import type {
   ProfileEvidenceInput,
   ProfileItemInput
 } from "../types.ts";
-import { nowIso, slugify } from "./shared.ts";
+import { nowIso, readJson, slugify, writeJson } from "./shared.ts";
 
+export const PROJECT_PROFILE_SCHEMA_VERSION = "opennori/project-profile-v1";
 export const VALID_PROFILE_STRENGTHS = new Set(["must", "prefer", "avoid"]);
 export const VALID_PROFILE_ITEM_TYPES = new Set(["skill", "stack", "constraint"]);
 export const VALID_PROFILE_RESULTS = new Set(["satisfied", "violated", "waived"]);
 
-function ensureCapabilityProfile(ledger: EvidenceLedger): CapabilityProfile {
-  if (!ledger.capability_profile) ledger.capability_profile = { items: [], evidence: [] };
-  return ledger.capability_profile;
+export function projectProfileDir(root: string): string {
+  return path.join(root, ".opennori", "profile");
 }
 
-export function addProfileItem(ledger: EvidenceLedger, item: ProfileItemInput): EvidenceLedger {
-  const profile = ensureCapabilityProfile(ledger);
+export function projectProfilePath(root: string): string {
+  return path.join(projectProfileDir(root), "profile.json");
+}
+
+export function emptyProjectProfile(): CapabilityProfile {
+  return {
+    schema_version: PROJECT_PROFILE_SCHEMA_VERSION,
+    items: []
+  };
+}
+
+export function normalizeProjectProfile(input: Partial<CapabilityProfile> | null | undefined = {}): CapabilityProfile {
+  return {
+    schema_version: input?.schema_version || PROJECT_PROFILE_SCHEMA_VERSION,
+    updated_at: input?.updated_at,
+    items: Array.isArray(input?.items) ? input.items : []
+  };
+}
+
+export function readProjectProfile(root: string): CapabilityProfile {
+  try {
+    return normalizeProjectProfile(readJson<CapabilityProfile>(projectProfilePath(root)));
+  } catch (error) {
+    const typedError = error as Error;
+    if (typedError.message?.startsWith("File not found:")) return emptyProjectProfile();
+    throw error;
+  }
+}
+
+export function writeProjectProfile(root: string, profile: CapabilityProfile): CapabilityProfile {
+  const normalized = normalizeProjectProfile({
+    ...profile,
+    updated_at: nowIso()
+  });
+  writeJson(projectProfilePath(root), normalized);
+  writeProjectProfileReadme(root, normalized);
+  return normalized;
+}
+
+export function writeProjectProfileReadme(root: string, profile: CapabilityProfile = readProjectProfile(root)): void {
+  fs.mkdirSync(projectProfileDir(root), { recursive: true });
+  fs.writeFileSync(path.join(projectProfileDir(root), "README.md"), renderProjectProfileMarkdown(profile));
+}
+
+export function addProfileItem(profile: CapabilityProfile, item: ProfileItemInput): CapabilityProfile {
   const type = item.type || "constraint";
   const strength = item.strength || "prefer";
   if (!VALID_PROFILE_ITEM_TYPES.has(type)) {
@@ -38,26 +83,30 @@ export function addProfileItem(ledger: EvidenceLedger, item: ProfileItemInput): 
     strength,
     purpose: String(item.purpose || "").trim(),
     scope: String(item.scope || "").trim(),
-    install_policy: item.install_policy || "ask_before_install",
-    evidence: []
+    install_policy: item.install_policy || "ask_before_install"
   };
   if (!entry.name) throw new Error("--name is required");
-  if (existingIndex === -1) {
-    profile.items.push(entry);
-  } else {
-    profile.items[existingIndex] = {
-      ...profile.items[existingIndex],
-      ...entry,
-      evidence: profile.items[existingIndex]?.evidence || []
-    };
-  }
-  return ledger;
+  const items = [...profile.items];
+  items[existingIndex === -1 ? items.length : existingIndex] = entry;
+  return {
+    ...profile,
+    items,
+    updated_at: nowIso()
+  };
 }
 
-export function addProfileEvidence(ledger: EvidenceLedger, itemId: string, evidence: ProfileEvidenceInput): EvidenceLedger {
-  const profile = ensureCapabilityProfile(ledger);
+export function profileEvidence(ledger: EvidenceLedger): CapabilityProfileEvidence[] {
+  return Array.isArray(ledger.profile_evidence) ? ledger.profile_evidence : [];
+}
+
+function ensureProfileEvidence(ledger: EvidenceLedger): CapabilityProfileEvidence[] {
+  if (!Array.isArray(ledger.profile_evidence)) ledger.profile_evidence = [];
+  return ledger.profile_evidence;
+}
+
+export function addProfileEvidence(profile: CapabilityProfile, ledger: EvidenceLedger, itemId: string, evidence: ProfileEvidenceInput): EvidenceLedger {
   const item = profile.items.find((entry) => entry.id === itemId);
-  if (!item) throw new Error(`Capability profile item not found: ${itemId}`);
+  if (!item) throw new Error(`Project Profile item not found: ${itemId}`);
   if (!VALID_PROFILE_RESULTS.has(evidence.result)) {
     throw new Error(`Invalid profile evidence result: ${evidence.result}`);
   }
@@ -68,16 +117,19 @@ export function addProfileEvidence(ledger: EvidenceLedger, itemId: string, evide
     path: evidence.path,
     created_at: nowIso()
   };
-  item.evidence = [...(item.evidence || []), entry];
-  profile.evidence.push(entry);
+  ensureProfileEvidence(ledger).push(entry);
   ledger.updated_at = nowIso();
   return ledger;
 }
 
-export function profileCompliance(ledger: EvidenceLedger): ProfileCompliance {
-  const items = ledger.capability_profile?.items || [];
+function latestProfileEvidence(ledger: EvidenceLedger, itemId: string): CapabilityProfileEvidence | undefined {
+  return profileEvidence(ledger).filter((entry) => entry.item_id === itemId).at(-1);
+}
+
+export function profileCompliance(profile: CapabilityProfile, ledger: EvidenceLedger): ProfileCompliance {
+  const items = profile.items || [];
   const statuses = items.map((item) => {
-    const latest = item.evidence?.at(-1);
+    const latest = latestProfileEvidence(ledger, item.id);
     let status: ProfileComplianceStatus = "unknown";
     if (latest?.result === "satisfied") status = "satisfied";
     if (latest?.result === "waived") status = "waived";
@@ -109,12 +161,46 @@ export function profileCompliance(ledger: EvidenceLedger): ProfileCompliance {
   };
 }
 
-export function renderProfileLines(ledger: EvidenceLedger): string[] {
-  const compliance = profileCompliance(ledger);
-  if (!compliance.required) return ["<none>"];
+export function renderProfileLines(profile: CapabilityProfile, ledger?: EvidenceLedger): string[] {
+  if (!profile.items.length) return ["<none>"];
+  const compliance = ledger
+    ? profileCompliance(profile, ledger)
+    : {
+        statuses: profile.items.map((item) => ({
+          id: item.id,
+          type: item.type,
+          name: item.name,
+          strength: item.strength,
+          purpose: item.purpose,
+          status: "not evaluated",
+          summary: "<none>"
+        }))
+      };
   return [
     "| ID | Type | Name | Strength | Compliance | Purpose |",
     "| --- | --- | --- | --- | --- | --- |",
     ...compliance.statuses.map((item) => `| ${item.id} | ${item.type} | ${item.name} | ${item.strength} | ${item.status} | ${item.purpose || "<none>"} |`)
   ];
+}
+
+export function renderProjectProfileMarkdown(profile: CapabilityProfile): string {
+  const lines = [
+    "# OpenNori Project Profile",
+    "",
+    "Project Profile defines how the agent should work in this project. It is project-level source data, not a Nori Contract and not Product AC.",
+    "",
+    `Updated: ${profile.updated_at || "<unknown>"}`,
+    "",
+    "## Items",
+    "",
+    ...renderProfileLines(profile),
+    "",
+    "## Boundary",
+    "",
+    "- Product AC says what the human user opens, does, sees, and judges.",
+    "- Project Profile says which Skills, stacks, constraints, and install policies the agent should follow.",
+    "- Goal reports may show compliance evidence against this Profile, but the Profile itself is not copied into a goal.",
+    ""
+  ];
+  return `${lines.join("\n")}`;
 }

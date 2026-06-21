@@ -1,0 +1,33 @@
+{
+  "kind": "project-profile-report-surface-review",
+  "basis": "tool-observation",
+  "summary": "Active Nori Contract dossier shows goal, layered criteria, criterion statuses, Project Profile compliance, and the current rule in one readable review surface.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/current/opennori-self/README.md",
+      "path": ".opennori/current/opennori-self/README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/current/opennori-self/contract.json",
+      "path": ".opennori/current/opennori-self/contract.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/current/opennori-self/ledger.json",
+      "path": ".opennori/current/opennori-self/ledger.json"
+    }
+  ],
+  "reviewability": "Open .opennori/current/opennori-self/README.md and confirm the readable contract surface leads with goal, criteria, status, Project Profile compliance, and current gap/rule without requiring chat history.",
+  "limitations": "This verifies the generated active goal dossier and status projection. It does not replace user review of whether future contract prose is sufficiently detailed.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T13:34:19.202Z"
+}

@@ -1,9 +1,9 @@
 {
   "id": "AC-O-8",
   "layer": "operator",
-  "user_story": "作为用户，我在 Codex 对话里声明必须使用某个 Skill、偏好某个技术栈或避免某个工具后，agent 能记录这些偏好并在完成前告诉我是否遵守。",
-  "measurement": "在 Codex 对话中提出能力偏好后，查看 active contract、status 或 report 中的 Nori Profile。",
-  "threshold": "用户不需要记住 CLI；must 或 avoid 的违反会阻止 complete，prefer 会被展示但不阻止 complete；这些偏好不会被写成用户 AC。",
+  "user_story": "作为用户，我在 Codex 对话里声明必须使用某个 Skill、偏好某个技术栈、避免某个工具或指定安装策略后，agent 能把它记录为项目级 Project Profile，并在当前 goal 完成前告诉我该 goal 是否遵守。",
+  "measurement": "在 Codex 对话中提出能力偏好后，查看 .opennori/profile/、status、report 或 dashboard 的 Project Profile compliance。",
+  "threshold": "用户不需要记住 CLI；Project Profile 保存在 .opennori/profile/，不被复制进 Nori Contract 或写成 Product AC；current goal 的 ledger 只记录 profile_evidence；must 或 avoid 的违反会阻止 complete，prefer 作为 review risk 展示；没有 current goal 时可查看/编辑 Project Profile 但不评价合规。",
   "required": true,
   "risk": "high",
   "order": 20

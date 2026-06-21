@@ -3,6 +3,7 @@ import {
   currentGap,
   inferCriterionLayer,
   ok,
+  readProjectProfile,
   recomputeWorkflowStatus,
   validateContract
 } from "../../../core.ts";
@@ -116,7 +117,8 @@ export const criterionAddCommand = defineCommand({
       };
     }
 
-    recomputeWorkflowStatus(contract, ledger);
+    const profile = readProjectProfile(root);
+    recomputeWorkflowStatus(contract, ledger, profile);
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
     return ok({
@@ -124,7 +126,7 @@ export const criterionAddCommand = defineCommand({
       criterion,
       acceptance_basis: contract.acceptance_basis,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger)
+      current_gap: currentGap(contract, ledger, profile)
     });
   }
 });
@@ -208,7 +210,8 @@ export const criterionUpdateCommand = defineCommand({
       };
     }
 
-    recomputeWorkflowStatus(contract, ledger);
+    const profile = readProjectProfile(root);
+    recomputeWorkflowStatus(contract, ledger, profile);
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
     return ok({
@@ -216,7 +219,7 @@ export const criterionUpdateCommand = defineCommand({
       criterion,
       acceptance_basis: contract.acceptance_basis,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger)
+      current_gap: currentGap(contract, ledger, profile)
     });
   }
 });

@@ -6,10 +6,11 @@ import {
   criterionStatusRows,
   currentGap,
   evidenceHealth,
-  intervention,
+  interventionForProfile,
   nextRecommendation,
   pathsForGoal,
   profileCompliance,
+  readProjectProfile,
   readGoalPayload
 } from "../core.ts";
 import { architectureState } from "../architecture.ts";
@@ -23,8 +24,9 @@ export function buildContextExport(root: string, pair: { goalDir: string; contra
   const ledger = payload.ledger;
   const reportPath = pathsForGoal(root, contract.goal_id).reportPath;
   const architecture = architectureState(root, contract.goal_id);
-  const gap = currentGap(contract, ledger);
-  const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+  const profile = readProjectProfile(root);
+  const gap = currentGap(contract, ledger, profile);
+  const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
   return {
     schema_version: "opennori/context-export-v1",
     exported_at: new Date().toISOString(),
@@ -35,15 +37,15 @@ export function buildContextExport(root: string, pair: { goalDir: string; contra
     acceptance_basis: contract.acceptance_basis || { status: "draft" },
     workflow_status: ledger.status,
     current_gap: gap,
-    completion: completionAnswer(contract, ledger, { root, architecture }),
-    intervention: intervention(contract, ledger),
+    completion: completionAnswer(contract, ledger, { root, architecture, profile }),
+    intervention: interventionForProfile(contract, ledger, profile),
     acceptance_review: reviewAcceptanceQuality(contract),
     evidence_health: evidenceHealth(contract, ledger, { root }),
     next_recommendation: recommendation,
     agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation),
     criteria: criterionStatusRows(contract, ledger, { root }),
-    capability_profile: ledger.capability_profile || { items: [], evidence: [] },
-    capability_compliance: profileCompliance(ledger),
+    capability_profile: profile,
+    capability_compliance: profileCompliance(profile, ledger),
     architecture,
     paths: {
       acceptance: relativeTo(root, pair.acceptancePath),

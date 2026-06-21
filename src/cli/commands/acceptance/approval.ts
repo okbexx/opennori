@@ -10,6 +10,7 @@ import {
   pathsForGoal,
   nextRecommendation,
   ok,
+  readProjectProfile,
   refreshSnapshot,
   recomputeWorkflowStatus,
   writeGoalDossier
@@ -65,15 +66,16 @@ export const approveCommand = defineCommand({
     if (args.language) {
       contract.presentation = withContractLanguage(contract, String(args.language)).presentation;
     }
-    recomputeWorkflowStatus(contract, ledger);
+    const profile = readProjectProfile(root);
+    recomputeWorkflowStatus(contract, ledger, profile);
     writeGoalDossier(targetPaths.goalDir, contract, ledger);
     if (pair.location === "drafts") {
       fs.rmSync(pair.goalDir, { recursive: true, force: true });
     }
     refreshManifest(root);
     const architecture = architectureState(root, contract.goal_id);
-    const gap = currentGap(contract, ledger);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture });
+    const gap = currentGap(contract, ledger, profile);
+    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
     appendEvent(root, {
       type: "contract.approved",
       goal_id: contract.goal_id,

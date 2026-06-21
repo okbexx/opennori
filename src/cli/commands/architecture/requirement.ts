@@ -9,6 +9,7 @@ import {
   ok,
   pathsForGoal,
   readGoalPayload,
+  readProjectProfile,
   refreshSnapshot
 } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
@@ -84,8 +85,9 @@ export const architectureRequirementCommand = defineCommand({
     let agent_next;
     if (fs.existsSync(activePaths.evidencePath)) {
       const payload = readGoalPayload(activePaths);
-      current_gap = currentGap(payload.contract, payload.ledger);
-      recommendation = nextRecommendation(payload.contract, payload.ledger, { root, architecture });
+      const projectProfile = readProjectProfile(root);
+      current_gap = currentGap(payload.contract, payload.ledger, projectProfile);
+      recommendation = nextRecommendation(payload.contract, payload.ledger, { root, architecture, profile: projectProfile });
       agent_next = agentNextForRecommendation(payload.contract.goal_id, current_gap, recommendation);
       refreshSnapshot(root, { goalId });
     }

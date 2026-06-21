@@ -49,7 +49,7 @@ contract exists, infer from the user's prompt.
 ## Start Here
 
 1. Read the current goal, Product AC, `presentation.language`, and `data.architecture.requirement` from resume/status.
-2. Read Nori Profile for required Skills, preferred stacks, avoid rules, and install policy. Preserve the same language when profile preferences influence project Architecture Profile wording.
+2. Read Project Profile for required Skills, preferred stacks, avoid rules, and install policy. Preserve the same language when profile preferences influence project Architecture Profile wording.
 3. Inspect existing project architecture, dependencies, package/module layout, state model, command/API/MCP/IPC surfaces, tests, docs, and user-supplied references.
 4. If visible Product AC is broad, implementation-centered, or missing its
    operation path, stop architecture work and hand off to `nori-acceptance`.
