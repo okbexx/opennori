@@ -95,8 +95,8 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
   const goal = hasGoal ? snapshot?.goal : null;
 
   // 1. 简体中文：生成核心 Goal 节点，放置在画布正中心
-  const goalId = goal?.id || "no-goal";
-  const goalLabel = hasGoal ? "Goal" : "No Goal";
+  const goalId = goal?.id || "no-current-goal";
+  const goalLabel = hasGoal ? "Goal" : "Ready";
   nodes.push({
     id: goalId,
     type: "goal",
@@ -104,7 +104,11 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
     x: centerX,
     y: centerY,
     status: goal?.workflow_status || "idle",
-    rawData: goal || { message: "Waiting for current Nori contract." }
+    rawData: goal || {
+      empty_state: true,
+      idle_summary: snapshot?.idle_summary,
+      message: snapshot?.idle_summary?.message || "No current Nori Contract is being observed."
+    }
   });
 
   // 2. 简体中文：如果有活跃目标且存在 criteria 列表，执行智能精简重构（Smart Focus View）

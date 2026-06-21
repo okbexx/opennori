@@ -17,19 +17,26 @@ Passing threshold: 页面以视觉化 acceptance loop 和少量状态面板展�
 
 ## Evidence
 
-Latest: dashboard-review - Dashboard snapshot and inspect panels now expose goal dossier and criterion dossier paths so users can trace Goal and AC nodes back to .opennori/current/<goal>/contract.json, ledger.json, README.md, and criteria/<AC-id>/{README.md,criterion.json,status.json,evidence,artifacts}. Plugin cache was synced locally from 0.1.9 to 0.1.10 with opennori plugin sync --local --confirm.
+Latest: dashboard-idle-state-verification - Dashboard no-current-goal state now shows an explicit NORI STATE / READY panel with the latest completed outcome and next recommendation, while hiding active-goal Architecture Compliance and Completion Auditor panels so users are not told an idle project is INCOMPLETE.
 Result: passing
 Basis: tool-observation
-Reviewability: Run the listed checks; start opennori dashboard and select Goal, an individual AC, and a focused Passed AC to confirm dossier paths are visible in the read-only inspect panel.
-Limitations: This verifies dashboard projection, UI build, and selection behavior. It does not require dashboard to write, approve, waive, or record evidence; those remain agent/CLI paths.
+Reviewability: Run the listed commands, start opennori dashboard against a project with no current goal and at least one completed goal, then inspect the first screen for NORI STATE / READY / LAST OUTCOME / NEXT and absence of misleading INCOMPLETE completion audit.
+Limitations: This verifies dashboard state projection and visible no-current UI semantics. It does not create or approve a new Nori Contract from the dashboard, and it does not change completed goal history.
 
 Sources:
-- npm run typecheck:dashboard
+- Playwright observation: opened the Agent Workbench no-current dashboard at http://127.0.0.1:52642; first screen showed Ready, NORI STATE, LAST OUTCOME aw-complete-product-workbench COMPLETE, NEXT, and no INCOMPLETE completion auditor.
 - npx tsc --noEmit --pretty false
+- npm run typecheck:dashboard
 - npm run build:dashboard
 - npm run test:dashboard
 - npm run test:quick
 - git diff --check
+- src/kernel/snapshot.ts
+- src/dashboard/src/App.tsx
+- src/dashboard/src/components/AcceptanceRadarNet.tsx
+- src/dashboard/src/components/InspectNodePanel.tsx
+- test/cli-dashboard.test.js
+- test/dashboard-selection.test.ts
 
 ## Files
 

@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-21T10:26:07.803Z",
+  "updated_at": "2026-06-21T11:20:20.581Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -5403,6 +5403,83 @@
           "limitations": "This verifies dashboard projection, UI build, and selection behavior. It does not require dashboard to write, approve, waive, or record evidence; those remain agent/CLI paths.",
           "gate": "accepted",
           "created_at": "2026-06-21T10:26:07.561Z"
+        },
+        {
+          "kind": "dashboard-idle-state-verification",
+          "basis": "tool-observation",
+          "summary": "Dashboard no-current-goal state now shows an explicit NORI STATE / READY panel with the latest completed outcome and next recommendation, while hiding active-goal Architecture Compliance and Completion Auditor panels so users are not told an idle project is INCOMPLETE.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "reference",
+              "label": "Playwright observation: opened the Agent Workbench no-current dashboard at http://127.0.0.1:52642; first screen showed Ready, NORI STATE, LAST OUTCOME aw-complete-product-workbench COMPLETE, NEXT, and no INCOMPLETE completion auditor."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run typecheck:dashboard",
+              "command": "npm run typecheck:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run build:dashboard",
+              "command": "npm run build:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:quick",
+              "command": "npm run test:quick"
+            },
+            {
+              "type": "command",
+              "label": "git diff --check",
+              "command": "git diff --check"
+            },
+            {
+              "type": "artifact",
+              "label": "src/kernel/snapshot.ts",
+              "path": "src/kernel/snapshot.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/App.tsx",
+              "path": "src/dashboard/src/App.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/AcceptanceRadarNet.tsx",
+              "path": "src/dashboard/src/components/AcceptanceRadarNet.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/InspectNodePanel.tsx",
+              "path": "src/dashboard/src/components/InspectNodePanel.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "test/cli-dashboard.test.js",
+              "path": "test/cli-dashboard.test.js"
+            },
+            {
+              "type": "artifact",
+              "label": "test/dashboard-selection.test.ts",
+              "path": "test/dashboard-selection.test.ts"
+            }
+          ],
+          "reviewability": "Run the listed commands, start opennori dashboard against a project with no current goal and at least one completed goal, then inspect the first screen for NORI STATE / READY / LAST OUTCOME / NEXT and absence of misleading INCOMPLETE completion audit.",
+          "limitations": "This verifies dashboard state projection and visible no-current UI semantics. It does not create or approve a new Nori Contract from the dashboard, and it does not change completed goal history.",
+          "gate": "accepted",
+          "created_at": "2026-06-21T11:20:09.030Z"
         }
       ]
     },
@@ -7249,6 +7326,73 @@
           "limitations": "Manual Playwright verification used a local demo dashboard state with one required Profile item; tests cover snapshot and selection behavior but do not create a permanent browser screenshot artifact.",
           "gate": "accepted",
           "created_at": "2026-06-20T14:34:50.508Z"
+        },
+        {
+          "kind": "dashboard-profile-idle-state-verification",
+          "basis": "tool-observation",
+          "summary": "Dashboard Profile drawer now distinguishes no-current-goal from satisfied compliance: when there is no current Nori Contract, the Profile icon opens a readonly drawer that shows NOT EVALUATED, explains Profile is current-contract-scoped, and says no current goal profile is active instead of reporting empty Profile as COMPLETE.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "reference",
+              "label": "Playwright observation: clicked Inspect Nori Profile on the no-current Agent Workbench dashboard; drawer showed PROFILE: Profile, compliance NOT EVALUATED, No Current Goal Profile, and No current goal profile is active."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run typecheck:dashboard",
+              "command": "npm run typecheck:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run build:dashboard",
+              "command": "npm run build:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:quick",
+              "command": "npm run test:quick"
+            },
+            {
+              "type": "command",
+              "label": "git diff --check",
+              "command": "git diff --check"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/selection.ts",
+              "path": "src/dashboard/src/selection.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/InspectNodePanel.tsx",
+              "path": "src/dashboard/src/components/InspectNodePanel.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/types.ts",
+              "path": "src/dashboard/src/types.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/dashboard-selection.test.ts",
+              "path": "test/dashboard-selection.test.ts"
+            }
+          ],
+          "reviewability": "Run the listed commands, start dashboard against a no-current-goal project, click the header Profile icon, and verify the drawer says NOT EVALUATED with no-current explanatory copy rather than COMPLETE.",
+          "limitations": "This verifies current dashboard Profile semantics and selection state. It does not restore historical Profile items into a new active contract; completed goal details remain report/history state.",
+          "gate": "accepted",
+          "created_at": "2026-06-21T11:20:20.581Z"
         }
       ]
     },

@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 1,
   "latest_evidence_summary": "Enhanced autogoal now leaves a user-visible confirmation surface: Skill replies must show Enhanced Discovery checked, drafts persist source/mode/coverage metadata, and status/report/acceptance markdown expose that metadata for review.",
-  "updated_at": "2026-06-21T10:26:07.803Z"
+  "updated_at": "2026-06-21T11:20:20.581Z"
 }

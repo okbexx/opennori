@@ -148,6 +148,9 @@ export default function App() {
   // 简体中文：仅供复制的对话提示，Dashboard 不暴露底层状态写入命令
   const suggestedAgentReply = useMemo(() => {
     if (!snapshot) return "";
+    if (snapshot.status === "no_active_goal") {
+      return "Use OpenNori for my next goal. Start by drafting a Nori Contract I can review.";
+    }
     if (snapshot.need_user) {
       return snapshot.user_action || "Please use OpenNori to record my decision in this agent conversation.";
     }
@@ -162,6 +165,13 @@ export default function App() {
     return recentEvents.find((event) => event.actor.kind === "agent");
   }, [recentEvents]);
   const agentRunning = isAgentRunning(snapshot);
+  const hasCurrentGoal = snapshot?.status === "active" && !!snapshot.goal;
+  const idleSummary = snapshot?.idle_summary;
+  const inspectedNodeTitle = selectedNode
+    ? selectedNode.type === "goal" && (selectedNode.rawData as { empty_state?: boolean } | null)?.empty_state
+      ? "NORI STATE"
+      : selectedNode.type === "goal" ? `GOAL: ${selectedNode.id}` : `${selectedNode.type.toUpperCase()}: ${selectedNode.label}`
+    : "";
 
   return (
     <Tooltip.Provider delayDuration={180}>
@@ -256,6 +266,44 @@ export default function App() {
                       </div>
                     )}
 
+                    {!hasCurrentGoal && (
+                      <div className="rounded-lg border-l-[3.5px] border-l-[#00f0ff] border border-[rgba(0,240,255,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="inline-flex items-center gap-1 rounded bg-[#00f0ff]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#00f0ff]">
+                            NORI STATE
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded bg-[#34d399]/10 px-1.5 py-0.5 text-[8.5px] font-mono font-bold text-[#34d399]">
+                            READY
+                          </span>
+                        </div>
+                        <p className="text-[11px] leading-relaxed text-slate-300">
+                          {idleSummary?.message || "No current Nori Contract is being observed."}
+                        </p>
+                        {idleSummary?.last_goal ? (
+                          <div className="mt-2 border-t border-slate-800/80 pt-1.5">
+                            <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-[#34d399]">LAST OUTCOME</span>
+                            <p className="mt-0.5 text-[10px] font-semibold leading-relaxed text-slate-200">
+                              {idleSummary.last_goal.label}
+                            </p>
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                              <span className="rounded bg-slate-900 px-1.5 py-0.5 text-[8px] font-mono font-bold text-slate-300">
+                                {idleSummary.last_goal.id}
+                              </span>
+                              <span className="rounded bg-[#34d399]/10 px-1.5 py-0.5 text-[8px] font-mono font-bold text-[#34d399]">
+                                {formatSignal(idleSummary.last_goal.workflow_status)}
+                              </span>
+                            </div>
+                          </div>
+                        ) : null}
+                        <div className="mt-2 rounded border border-[#fbbf24]/15 bg-[#fbbf24]/5 p-2">
+                          <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-[#fbbf24]">NEXT</span>
+                          <p className="mt-0.5 text-[10px] leading-relaxed text-slate-300">
+                            {idleSummary?.next || "Ask the agent to use OpenNori for a goal, then approve a Nori Contract."}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
                     {/* B. AGENT ACTIVITY 舱 */}
                     <div className="rounded-lg border-l-[3.5px] border-l-[#34d399] border border-[rgba(52,211,153,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
                       <div className="flex items-center justify-between mb-1.5">
@@ -287,65 +335,69 @@ export default function App() {
                     </div>
 
                     {/* C. ARCHITECTURE COMPLIANCE 舱 */}
-                    <div className="rounded-lg border-l-[3.5px] border-l-[#bd93f9] border border-[rgba(189,147,249,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="inline-flex items-center gap-1 rounded bg-[#bd93f9]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#bd93f9]">
-                          ARCHITECTURE COMPLIANCE
-                        </span>
-                        <span className={`inline-flex items-center gap-1.5 text-[8.5px] font-mono font-bold ${architectureDecisionClass(snapshot.architecture.decision)}`}>
-                          {formatSignal(snapshot.architecture.decision)}
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-slate-300 leading-normal flex flex-col gap-1">
-                        <div>
-                          <span className="text-slate-500 font-mono text-[8px] block">ACTIVE PROFILE</span>
-                          <strong className="text-slate-200 font-bold">{snapshot.architecture.profile_title || snapshot.architecture.profile || "none"}</strong>
+                    {hasCurrentGoal && (
+                      <div className="rounded-lg border-l-[3.5px] border-l-[#bd93f9] border border-[rgba(189,147,249,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="inline-flex items-center gap-1 rounded bg-[#bd93f9]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#bd93f9]">
+                            ARCHITECTURE COMPLIANCE
+                          </span>
+                          <span className={`inline-flex items-center gap-1.5 text-[8.5px] font-mono font-bold ${architectureDecisionClass(snapshot.architecture.decision)}`}>
+                            {formatSignal(snapshot.architecture.decision)}
+                          </span>
                         </div>
-                        {Number(snapshot.architecture.open_challenges || 0) > 0 && (
-                          <div className="mt-1 rounded bg-rose-500/10 border border-rose-500/20 p-1.5 text-[9px] text-rose-400 font-semibold flex items-center gap-1.5">
-                            <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-ping" />
-                            <span>{snapshot.architecture.open_challenges} ACTIVE ARCHITECTURE CHALLENGES</span>
+                        <div className="text-[10px] text-slate-300 leading-normal flex flex-col gap-1">
+                          <div>
+                            <span className="text-slate-500 font-mono text-[8px] block">ACTIVE PROFILE</span>
+                            <strong className="text-slate-200 font-bold">{snapshot.architecture.profile_title || snapshot.architecture.profile || "none"}</strong>
                           </div>
-                        )}
+                          {Number(snapshot.architecture.open_challenges || 0) > 0 && (
+                            <div className="mt-1 rounded bg-rose-500/10 border border-rose-500/20 p-1.5 text-[9px] text-rose-400 font-semibold flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-ping" />
+                              <span>{snapshot.architecture.open_challenges} ACTIVE ARCHITECTURE CHALLENGES</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* D. COMPLETION AUDITOR 舱 */}
-                    <div className="rounded-lg border-l-[3.5px] border-l-[#fbbf24] border border-[rgba(251,191,36,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="inline-flex items-center gap-1 rounded bg-[#fbbf24]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#fbbf24]">
-                          COMPLETION AUDITOR
-                        </span>
-                        <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.2 text-[8.5px] font-mono font-bold ${
-                          snapshot.completion?.complete ? "bg-[#34d399]/15 text-[#34d399]" : "bg-rose-500/15 text-rose-400"
-                        }`}>
-                          {snapshot.completion?.complete ? "READY" : "INCOMPLETE"}
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-slate-300 leading-normal">
-                        <span className="text-slate-500 font-mono text-[8px] block">AUDIT DECISION</span>
-                        <p className="text-slate-200 font-medium italic mt-0.5">"{snapshot.completion?.answer || "Pending final criteria audit."}"</p>
+                    {hasCurrentGoal && (
+                      <div className="rounded-lg border-l-[3.5px] border-l-[#fbbf24] border border-[rgba(251,191,36,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="inline-flex items-center gap-1 rounded bg-[#fbbf24]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#fbbf24]">
+                            COMPLETION AUDITOR
+                          </span>
+                          <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.2 text-[8.5px] font-mono font-bold ${
+                            snapshot.completion?.complete ? "bg-[#34d399]/15 text-[#34d399]" : "bg-rose-500/15 text-rose-400"
+                          }`}>
+                            {snapshot.completion?.complete ? "READY" : "INCOMPLETE"}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-300 leading-normal">
+                          <span className="text-slate-500 font-mono text-[8px] block">AUDIT DECISION</span>
+                          <p className="text-slate-200 font-medium italic mt-0.5">"{snapshot.completion?.answer || "Pending final criteria audit."}"</p>
 
-                        {snapshot.completion?.confidence && (
-                          <div className="mt-1.5 flex items-center justify-between text-[9px] font-mono border-t border-slate-800/80 pt-1.5">
-                            <span className="text-slate-500">CONFIDENCE:</span>
-                            <span className={`font-bold ${
-                              snapshot.completion.confidence === "confident" ? "text-[#34d399]" :
-                              snapshot.completion.confidence === "review-risk" ? "text-[#fbbf24] animate-pulse" :
-                              "text-rose-400"
-                            }`}>
-                              {formatSignal(snapshot.completion.confidence)}
-                            </span>
-                          </div>
-                        )}
+                          {snapshot.completion?.confidence && (
+                            <div className="mt-1.5 flex items-center justify-between text-[9px] font-mono border-t border-slate-800/80 pt-1.5">
+                              <span className="text-slate-500">CONFIDENCE:</span>
+                              <span className={`font-bold ${
+                                snapshot.completion.confidence === "confident" ? "text-[#34d399]" :
+                                snapshot.completion.confidence === "review-risk" ? "text-[#fbbf24] animate-pulse" :
+                                "text-rose-400"
+                              }`}>
+                                {formatSignal(snapshot.completion.confidence)}
+                              </span>
+                            </div>
+                          )}
 
-                        {snapshot.completion?.review_risks && snapshot.completion.review_risks.length > 0 && (
-                          <div className="mt-2 rounded bg-[#fbbf24]/8 border border-[#fbbf24]/15 p-1.5 text-[8.5px] text-[#fbbf24] leading-normal font-semibold">
-                            ⚠️ {snapshot.completion.review_risks.length} REVIEW RISKS PENDING JUDGMENT
-                          </div>
-                        )}
+                          {snapshot.completion?.review_risks && snapshot.completion.review_risks.length > 0 && (
+                            <div className="mt-2 rounded bg-[#fbbf24]/8 border border-[#fbbf24]/15 p-1.5 text-[8.5px] text-[#fbbf24] leading-normal font-semibold">
+                              ⚠️ {snapshot.completion.review_risks.length} REVIEW RISKS PENDING JUDGMENT
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* E. CO-PILOT DECISION 舱 */}
                     {snapshot.need_user && (
@@ -398,7 +450,7 @@ export default function App() {
                           Inspected Node
                         </span>
                         <h3 className="text-base font-semibold text-[#e2e8f0]">
-                          {selectedNode.type === "goal" ? `GOAL: ${selectedNode.id}` : `${selectedNode.type.toUpperCase()}: ${selectedNode.label}`}
+                          {inspectedNodeTitle}
                         </h3>
                       </div>
                       <button

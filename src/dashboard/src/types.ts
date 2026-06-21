@@ -99,6 +99,21 @@ export type NoriSnapshot = {
   generated_at: string;
   root: string;
   status: "active" | "no_active_goal" | (string & {});
+  idle_summary?: {
+    state: "no_current_goal";
+    message: string;
+    next: string;
+    last_goal?: {
+      id: string;
+      label: string;
+      workflow_status: string;
+      location: string;
+      updated_at?: string;
+      dossier_path: string;
+      readme_path: string;
+      report_path: string;
+    };
+  };
   agent: {
     name: string;
     skill?: string;

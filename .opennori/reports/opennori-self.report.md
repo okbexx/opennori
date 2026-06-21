@@ -79,7 +79,7 @@ Summary: Add acceptance for per-AC dossier goal state.
 | AC-Z-18 | productization | passing | verified | artifact-review: README now explains that agent_next.candidate_goals is the Skill routing surfa… | tool-observation |
 | AC-Z-19 | productization | passing | verified | confirmed-init-routing-smoke: Confirmed opennori init on a fresh project creates .opennori stat… | tool-observation |
 | AC-Z-20 | productization | passing | verified | behavior-test: Draft Nori Contracts now keep workflow status as draft until user approval; temp… | protocol-check |
-| AC-D-1 | acceptance | passing | verified | dashboard-review: Dashboard snapshot and inspect panels now expose goal dossier and criterion d… | tool-observation |
+| AC-D-1 | acceptance | passing | verified | dashboard-idle-state-verification: Dashboard no-current-goal state now shows an explicit NORI S… | tool-observation |
 | AC-D-2 | acceptance | passing | verified | dashboard-activity-workflow: OpenNori now gives Skills a dashboard_activity routing surface, le… | tool-observation |
 | AC-D-3 | acceptance | passing | verified | dashboard-execution-presence-review: Dashboard event focus now follows execution-relevant OpenN… | tool-observation |
 | AC-D-4 | acceptance | passing | verified | dashboard-observation-boundary: Dashboard now presents user intervention as an agent-conversati… | tool-observation |
@@ -96,7 +96,7 @@ Summary: Add acceptance for per-AC dossier goal state.
 | AC-O-16 | operator | passing | high | review-result: Enhanced autogoal now leaves a user-visible confirmation surface: Skill replies… | tool-observation |
 | AC-O-17 | operator | passing | high | review-result: Draft criterion revisions now preserve draft acceptance state: criterion add/upd… | tool-observation |
 | AC-O-18 | operator | passing | high | review-result: Acceptance Surface Modeling now covers all OpenNori packaged Skill bodies and fr… | tool-observation |
-| AC-D-5 | acceptance | passing | verified | dashboard-ui-verification: Dashboard now exposes a readonly Nori Profile drawer from the header… | tool-observation |
+| AC-D-5 | acceptance | passing | verified | dashboard-profile-idle-state-verification: Dashboard Profile drawer now distinguishes no-curren… | tool-observation |
 | AC-P-14 | protocol | passing | verified | report-rendering-test: OpenNori report rendering now keeps the Acceptance Status table compact… | tool-observation |
 | AC-P-15 | protocol | passing | verified | test-system-refactor-review: OpenNori test coverage has been reorganized around objective proto… | tool-observation |
 | AC-P-16 | protocol | passing | verified | protocol-dashboard-review: Dashboard status projection now uses the goal dossier model directly… | tool-observation |
@@ -1584,26 +1584,37 @@ Summary: Add acceptance for per-AC dossier goal state.
 - Passing threshold: 页面以视觉化 acceptance loop 和少量状态面板展示 agent activity、goal、current gap、need user、architecture
   decision、completion decision 和 latest event；有活动动效但不呈现聊天记录、过程任务列表、证据账本或完成权威入口；状态变化来自 /api/snapshot 与
   /api/events。
-- Evidence: dashboard-review: Dashboard snapshot and inspect panels now expose goal dossier and criterion
-  dossier paths so users can trace Goal and AC nodes back to .opennori/current/<goal>/contract.json,
-  ledger.json, README.md, and criteria/<AC-id>/{README.md,criterion.json,status.json,evidence,artifact
-  s}. Plugin cache was synced locally from 0.1.9 to 0.1.10 with opennori plugin sync --local
-  --confirm.
+- Evidence: dashboard-idle-state-verification: Dashboard no-current-goal state now shows an explicit NORI STATE
+  / READY panel with the latest completed outcome and next recommendation, while hiding active-goal
+  Architecture Compliance and Completion Auditor panels so users are not told an idle project is
+  INCOMPLETE.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-21T10:26:07.561Z
+- Evidence recorded: 2026-06-21T11:20:09.030Z
 - Sources:
-  - type=command, label=npm run typecheck:dashboard, command=npm run typecheck:dashboard
+  - type=reference, label=Playwright observation: opened the Agent Workbench no-current dashboard at
+    http://127.0.0.1:52642; first screen showed Ready, NORI STATE, LAST OUTCOME aw-complete-product-workbench
+    COMPLETE, NEXT, and no INCOMPLETE completion auditor.
   - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
+  - type=command, label=npm run typecheck:dashboard, command=npm run typecheck:dashboard
   - type=command, label=npm run build:dashboard, command=npm run build:dashboard
   - type=command, label=npm run test:dashboard, command=npm run test:dashboard
   - type=command, label=npm run test:quick, command=npm run test:quick
   - type=command, label=git diff --check, command=git diff --check
-- Reviewability: Run the listed checks; start opennori dashboard and select Goal, an individual AC, and a focused
-  Passed AC to confirm dossier paths are visible in the read-only inspect panel.
-- Limitations: This verifies dashboard projection, UI build, and selection behavior. It does not require dashboard
-  to write, approve, waive, or record evidence; those remain agent/CLI paths.
+  - type=artifact, label=src/kernel/snapshot.ts, path=src/kernel/snapshot.ts
+  - type=artifact, label=src/dashboard/src/App.tsx, path=src/dashboard/src/App.tsx
+  - type=artifact, label=src/dashboard/src/components/AcceptanceRadarNet.tsx,
+    path=src/dashboard/src/components/AcceptanceRadarNet.tsx
+  - type=artifact, label=src/dashboard/src/components/InspectNodePanel.tsx,
+    path=src/dashboard/src/components/InspectNodePanel.tsx
+  - type=artifact, label=test/cli-dashboard.test.js, path=test/cli-dashboard.test.js
+  - type=artifact, label=test/dashboard-selection.test.ts, path=test/dashboard-selection.test.ts
+- Reviewability: Run the listed commands, start opennori dashboard against a project with no current goal and at
+  least one completed goal, then inspect the first screen for NORI STATE / READY / LAST OUTCOME / NEXT
+  and absence of misleading INCOMPLETE completion audit.
+- Limitations: This verifies dashboard state projection and visible no-current UI semantics. It does not create or
+  approve a new Nori Contract from the dashboard, and it does not change completed goal history.
 
 ### AC-D-2
 
@@ -2346,40 +2357,35 @@ Summary: Add acceptance for per-AC dossier goal state.
   type/name/strength/purpose/scope/install policy/latest evidence summary；没有 profile 时显示空态；浮窗只读，不提供
   add/check/evidence/waive/confirm 等写状态按钮；Profile 不被渲染为 Product AC 节点；打开或关闭浮窗前后，radar/main
   区域不重新分配布局宽度，浮窗只覆盖在右侧观察层上。
-- Evidence: dashboard-ui-verification: Dashboard now exposes a readonly Nori Profile drawer from the header
-  Profile icon. The snapshot includes capability_profile and capability_compliance; the drawer shows
-  item counts, must/prefer/avoid distribution, compliance, blocking/review counts, item metadata, and
-  latest evidence; Profile remains outside Product AC radar criteria. Playwright measured the radar
-  SVG width before and after opening the drawer as 1118px both times, confirming the right-side drawer
-  is an overlay and does not affect main layout sizing.
+- Evidence: dashboard-profile-idle-state-verification: Dashboard Profile drawer now distinguishes
+  no-current-goal from satisfied compliance: when there is no current Nori Contract, the Profile icon
+  opens a readonly drawer that shows NOT EVALUATED, explains Profile is current-contract-scoped, and
+  says no current goal profile is active instead of reporting empty Profile as COMPLETE.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-20T14:34:50.508Z
+- Evidence recorded: 2026-06-21T11:20:20.581Z
 - Sources:
-  - type=reference, label=Playwright dashboard observation: clicked Inspect Nori Profile; UI Panel showed NORI
-    PROFILE, ITEMS 1, MUST 1, PREFER 0, AVOID 0, NEEDS REVIEW, Blocking 1, Review 0, design-taste-frontend, install
-    policy existing_only, latest evidence <none>. Radar width was 1118px before and 1118px after opening the drawer.
-  - type=architecture-apply, label=opennori-self-ac-d-5-aligned,
-    path=/Users/jarl/code/jarlone/opennori/.opennori/architecture/evidence/opennori-self-ac-d-5-aligned.json,
-    summary=Architecture Baseline alignment context. This is not Product AC evidence by itself., role=context
-  - type=command, label=npm run lint, command=npm run lint
+  - type=reference, label=Playwright observation: clicked Inspect Nori Profile on the no-current Agent Workbench
+    dashboard; drawer showed PROFILE: Profile, compliance NOT EVALUATED, No Current Goal Profile, and No current
+    goal profile is active.
+  - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
   - type=command, label=npm run typecheck:dashboard, command=npm run typecheck:dashboard
-  - type=command, label=npm run test:quick, command=npm run test:quick
+  - type=command, label=npm run build:dashboard, command=npm run build:dashboard
   - type=command, label=npm run test:dashboard, command=npm run test:dashboard
+  - type=command, label=npm run test:quick, command=npm run test:quick
   - type=command, label=git diff --check, command=git diff --check
-  - type=artifact, label=src/dashboard/src/App.tsx, path=src/dashboard/src/App.tsx
+  - type=artifact, label=src/dashboard/src/selection.ts, path=src/dashboard/src/selection.ts
   - type=artifact, label=src/dashboard/src/components/InspectNodePanel.tsx,
     path=src/dashboard/src/components/InspectNodePanel.tsx
-  - type=artifact, label=src/dashboard/src/selection.ts, path=src/dashboard/src/selection.ts
-  - type=artifact, label=src/kernel/snapshot.ts, path=src/kernel/snapshot.ts
+  - type=artifact, label=src/dashboard/src/types.ts, path=src/dashboard/src/types.ts
   - type=artifact, label=test/dashboard-selection.test.ts, path=test/dashboard-selection.test.ts
-- Reviewability: Run npm run lint, npm run typecheck:dashboard, npm run test:quick, npm run test:dashboard, and git
-  diff --check. Start opennori dashboard, click the header Profile icon, inspect UI Panel / Raw JSON,
-  and compare the radar SVG width before and after opening the drawer.
-- Limitations: Manual Playwright verification used a local demo dashboard state with one required Profile item;
-  tests cover snapshot and selection behavior but do not create a permanent browser screenshot
-  artifact.
+- Reviewability: Run the listed commands, start dashboard against a no-current-goal project, click the header Profile
+  icon, and verify the drawer says NOT EVALUATED with no-current explanatory copy rather than
+  COMPLETE.
+- Limitations: This verifies current dashboard Profile semantics and selection state. It does not restore
+  historical Profile items into a new active contract; completed goal details remain report/history
+  state.
 
 ### AC-P-14
 

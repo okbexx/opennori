@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 1,
   "latest_evidence_summary": "Enhanced autogoal discovery is documented as nori-autogoal Skill behavior and surfaced in product docs/site/tests without adding a new CLI artifact.",
-  "updated_at": "2026-06-21T10:26:07.803Z"
+  "updated_at": "2026-06-21T11:20:20.581Z"
 }

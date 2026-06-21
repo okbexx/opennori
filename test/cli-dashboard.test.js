@@ -175,6 +175,25 @@ test("activity start ignores drafts and requires a current goal before publishin
   assert.equal(noCurrent.data.snapshot.status, "no_active_goal");
 });
 
+test("dashboard no-current snapshot summarizes the latest historical outcome", { tags: ["cli", "dashboard", "quick"] }, () => {
+  const root = tempRoot();
+  writeActiveGoalWithId(root, "finished-goal", "complete", "completed");
+
+  const snapshot = refreshSnapshot(root);
+
+  assert.equal(snapshot.status, "no_active_goal");
+  assert.equal(snapshot.goal, null);
+  assert.equal(snapshot.decision, "no_active_goal");
+  assert.equal(snapshot.idle_summary.state, "no_current_goal");
+  assert.equal(snapshot.idle_summary.last_goal.id, "finished-goal");
+  assert.equal(snapshot.idle_summary.last_goal.workflow_status, "complete");
+  assert.equal(snapshot.idle_summary.last_goal.location, "completed");
+  assert.equal(snapshot.idle_summary.last_goal.dossier_path, ".opennori/completed/finished-goal");
+  assert.equal(snapshot.idle_summary.last_goal.readme_path, ".opennori/completed/finished-goal/README.md");
+  assert.equal(snapshot.idle_summary.last_goal.report_path, ".opennori/reports/finished-goal.report.md");
+  assert.match(snapshot.idle_summary.next, /next goal/i);
+});
+
 test("activity start refuses invalid multiple current goals instead of attaching dashboard state to the wrong target", { tags: ["cli", "dashboard", "acceptance"] }, async () => {
   const root = tempRoot();
   writeActiveGoalWithId(root, "first-goal");

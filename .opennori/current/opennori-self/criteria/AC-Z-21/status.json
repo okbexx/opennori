@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 2,
   "latest_evidence_summary": "OpenNori now preserves language preference across user-reviewable profile assets: packaged Skills route wrong-language Nori Profile and project Architecture Profile content back to profile/architecture Skills; project profile prose follows explicit user language or presentation.language while stable ids and protocol fields remain English. CLI help now defaults to human-readable text, and draft human output presents one Nori Contract Draft with an internal evidence ledger instead of two user-facing deliverables.",
-  "updated_at": "2026-06-21T10:26:07.803Z"
+  "updated_at": "2026-06-21T11:20:20.581Z"
 }

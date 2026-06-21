@@ -34,15 +34,18 @@ export function profileNodeFromSnapshot(snapshot: NoriSnapshot): RadarNode {
     review: [],
     statuses: []
   };
+  const hasCurrentGoal = snapshot.status === "active" && !!snapshot.goal;
   return {
     id: "profile",
     type: "profile",
     label: "Profile",
-    status: compliance.complete ? "satisfied" : "review",
+    status: hasCurrentGoal ? (compliance.complete ? "satisfied" : "review") : "not_evaluated",
     x: 0,
     y: 0,
     rawData: {
       title: "Nori Profile",
+      scope: hasCurrentGoal ? "current_goal" : "no_current_goal",
+      idle_summary: snapshot.idle_summary,
       profile,
       compliance
     }
@@ -80,7 +83,19 @@ export function syncSelectedNodeWithSnapshot(selectedNode: RadarNode | null, nex
   if (!selectedNode) return null;
 
   if (selectedNode.type === "goal") {
-    if (!nextSnapshot.goal) return null;
+    if (!nextSnapshot.goal) {
+      return {
+        ...selectedNode,
+        id: "no-current-goal",
+        label: "Ready",
+        status: "idle",
+        rawData: {
+          empty_state: true,
+          idle_summary: nextSnapshot.idle_summary,
+          message: nextSnapshot.idle_summary?.message || "No current Nori Contract is being observed."
+        }
+      };
+    }
     return {
       ...selectedNode,
       id: nextSnapshot.goal.id,

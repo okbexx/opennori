@@ -103,6 +103,22 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
   // 1. 简体中文：Goal 目标的只读面板渲染
   if (node.type === "goal") {
     const rawGoal = node.rawData as {
+      empty_state?: boolean;
+      message?: string;
+      idle_summary?: {
+        message?: string;
+        next?: string;
+        last_goal?: {
+          id: string;
+          label: string;
+          workflow_status: string;
+          location: string;
+          updated_at?: string;
+          dossier_path?: string;
+          readme_path?: string;
+          report_path?: string;
+        };
+      };
       label: string;
       workflow_status?: string;
       dossier?: {
@@ -115,6 +131,73 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
         report_path?: string;
       };
     };
+    if (rawGoal.empty_state) {
+      const idleSummary = rawGoal.idle_summary;
+      const lastGoal = idleSummary?.last_goal;
+      return (
+        <div className="flex flex-col gap-4 text-left select-text">
+          <div className="flex items-center gap-2.5 rounded-lg border border-[rgba(0,240,255,0.1)] bg-[#00f0ff]/5 p-3.5">
+            <div className="grid h-8 w-8 place-items-center rounded bg-[#00f0ff]/15 text-[#00f0ff]">
+              <Compass size={18} />
+            </div>
+            <div>
+              <span className="text-[10px] font-mono font-bold tracking-widest text-[#00f0ff]/80">NORI STATE</span>
+              <div className="mt-0.5 flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded bg-[#34d399]/10 px-1.5 py-0.5 text-[9px] font-mono font-bold text-[#34d399]">
+                  READY
+                </span>
+                <span className="text-[9px] text-slate-500 font-mono">NO CURRENT CONTRACT</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded border border-slate-800 bg-slate-950/40 p-3">
+            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-500">Current State</span>
+            <p className="text-xs font-semibold leading-relaxed text-slate-200">
+              {idleSummary?.message || rawGoal.message || "No current Nori Contract is being observed."}
+            </p>
+          </div>
+
+          {lastGoal ? (
+            <div className="rounded border border-[#34d399]/15 bg-[#34d399]/5 p-3">
+              <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#34d399]/80">Last Outcome</span>
+              <p className="text-xs font-semibold leading-relaxed text-slate-200">{lastGoal.label}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <span className="rounded bg-slate-900 px-1.5 py-0.5 text-[8px] font-mono font-bold text-slate-300">
+                  ID {lastGoal.id}
+                </span>
+                <span className="rounded bg-[#34d399]/10 px-1.5 py-0.5 text-[8px] font-mono font-bold text-[#34d399]">
+                  {formatSignal(lastGoal.workflow_status)}
+                </span>
+                <span className="rounded bg-[#00f0ff]/10 px-1.5 py-0.5 text-[8px] font-mono font-bold text-[#00f0ff]">
+                  {formatSignal(lastGoal.location)}
+                </span>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="rounded border border-[#fbbf24]/15 bg-[#fbbf24]/5 p-3">
+            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#fbbf24]/90">Next</span>
+            <p className="text-xs leading-relaxed text-slate-300">
+              {idleSummary?.next || "Ask the agent to use OpenNori for a goal, then approve a Nori Contract."}
+            </p>
+          </div>
+
+          <DossierPathList
+            title="Last Goal Files"
+            paths={[
+              { label: "state", value: lastGoal?.dossier_path },
+              { label: "readme", value: lastGoal?.readme_path },
+              { label: "report", value: lastGoal?.report_path }
+            ]}
+          />
+
+          <div className="rounded border border-slate-800 bg-slate-950/40 p-3 text-xs leading-normal text-slate-400">
+            The dashboard is observation-only. Start or approve the next Nori Contract in the agent conversation, not from this panel.
+          </div>
+        </div>
+      );
+    }
     const isCompleted = String(rawGoal.workflow_status || "").toLowerCase() === "complete";
 
     return (
@@ -236,9 +319,18 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
   // 3. 简体中文：Nori Profile 只读面板，不提供任何写状态动作
   if (node.type === "profile") {
     const rawProfile = node.rawData as {
+      scope?: "current_goal" | "no_current_goal" | string;
+      idle_summary?: {
+        last_goal?: {
+          id: string;
+          label: string;
+          report_path?: string;
+        };
+      };
       profile?: CapabilityProfile;
       compliance?: ProfileCompliance;
     };
+    const hasCurrentGoal = rawProfile.scope !== "no_current_goal";
     const profile = rawProfile.profile || { items: [], evidence: [] };
     const compliance = rawProfile.compliance || {
       required: false,
@@ -265,7 +357,8 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
       return acc;
     }, { total: 0, must: 0, prefer: 0, avoid: 0 });
     const statusById = new Map(compliance.statuses.map((row) => [row.id, row]));
-    const panelColor = compliance.complete ? "#34d399" : "#fbbf24";
+    const panelColor = !hasCurrentGoal ? "#94a3b8" : compliance.complete ? "#34d399" : "#fbbf24";
+    const complianceLabel = !hasCurrentGoal ? "NOT EVALUATED" : compliance.complete ? "COMPLETE" : "NEEDS REVIEW";
 
     return (
       <div className="flex h-full max-h-full min-h-0 select-text flex-col gap-3 overflow-hidden text-left">
@@ -296,11 +389,25 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
             <div className="text-right">
               <span className="block text-[8px] font-mono uppercase text-slate-500">compliance</span>
               <span className="text-xs font-mono font-bold" style={{ color: panelColor }}>
-                {compliance.complete ? "COMPLETE" : "NEEDS REVIEW"}
+                {complianceLabel}
               </span>
             </div>
           </div>
         </div>
+
+        {!hasCurrentGoal && (
+          <div className="rounded border border-slate-800 bg-slate-950/40 p-3">
+            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-500">No Current Goal Profile</span>
+            <p className="text-xs leading-relaxed text-slate-300">
+              Nori Profile is evaluated against the current Nori Contract. There is no current contract right now, so this panel is not claiming profile compliance.
+            </p>
+            {rawProfile.idle_summary?.last_goal ? (
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                Last outcome: <span className="font-semibold text-slate-300">{rawProfile.idle_summary.last_goal.label}</span>
+              </p>
+            ) : null}
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded border border-rose-500/15 bg-rose-500/5 p-2.5">
@@ -368,9 +475,13 @@ export function InspectNodePanel({ node }: InspectNodePanelProps) {
               <div className="mx-auto mb-2 grid h-9 w-9 place-items-center rounded bg-slate-900/70 text-slate-500">
                 <ListChecks size={17} />
               </div>
-              <p className="text-xs font-semibold text-slate-400">No Nori Profile items recorded.</p>
+              <p className="text-xs font-semibold text-slate-400">
+                {hasCurrentGoal ? "No Nori Profile items recorded for this current goal." : "No current goal profile is active."}
+              </p>
               <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-                Required Skills, preferred stacks, and avoided tools will appear here after the agent records them through OpenNori Profile.
+                {hasCurrentGoal
+                  ? "Required Skills, preferred stacks, and avoided tools will appear here after the agent records them through OpenNori Profile."
+                  : "Open a current Nori Contract to inspect its required Skills, preferred stacks, avoided tools, and compliance evidence."}
               </p>
             </div>
           )}

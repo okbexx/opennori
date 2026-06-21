@@ -210,3 +210,40 @@ test("dashboard profile node syncs Nori Profile compliance from snapshots", { ta
   assert.equal(synced?.status, "satisfied");
   assert.equal((synced?.rawData as { compliance: { complete: boolean } }).compliance.complete, true);
 });
+
+test("dashboard profile node is not evaluated when there is no current goal", { tags: ["dashboard", "quick"] }, () => {
+  const snapshot = snapshotWithCriteria([]);
+  snapshot.status = "no_active_goal";
+  snapshot.goal = null;
+  snapshot.current_gap = null;
+  snapshot.decision = "no_active_goal";
+  snapshot.idle_summary = {
+    state: "no_current_goal",
+    message: "No current Nori Contract is being observed.",
+    next: "Ask the agent to use OpenNori for the next goal.",
+    last_goal: {
+      id: "completed-goal",
+      label: "Ship completed goal",
+      workflow_status: "complete",
+      location: "completed",
+      dossier_path: ".opennori/completed/completed-goal",
+      readme_path: ".opennori/completed/completed-goal/README.md",
+      report_path: ".opennori/reports/completed-goal.report.md"
+    }
+  };
+  snapshot.capability_profile = { items: [], evidence: [] };
+  snapshot.capability_compliance = {
+    required: false,
+    complete: true,
+    blocking: [],
+    review: [],
+    statuses: []
+  };
+
+  const node = profileNodeFromSnapshot(snapshot);
+  const rawData = node.rawData as { scope: string; idle_summary: NonNullable<NoriSnapshot["idle_summary"]> };
+
+  assert.equal(node.status, "not_evaluated");
+  assert.equal(rawData.scope, "no_current_goal");
+  assert.equal(rawData.idle_summary.last_goal?.id, "completed-goal");
+});

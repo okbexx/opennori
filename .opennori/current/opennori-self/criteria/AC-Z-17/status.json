@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 1,
   "latest_evidence_summary": "README and website quickstart lead with short commands: try once with npx opennori, pin with npm install -D opennori, then use opennori as the project-local entry.",
-  "updated_at": "2026-06-21T10:26:07.803Z"
+  "updated_at": "2026-06-21T11:20:20.581Z"
 }

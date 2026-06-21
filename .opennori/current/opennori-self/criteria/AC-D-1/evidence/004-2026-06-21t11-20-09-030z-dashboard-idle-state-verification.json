@@ -1,0 +1,77 @@
+{
+  "kind": "dashboard-idle-state-verification",
+  "basis": "tool-observation",
+  "summary": "Dashboard no-current-goal state now shows an explicit NORI STATE / READY panel with the latest completed outcome and next recommendation, while hiding active-goal Architecture Compliance and Completion Auditor panels so users are not told an idle project is INCOMPLETE.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "reference",
+      "label": "Playwright observation: opened the Agent Workbench no-current dashboard at http://127.0.0.1:52642; first screen showed Ready, NORI STATE, LAST OUTCOME aw-complete-product-workbench COMPLETE, NEXT, and no INCOMPLETE completion auditor."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck:dashboard",
+      "command": "npm run typecheck:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run build:dashboard",
+      "command": "npm run build:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:quick",
+      "command": "npm run test:quick"
+    },
+    {
+      "type": "command",
+      "label": "git diff --check",
+      "command": "git diff --check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot.ts",
+      "path": "src/kernel/snapshot.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/App.tsx",
+      "path": "src/dashboard/src/App.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/AcceptanceRadarNet.tsx",
+      "path": "src/dashboard/src/components/AcceptanceRadarNet.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/InspectNodePanel.tsx",
+      "path": "src/dashboard/src/components/InspectNodePanel.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-dashboard.test.js",
+      "path": "test/cli-dashboard.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/dashboard-selection.test.ts",
+      "path": "test/dashboard-selection.test.ts"
+    }
+  ],
+  "reviewability": "Run the listed commands, start opennori dashboard against a project with no current goal and at least one completed goal, then inspect the first screen for NORI STATE / READY / LAST OUTCOME / NEXT and absence of misleading INCOMPLETE completion audit.",
+  "limitations": "This verifies dashboard state projection and visible no-current UI semantics. It does not create or approve a new Nori Contract from the dashboard, and it does not change completed goal history.",
+  "gate": "accepted",
+  "created_at": "2026-06-21T11:20:09.030Z"
+}

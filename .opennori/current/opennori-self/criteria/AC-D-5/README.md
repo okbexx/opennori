@@ -17,24 +17,23 @@ Passing threshold: 右侧 overlay 浮窗展示 Profile item 总数、must/prefer
 
 ## Evidence
 
-Latest: dashboard-ui-verification - Dashboard now exposes a readonly Nori Profile drawer from the header Profile icon. The snapshot includes capability_profile and capability_compliance; the drawer shows item counts, must/prefer/avoid distribution, compliance, blocking/review counts, item metadata, and latest evidence; Profile remains outside Product AC radar criteria. Playwright measured the radar SVG width before and after opening the drawer as 1118px both times, confirming the right-side drawer is an overlay and does not affect main layout sizing.
+Latest: dashboard-profile-idle-state-verification - Dashboard Profile drawer now distinguishes no-current-goal from satisfied compliance: when there is no current Nori Contract, the Profile icon opens a readonly drawer that shows NOT EVALUATED, explains Profile is current-contract-scoped, and says no current goal profile is active instead of reporting empty Profile as COMPLETE.
 Result: passing
 Basis: tool-observation
-Reviewability: Run npm run lint, npm run typecheck:dashboard, npm run test:quick, npm run test:dashboard, and git diff --check. Start opennori dashboard, click the header Profile icon, inspect UI Panel / Raw JSON, and compare the radar SVG width before and after opening the drawer.
-Limitations: Manual Playwright verification used a local demo dashboard state with one required Profile item; tests cover snapshot and selection behavior but do not create a permanent browser screenshot artifact.
+Reviewability: Run the listed commands, start dashboard against a no-current-goal project, click the header Profile icon, and verify the drawer says NOT EVALUATED with no-current explanatory copy rather than COMPLETE.
+Limitations: This verifies current dashboard Profile semantics and selection state. It does not restore historical Profile items into a new active contract; completed goal details remain report/history state.
 
 Sources:
-- Playwright dashboard observation: clicked Inspect Nori Profile; UI Panel showed NORI PROFILE, ITEMS 1, MUST 1, PREFER 0, AVOID 0, NEEDS REVIEW, Blocking 1, Review 0, design-taste-frontend, install policy existing_only, latest evidence <none>. Radar width was 1118px before and 1118px after opening the drawer.
-- /Users/jarl/code/jarlone/opennori/.opennori/architecture/evidence/opennori-self-ac-d-5-aligned.json
-- npm run lint
+- Playwright observation: clicked Inspect Nori Profile on the no-current Agent Workbench dashboard; drawer showed PROFILE: Profile, compliance NOT EVALUATED, No Current Goal Profile, and No current goal profile is active.
+- npx tsc --noEmit --pretty false
 - npm run typecheck:dashboard
-- npm run test:quick
+- npm run build:dashboard
 - npm run test:dashboard
+- npm run test:quick
 - git diff --check
-- src/dashboard/src/App.tsx
-- src/dashboard/src/components/InspectNodePanel.tsx
 - src/dashboard/src/selection.ts
-- src/kernel/snapshot.ts
+- src/dashboard/src/components/InspectNodePanel.tsx
+- src/dashboard/src/types.ts
 - test/dashboard-selection.test.ts
 
 ## Files
