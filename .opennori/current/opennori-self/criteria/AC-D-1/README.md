@@ -17,26 +17,22 @@ Passing threshold: 页面以视觉化 acceptance loop 和少量状态面板展�
 
 ## Evidence
 
-Latest: dashboard-idle-state-verification - Dashboard no-current-goal state now shows an explicit NORI STATE / READY panel with the latest completed outcome and next recommendation, while hiding active-goal Architecture Compliance and Completion Auditor panels so users are not told an idle project is INCOMPLETE.
+Latest: dashboard-outcome-hud-verification - Dashboard first screen now leads with Outcome Overview, Decision, Current gap, Next, and Project Profile impact. The kernel snapshot exposes outcome_summary so the UI does not force users to infer completion from radar nodes, event logs, or the Project Profile drawer.
 Result: passing
 Basis: tool-observation
-Reviewability: Run the listed commands, start opennori dashboard against a project with no current goal and at least one completed goal, then inspect the first screen for NORI STATE / READY / LAST OUTCOME / NEXT and absence of misleading INCOMPLETE completion audit.
-Limitations: This verifies dashboard state projection and visible no-current UI semantics. It does not create or approve a new Nori Contract from the dashboard, and it does not change completed goal history.
+Reviewability: Run opennori dashboard --root . and inspect the left HUD. It should show Outcome Overview, Decision, Current gap, Next, and Project Profile impact before agent activity or event logs. Check /api/snapshot for outcome_summary and rerun dashboard tests.
+Limitations: This evidence verifies the current OpenNori self dashboard on localhost and keeps the screenshot in ignored local output. It does not test every possible external project profile combination visually.
 
 Sources:
-- Playwright observation: opened the Agent Workbench no-current dashboard at http://127.0.0.1:52642; first screen showed Ready, NORI STATE, LAST OUTCOME aw-complete-product-workbench COMPLETE, NEXT, and no INCOMPLETE completion auditor.
 - npx tsc --noEmit --pretty false
-- npm run typecheck:dashboard
-- npm run build:dashboard
 - npm run test:dashboard
-- npm run test:quick
-- git diff --check
 - src/kernel/snapshot.ts
 - src/dashboard/src/App.tsx
-- src/dashboard/src/components/AcceptanceRadarNet.tsx
-- src/dashboard/src/components/InspectNodePanel.tsx
+- src/dashboard/src/types.ts
+- src/types.ts
 - test/cli-dashboard.test.js
-- test/dashboard-selection.test.ts
+- dashboard/index.html
+- output/playwright/dashboard-outcome-hud.png
 
 ## Files
 

@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-21T13:40:55.807Z",
+  "updated_at": "2026-06-22T01:08:44.236Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -444,6 +444,17 @@
         "summary": "CLI boundary audit kept subjective product semantics in Skills and narrowed hard validation to objective contract, ledger, evidence, architecture, lifecycle, and schema integrity.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-ac-a-12-aligned.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-ac-d-1-dashboard-outcome-hud",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-D-1",
+        "status": "aligned",
+        "summary": "Dashboard Outcome HUD keeps the React/Vite/Tailwind dashboard as a readonly observation surface while surfacing completion decision, current gap, user intervention, next action, and Project Profile impact from kernel snapshot projection.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-d-1-dashboard-outcome-hud.json",
         "schema_valid": true,
         "schema_errors": []
       },

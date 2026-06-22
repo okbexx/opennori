@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 2,
   "latest_evidence_summary": "OpenNori initializes .opennori/profile/profile.json as the project-level Project Profile source and .opennori/profile/README.md as a generated review surface; goal ledgers store only profile_evidence compliance records.",
-  "updated_at": "2026-06-21T13:40:42.527Z"
+  "updated_at": "2026-06-22T01:08:33.734Z"
 }

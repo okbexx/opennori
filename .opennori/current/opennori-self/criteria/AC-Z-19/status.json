@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 7,
   "latest_evidence_summary": "Confirmed opennori init on a fresh project creates .opennori state, leaves active goals empty, and returns initialized_no_active_contract with next guidance to turn the stated goal into human-centered AC rather than inspect empty directories or repeat setup.",
-  "updated_at": "2026-06-21T13:40:42.527Z"
+  "updated_at": "2026-06-22T01:08:33.734Z"
 }

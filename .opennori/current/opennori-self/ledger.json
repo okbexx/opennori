@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-21T13:40:42.527Z",
+  "updated_at": "2026-06-22T01:08:33.734Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -5380,6 +5380,64 @@
           "limitations": "This verifies dashboard state projection and visible no-current UI semantics. It does not create or approve a new Nori Contract from the dashboard, and it does not change completed goal history.",
           "gate": "accepted",
           "created_at": "2026-06-21T11:20:09.030Z"
+        },
+        {
+          "kind": "dashboard-outcome-hud-verification",
+          "basis": "tool-observation",
+          "summary": "Dashboard first screen now leads with Outcome Overview, Decision, Current gap, Next, and Project Profile impact. The kernel snapshot exposes outcome_summary so the UI does not force users to infer completion from radar nodes, event logs, or the Project Profile drawer.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "artifact",
+              "label": "src/kernel/snapshot.ts",
+              "path": "src/kernel/snapshot.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/App.tsx",
+              "path": "src/dashboard/src/App.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/types.ts",
+              "path": "src/dashboard/src/types.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/types.ts",
+              "path": "src/types.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/cli-dashboard.test.js",
+              "path": "test/cli-dashboard.test.js"
+            },
+            {
+              "type": "artifact",
+              "label": "dashboard/index.html",
+              "path": "dashboard/index.html"
+            },
+            {
+              "type": "artifact",
+              "label": "output/playwright/dashboard-outcome-hud.png",
+              "path": "output/playwright/dashboard-outcome-hud.png"
+            }
+          ],
+          "reviewability": "Run opennori dashboard --root . and inspect the left HUD. It should show Outcome Overview, Decision, Current gap, Next, and Project Profile impact before agent activity or event logs. Check /api/snapshot for outcome_summary and rerun dashboard tests.",
+          "limitations": "This evidence verifies the current OpenNori self dashboard on localhost and keeps the screenshot in ignored local output. It does not test every possible external project profile combination visually.",
+          "gate": "accepted",
+          "created_at": "2026-06-22T01:08:33.731Z"
         }
       ]
     },

@@ -67,6 +67,11 @@ test("kernel events activity and snapshot expose dashboard state without replaci
   assert.equal(snapshot.criteria.find((criterion) => criterion.id === "AC-1").dossier.readme_path, ".opennori/current/module-goal/criteria/AC-1/README.md");
   assert.equal(snapshot.capability_profile.items.length, 0);
   assert.equal(snapshot.capability_compliance.complete, true);
+  assert.equal(snapshot.outcome_summary.decision.state, "not_complete");
+  assert.equal(snapshot.outcome_summary.decision.label, "Not complete yet");
+  assert.equal(snapshot.outcome_summary.current_gap.id, "AC-1");
+  assert.match(snapshot.outcome_summary.next.action, /AC-1/);
+  assert.equal(snapshot.outcome_summary.profile.state, "idle");
   assert.equal(fs.existsSync(snapshotPath(root)), true);
   assert.equal(fs.existsSync(goalPaths(root, "module-goal").evidencePath), true);
 });
@@ -89,6 +94,9 @@ test("dashboard snapshot exposes Project Profile without turning it into an AC n
   assert.equal(snapshot.capability_profile.items.length, 1);
   assert.equal(snapshot.capability_compliance.complete, false);
   assert.equal(snapshot.capability_compliance.blocking[0].id, "skill-design-taste-frontend");
+  assert.equal(snapshot.outcome_summary.profile.scope, "current_goal_compliance");
+  assert.equal(snapshot.outcome_summary.profile.state, "blocked");
+  assert.match(snapshot.outcome_summary.profile.detail, /must\/avoid/);
   assert.equal(snapshot.criteria.some((criterion) => criterion.id === "skill-design-taste-frontend"), false);
 });
 
@@ -183,6 +191,10 @@ test("dashboard no-current snapshot summarizes the latest historical outcome", {
   assert.equal(snapshot.idle_summary.last_goal.dossier_path, ".opennori/completed/finished-goal");
   assert.equal(snapshot.idle_summary.last_goal.readme_path, ".opennori/completed/finished-goal/README.md");
   assert.equal(snapshot.idle_summary.last_goal.report_path, ".opennori/reports/finished-goal.report.md");
+  assert.equal(snapshot.outcome_summary.decision.state, "no_active_goal");
+  assert.equal(snapshot.outcome_summary.current_gap.id, null);
+  assert.equal(snapshot.outcome_summary.profile.scope, "project_only");
+  assert.equal(snapshot.outcome_summary.profile.state, "idle");
   assert.match(snapshot.idle_summary.next, /next goal/i);
 });
 

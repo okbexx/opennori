@@ -47,6 +47,22 @@ function architectureDecisionClass(decision: string): string {
   return "text-[#fbbf24]";
 }
 
+function outcomeDecisionClass(decision: string | undefined): string {
+  const clean = String(decision || "").toLowerCase();
+  if (clean === "complete") return "border-[#34d399]/25 bg-[#34d399]/10 text-[#34d399]";
+  if (clean === "review_risk") return "border-[#fbbf24]/30 bg-[#fbbf24]/10 text-[#fbbf24]";
+  if (clean === "no_active_goal") return "border-[#00f0ff]/25 bg-[#00f0ff]/10 text-[#00f0ff]";
+  return "border-rose-400/25 bg-rose-500/10 text-rose-300";
+}
+
+function profileImpactClass(state: string | undefined): string {
+  const clean = String(state || "").toLowerCase();
+  if (clean === "clear") return "border-[#34d399]/25 bg-[#34d399]/10 text-[#34d399]";
+  if (clean === "blocked") return "border-rose-400/25 bg-rose-500/10 text-rose-300";
+  if (clean === "review") return "border-[#fbbf24]/30 bg-[#fbbf24]/10 text-[#fbbf24]";
+  return "border-[#bd93f9]/25 bg-[#bd93f9]/10 text-[#bd93f9]";
+}
+
 function relativeTime(value: string | undefined): string {
   if (!value) return "not seen";
   const timestamp = Date.parse(value);
@@ -83,6 +99,58 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip.Root>
+  );
+}
+
+function OutcomeCard({
+  label,
+  title,
+  detail,
+  badge,
+  tone = "cyan",
+  icon
+}: {
+  label: string;
+  title: string;
+  detail: string;
+  badge?: string;
+  tone?: "cyan" | "green" | "purple" | "amber" | "rose";
+  icon?: React.ReactNode;
+}) {
+  const toneClass = {
+    cyan: "border-l-[#00f0ff] border-[rgba(0,240,255,0.12)]",
+    green: "border-l-[#34d399] border-[rgba(52,211,153,0.12)]",
+    purple: "border-l-[#bd93f9] border-[rgba(189,147,249,0.12)]",
+    amber: "border-l-[#fbbf24] border-[rgba(251,191,36,0.12)]",
+    rose: "border-l-rose-400 border-rose-400/15"
+  }[tone];
+  const textClass = {
+    cyan: "text-[#00f0ff] bg-[#00f0ff]/10",
+    green: "text-[#34d399] bg-[#34d399]/10",
+    purple: "text-[#bd93f9] bg-[#bd93f9]/10",
+    amber: "text-[#fbbf24] bg-[#fbbf24]/10",
+    rose: "text-rose-300 bg-rose-500/10"
+  }[tone];
+  return (
+    <div className={`rounded-lg border-l-[3.5px] ${toneClass} bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left`}>
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <span className={`inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider ${textClass}`}>
+          {icon}
+          {label}
+        </span>
+        {badge ? (
+          <span className="shrink-0 rounded border border-slate-700/80 bg-black/30 px-1.5 py-0.5 text-[8px] font-mono font-bold uppercase tracking-wider text-slate-400">
+            {badge}
+          </span>
+        ) : null}
+      </div>
+      <p className="text-[11px] font-bold leading-relaxed tracking-wide text-slate-100 break-words">
+        {title}
+      </p>
+      <p className="mt-1 text-[10px] leading-relaxed text-slate-400 break-words">
+        {detail}
+      </p>
+    </div>
   );
 }
 
@@ -167,6 +235,7 @@ export default function App() {
   const agentRunning = isAgentRunning(snapshot);
   const hasCurrentGoal = snapshot?.status === "active" && !!snapshot.goal;
   const idleSummary = snapshot?.idle_summary;
+  const outcomeSummary = snapshot?.outcome_summary;
   const inspectedNodeTitle = selectedNode
     ? selectedNode.type === "goal" && (selectedNode.rawData as { empty_state?: boolean } | null)?.empty_state
       ? "NORI STATE"
@@ -237,74 +306,117 @@ export default function App() {
                   selectedNodeId={selectedNode?.id || null}
                 />
 
-                {/* 2. 简体中文：左侧悬浮式多维验收决策舱 (Acceptance Telemetry HUD Deck) */}
+                {/* 2. 简体中文：左侧悬浮 Outcome HUD，先回答完成判断与下一步 */}
                 {snapshot && (
                   <div className="absolute left-4 top-4 bottom-4 z-20 w-[min(340px,calc(100vw-2rem))] overflow-y-auto scrollbar-hover-visible flex flex-col gap-3 pointer-events-auto pr-1">
-                    {/* A. GOAL & DIRECTIVE 舱 */}
-                    {snapshot.goal && (
-                      <div className="rounded-lg border-l-[3.5px] border-l-[#00f0ff] border border-[rgba(0,240,255,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
-                        <div className="absolute top-0 right-0 px-2 py-0.5 bg-[rgba(0,240,255,0.06)] text-[8px] font-mono tracking-widest text-[#00f0ff]/80 border-b border-l border-[rgba(0,240,255,0.08)] rounded-bl">
-                          SYS.DIRECTIVE / GOAL
-                        </div>
-
-                        <div className="flex items-center gap-1.5 mb-1.5 flex-wrap mt-2.5">
-                          <span className="inline-flex items-center gap-1 rounded bg-[#00f0ff]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#00f0ff]">
-                            GOAL_ID: {snapshot.goal.id}
-                          </span>
-                          <span className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[9px] font-mono font-bold ${snapshot.goal.workflow_status === "complete" ? "bg-[#34d399]/10 text-[#34d399]" : "bg-[#fbbf24]/10 text-[#fbbf24]"}`}>
-                            STATUS: {snapshot.goal.workflow_status.toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="flex items-start gap-1.5 mt-1">
-                          <div className="mt-0.5 text-[#00f0ff] shrink-0">
-                            <Compass size={13} />
-                          </div>
-                          <h2 className="text-[11px] font-bold leading-relaxed tracking-wide text-slate-200 break-words">
-                            {snapshot.goal.label}
-                          </h2>
-                        </div>
+                    <div className="rounded-lg border-l-[3.5px] border-l-[#00f0ff] border border-[rgba(0,240,255,0.14)] bg-[rgba(8,9,20,0.88)] p-3 shadow-2xl backdrop-blur-md text-left">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded bg-[#00f0ff]/10 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-[#00f0ff]">
+                          <Compass size={11} />
+                          Outcome Overview
+                        </span>
+                        <span className={`shrink-0 rounded border px-2 py-0.5 text-[8.5px] font-mono font-bold uppercase tracking-wider ${outcomeDecisionClass(outcomeSummary?.decision.state || snapshot.decision)}`}>
+                          {formatSignal(outcomeSummary?.decision.state || snapshot.decision)}
+                        </span>
                       </div>
-                    )}
 
-                    {!hasCurrentGoal && (
-                      <div className="rounded-lg border-l-[3.5px] border-l-[#00f0ff] border border-[rgba(0,240,255,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="inline-flex items-center gap-1 rounded bg-[#00f0ff]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#00f0ff]">
-                            NORI STATE
-                          </span>
-                          <span className="inline-flex items-center gap-1 rounded bg-[#34d399]/10 px-1.5 py-0.5 text-[8.5px] font-mono font-bold text-[#34d399]">
-                            READY
-                          </span>
-                        </div>
-                        <p className="text-[11px] leading-relaxed text-slate-300">
-                          {idleSummary?.message || "No current Nori Contract is being observed."}
-                        </p>
-                        {idleSummary?.last_goal ? (
-                          <div className="mt-2 border-t border-slate-800/80 pt-1.5">
-                            <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-[#34d399]">LAST OUTCOME</span>
-                            <p className="mt-0.5 text-[10px] font-semibold leading-relaxed text-slate-200">
-                              {idleSummary.last_goal.label}
+                      <div className="space-y-2">
+                        {snapshot.goal ? (
+                          <div>
+                            <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-slate-500">Goal</span>
+                            <p className="mt-0.5 text-[11px] font-bold leading-relaxed tracking-wide text-slate-100 break-words">
+                              {snapshot.goal.label}
                             </p>
                             <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                              <span className="rounded bg-slate-900 px-1.5 py-0.5 text-[8px] font-mono font-bold text-slate-300">
-                                {idleSummary.last_goal.id}
+                              <span className="rounded bg-[#00f0ff]/10 px-1.5 py-0.5 text-[8px] font-mono font-bold text-[#00f0ff]">
+                                {snapshot.goal.id}
                               </span>
-                              <span className="rounded bg-[#34d399]/10 px-1.5 py-0.5 text-[8px] font-mono font-bold text-[#34d399]">
-                                {formatSignal(idleSummary.last_goal.workflow_status)}
+                              <span className={`rounded px-1.5 py-0.5 text-[8px] font-mono font-bold ${snapshot.goal.workflow_status === "complete" ? "bg-[#34d399]/10 text-[#34d399]" : "bg-[#fbbf24]/10 text-[#fbbf24]"}`}>
+                                {formatSignal(snapshot.goal.workflow_status)}
                               </span>
                             </div>
                           </div>
                         ) : null}
-                        <div className="mt-2 rounded border border-[#fbbf24]/15 bg-[#fbbf24]/5 p-2">
-                          <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-[#fbbf24]">NEXT</span>
-                          <p className="mt-0.5 text-[10px] leading-relaxed text-slate-300">
-                            {idleSummary?.next || "Ask the agent to use OpenNori for a goal, then approve a Nori Contract."}
+
+                        <div className="rounded border border-slate-800/80 bg-black/25 p-2">
+                          <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-slate-500">Decision</span>
+                          <p className="mt-0.5 text-[11px] font-bold leading-relaxed text-slate-100">
+                            {outcomeSummary?.decision.label || "No current goal"}
+                          </p>
+                          <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
+                            {outcomeSummary?.decision.detail || idleSummary?.message || "No current Nori Contract is being observed."}
                           </p>
                         </div>
                       </div>
-                    )}
+                    </div>
 
-                    {/* B. AGENT ACTIVITY 舱 */}
+                    {outcomeSummary ? (
+                      <>
+                        <OutcomeCard
+                          label="Current gap"
+                          title={outcomeSummary.current_gap.id ? `${outcomeSummary.current_gap.id}: ${outcomeSummary.current_gap.label}` : outcomeSummary.current_gap.label}
+                          detail={outcomeSummary.current_gap.detail}
+                          badge={outcomeSummary.current_gap.id || "none"}
+                          tone={outcomeSummary.current_gap.id ? "rose" : "green"}
+                        />
+
+                        <div className="rounded-lg border-l-[3.5px] border-l-[#fbbf24] border border-[rgba(251,191,36,0.14)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
+                          <div className="mb-1.5 flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1.5 rounded bg-[#fbbf24]/10 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-[#fbbf24]">
+                              {outcomeSummary.next.label}
+                            </span>
+                            <span className={`rounded border px-1.5 py-0.5 text-[8px] font-mono font-bold uppercase tracking-wider ${outcomeSummary.need_user.required ? "border-[#fbbf24]/30 bg-[#fbbf24]/10 text-[#fbbf24]" : "border-[#34d399]/25 bg-[#34d399]/10 text-[#34d399]"}`}>
+                              {outcomeSummary.need_user.required ? "need user" : "agent can continue"}
+                            </span>
+                          </div>
+                          <p className="text-[10px] leading-relaxed text-slate-300">
+                            {outcomeSummary.next.action}
+                          </p>
+                          {outcomeSummary.need_user.required ? (
+                            <div className="mt-2.5 flex items-center gap-2 rounded border border-[#fbbf24]/20 bg-black/40 p-1.5">
+                              <code className="flex-1 truncate text-[9px] text-[#fbbf24]">
+                                {suggestedAgentReply}
+                              </code>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(suggestedAgentReply)}
+                                className="text-slate-400 hover:text-[#fbbf24] transition-colors shrink-0"
+                                title="Copy reply for agent chat"
+                              >
+                                {copied ? <Check size={12} /> : <Copy size={12} />}
+                              </button>
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className="rounded-lg border-l-[3.5px] border-l-[#bd93f9] border border-[rgba(189,147,249,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
+                          <div className="mb-1.5 flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1.5 rounded bg-[#bd93f9]/10 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-[#bd93f9]">
+                              <ListChecks size={11} />
+                              Project Profile impact
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedNode(profileNodeFromSnapshot(snapshot));
+                                setDrawerTab("visual");
+                              }}
+                              className={`rounded border px-1.5 py-0.5 text-[8px] font-mono font-bold uppercase tracking-wider transition hover:border-[#bd93f9]/50 ${profileImpactClass(outcomeSummary.profile.state)}`}
+                            >
+                              Inspect
+                            </button>
+                          </div>
+                          <p className="text-[11px] font-bold leading-relaxed text-slate-100">
+                            {outcomeSummary.profile.label}
+                          </p>
+                          <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
+                            {outcomeSummary.profile.detail}
+                          </p>
+                        </div>
+                      </>
+                    ) : null}
+
+                    {/* B. AGENT ACTIVITY 支撑状态 */}
                     <div className="rounded-lg border-l-[3.5px] border-l-[#34d399] border border-[rgba(52,211,153,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="inline-flex items-center gap-1 rounded bg-[#34d399]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#34d399]">
@@ -325,7 +437,7 @@ export default function App() {
                       </p>
                       {snapshot.current_gap && (
                         <div className="mt-2 border-t border-slate-800/80 pt-1.5">
-                          <span className="block text-[8px] font-mono font-bold text-[#ff00a0] uppercase tracking-wider">🎯 LOCKED GAP (CURRENT AC)</span>
+                          <span className="block text-[8px] font-mono font-bold text-[#ff00a0] uppercase tracking-wider">CURRENT AC</span>
                           <div className="flex items-center gap-1 text-[10px] text-slate-300 font-semibold mt-0.5">
                             <span className="text-[#ff00a0] font-mono shrink-0">[{snapshot.current_gap.id}]</span>
                             <span className="truncate">{snapshot.current_gap.label}</span>
@@ -334,7 +446,7 @@ export default function App() {
                       )}
                     </div>
 
-                    {/* C. ARCHITECTURE COMPLIANCE 舱 */}
+                    {/* C. ARCHITECTURE COMPLIANCE 支撑状态 */}
                     {hasCurrentGoal && (
                       <div className="rounded-lg border-l-[3.5px] border-l-[#bd93f9] border border-[rgba(189,147,249,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
                         <div className="flex items-center justify-between mb-1.5">
@@ -356,75 +468,6 @@ export default function App() {
                               <span>{snapshot.architecture.open_challenges} ACTIVE ARCHITECTURE CHALLENGES</span>
                             </div>
                           )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* D. COMPLETION AUDITOR 舱 */}
-                    {hasCurrentGoal && (
-                      <div className="rounded-lg border-l-[3.5px] border-l-[#fbbf24] border border-[rgba(251,191,36,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="inline-flex items-center gap-1 rounded bg-[#fbbf24]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#fbbf24]">
-                            COMPLETION AUDITOR
-                          </span>
-                          <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.2 text-[8.5px] font-mono font-bold ${
-                            snapshot.completion?.complete ? "bg-[#34d399]/15 text-[#34d399]" : "bg-rose-500/15 text-rose-400"
-                          }`}>
-                            {snapshot.completion?.complete ? "READY" : "INCOMPLETE"}
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-slate-300 leading-normal">
-                          <span className="text-slate-500 font-mono text-[8px] block">AUDIT DECISION</span>
-                          <p className="text-slate-200 font-medium italic mt-0.5">"{snapshot.completion?.answer || "Pending final criteria audit."}"</p>
-
-                          {snapshot.completion?.confidence && (
-                            <div className="mt-1.5 flex items-center justify-between text-[9px] font-mono border-t border-slate-800/80 pt-1.5">
-                              <span className="text-slate-500">CONFIDENCE:</span>
-                              <span className={`font-bold ${
-                                snapshot.completion.confidence === "confident" ? "text-[#34d399]" :
-                                snapshot.completion.confidence === "review-risk" ? "text-[#fbbf24] animate-pulse" :
-                                "text-rose-400"
-                              }`}>
-                                {formatSignal(snapshot.completion.confidence)}
-                              </span>
-                            </div>
-                          )}
-
-                          {snapshot.completion?.review_risks && snapshot.completion.review_risks.length > 0 && (
-                            <div className="mt-2 rounded bg-[#fbbf24]/8 border border-[#fbbf24]/15 p-1.5 text-[8.5px] text-[#fbbf24] leading-normal font-semibold">
-                              ⚠️ {snapshot.completion.review_risks.length} REVIEW RISKS PENDING JUDGMENT
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* E. CO-PILOT DECISION 舱 */}
-                    {snapshot.need_user && (
-                      <div className="rounded-lg border border-[#fbbf24]/30 bg-[#121008]/85 p-3 shadow-2xl backdrop-blur-md text-left">
-                        <div className="flex items-start gap-2.5">
-                          <div className="grid h-5 w-5 place-items-center rounded bg-[#fbbf24]/20 text-[#fbbf24] font-mono font-bold text-[10px] shrink-0 mt-0.5">
-                            !
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <strong className="block text-[11px] font-semibold text-[#fde68a]">Co-Pilot Decision Needed</strong>
-                            <p className="mt-1 text-[10px] leading-relaxed text-slate-300">
-                              {snapshot.user_action || "Waiting for user judgment in agent chat."}
-                            </p>
-                            <div className="mt-2.5 flex items-center gap-2 rounded border border-[#fbbf24]/20 bg-black/40 p-1.5">
-                              <code className="flex-1 truncate text-[9px] text-[#fbbf24]">
-                                {suggestedAgentReply}
-                              </code>
-                              <button
-                                type="button"
-                                onClick={() => copyToClipboard(suggestedAgentReply)}
-                                className="text-slate-400 hover:text-[#fbbf24] transition-colors shrink-0"
-                                title="Copy reply command"
-                              >
-                                {copied ? <Check size={12} /> : <Copy size={12} />}
-                              </button>
-                            </div>
-                          </div>
                         </div>
                       </div>
                     )}

@@ -12,3 +12,4 @@ npm-debug.log*
 .opennori/snapshots/
 output/dashboard-review/
 output/playwright/
+.playwright-cli/

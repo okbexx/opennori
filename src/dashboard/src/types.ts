@@ -156,6 +156,33 @@ export type NoriSnapshot = {
   need_user: boolean;
   user_action?: string;
   decision: "complete" | "not_complete" | "review_risk" | "no_active_goal" | (string & {});
+  outcome_summary?: {
+    decision: {
+      state: "complete" | "not_complete" | "review_risk" | "no_active_goal" | (string & {});
+      label: string;
+      detail: string;
+    };
+    current_gap: {
+      id: string | null;
+      label: string;
+      detail: string;
+    };
+    need_user: {
+      required: boolean;
+      label: string;
+      action: string;
+    };
+    next: {
+      label: string;
+      action: string;
+    };
+    profile: {
+      scope: "project_only" | "current_goal_compliance" | (string & {});
+      state: "clear" | "review" | "blocked" | "idle" | (string & {});
+      label: string;
+      detail: string;
+    };
+  };
   completion?: CompletionAnswer;
   acceptance_review?: {
     status: string;

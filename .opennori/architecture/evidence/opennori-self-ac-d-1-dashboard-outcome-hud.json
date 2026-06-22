@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-ac-d-1-dashboard-outcome-hud",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-D-1",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Dashboard Outcome HUD keeps the React/Vite/Tailwind dashboard as a readonly observation surface while surfacing completion decision, current gap, user intervention, next action, and Project Profile impact from kernel snapshot projection.",
+  "fit": "The kernel computes outcome_summary from existing .opennori contract, ledger, Project Profile, architecture, and evidence state; the React dashboard renders it without write actions.",
+  "implementation_focus": "Dashboard first-screen clarity for completion judgment and next action.",
+  "evidence": "src/kernel/snapshot.ts outcome_summary projection; src/dashboard/src/App.tsx Outcome Overview HUD; test/cli-dashboard.test.js dashboard snapshot assertions; Playwright snapshot at .playwright-cli/page-2026-06-22T01-06-41-465Z.yml; local screenshot output/playwright/dashboard-outcome-hud.png.",
+  "limitations": "Dashboard remains readonly and does not replace report/evidence ledgers. The screenshot is local ignored output, not committed artifact.",
+  "created_at": "2026-06-22T01:08:33.570Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

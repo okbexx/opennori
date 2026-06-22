@@ -335,6 +335,34 @@ export type NoriIdleSummary = {
   };
 };
 
+export type NoriOutcomeSummary = {
+  decision: {
+    state: "complete" | "not_complete" | "review_risk" | "no_active_goal" | (string & {});
+    label: string;
+    detail: string;
+  };
+  current_gap: {
+    id: string | null;
+    label: string;
+    detail: string;
+  };
+  need_user: {
+    required: boolean;
+    label: string;
+    action: string;
+  };
+  next: {
+    label: string;
+    action: string;
+  };
+  profile: {
+    scope: "project_only" | "current_goal_compliance";
+    state: "clear" | "review" | "blocked" | "idle" | (string & {});
+    label: string;
+    detail: string;
+  };
+};
+
 export type NoriSnapshot = {
   schema_version: "opennori/snapshot-v1" | (string & {});
   generated_at: string;
@@ -382,6 +410,7 @@ export type NoriSnapshot = {
   need_user: boolean;
   user_action?: string;
   decision: "complete" | "not_complete" | "review_risk" | "no_active_goal" | (string & {});
+  outcome_summary?: NoriOutcomeSummary;
   completion?: CompletionAnswer;
   acceptance_review?: {
     status: string;

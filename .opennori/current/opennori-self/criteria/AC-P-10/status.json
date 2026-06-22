@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 2,
   "latest_evidence_summary": "A single AC can carry multiple evidence sources without fixed adapters; the CLI preserves command, artifact, URL, path, and custom metadata sources.",
-  "updated_at": "2026-06-21T13:40:42.527Z"
+  "updated_at": "2026-06-22T01:08:33.734Z"
 }

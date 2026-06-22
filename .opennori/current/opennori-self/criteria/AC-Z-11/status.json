@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 2,
   "latest_evidence_summary": "uninstall previews removals, preserves .opennori state by default, and requires explicit --include-state plus --confirm before removing OpenNori state.",
-  "updated_at": "2026-06-21T13:40:42.527Z"
+  "updated_at": "2026-06-22T01:08:33.734Z"
 }

@@ -79,7 +79,7 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 | AC-Z-18 | productization | passing | verified | artifact-review: README now explains that agent_next.candidate_goals is the Skill routing surfa… | tool-observation |
 | AC-Z-19 | productization | passing | verified | confirmed-init-routing-smoke: Confirmed opennori init on a fresh project creates .opennori stat… | tool-observation |
 | AC-Z-20 | productization | passing | verified | behavior-test: Draft Nori Contracts now keep workflow status as draft until user approval; temp… | protocol-check |
-| AC-D-1 | acceptance | passing | verified | dashboard-idle-state-verification: Dashboard no-current-goal state now shows an explicit NORI S… | tool-observation |
+| AC-D-1 | acceptance | passing | verified | dashboard-outcome-hud-verification: Dashboard first screen now leads with Outcome Overview, Dec… | tool-observation |
 | AC-D-2 | acceptance | passing | verified | dashboard-activity-workflow: OpenNori now gives Skills a dashboard_activity routing surface, le… | tool-observation |
 | AC-D-3 | acceptance | passing | verified | dashboard-execution-presence-review: Dashboard event focus now follows execution-relevant OpenN… | tool-observation |
 | AC-D-4 | acceptance | passing | verified | dashboard-observation-boundary: Dashboard now presents user intervention as an agent-conversati… | tool-observation |
@@ -1603,37 +1603,30 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 - Passing threshold: 页面以视觉化 acceptance loop 和少量状态面板展示 agent activity、goal、current gap、need user、architecture
   decision、completion decision 和 latest event；有活动动效但不呈现聊天记录、过程任务列表、证据账本或完成权威入口；状态变化来自 /api/snapshot 与
   /api/events。
-- Evidence: dashboard-idle-state-verification: Dashboard no-current-goal state now shows an explicit NORI STATE
-  / READY panel with the latest completed outcome and next recommendation, while hiding active-goal
-  Architecture Compliance and Completion Auditor panels so users are not told an idle project is
-  INCOMPLETE.
+- Evidence: dashboard-outcome-hud-verification: Dashboard first screen now leads with Outcome Overview,
+  Decision, Current gap, Next, and Project Profile impact. The kernel snapshot exposes outcome_summary
+  so the UI does not force users to infer completion from radar nodes, event logs, or the Project
+  Profile drawer.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-21T11:20:09.030Z
+- Evidence recorded: 2026-06-22T01:08:33.731Z
 - Sources:
-  - type=reference, label=Playwright observation: opened the Agent Workbench no-current dashboard at
-    http://127.0.0.1:52642; first screen showed Ready, NORI STATE, LAST OUTCOME aw-complete-product-workbench
-    COMPLETE, NEXT, and no INCOMPLETE completion auditor.
   - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
-  - type=command, label=npm run typecheck:dashboard, command=npm run typecheck:dashboard
-  - type=command, label=npm run build:dashboard, command=npm run build:dashboard
   - type=command, label=npm run test:dashboard, command=npm run test:dashboard
-  - type=command, label=npm run test:quick, command=npm run test:quick
-  - type=command, label=git diff --check, command=git diff --check
   - type=artifact, label=src/kernel/snapshot.ts, path=src/kernel/snapshot.ts
   - type=artifact, label=src/dashboard/src/App.tsx, path=src/dashboard/src/App.tsx
-  - type=artifact, label=src/dashboard/src/components/AcceptanceRadarNet.tsx,
-    path=src/dashboard/src/components/AcceptanceRadarNet.tsx
-  - type=artifact, label=src/dashboard/src/components/InspectNodePanel.tsx,
-    path=src/dashboard/src/components/InspectNodePanel.tsx
+  - type=artifact, label=src/dashboard/src/types.ts, path=src/dashboard/src/types.ts
+  - type=artifact, label=src/types.ts, path=src/types.ts
   - type=artifact, label=test/cli-dashboard.test.js, path=test/cli-dashboard.test.js
-  - type=artifact, label=test/dashboard-selection.test.ts, path=test/dashboard-selection.test.ts
-- Reviewability: Run the listed commands, start opennori dashboard against a project with no current goal and at
-  least one completed goal, then inspect the first screen for NORI STATE / READY / LAST OUTCOME / NEXT
-  and absence of misleading INCOMPLETE completion audit.
-- Limitations: This verifies dashboard state projection and visible no-current UI semantics. It does not create or
-  approve a new Nori Contract from the dashboard, and it does not change completed goal history.
+  - type=artifact, label=dashboard/index.html, path=dashboard/index.html
+  - type=artifact, label=output/playwright/dashboard-outcome-hud.png,
+    path=output/playwright/dashboard-outcome-hud.png
+- Reviewability: Run opennori dashboard --root . and inspect the left HUD. It should show Outcome Overview, Decision,
+  Current gap, Next, and Project Profile impact before agent activity or event logs. Check
+  /api/snapshot for outcome_summary and rerun dashboard tests.
+- Limitations: This evidence verifies the current OpenNori self dashboard on localhost and keeps the screenshot in
+  ignored local output. It does not test every possible external project profile combination visually.
 
 ### AC-D-2
 
@@ -2575,7 +2568,7 @@ Requirement: required - OpenNori self-goal changes architecture requirement rout
 Baseline: typescript-agent-state-cli (active)
 Technical baseline: 4 runtime, 6 module, 4 contract, 4 flow, 6 dependency, 5 reference items
 Challenge: none
-Architecture apply records: 20
+Architecture apply records: 21
 Architecture evidence health: clear
 Build-vs-buy: clear (15 decisions)
 Agent guide: installed
@@ -2596,6 +2589,7 @@ Architecture apply records:
 - AC-O-9: aligned (typescript-agent-state-cli) - Autogoal was implemented as packaged Skill-driven convergence into the existing Nori Contract Draft path, without adding a separate Autogoal Contract or MVP workflow.
 - AC-P-4: aligned (typescript-agent-state-cli) - High-risk evidence handling now preserves objective evidence results while surfacing confidence and evidence_health review risks; the CLI does not use fixed strong/weak natural-language evidence lists to rewrite subjective sufficiency.
 - AC-A-12: aligned (typescript-agent-state-cli) - CLI boundary audit kept subjective product semantics in Skills and narrowed hard validation to objective contract, ledger, evidence, architecture, lifecycle, and schema integrity.
+- AC-D-1: aligned (typescript-agent-state-cli) - Dashboard Outcome HUD keeps the React/Vite/Tailwind dashboard as a readonly observation surface while surfacing completion decision, current gap, user intervention, next action, and Project Profile impact from kernel snapshot projection.
 - AC-D-5: aligned (typescript-agent-state-cli) - Dashboard Profile drawer follows the confirmed dashboard web architecture: React/Vite/Tailwind/Motion renders a readonly overlay, kernel snapshot exposes capability_profile and capability_compliance, and .opennori remains the source of truth.
 - AC-D-5: aligned (typescript-agent-state-cli) - Dashboard observes Project Profile and current-goal compliance without becoming a write surface.
 - AC-O-10: aligned (typescript-agent-state-cli) - Conversation-to-contract adoption is implemented as Skill-driven nori-acceptance behavior backed by the existing standard draft path, without adding a new CLI workflow or autogoal artifact.
