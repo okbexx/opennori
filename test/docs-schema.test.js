@@ -119,6 +119,64 @@ test("OpenNori Skill descriptions stay discovery metadata, not behavior snapshot
   }
 });
 
+test("critical OpenNori Skill routing surfaces remain discoverable from metadata", { tags: ["docs", "quick"] }, () => {
+  const pluginRoot = path.join(ROOT, "plugins", "opennori");
+  const requiredMetadata = {
+    nori: [
+      /autogoal/i,
+      /MCP context/i,
+      /UI\/CRUD\/dashboard\/list\/form\/settings\/admin/,
+      /operation paths/i
+    ],
+    "nori-acceptance": [
+      /human-centered OpenNori acceptance criteria/i,
+      /UI\/CRUD\/dashboard\/list\/form\/settings\/admin/,
+      /Acceptance Surface Modeling/i,
+      /operation paths/i
+    ],
+    "nori-autogoal": [
+      /enhanced autogoal/i,
+      /self-grill/i,
+      /complete product\/UI\/CRUD\/dashboard/i,
+      /operation paths/i
+    ],
+    "nori-evidence": [
+      /evidence/i,
+      /broad UI\/CRUD\/dashboard evidence/i,
+      /operation path/i,
+      /confident passing/i
+    ],
+    "nori-reporting": [
+      /completion decisions/i,
+      /read-only MCP context/i,
+      /broad UI\/CRUD\/dashboard\/list\/form\/settings\/admin AC/i,
+      /operation paths/i
+    ]
+  };
+
+  for (const [name, patterns] of Object.entries(requiredMetadata)) {
+    const { frontmatter } = readSkillFrontmatter(path.join(pluginRoot, "skills", name, "SKILL.md"));
+    const description = String(frontmatter.description || "");
+    for (const pattern of patterns) {
+      assert.match(description, pattern, `${name} metadata should expose ${pattern}`);
+    }
+  }
+});
+
+test("acceptance and autogoal Skills keep the one-AC review reply protocol", { tags: ["docs", "quick"] }, () => {
+  const pluginRoot = path.join(ROOT, "plugins", "opennori");
+  for (const name of ["nori-acceptance", "nori-autogoal"]) {
+    const { asset } = readSkillFrontmatter(path.join(pluginRoot, "skills", name, "SKILL.md"));
+    assert.match(asset, /Review progress: AC 1\/N/);
+    assert.match(asset, /Reply `confirm AC-1` to continue to AC-2/);
+    assert.match(asset, /`revise AC-1: \.\.\.`/);
+    assert.match(asset, /Only reply `approve` after every AC has been confirmed one by one/);
+    assert.match(asset, /确认进度：AC 1\/N/);
+    assert.match(asset, /回复 `confirm AC-1` 继续确认 AC-2/);
+    assert.match(asset, /只有全部 AC 逐条确认后/);
+  }
+});
+
 test("public product surfaces present OpenNori as one capability bundle", { tags: ["docs", "quick"] }, () => {
   const readme = fs.readFileSync(path.join(ROOT, "README.md"), "utf8");
   const plugin = JSON.parse(fs.readFileSync(path.join(ROOT, "plugins", "opennori", ".codex-plugin", "plugin.json"), "utf8"));

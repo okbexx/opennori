@@ -17,23 +17,19 @@ Passing threshold: test/core.test.js 只保留窄核心不变量；原 cli-comma
 
 ## Evidence
 
-Latest: test-boundary-verification - Test architecture now keeps subjective Skill judgment out of hard-coded word-list assertions: core tests are narrow, CLI source boundary lives in module-boundaries, and Skill description tests check discovery metadata shape rather than judging AC quality.
+Latest: test - Test strategy now protects packaged Skill routing metadata and one-AC review reply skeletons as objective assets, while docs explicitly keep generated AC quality and operation-path sufficiency in Skill dogfood and user review rather than automated natural-language tests.
 Result: passing
-Basis: tool-observation
-Reviewability: Review test/core.test.js, test/docs-schema.test.js, test/module-boundaries.test.js, docs/testing.md, and docs/skill-evals.md; rerun focused tests plus lint/typecheck/check.
-Limitations: This verifies the automated test boundary. It does not evaluate whether a live agent will generate strong AC in a real user conversation; that remains covered by Skill dogfood evals.
+Basis: command-output
+Reviewability: Open test/docs-schema.test.js and docs/testing.md, then rerun the focused docs test, lint, and typecheck.
+Limitations: This proves the objective Skill asset guardrails only. Real AC quality still requires Skill evals, dogfood, and user confirmation.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-ac-p-15-subjective-test-boundary.json
-- npx vitest run test/core.test.js test/docs-schema.test.js test/module-boundaries.test.js
+- .opennori/architecture/evidence/opennori-self-skill-asset-protocol-guards.json
+- npx vitest run test/docs-schema.test.js
 - npm run lint
 - npx tsc --noEmit --pretty false
-- node ./bin/opennori.js check --root . --json
-- test/core.test.js
 - test/docs-schema.test.js
-- test/module-boundaries.test.js
 - docs/testing.md
-- docs/skill-evals.md
 
 ## Files
 

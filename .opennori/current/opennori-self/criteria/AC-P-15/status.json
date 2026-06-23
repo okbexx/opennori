@@ -4,7 +4,7 @@
   "confidence": "high",
   "required": true,
   "risk": "medium",
-  "evidence_count": 2,
-  "latest_evidence_summary": "Test architecture now keeps subjective Skill judgment out of hard-coded word-list assertions: core tests are narrow, CLI source boundary lives in module-boundaries, and Skill description tests check discovery metadata shape rather than judging AC quality.",
-  "updated_at": "2026-06-23T11:15:30.569Z"
+  "evidence_count": 3,
+  "latest_evidence_summary": "Test strategy now protects packaged Skill routing metadata and one-AC review reply skeletons as objective assets, while docs explicitly keep generated AC quality and operation-path sufficiency in Skill dogfood and user review rather than automated natural-language tests.",
+  "updated_at": "2026-06-23T11:29:56.262Z"
 }

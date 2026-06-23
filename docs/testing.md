@@ -14,6 +14,7 @@ Automated tests cover objective behavior:
 - Architecture requirement, baseline, apply records, challenges, and build-vs-buy state health.
 - Packaged Skill asset structure: plugin manifest, expected Skill directories, frontmatter, required protocol sections, and absence of deprecated install/copy routes.
 - Packaged Skill discovery metadata: frontmatter descriptions should expose the major user routing surfaces before Codex loads full Skill bodies, while avoiding tests that prove subjective judgment by matching long body word lists.
+- Packaged Skill reply protocol skeletons when they are part of the product contract, such as one-AC-at-a-time confirmation commands. Tests may protect the existence of the reply shape, but not the subjective quality of a future agent's generated AC.
 
 ## What Tests Must Not Own
 

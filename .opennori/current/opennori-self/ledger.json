@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T11:26:13.599Z",
+  "updated_at": "2026-06-23T11:29:56.268Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -10698,9 +10698,54 @@
           "limitations": "This verifies the automated test boundary. It does not evaluate whether a live agent will generate strong AC in a real user conversation; that remains covered by Skill dogfood evals.",
           "gate": "accepted",
           "created_at": "2026-06-23T11:15:30.569Z"
+        },
+        {
+          "kind": "test",
+          "basis": "command-output",
+          "summary": "Test strategy now protects packaged Skill routing metadata and one-AC review reply skeletons as objective assets, while docs explicitly keep generated AC quality and operation-path sufficiency in Skill dogfood and user review rather than automated natural-language tests.",
+          "result": "passing",
+          "confidence": "high",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-skill-asset-protocol-guards",
+              "path": ".opennori/architecture/evidence/opennori-self-skill-asset-protocol-guards.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/docs-schema.test.js",
+              "command": "npx vitest run test/docs-schema.test.js"
+            },
+            {
+              "type": "command",
+              "label": "npm run lint",
+              "command": "npm run lint"
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "artifact",
+              "label": "test/docs-schema.test.js",
+              "path": "test/docs-schema.test.js"
+            },
+            {
+              "type": "artifact",
+              "label": "docs/testing.md",
+              "path": "docs/testing.md"
+            }
+          ],
+          "reviewability": "Open test/docs-schema.test.js and docs/testing.md, then rerun the focused docs test, lint, and typecheck.",
+          "limitations": "This proves the objective Skill asset guardrails only. Real AC quality still requires Skill evals, dogfood, and user confirmation.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T11:29:56.262Z"
         }
       ],
-      "updated_at": "2026-06-23T11:15:30.569Z"
+      "updated_at": "2026-06-23T11:29:56.262Z"
     },
     "AC-P-16": {
       "status": "passing",

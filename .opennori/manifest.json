@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T11:26:13.700Z",
+  "updated_at": "2026-06-23T11:29:56.381Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -984,6 +984,17 @@
         "summary": "Setup lifecycle responsibilities will be split into setup type definitions, action builders, plan construction, and execution orchestration while preserving preview-first bundle setup semantics.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-setup-lifecycle-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-skill-asset-protocol-guards",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-P-15",
+        "status": "aligned",
+        "summary": "Docs/schema tests now protect critical packaged Skill routing metadata and one-AC review reply skeletons while keeping subjective AC quality out of automated tests.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-skill-asset-protocol-guards.json",
         "schema_valid": true,
         "schema_errors": []
       },
