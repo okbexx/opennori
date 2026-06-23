@@ -28,6 +28,10 @@ Automated tests must not pretend to prove subjective agent ability:
 
 Those belong to packaged Skill behavior, user review, dogfood, and eval prompts. Code can expose review surfaces and store state; it should not become a hidden product manager.
 
+Use `docs/skill-evals.md` for human-review dogfood scenarios when changing
+packaged Skills. The scenarios are review prompts and rubrics, not fixtures for
+automated exact-output tests.
+
 ## Test Layers
 
 - `test/core.test.js`: narrow core invariants and command-layer smoke.

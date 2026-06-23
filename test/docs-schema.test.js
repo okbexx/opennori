@@ -172,6 +172,23 @@ test("public product surfaces present OpenNori as one capability bundle", { tags
   }
 });
 
+test("Skill dogfood evals are documented as human-review scenarios", { tags: ["docs"] }, () => {
+  const readme = fs.readFileSync(path.join(ROOT, "README.md"), "utf8");
+  const testing = fs.readFileSync(path.join(ROOT, "docs", "testing.md"), "utf8");
+  const evals = fs.readFileSync(path.join(ROOT, "docs", "skill-evals.md"), "utf8");
+
+  assert.match(readme, /docs\/skill-evals\.md/);
+  assert.match(testing, /docs\/skill-evals\.md/);
+  assert.match(evals, /not automated natural-language tests/i);
+  assert.match(evals, /## Run Protocol/);
+  assert.match(evals, /## Rubric/);
+  assert.match(evals, /Enhanced Autogoal Todolist/);
+  assert.match(evals, /Project CRUD Operation Paths/);
+  assert.match(evals, /Complete Project Workbench/);
+  assert.match(evals, /Evidence And Reporting Boundary/);
+  assert.doesNotMatch(evals, /exact output snapshots as tests/i);
+});
+
 test("public JSON Schemas validate persisted OpenNori state and separate structure from semantics", { tags: ["schema"] }, () => {
   const root = tempRoot();
   run(["install", "--root", root, "--json"]);
