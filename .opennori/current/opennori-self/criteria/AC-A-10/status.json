@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 1,
   "latest_evidence_summary": "OpenNori was dogfooded in the separate opennori-site repo under the current Plugin-first boundary: a natural-language website goal became Product AC, an Astro Architecture Baseline and build-vs-buy decision were confirmed, homepage content was implemented, reviewable evidence was recorded, report/status completed, and the dogfood validated active-goal write locking.",
-  "updated_at": "2026-06-23T06:57:57.528Z"
+  "updated_at": "2026-06-23T07:02:39.963Z"
 }

@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 1,
   "latest_evidence_summary": "OpenNori now supports adopting an in-progress AC discussion as a standard draft Nori Contract. The root nori Skill routes 'take over the AC we just discussed' to nori-acceptance, nori-acceptance prepares a brief with acceptance_basis.source conversation and writes only .opennori/drafts via draft --brief, nori-autogoal explicitly hands off already discussed AC material instead of treating it as a rough idea, and docs/site/default prompts show the user-facing phrase. Objective tests verify the adopted conversation brief remains draft with ACCEPTANCE-BASIS as current gap, no current contract, assumptions/open questions rendered, and no implementation/task-list/autogoal artifact wording.",
-  "updated_at": "2026-06-23T06:57:57.528Z"
+  "updated_at": "2026-06-23T07:02:39.963Z"
 }

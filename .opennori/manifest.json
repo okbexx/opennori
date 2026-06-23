@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T06:57:57.626Z",
+  "updated_at": "2026-06-23T07:02:40.058Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -654,6 +654,17 @@
         "summary": "Generated acceptance Markdown is now an explicit review-surface-only helper rather than a contract state or import layer.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-generated-markdown-review-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-lifecycle-adapter-parser-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Lifecycle external command stdout parsing stays inside narrow adapters instead of setup or plugin-sync orchestration.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-lifecycle-adapter-parser-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

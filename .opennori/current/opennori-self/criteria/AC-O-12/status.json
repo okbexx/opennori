@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 1,
   "latest_evidence_summary": "OpenNori now instructs agents to expand complete product, complete feature, full app, full dashboard, and full workbench goals into a full human-reviewable acceptance surface instead of a compact MVP-style AC set. The rule is present in packaged Skills, local development Skills, protocol, README, Plugin prompt, objective asset tests, self example, and the public website content.",
-  "updated_at": "2026-06-23T06:57:57.528Z"
+  "updated_at": "2026-06-23T07:02:39.963Z"
 }

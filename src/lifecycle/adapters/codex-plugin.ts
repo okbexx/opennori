@@ -34,9 +34,16 @@ export function sameResolvedPath(left: string | null, right: string): boolean {
 }
 
 export function parseInstalledCodexPluginVersion(stdout: string, pluginId = DEFAULT_PLUGIN_ID): string | null {
-  const matcher = new RegExp(`^${escapeRegExp(pluginId)}\\s+installed,\\s+enabled\\s+(\\S+)`, "m");
-  const match = stdout.match(matcher);
-  return match?.[1] || null;
+  const line = stdout.split(/\r?\n/).find((entry) => entry.trim().startsWith(`${pluginId} `));
+  if (!line) return null;
+  const cells = line.trim().split(/\s+/);
+  const version = cells.find((cell, index) => {
+    if (index === 0) return false;
+    if (cell === "installed" || cell === "enabled" || cell === "disabled") return false;
+    if (cell.endsWith(",")) return false;
+    return /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(cell);
+  });
+  return version || null;
 }
 
 export function inspectCodexMarketplace(

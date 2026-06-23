@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T06:57:57.528Z",
+  "updated_at": "2026-06-23T07:02:39.963Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -5702,6 +5702,66 @@
           "limitations": "This verifies OpenNori-owned generated review Markdown only. It intentionally does not add editable Markdown/frontmatter import or arbitrary Markdown parsing; that remains future scope requiring a new build-vs-buy decision.",
           "gate": "accepted",
           "created_at": "2026-06-23T06:57:57.525Z"
+        },
+        {
+          "kind": "lifecycle-adapter-parser-boundary-verification",
+          "basis": "tool-observation",
+          "summary": "Lifecycle external command parsing is kept inside adapters: setup and plugin-sync consume Codex/npm probe objects, and the Codex Plugin adapter now tolerates minor plugin-list stdout status/spacing/version format drift without pushing parsing logic into lifecycle orchestration.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-lifecycle-adapter-parser-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-lifecycle-adapter-parser-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/lifecycle-adapters.test.ts",
+              "command": "npx vitest run test/lifecycle-adapters.test.ts"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:lifecycle",
+              "command": "npm run test:lifecycle"
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run lint",
+              "command": "npm run lint"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle/adapters/codex-plugin.ts",
+              "path": "src/lifecycle/adapters/codex-plugin.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle/setup.ts",
+              "path": "src/lifecycle/setup.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle/plugin-sync.ts",
+              "path": "src/lifecycle/plugin-sync.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/lifecycle-adapters.test.ts",
+              "path": "test/lifecycle-adapters.test.ts"
+            }
+          ],
+          "reviewability": "Inspect the adapter implementation and tests. setup.ts and plugin-sync.ts should call inspectCodexMarketplace/inspectCodexPlugin instead of parsing stdout directly; lifecycle-adapters.test.ts covers status/spacing/version drift inside the adapter.",
+          "limitations": "This still depends on text output from the Codex CLI because no structured Codex Plugin SDK/JSON probe is used here. If one becomes available, OpenNori should revisit this adapter.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T07:02:39.960Z"
         }
       ]
     },

@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 16,
-  "latest_evidence_summary": "Generated Markdown review boundary is hardened: contract state construction no longer owns Markdown parsing, generated review Markdown uses an explicit review-surface-only marker and metadata, arbitrary Markdown without the marker is not parsed as OpenNori state, and docs state JSON/dossier files remain authoritative.",
-  "updated_at": "2026-06-23T06:57:57.528Z"
+  "evidence_count": 17,
+  "latest_evidence_summary": "Lifecycle external command parsing is kept inside adapters: setup and plugin-sync consume Codex/npm probe objects, and the Codex Plugin adapter now tolerates minor plugin-list stdout status/spacing/version format drift without pushing parsing logic into lifecycle orchestration.",
+  "updated_at": "2026-06-23T07:02:39.963Z"
 }

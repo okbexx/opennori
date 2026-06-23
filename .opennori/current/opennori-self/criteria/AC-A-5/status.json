@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 2,
   "latest_evidence_summary": "Status, report, and context export now pass ArchitectureState into completionAnswer/nextRecommendation so Product AC completion and Architecture decision are shown separately; missing or challenged architecture becomes architecture_review without replacing current_gap.",
-  "updated_at": "2026-06-23T06:57:57.528Z"
+  "updated_at": "2026-06-23T07:02:39.963Z"
 }
