@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T11:07:42.139Z",
+  "updated_at": "2026-06-23T11:15:30.682Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -566,6 +566,17 @@
         "summary": "Report readability work stays inside the confirmed TypeScript agent-state CLI baseline: src/core/report.ts owns human report rendering, tests stay in reporting/domain suites, and .opennori remains the evidence source of truth.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-ac-p-14-report-readability.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-ac-p-15-subjective-test-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-P-15",
+        "status": "aligned",
+        "summary": "Test-system boundary now keeps core tests narrow, moves CLI source-boundary checks into module-boundaries, and prevents Skill description tests from becoming subjective behavior snapshots.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-p-15-subjective-test-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

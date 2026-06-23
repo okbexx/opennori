@@ -1,0 +1,65 @@
+{
+  "kind": "test-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "Test architecture now keeps subjective Skill judgment out of hard-coded word-list assertions: core tests are narrow, CLI source boundary lives in module-boundaries, and Skill description tests check discovery metadata shape rather than judging AC quality.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-p-15-subjective-test-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-p-15-subjective-test-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/core.test.js test/docs-schema.test.js test/module-boundaries.test.js",
+      "command": "npx vitest run test/core.test.js test/docs-schema.test.js test/module-boundaries.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "test/core.test.js",
+      "path": "test/core.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/docs-schema.test.js",
+      "path": "test/docs-schema.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/module-boundaries.test.js",
+      "path": "test/module-boundaries.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "docs/testing.md",
+      "path": "docs/testing.md"
+    },
+    {
+      "type": "artifact",
+      "label": "docs/skill-evals.md",
+      "path": "docs/skill-evals.md"
+    }
+  ],
+  "reviewability": "Review test/core.test.js, test/docs-schema.test.js, test/module-boundaries.test.js, docs/testing.md, and docs/skill-evals.md; rerun focused tests plus lint/typecheck/check.",
+  "limitations": "This verifies the automated test boundary. It does not evaluate whether a live agent will generate strong AC in a real user conversation; that remains covered by Skill dogfood evals.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T11:15:30.569Z"
+}

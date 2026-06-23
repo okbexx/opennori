@@ -38,6 +38,29 @@ test("source and tests import domain types instead of restoring a central type b
   assert.deepEqual(offenders, []);
 });
 
+test("CLI entrypoint stays on the citty command tree boundary", { tags: ["architecture", "cli", "unit", "quick"] }, () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
+  const cliSource = fs.readFileSync(path.join(ROOT, "src", "cli.ts"), "utf8");
+  const commandTree = fs.readFileSync(path.join(ROOT, "src", "cli", "command-tree.ts"), "utf8");
+  const registrySource = fs.readFileSync(path.join(ROOT, "src", "cli", "registry.ts"), "utf8");
+  const runtimeSource = fs.readFileSync(path.join(ROOT, "src", "cli", "runtime.ts"), "utf8");
+  const activeGoalLockSource = fs.readFileSync(path.join(ROOT, "src", "cli", "active-goal-lock.ts"), "utf8");
+
+  assert.equal(packageJson.dependencies.citty.startsWith("^"), true);
+  assert.equal(fs.existsSync(path.join(ROOT, "src", "cli", "routes.ts")), false);
+  assert.deepEqual(importSpecifiers(cliSource).filter((specifier) => /commands\//.test(specifier)), []);
+  assert.equal(importSpecifiers(cliSource).includes("./cli/command-tree.ts"), true);
+  assert.equal(importSpecifiers(commandTree).includes("./registry.ts"), true);
+  assert.equal(importSpecifiers(commandTree).includes("./resolver.ts"), true);
+  assert.equal(importSpecifiers(commandTree).includes("./runner.ts"), true);
+  assert.match(registrySource, /defineCommand/);
+  assert.match(runtimeSource, /active-goal-store\.ts/);
+  assert.match(runtimeSource, /active-goal-lock\.ts/);
+  assert.match(runtimeSource, /executor\.ts/);
+  assert.match(activeGoalLockSource, /active-goal\.write\.lock/);
+  assert.doesNotMatch(activeGoalLockSource, /readGoalPayload/);
+});
+
 test("MCP source stays read-only and does not register write tools", { tags: ["architecture", "unit"] }, () => {
   const mcpFiles = [
     path.join(ROOT, "src", "mcp.ts"),

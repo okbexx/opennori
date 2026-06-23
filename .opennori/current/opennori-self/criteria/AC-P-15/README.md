@@ -3,7 +3,7 @@
 Goal: 让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收驱动产品；用户不仅能判断产品目标是否完成，也能判断交付物是否按确认过的优秀技术架构完成。
 Layer: protocol
 Status: passing
-Confidence: verified
+Confidence: high
 Required: yes
 Risk: medium
 
@@ -17,45 +17,23 @@ Passing threshold: test/core.test.js 只保留窄核心不变量；原 cli-comma
 
 ## Evidence
 
-Latest: test-system-refactor-review - OpenNori test coverage has been reorganized around objective protocol boundaries instead of one giant core/CLI suite. core.test.js now contains only narrow core invariants; the former CLI mega-suite is split into focused cli-domain files; acceptance, evidence, reporting, profile, lifecycle, architecture, docs-schema, and dashboard tests own their domains. docs/testing.md, AGENTS.md, and the local nori-product-development Skill state that automated tests must not prove subjective AC quality, UI/CRUD/Dashboard discovery quality, enhanced autogoal judgment, or exact prompt wording; those belong to Skills, dogfood, eval prompts, and user review.
+Latest: test-boundary-verification - Test architecture now keeps subjective Skill judgment out of hard-coded word-list assertions: core tests are narrow, CLI source boundary lives in module-boundaries, and Skill description tests check discovery metadata shape rather than judging AC quality.
 Result: passing
 Basis: tool-observation
-Reviewability: Open docs/testing.md, AGENTS.md, package.json scripts, and the listed test files. Confirm core.test.js is narrow, there is no remaining test/cli-commands reference, the CLI suite is split by command domain, and the docs/Skill explicitly keep subjective agent ability out of automated tests. Rerun the listed lint/typecheck/domain commands.
-Limitations: This proves the repository test architecture and current focused verification. It does not prove future Skills will always produce ideal ACs; that remains an agent Skill, dogfood, eval, and human review responsibility.
+Reviewability: Review test/core.test.js, test/docs-schema.test.js, test/module-boundaries.test.js, docs/testing.md, and docs/skill-evals.md; rerun focused tests plus lint/typecheck/check.
+Limitations: This verifies the automated test boundary. It does not evaluate whether a live agent will generate strong AC in a real user conversation; that remains covered by Skill dogfood evals.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-ac-p-15-test-system-boundary.json
+- .opennori/architecture/evidence/opennori-self-ac-p-15-subjective-test-boundary.json
+- npx vitest run test/core.test.js test/docs-schema.test.js test/module-boundaries.test.js
 - npm run lint
-- npm run typecheck
-- npm run test:quick
-- npm run test:docs
-- npm run test:schema
-- npm run test:reporting
-- npm run test:cli
-- rg -n 'cli-commands\.test|test/cli-commands' AGENTS.md docs test package.json /Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md
-- docs/testing.md
-- AGENTS.md
-- /Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md
+- npx tsc --noEmit --pretty false
+- node ./bin/opennori.js check --root . --json
 - test/core.test.js
-- test/acceptance.test.js
-- test/evidence.test.js
-- test/reporting.test.js
-- test/profile.test.js
-- test/lifecycle.test.js
-- test/architecture.test.js
 - test/docs-schema.test.js
-- test/cli-core.test.js
-- test/cli-lifecycle.test.js
-- test/cli-human-output.test.js
-- test/cli-acceptance.test.js
-- test/cli-reporting.test.js
-- test/cli-architecture.test.js
-- test/cli-profile.test.js
-- test/cli-dashboard.test.js
-- test/cli-evidence.test.js
-- test/support/cli.js
-- test/support/command-fixtures.js
-- package.json
+- test/module-boundaries.test.js
+- docs/testing.md
+- docs/skill-evals.md
 
 ## Files
 
