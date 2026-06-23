@@ -1,6 +1,7 @@
 export type ActiveGoalArgs = {
   root?: unknown;
   goal?: unknown;
+  dossier?: unknown;
   acceptance?: unknown;
   evidence?: unknown;
   fromDraft?: unknown;
@@ -16,13 +17,17 @@ export const activeGoalArgs = {
     type: "string",
     description: "Active goal id."
   },
+  dossier: {
+    type: "string",
+    description: "Explicit Nori Contract dossier directory. Reads contract.json and ledger.json; Markdown is not parsed as state."
+  },
   acceptance: {
     type: "string",
-    description: "Explicit goal README path."
+    description: "Legacy generated goal README path used only to locate the dossier. Markdown is not parsed as state."
   },
   evidence: {
     type: "string",
-    description: "Explicit goal ledger JSON path."
+    description: "Legacy goal ledger JSON path, required with --acceptance."
   },
   fromDraft: {
     type: "boolean",

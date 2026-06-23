@@ -1,10 +1,10 @@
 {
   "criterion_id": "AC-A-8",
   "status": "passing",
-  "confidence": "high",
+  "confidence": "reviewed",
   "required": true,
   "risk": "high",
-  "evidence_count": 47,
-  "latest_evidence_summary": "Lifecycle type coupling reduced: result, path, plugin state, manifest, plan, doctor, bootstrap, profile-check, and context-export types now live in domain files; internal source imports those domain files directly, and module-boundary tests keep lifecycle.ts as a compatibility re-export only.",
-  "updated_at": "2026-06-23T11:49:14.533Z"
+  "evidence_count": 48,
+  "latest_evidence_summary": "Markdown dossier authority boundary was tightened: opennori help now exposes --dossier as the explicit Nori Contract dossier locator, legacy --acceptance is described as README locator only, status reads structured JSON even when README content is forged, and protocol marker text matches generated README output.",
+  "updated_at": "2026-06-23T11:58:37.583Z"
 }

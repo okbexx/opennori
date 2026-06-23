@@ -3,7 +3,7 @@
 Goal: 让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收驱动产品；用户不仅能判断产品目标是否完成，也能判断交付物是否按确认过的优秀技术架构完成。
 Layer: architecture
 Status: passing
-Confidence: high
+Confidence: reviewed
 Required: yes
 Risk: high
 
@@ -17,17 +17,22 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: protocol-check - Lifecycle type coupling reduced: result, path, plugin state, manifest, plan, doctor, bootstrap, profile-check, and context-export types now live in domain files; internal source imports those domain files directly, and module-boundary tests keep lifecycle.ts as a compatibility re-export only.
+Latest: protocol-check - Markdown dossier authority boundary was tightened: opennori help now exposes --dossier as the explicit Nori Contract dossier locator, legacy --acceptance is described as README locator only, status reads structured JSON even when README content is forged, and protocol marker text matches generated README output.
 Result: passing
 Basis: tool-observation
-Reviewability: Review src/types/*.ts, internal import paths, and the lifecycle type boundary guard in test/module-boundaries.test.js.
-Limitations: src/types/lifecycle.ts intentionally remains as a compatibility re-export; it should not be used by internal source.
+Reviewability: Run the two test commands and inspect evidence add --help plus the listed source files; the acceptance test explicitly forges README content and verifies status still reads criterion JSON.
+Limitations: This keeps legacy --acceptance/--evidence option names for compatibility while steering new explicit path usage to --dossier.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-lifecycle-types-domain-split.json
-- npx vitest run test/module-boundaries.test.js test/mcp.test.ts test/cli-lifecycle.test.js
+- /Users/jarl/code/jarlone/opennori/.opennori/architecture/evidence/opennori-self-markdown-dossier-authority-boundary.json
+- npx vitest run test/acceptance.test.js test/module-boundaries.test.js
 - npx tsc --noEmit --pretty false
-- rg -n 'from .*types/lifecycle\.ts|import\(.*types/lifecycle\.ts' src test
+- node ./bin/opennori.js evidence add --help
+- src/cli/active-goal-store.ts
+- src/cli/active-goal-args.ts
+- test/acceptance.test.js
+- test/module-boundaries.test.js
+- .opennori/protocol.md
 
 ## Files
 

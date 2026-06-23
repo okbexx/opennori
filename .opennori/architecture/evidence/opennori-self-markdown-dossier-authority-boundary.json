@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-markdown-dossier-authority-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Goal dossier Markdown remains a generated review surface while CLI active goal loading now supports explicit dossier directories and keeps README content out of state authority.",
+  "fit": "This follows the JSON-authoritative OpenNori baseline: --dossier locates contract.json and ledger.json, legacy --acceptance only locates the dossier, generated README markers are documented consistently, and boundary tests prevent Markdown parser/import paths from returning.",
+  "implementation_focus": "Acceptance gap AC-A-8 architecture boundary: Markdown review surfaces cannot become contract import/update authority.",
+  "evidence": "npx vitest run test/acceptance.test.js test/module-boundaries.test.js; npx tsc --noEmit --pretty false",
+  "limitations": "This preserves legacy --acceptance/--evidence compatibility names for existing tests and scripts; a broader API rename can happen separately if needed.",
+  "created_at": "2026-06-23T11:58:12.004Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

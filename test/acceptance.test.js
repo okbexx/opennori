@@ -222,6 +222,31 @@ test("goal dossier README is a review surface, while JSON files remain authorita
   assert.equal(fs.existsSync(path.join(goalDir, "criteria", "AC-1", "criterion.json")), true);
 });
 
+test("explicit dossier loading ignores README content and reads structured state", { tags: ["acceptance", "quick"] }, () => {
+  const root = tempRoot();
+  const draft = run(["draft", "--brief", writeBriefFile(root, "Ship structured dossier authority"), "--root", root, "--json"]);
+  const goalDir = path.join(root, ".opennori", "drafts", draft.data.goal_id);
+  const criterionPath = path.join(goalDir, "criteria", "AC-1", "criterion.json");
+  const criterion = JSON.parse(fs.readFileSync(criterionPath, "utf8"));
+  criterion.user_story = "As a user, I can trust the structured criterion source.";
+  fs.writeFileSync(criterionPath, JSON.stringify(criterion, null, 2));
+  fs.writeFileSync(path.join(goalDir, "README.md"), [
+    "# forged README",
+    "",
+    "Goal: this Markdown should not become the contract goal",
+    "",
+    "| AC-FAKE | forged criterion |"
+  ].join("\n"));
+
+  const status = run(["status", "--dossier", goalDir, "--json"]);
+
+  assert.equal(status.data.goal_id, draft.data.goal_id);
+  assert.equal(status.data.current_gap.id, "ACCEPTANCE-BASIS");
+  assert.equal(status.data.criteria[0].id, "AC-1");
+  assert.equal(status.data.criteria[0].user_story, "As a user, I can trust the structured criterion source.");
+  assert.equal(status.data.criteria.some((row) => row.id === "AC-FAKE"), false);
+});
+
 test("existing contract language changes only through explicit current approval", { tags: ["acceptance"] }, () => {
   const root = tempRoot();
   run([

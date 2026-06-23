@@ -89,6 +89,13 @@ export function inferRootFromAcceptancePath(acceptancePath: string): string {
   return parts.slice(0, noriIndex).join(path.sep) || path.sep;
 }
 
+export function inferRootFromDossierPath(dossierPath: string): string {
+  const parts = path.resolve(dossierPath).split(path.sep);
+  const noriIndex = parts.lastIndexOf(".opennori");
+  if (noriIndex <= 0) return process.cwd();
+  return parts.slice(0, noriIndex).join(path.sep) || path.sep;
+}
+
 function optionalString(value: unknown): string | undefined {
   if (value === undefined || value === null) return undefined;
   const stringValue = String(value).trim();
@@ -96,8 +103,31 @@ function optionalString(value: unknown): string | undefined {
 }
 
 export function loadPair(args: ActiveGoalArgs = {}): ActiveGoalPair {
+  const explicitDossier = optionalString(args.dossier);
   const explicitAcceptance = optionalString(args.acceptance);
   const explicitEvidence = optionalString(args.evidence);
+  if (explicitDossier) {
+    const goalDir = path.resolve(explicitDossier);
+    const acceptancePath = path.join(goalDir, "README.md");
+    const evidencePath = path.join(goalDir, "ledger.json");
+    const contractPath = path.join(goalDir, "contract.json");
+    const payload = readGoalPayload({
+      goalDir,
+      contractPath,
+      ledgerPath: evidencePath
+    });
+    return preparePair({
+      contract: payload.contract,
+      ledger: payload.ledger,
+      goalDir,
+      contractPath,
+      ledgerPath: evidencePath,
+      acceptancePath,
+      evidencePath,
+      root: inferRootFromDossierPath(goalDir),
+      location: inferGoalLocation(goalDir) || "current"
+    });
+  }
   if (explicitAcceptance || explicitEvidence) {
     if (!explicitAcceptance || !explicitEvidence) {
       throw new Error("Both --acceptance and --evidence are required");

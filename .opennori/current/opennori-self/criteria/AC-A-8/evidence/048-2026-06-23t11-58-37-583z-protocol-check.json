@@ -1,0 +1,60 @@
+{
+  "kind": "protocol-check",
+  "basis": "tool-observation",
+  "summary": "Markdown dossier authority boundary was tightened: opennori help now exposes --dossier as the explicit Nori Contract dossier locator, legacy --acceptance is described as README locator only, status reads structured JSON even when README content is forged, and protocol marker text matches generated README output.",
+  "result": "passing",
+  "confidence": "reviewed",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-markdown-dossier-authority-boundary",
+      "path": "/Users/jarl/code/jarlone/opennori/.opennori/architecture/evidence/opennori-self-markdown-dossier-authority-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/acceptance.test.js test/module-boundaries.test.js",
+      "command": "npx vitest run test/acceptance.test.js test/module-boundaries.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js evidence add --help",
+      "command": "node ./bin/opennori.js evidence add --help"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/active-goal-store.ts",
+      "path": "src/cli/active-goal-store.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/active-goal-args.ts",
+      "path": "src/cli/active-goal-args.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/acceptance.test.js",
+      "path": "test/acceptance.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/module-boundaries.test.js",
+      "path": "test/module-boundaries.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    }
+  ],
+  "reviewability": "Run the two test commands and inspect evidence add --help plus the listed source files; the acceptance test explicitly forges README content and verifies status still reads criterion JSON.",
+  "limitations": "This keeps legacy --acceptance/--evidence option names for compatibility while steering new explicit path usage to --dossier.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T11:58:37.583Z"
+}

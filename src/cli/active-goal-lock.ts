@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { writeJson } from "../core.ts";
-import { inferRootFromAcceptancePath } from "./active-goal-store.ts";
+import { inferRootFromAcceptancePath, inferRootFromDossierPath } from "./active-goal-store.ts";
 
 function waitSync(ms: number): void {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
@@ -23,6 +23,8 @@ function argValue(rawArgs: string[], name: string): string | undefined {
 }
 
 function lockRootFromArgs(rawArgs: string[]): string {
+  const dossierPath = argValue(rawArgs, "dossier");
+  if (dossierPath) return inferRootFromDossierPath(dossierPath);
   const acceptancePath = argValue(rawArgs, "acceptance");
   if (acceptancePath) return inferRootFromAcceptancePath(acceptancePath);
   return path.resolve(argValue(rawArgs, "root") || process.cwd());

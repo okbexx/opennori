@@ -194,4 +194,18 @@ test("goal dossier Markdown stays a generated review surface, not a state import
 
   const coreBarrel = fs.readFileSync(path.join(ROOT, "src", "core.ts"), "utf8");
   assert.equal(coreBarrel.includes("generated-acceptance-markdown"), false);
+
+  const stateReaders = [
+    path.join(ROOT, "src", "core", "dossier.ts"),
+    path.join(ROOT, "src", "cli", "active-goal-store.ts")
+  ];
+  const markdownReadOffenders = stateReaders
+    .filter((filePath) => /readFileSync\([^)]*README\.md|readFileSync\([^)]*acceptancePath/.test(fs.readFileSync(filePath, "utf8")))
+    .map(relative);
+  assert.deepEqual(markdownReadOffenders, []);
+
+  const activeGoalArgs = fs.readFileSync(path.join(ROOT, "src", "cli", "active-goal-args.ts"), "utf8");
+  assert.match(activeGoalArgs, /dossier/);
+  assert.match(activeGoalArgs, /Markdown is not parsed as state/);
+  assert.match(activeGoalArgs, /Legacy generated goal README path used only to locate the dossier/);
 });
