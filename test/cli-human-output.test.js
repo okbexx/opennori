@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { test } from "vitest";
-import { tempRoot, writeActiveGoalWithId, activeGoalRuntimeFor, setupRunner, renderHuman, runActivityStartCommand, runStatusCommand, runCheckCommand, runDashboardCommand, runDoctorCommand, runInstallCommand, runPluginSyncCommand, runReportCommand, runUninstallCommand, runUpgradeCommand, printHumanResult } from "./support/command-fixtures.js";
+import { tempRoot, writeActiveGoalWithId, activeGoalRuntimeFor, setupRunner, renderHuman, runActivityStartCommand, runArchitectureBaselineCommand, runArchitectureProfilesCommand, runArchitectureRequirementCommand, runArchitectureShowCommand, runStatusCommand, runCheckCommand, runDashboardCommand, runDoctorCommand, runInstallCommand, runPluginSyncCommand, runProfileAddCommand, runProfileCheckCommand, runProfileShowCommand, runReportCommand, runUninstallCommand, runUpgradeCommand, printHumanResult } from "./support/command-fixtures.js";
 
 test("human output summarizes lifecycle commands instead of printing full JSON", { tags: ["cli", "reporting", "quick"] }, async () => {
   const root = tempRoot();
@@ -71,6 +71,94 @@ test("human output summarizes doctor check status report and dashboard", { tags:
   assert.match(activityText, /Current gap: AC-1/);
   assert.match(activityText, /Snapshot: \.opennori\/snapshots\/current\.json/);
   assert.doesNotMatch(activityText, /"snapshot_summary"/);
+});
+
+test("human output summarizes Project Profile commands", { tags: ["cli", "profile", "reporting", "quick"] }, async () => {
+  const root = tempRoot();
+  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ dependencies: { react: "19.0.0" } }, null, 2));
+  writeActiveGoalWithId(root, "human-profile-goal");
+  const added = await runProfileAddCommand([
+    "--root", root,
+    "--type", "stack",
+    "--name", "react",
+    "--strength", "must",
+    "--purpose", "Use the project UI stack instead of adding another one.",
+    "--json"
+  ]);
+  const addText = renderHuman(added, ["profile", "add"]);
+  assert.match(addText, /OpenNori profile add/);
+  assert.match(addText, /Items: 1/);
+  assert.match(addText, /react/);
+  assert.doesNotMatch(addText.trimStart(), /^\{/);
+  assert.doesNotMatch(addText, /"profile"/);
+
+  const shown = await runProfileShowCommand(["--root", root, "--json"]);
+  const showText = renderHuman(shown, ["profile", "show"]);
+  assert.match(showText, /OpenNori profile show/);
+  assert.match(showText, /Scope: project/);
+  assert.match(showText, /Goal: human-profile-goal/);
+  assert.match(showText, /Compliance:/);
+  assert.doesNotMatch(showText, /"compliance"/);
+
+  const checked = await runProfileCheckCommand(["--root", root, "--goal", "human-profile-goal", "--record", "--json"]);
+  const checkText = renderHuman(checked, ["profile", "check"]);
+  assert.match(checkText, /OpenNori profile check/);
+  assert.match(checkText, /Checks: 1/);
+  assert.match(checkText, /Recorded: yes/);
+  assert.doesNotMatch(checkText, /"checks"/);
+});
+
+test("human output summarizes Architecture commands", { tags: ["cli", "architecture", "reporting", "quick"] }, async () => {
+  const root = tempRoot();
+  writeActiveGoalWithId(root, "human-architecture-goal");
+
+  const profiles = await runArchitectureProfilesCommand(["--root", root, "--json"]);
+  const profilesText = renderHuman(profiles, ["architecture", "profiles"]);
+  assert.match(profilesText, /OpenNori architecture profiles/);
+  assert.match(profilesText, /Profiles:/);
+  assert.doesNotMatch(profilesText.trimStart(), /^\{/);
+  assert.doesNotMatch(profilesText, /"profiles"/);
+
+  const requirement = await runArchitectureRequirementCommand([
+    "--root", root,
+    "--goal-id", "human-architecture-goal",
+    "--status", "required",
+    "--reason", "This fixture touches runtime and state boundaries.",
+    "--json"
+  ]);
+  const requirementText = renderHuman(requirement, ["architecture", "requirement"]);
+  assert.match(requirementText, /OpenNori architecture requirement/);
+  assert.match(requirementText, /Goal: human-architecture-goal/);
+  assert.match(requirementText, /Requirement: required/);
+  assert.doesNotMatch(requirementText, /"requirement"/);
+
+  const preview = await runArchitectureBaselineCommand([
+    "--root", root,
+    "--goal", "Ship human architecture output",
+    "--goal-id", "human-architecture-goal",
+    "--json"
+  ]);
+  const previewText = renderHuman(preview, ["architecture", "baseline"]);
+  assert.match(previewText, /OpenNori architecture baseline/);
+  assert.match(previewText, /Confirmed: no/);
+  assert.match(previewText, /Baseline: TypeScript Agent State CLI/);
+  assert.doesNotMatch(previewText, /"baseline"/);
+
+  const confirmed = await runArchitectureBaselineCommand([
+    "--root", root,
+    "--goal", "Ship human architecture output",
+    "--goal-id", "human-architecture-goal",
+    "--confirm",
+    "--json"
+  ]);
+  const confirmedText = renderHuman(confirmed, ["architecture", "baseline"]);
+  assert.match(confirmedText, /Confirmed: yes/);
+
+  const shown = await runArchitectureShowCommand(["--root", root, "--goal", "human-architecture-goal", "--json"]);
+  const showText = renderHuman(shown, ["architecture", "show"]);
+  assert.match(showText, /OpenNori architecture show/);
+  assert.match(showText, /Architecture decision: valid/);
+  assert.doesNotMatch(showText, /"architecture"/);
 });
 
 test("human status output shows enhanced autogoal acceptance basis", { tags: ["cli", "reporting", "acceptance", "quick"] }, () => {

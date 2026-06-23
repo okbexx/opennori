@@ -198,6 +198,66 @@ function printActivity(stdout: NodeJS.WriteStream, data: JsonObject, subcommand?
   if (data.snapshot_path) line(stdout, `Snapshot: ${data.snapshot_path}`);
 }
 
+function printProfile(stdout: NodeJS.WriteStream, data: JsonObject, subcommand?: string): void {
+  const profile = asObject(data.profile);
+  const items = Array.isArray(profile.items) ? profile.items.map(asObject) : [];
+  const checks = Array.isArray(data.checks) ? data.checks : [];
+  const compliance = asObject(data.compliance);
+  const counts = new Map<string, number>();
+  for (const item of items) counts.set(String(item.strength || "unknown"), (counts.get(String(item.strength || "unknown")) || 0) + 1);
+  line(stdout, `OpenNori profile ${subcommand || "summary"}.`);
+  line(stdout, `Scope: ${data.scope || "project"}`);
+  line(stdout, `Items: ${items.length}`);
+  if (checks.length > 0) line(stdout, `Checks: ${checks.length}`);
+  if (items.length > 0) {
+    line(stdout, `Strengths: ${[...counts.entries()].map(([key, count]) => `${key}: ${count}`).join(", ")}`);
+    line(stdout, "Profile items:");
+    for (const item of items.slice(0, 5)) {
+      line(stdout, `- ${item.id || item.name}: ${item.name || "unnamed"} (${item.type || "constraint"}, ${item.strength || "prefer"})`);
+    }
+  }
+  if (data.goal_id || data.current_goal) line(stdout, `Goal: ${data.goal_id || data.current_goal}`);
+  if (compliance.complete !== undefined) line(stdout, `Compliance: ${compliance.complete ? "complete" : "needs review"}`);
+  if (Array.isArray(compliance.blocking) && compliance.blocking.length > 0) line(stdout, `Blocking: ${compliance.blocking.length}`);
+  if (Array.isArray(compliance.review) && compliance.review.length > 0) line(stdout, `Review: ${compliance.review.length}`);
+  if (data.recorded !== undefined) line(stdout, `Recorded: ${data.recorded ? "yes" : "no"}`);
+}
+
+function printArchitecture(stdout: NodeJS.WriteStream, data: JsonObject, subcommand?: string): void {
+  const architecture = asObject(data.architecture);
+  const requirement = asObject(architecture.requirement || data.requirement);
+  const baseline = asObject(data.baseline || architecture.baseline);
+  const profiles = Array.isArray(data.profiles) ? data.profiles.map(asObject) : [];
+  line(stdout, `OpenNori architecture ${subcommand || "summary"}.`);
+  line(stdout, `Project: ${data.root || "."}`);
+  if (data.confirmed !== undefined) line(stdout, `Confirmed: ${data.confirmed ? "yes" : "no"}`);
+  if (data.goal_id || baseline.goal_id) line(stdout, `Goal: ${data.goal_id || baseline.goal_id}`);
+  if (requirement.status) line(stdout, `Requirement: ${requirement.status}`);
+  if (architecture.decision) line(stdout, `Architecture decision: ${architecture.decision}`);
+  if (baseline.profile || baseline.profile_title) line(stdout, `Baseline: ${baseline.profile_title || baseline.profile}`);
+  if (profiles.length > 0) {
+    line(stdout, `Profiles: ${profiles.length}`);
+    for (const profile of profiles.slice(0, 5)) {
+      line(stdout, `- ${profile.id || profile.profile || "unknown"}: ${profile.title || profile.summary || profile.status || "review profile"}`);
+    }
+  }
+  if (data.apply_record) {
+    const record = asObject(data.apply_record);
+    line(stdout, `Apply record: ${record.id || "unknown"} (${record.status || "unknown"})`);
+  }
+  if (data.challenge) {
+    const challenge = asObject(data.challenge);
+    line(stdout, `Challenge: ${challenge.id || "unknown"} (${challenge.status || "open"})`);
+    line(stdout, `Need user: ${challenge.needs_user ? "yes" : "no"}`);
+  }
+  if (data.decision) {
+    const decision = asObject(data.decision);
+    line(stdout, `Build-vs-buy: ${decision.id || "unknown"} (${decision.recommendation || "unknown"})`);
+  }
+  if (data.markdown_path) line(stdout, `Review: ${relative(data.root, data.markdown_path)}`);
+  else if (data.decision_path) line(stdout, `Decision record: ${relative(data.root, data.decision_path)}`);
+}
+
 export function shouldPrintHuman(args: string[], stdout: NodeJS.WriteStream = process.stdout): boolean {
   return !args.includes("--json") && Boolean(stdout.isTTY);
 }
@@ -223,6 +283,8 @@ export function printHumanResult(payload: NoriResult, options: HumanOutputOption
   else if (command === "report") printReport(stdout, data);
   else if (command === "dashboard") printDashboard(stdout, data);
   else if (command === "activity") printActivity(stdout, data, subcommand);
+  else if (command === "profile") printProfile(stdout, data, subcommand);
+  else if (command === "architecture") printArchitecture(stdout, data, subcommand);
   else return false;
 
   if (!["status", "resume", "next", "report"].includes(String(command))) {

@@ -8,7 +8,7 @@ import { buildEvidenceLedger, pathsForGoal, readGoalPayload, writeGoalDossier, w
 
 export { loadPair, savePair };
 export { runApproveCommand, runBrainstormCommand, runCriterionAddCommand, runCriterionUpdateCommand, runDiscoverCommand, runDraftCommand, runEvaluateCommand, runInitCommand, runNextCommand, runResumeCommand, runStatusCommand } from "../../src/cli/commands/acceptance.ts";
-export { runArchitectureApplyCommand, runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand, runArchitectureRequirementCommand } from "../../src/cli/commands/architecture.ts";
+export { runArchitectureApplyCommand, runArchitectureBaselineCommand, runArchitectureBuildVsBuyCommand, runArchitectureChallengeCommand, runArchitectureProfileCommand, runArchitectureProfilesCommand, runArchitectureRequirementCommand, runArchitectureShowCommand } from "../../src/cli/commands/architecture.ts";
 export { runActivityFinishCommand, runActivityHeartbeatCommand, runActivityShowCommand, runActivityStartCommand } from "../../src/cli/commands/activity.ts";
 export { runBootstrapCommand } from "../../src/cli/commands/bootstrap.ts";
 export { runCheckCommand } from "../../src/cli/commands/check.ts";
