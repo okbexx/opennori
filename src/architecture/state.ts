@@ -1,10 +1,7 @@
 import fs from "node:fs";
 import { readJson } from "../core.ts";
-import type {
-  ArchitectureBaseline,
-  ArchitectureState,
-  ValidationIssue
-} from "../types.ts";
+import type { ArchitectureBaseline, ArchitectureState } from "../types/architecture.ts";
+import type { ValidationIssue } from "../types/common.ts";
 import { architectureSurfaceState } from "./agent-surface.ts";
 import { architectureApplySummaries, architectureEvidenceHealth } from "./apply.ts";
 import { validateArchitectureBaseline } from "./baseline.ts";

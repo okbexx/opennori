@@ -1,6 +1,6 @@
 import { readGoalPayload } from "../core/shared.ts";
 import { goalReviewState, type GoalReviewState } from "../lifecycle/goal-review-state.ts";
-import type { NoriActivity, NoriEvent, NoriIdleSummary, NoriSnapshot } from "../types.ts";
+import type { NoriActivity, NoriEvent, NoriIdleSummary, NoriSnapshot } from "../types/kernel.ts";
 import type { profileCompliance, readProjectProfile } from "../core/profile.ts";
 import { activityAgentSummary, defaultAgentSummary } from "./snapshot-agent.ts";
 import { latestEvidenceSummary, snapshotCriteria } from "./snapshot-criteria.ts";

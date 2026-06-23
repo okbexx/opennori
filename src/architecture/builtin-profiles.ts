@@ -1,4 +1,4 @@
-import type { ArchitectureProfile } from "../types.ts";
+import type { ArchitectureProfile } from "../types/architecture.ts";
 
 export const BUILTIN_ARCHITECTURE_PROFILES: Record<string, ArchitectureProfile> = {
   "typescript-agent-state-cli": {

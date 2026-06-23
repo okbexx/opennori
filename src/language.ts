@@ -1,4 +1,5 @@
-import type { ContractLanguage, NoriBrief, NoriContract } from "./types.ts";
+import type { ContractLanguage } from "./types/common.ts";
+import type { NoriBrief, NoriContract } from "./types/contract.ts";
 
 export const DEFAULT_CONTRACT_LANGUAGE: ContractLanguage = "en";
 export type PresentationLanguage = ContractLanguage;

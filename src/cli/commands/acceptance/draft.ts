@@ -15,7 +15,7 @@ import {
 } from "../../../core.ts";
 import { bootstrap, refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
-import type { AcceptanceBasis, NoriBrief } from "../../../types.ts";
+import type { AcceptanceBasis, NoriBrief } from "../../../types/contract.ts";
 import { withContractLanguage } from "../../../language.ts";
 import { jsonArg, resolveRoot, rootArg } from "./shared.ts";
 

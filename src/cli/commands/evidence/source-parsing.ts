@@ -1,4 +1,5 @@
-import type { EvidenceResult, EvidenceSource } from "../../../types.ts";
+import type { EvidenceResult } from "../../../types/common.ts";
+import type { EvidenceSource } from "../../../types/evidence.ts";
 
 type CliArgs = Record<string, any>;
 

@@ -1,7 +1,7 @@
 import { defineCommand } from "citty";
 import { fail, ok, validateContract } from "../../core.ts";
 import { goalReviewState } from "../../lifecycle.ts";
-import type { JsonObject } from "../../types.ts";
+import type { JsonObject } from "../../types/common.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
 
 export const checkCommand = defineCommand({

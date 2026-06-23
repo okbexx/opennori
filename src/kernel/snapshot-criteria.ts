@@ -1,4 +1,5 @@
-import type { AcceptanceCriterion, EvidenceLedger } from "../types.ts";
+import type { AcceptanceCriterion } from "../types/contract.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
 import { criterionDossier, type SnapshotGoalPair } from "./snapshot-paths.ts";
 
 export function latestEvidenceSummary(ledger: EvidenceLedger, gapId?: string): string {

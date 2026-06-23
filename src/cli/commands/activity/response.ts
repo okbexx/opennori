@@ -1,6 +1,6 @@
 import path from "node:path";
 import { ok, snapshotPath } from "../../../core.ts";
-import type { NoriActivity, NoriActivityTarget, NoriSnapshot } from "../../../types.ts";
+import type { NoriActivity, NoriActivityTarget, NoriSnapshot } from "../../../types/kernel.ts";
 
 function projectSnapshotPath(root: string): string {
   const filePath = snapshotPath(root);

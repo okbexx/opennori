@@ -1,8 +1,4 @@
-import type {
-  ProfileEvidenceResult,
-  ProfileItemType,
-  ProfileStrength
-} from "../../../types.ts";
+import type { ProfileEvidenceResult, ProfileItemType, ProfileStrength } from "../../../types/profile.ts";
 
 export const rootArg = {
   type: "string",

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { ArchitectureSurfaceState } from "../types.ts";
+import type { ArchitectureSurfaceState } from "../types/architecture.ts";
 import {
   AGENT_ROUTE_END,
   AGENT_ROUTE_START,

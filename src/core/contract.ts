@@ -1,10 +1,6 @@
-import type {
-  AcceptanceCriterion,
-  EvidenceLedger,
-  NoriBrief,
-  NoriContract,
-  ValidationIssue
-} from "../types.ts";
+import type { ValidationIssue } from "../types/common.ts";
+import type { AcceptanceCriterion, NoriBrief, NoriContract } from "../types/contract.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
 import { contractLanguageFromBrief } from "../language.ts";
 import { inferCriterionLayer, nowIso, slugify, PROTOCOL_VERSION } from "./shared.ts";
 

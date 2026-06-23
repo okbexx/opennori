@@ -1,5 +1,5 @@
 import { inferContractLanguage, normalizeContractLanguage } from "./language.ts";
-import type { AcceptanceDiscovery, Brainstorm } from "./types.ts";
+import type { AcceptanceDiscovery, Brainstorm } from "./types/acceptance.ts";
 
 export function renderDiscoveryMarkdown(discovery: AcceptanceDiscovery): string {
   const language = normalizeContractLanguage(discovery.presentation?.language, inferContractLanguage(discovery.goal));

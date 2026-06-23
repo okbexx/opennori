@@ -1,12 +1,7 @@
 import { slugify } from "./core/shared.ts";
 import { inferContractLanguage, normalizeContractLanguage, type PresentationLanguage } from "./language.ts";
-import type {
-  AcceptanceDiscovery,
-  AcceptanceDiscoveryGap,
-  Brainstorm,
-  BrainstormCandidate,
-  NoriBrief
-} from "./types.ts";
+import type { AcceptanceDiscovery, AcceptanceDiscoveryGap, Brainstorm, BrainstormCandidate } from "./types/acceptance.ts";
+import type { NoriBrief } from "./types/contract.ts";
 
 const GENERATED_BY_SKILL_SUMMARY = "Draft generated from a Skill-prepared brief. User must approve or revise it before implementation.";
 

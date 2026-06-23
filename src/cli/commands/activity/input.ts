@@ -1,5 +1,5 @@
 import { inferActivityTarget } from "../../../core.ts";
-import type { NoriActivity, NoriActivityInput, NoriActivityTarget } from "../../../types.ts";
+import type { NoriActivity, NoriActivityInput, NoriActivityTarget } from "../../../types/kernel.ts";
 
 export type ActivityAction = "start" | "heartbeat" | "finish";
 

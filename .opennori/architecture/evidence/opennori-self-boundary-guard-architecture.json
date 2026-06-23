@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-boundary-guard-architecture",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Internal source modules now import domain type modules instead of the public src/types.ts barrel, and boundary tests guard MCP read-only resources, generated Markdown review-only authority, and lifecycle external command adapters.",
+  "fit": "The change follows the confirmed TypeScript agent-state CLI baseline: public barrels remain external API surfaces, domain modules own protocol types, MCP reuses existing context/snapshot/doctor projections without write tools, Markdown stays generated review surface, and setup/plugin-sync delegate Codex/npm probing to narrow adapters.",
+  "implementation_focus": "Keep architecture fixes focused on state-boundary and integration-boundary guardrails rather than adding new workflow state or subjective AC validators.",
+  "evidence": "npx tsc --noEmit --pretty false, npx vitest run test/module-boundaries.test.js, npx vitest run test/mcp.test.ts test/lifecycle-adapters.test.ts, npx vitest run test/acceptance.test.js --testNamePattern Markdown.",
+  "limitations": "",
+  "created_at": "2026-06-23T10:11:58.535Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

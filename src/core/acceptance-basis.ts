@@ -1,4 +1,4 @@
-import type { NoriContract } from "../types.ts";
+import type { NoriContract } from "../types/contract.ts";
 
 function stringList(value: unknown): string[] {
   return Array.isArray(value) ? value.map((item) => String(item).trim()).filter(Boolean) : [];

@@ -1,10 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readJson } from "../core.ts";
-import type {
-  ArchitectureChallenge,
-  ArchitectureChallengeSummary
-} from "../types.ts";
+import type { ArchitectureChallenge, ArchitectureChallengeSummary } from "../types/architecture.ts";
 import { architectureDir, errorMessage, relativeTo } from "./shared.ts";
 
 export function architectureChallengeSummaries(root: string): ArchitectureChallengeSummary[] {

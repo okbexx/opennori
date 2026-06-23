@@ -1,4 +1,4 @@
-import type { NoriActivity } from "../types.ts";
+import type { NoriActivity } from "../types/kernel.ts";
 import { appendEvent } from "./events.ts";
 
 function sameAcTarget(left?: Pick<NoriActivity, "goal_id" | "gap_id">, right?: Pick<NoriActivity, "goal_id" | "gap_id">): boolean {

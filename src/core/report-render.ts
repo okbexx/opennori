@@ -1,9 +1,5 @@
-import type {
-  EvidenceLedger,
-  EvidenceRecord,
-  EvidenceSource,
-  NoriContract
-} from "../types.ts";
+import type { NoriContract } from "../types/contract.ts";
+import type { EvidenceLedger, EvidenceRecord, EvidenceSource } from "../types/evidence.ts";
 import { evidenceView } from "./evidence.ts";
 import { emptyProjectProfile, renderProfileLines } from "./profile.ts";
 import { inferCriterionLayer } from "./shared.ts";

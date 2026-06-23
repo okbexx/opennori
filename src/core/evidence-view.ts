@@ -1,10 +1,5 @@
-import type {
-  CriterionStatusRow,
-  EvidenceRecord,
-  EvidenceView,
-  NoriContract,
-  EvidenceLedger
-} from "../types.ts";
+import type { NoriContract } from "../types/contract.ts";
+import type { CriterionStatusRow, EvidenceRecord, EvidenceView, EvidenceLedger } from "../types/evidence.ts";
 import { basisForEvidenceKind, evidencePathExists, sourceIsInspectable, sourceIsStillReviewable } from "./evidence-source.ts";
 import { inferCriterionLayer } from "./shared.ts";
 

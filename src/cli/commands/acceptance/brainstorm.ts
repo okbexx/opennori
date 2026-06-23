@@ -10,7 +10,7 @@ import {
 import { ok, writeJson } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
-import type { AcceptanceDiscovery } from "../../../types.ts";
+import type { AcceptanceDiscovery } from "../../../types/acceptance.ts";
 import { brainstormPaths, discoveryPaths, jsonArg, resolveRoot, rootArg } from "./shared.ts";
 
 export const brainstormCommand = defineCommand({

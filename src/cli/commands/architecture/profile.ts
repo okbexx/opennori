@@ -9,7 +9,7 @@ import {
 import { fail, ok, readJson } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
-import type { ArchitectureProfile } from "../../../types.ts";
+import type { ArchitectureProfile } from "../../../types/architecture.ts";
 import { jsonArg, resolveRoot, rootArg } from "./shared.ts";
 
 export const architectureProfileCommand = defineCommand({

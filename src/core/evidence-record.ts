@@ -1,8 +1,5 @@
-import type {
-  EvidenceInput,
-  EvidenceLedger,
-  NoriContract
-} from "../types.ts";
+import type { NoriContract } from "../types/contract.ts";
+import type { EvidenceInput, EvidenceLedger } from "../types/evidence.ts";
 import { applyRiskGate } from "./evidence-risk.ts";
 import { normalizeEvidence, VALID_EVIDENCE_RESULTS } from "./evidence-source.ts";
 import { recomputeWorkflowStatus } from "./evidence-workflow.ts";

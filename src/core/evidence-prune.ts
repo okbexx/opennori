@@ -1,10 +1,6 @@
-import type {
-  AcceptanceStatus,
-  EvidenceLedger,
-  EvidencePruneSummary,
-  EvidenceRecord,
-  NoriContract
-} from "../types.ts";
+import type { AcceptanceStatus } from "../types/common.ts";
+import type { NoriContract } from "../types/contract.ts";
+import type { EvidenceLedger, EvidencePruneSummary, EvidenceRecord } from "../types/evidence.ts";
 import { confidenceForEvidence } from "./evidence-risk.ts";
 import { evidencePathExists, sourceIsStillReviewable } from "./evidence-source.ts";
 import { evidenceView } from "./evidence-view.ts";

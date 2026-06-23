@@ -10,7 +10,7 @@ import {
 import { appendEvent, ok, refreshSnapshot, slugify, writeJson } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
-import type { BuildVsBuyDecision } from "../../../types.ts";
+import type { BuildVsBuyDecision } from "../../../types/architecture.ts";
 import { jsonArg, resolveRoot, rootArg } from "./shared.ts";
 
 export const architectureBuildVsBuyCommand = defineCommand({

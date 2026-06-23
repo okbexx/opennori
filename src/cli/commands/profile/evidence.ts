@@ -9,7 +9,7 @@ import {
 } from "../../../core.ts";
 import { goalReviewState } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
-import type { ProfileEvidenceInput } from "../../../types.ts";
+import type { ProfileEvidenceInput } from "../../../types/profile.ts";
 import {
   jsonArg,
   profileEvidenceResult

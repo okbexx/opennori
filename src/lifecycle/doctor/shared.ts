@@ -1,9 +1,4 @@
-import type {
-  DoctorCheck,
-  DoctorIssue,
-  DoctorRecoveryAction,
-  DoctorState
-} from "../../types.ts";
+import type { DoctorCheck, DoctorIssue, DoctorRecoveryAction, DoctorState } from "../../types/lifecycle.ts";
 
 export function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);

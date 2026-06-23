@@ -1,7 +1,8 @@
 import { renderReport } from "../core.ts";
 import { readProjectProfile } from "../core/profile.ts";
 import { reviewState, type ReviewState } from "../core/review-state.ts";
-import type { EvidenceLedger, NoriContract } from "../types.ts";
+import type { NoriContract } from "../types/contract.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
 import { architectureState } from "./state.ts";
 
 function renderArchitectureReportSection(root: string, goalId: string | undefined = undefined): string {

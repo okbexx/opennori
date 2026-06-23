@@ -1,0 +1,70 @@
+{
+  "kind": "architecture-boundary-refactor",
+  "basis": "tool-observation",
+  "summary": "OpenNori internal source modules now import domain type modules instead of the public type barrel, with guard tests covering type import boundaries, MCP read-only resources, generated Markdown review-only authority, and lifecycle external command adapter parsing.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-boundary-guard-architecture",
+      "path": ".opennori/architecture/evidence/opennori-self-boundary-guard-architecture.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/module-boundaries.test.js",
+      "command": "npx vitest run test/module-boundaries.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/mcp.test.ts test/lifecycle-adapters.test.ts",
+      "command": "npx vitest run test/mcp.test.ts test/lifecycle-adapters.test.ts"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/acceptance.test.js --testNamePattern Markdown",
+      "command": "npx vitest run test/acceptance.test.js --testNamePattern Markdown"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types.ts",
+      "path": "src/types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types",
+      "path": "src/types"
+    },
+    {
+      "type": "artifact",
+      "label": "src/mcp",
+      "path": "src/mcp"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/adapters",
+      "path": "src/lifecycle/adapters"
+    },
+    {
+      "type": "artifact",
+      "label": "test/module-boundaries.test.js",
+      "path": "test/module-boundaries.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "docs/testing.md",
+      "path": "docs/testing.md"
+    }
+  ],
+  "reviewability": "Inspect changed imports to confirm implementation modules use src/types/<domain>.ts rather than src/types.ts; inspect module-boundaries tests to confirm MCP has no write tools, generated Markdown parser is not a state import path, and setup/plugin-sync output parsing is confined to adapters. Rerun the listed typecheck and focused tests.",
+  "limitations": "This slice hardens architecture boundaries and tests. It does not add new user-facing OpenNori workflow capability, and it deliberately avoids subjective AC quality validators.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T10:12:12.817Z"
+}

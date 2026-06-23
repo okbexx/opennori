@@ -3,7 +3,7 @@ import path from "node:path";
 import { Hono } from "hono";
 import { streamSSE, type SSEStreamingApi } from "hono/streaming";
 import { packagePath } from "../../package-root.ts";
-import type { NoriEvent } from "../../types.ts";
+import type { NoriEvent } from "../../types/kernel.ts";
 import { readEvents } from "../events.ts";
 import { refreshSnapshot } from "../snapshot.ts";
 

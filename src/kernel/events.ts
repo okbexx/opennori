@@ -2,7 +2,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { nowIso, readJson, writeJson } from "../core/shared.ts";
-import type { JsonObject, NoriEvent, NoriEventActor, NoriEventInput } from "../types.ts";
+import type { JsonObject } from "../types/common.ts";
+import type { NoriEvent, NoriEventActor, NoriEventInput } from "../types/kernel.ts";
 
 export const EVENT_SCHEMA_VERSION = "opennori/event-v1";
 

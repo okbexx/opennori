@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readJson, writeJson } from "../core.ts";
-import type { ArchitectureApplyRecord, ArchitectureApplySummary, ArchitectureEvidenceFinding, ArchitectureEvidenceHealth } from "../types.ts";
+import type { ArchitectureApplyRecord, ArchitectureApplySummary, ArchitectureEvidenceFinding, ArchitectureEvidenceHealth } from "../types/architecture.ts";
 import { schemaErrorSummary, validateSchema } from "../validation.ts";
 import { ARCHITECTURE_APPLY_SCHEMA_VERSION, architectureApplyPath, architectureDir, errorMessage, relativeTo } from "./shared.ts";
 

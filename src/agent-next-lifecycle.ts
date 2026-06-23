@@ -1,9 +1,5 @@
-import type {
-  ActiveGoalSummary,
-  AgentNext,
-  BootstrapData,
-  DoctorState
-} from "./types.ts";
+import type { AgentNext } from "./types/agent.ts";
+import type { ActiveGoalSummary, BootstrapData, DoctorState } from "./types/lifecycle.ts";
 import { agentNext } from "./agent-next-builder.ts";
 import { activeGoalCount, activeGoals } from "./agent-next-doctor.ts";
 

@@ -2,7 +2,8 @@ import path from "node:path";
 import { findCurrentPairs, ok } from "../core.ts";
 import { buildSnapshot } from "../kernel/snapshot.ts";
 import { buildContextExport, doctor } from "../lifecycle.ts";
-import type { DoctorState, JsonObject, NoriResult } from "../types.ts";
+import type { JsonObject } from "../types/common.ts";
+import type { DoctorState, NoriResult } from "../types/lifecycle.ts";
 import type {
   McpContextResource,
   McpDoctorResource,

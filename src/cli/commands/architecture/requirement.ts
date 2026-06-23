@@ -9,7 +9,7 @@ import {
   refreshSnapshot
 } from "../../../core.ts";
 import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
-import type { ArchitectureRequirementStatus } from "../../../types.ts";
+import type { ArchitectureRequirementStatus } from "../../../types/architecture.ts";
 import { runJsonCommand } from "../../runtime.ts";
 import { jsonArg, resolveRoot, rootArg } from "./shared.ts";
 

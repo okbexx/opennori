@@ -12,11 +12,7 @@ import {
   manifestPath,
   sameStringSet
 } from "../shared.ts";
-import type {
-  ActiveGoalSummary,
-  DoctorCheck,
-  Manifest
-} from "../../types.ts";
+import type { ActiveGoalSummary, DoctorCheck, Manifest } from "../../types/lifecycle.ts";
 import { doctorCheck, errorMessage } from "./shared.ts";
 
 export type ManifestInspection = {

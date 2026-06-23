@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { packagePath } from "../package-root.ts";
-import type { JsonObject } from "../types.ts";
+import type { JsonObject } from "../types/common.ts";
 
 export const PACKAGE_JSON = JSON.parse(fs.readFileSync(packagePath("package.json"), "utf8")) as JsonObject;
 export const MANIFEST_SCHEMA_VERSION = "opennori/manifest-v1";

@@ -11,10 +11,7 @@ import {
 } from "../../core.ts";
 import { validateSchema } from "../../validation.ts";
 import { relativeTo } from "../shared.ts";
-import type {
-  ActiveGoalSummary,
-  DoctorIssue
-} from "../../types.ts";
+import type { ActiveGoalSummary, DoctorIssue } from "../../types/lifecycle.ts";
 import { errorMessage } from "./shared.ts";
 
 export type ActiveGoalInspection = {

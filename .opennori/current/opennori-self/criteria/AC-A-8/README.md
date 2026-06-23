@@ -17,32 +17,24 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: write-command-review-routing-boundary-refactor - State-mutating CLI commands now route post-write current_gap, next_recommendation, and agent_next through goalReviewState instead of assembling routing responses with ad hoc currentGap/nextRecommendation calls. Evidence, profile, acceptance approval/evaluate/criterion, and architecture requirement/baseline command responses now use the shared read model after deterministic writes.
+Latest: architecture-boundary-refactor - OpenNori internal source modules now import domain type modules instead of the public type barrel, with guard tests covering type import boundaries, MCP read-only resources, generated Markdown review-only authority, and lifecycle external command adapter parsing.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed command files and confirm state writes remain command-local while response routing fields come from goalReviewState. Rerun the listed validation commands.
-Limitations: This only centralizes response routing after deterministic writes. Inventory/probe surfaces such as manifest, doctor, list, changes, activity-target, and draft creation may still compute lightweight current_gap summaries because they are not completion routing authorities.
+Reviewability: Inspect changed imports to confirm implementation modules use src/types/<domain>.ts rather than src/types.ts; inspect module-boundaries tests to confirm MCP has no write tools, generated Markdown parser is not a state import path, and setup/plugin-sync output parsing is confined to adapters. Rerun the listed typecheck and focused tests.
+Limitations: This slice hardens architecture boundaries and tests. It does not add new user-facing OpenNori workflow capability, and it deliberately avoids subjective AC quality validators.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-write-command-review-routing-boundary.json
+- .opennori/architecture/evidence/opennori-self-boundary-guard-architecture.json
 - npx tsc --noEmit --pretty false
-- npm run test:cli
-- npm run test:evidence
-- npm run test:profile
-- npm run test:architecture
-- npm run lint
-- node ./bin/opennori.js check --root . --json
-- node ./bin/opennori.js status --root . --json
-- src/cli/commands/evidence/add.ts
-- src/cli/commands/evidence/prune.ts
-- src/cli/commands/profile/add.ts
-- src/cli/commands/profile/check.ts
-- src/cli/commands/profile/evidence.ts
-- src/cli/commands/acceptance/approval.ts
-- src/cli/commands/acceptance/criterion.ts
-- src/cli/commands/acceptance/runtime-status.ts
-- src/cli/commands/architecture/requirement.ts
-- src/cli/commands/architecture/baseline.ts
+- npx vitest run test/module-boundaries.test.js
+- npx vitest run test/mcp.test.ts test/lifecycle-adapters.test.ts
+- npx vitest run test/acceptance.test.js --testNamePattern Markdown
+- src/types.ts
+- src/types
+- src/mcp
+- src/lifecycle/adapters
+- test/module-boundaries.test.js
+- docs/testing.md
 
 ## Files
 

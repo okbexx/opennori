@@ -1,12 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readJson } from "../core.ts";
-import type {
-  BuildVsBuyDecision,
-  BuildVsBuyDecisionSummary,
-  BuildVsBuyFinding,
-  BuildVsBuyHealth
-} from "../types.ts";
+import type { BuildVsBuyDecision, BuildVsBuyDecisionSummary, BuildVsBuyFinding, BuildVsBuyHealth } from "../types/architecture.ts";
 import { schemaErrorSummary, validateSchema } from "../validation.ts";
 import { architectureDir, errorMessage, relativeTo } from "./shared.ts";
 

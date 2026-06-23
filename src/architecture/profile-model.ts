@@ -1,10 +1,6 @@
 import { slugify } from "../core.ts";
-import type {
-  ArchitectureProfile,
-  ArchitectureProfileDescriptor,
-  JsonObject,
-  ValidationIssue
-} from "../types.ts";
+import type { ArchitectureProfile, ArchitectureProfileDescriptor } from "../types/architecture.ts";
+import type { JsonObject, ValidationIssue } from "../types/common.ts";
 import { normalizeTechnicalBaseline, technicalBaselineIsComplete } from "./technical-baseline.ts";
 
 export function architectureProfileDescriptor(

@@ -1,9 +1,5 @@
 import { pluginState } from "../../plugin.ts";
-import type {
-  DoctorCheck,
-  Manifest,
-  PluginState
-} from "../../types.ts";
+import type { DoctorCheck, Manifest, PluginState } from "../../types/lifecycle.ts";
 import { doctorCheck } from "./shared.ts";
 
 export type PluginHealthInspection = {

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { ManagedAction } from "../types.ts";
+import type { ManagedAction } from "../types/lifecycle.ts";
 
 function plannedDelete(root: string, relativePath: string, kind: string, { recursive = false, reason = undefined as string | undefined } = {}): ManagedAction {
   const target = path.join(root, relativePath);

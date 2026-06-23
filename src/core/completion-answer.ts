@@ -1,8 +1,5 @@
-import type {
-  CompletionAnswer,
-  EvidenceLedger,
-  NoriContract
-} from "../types.ts";
+import type { CompletionAnswer, NoriContract } from "../types/contract.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
 import { reviewAcceptanceQuality } from "../acceptance.ts";
 import { currentGap, evidenceHealth } from "./evidence.ts";
 import { emptyProjectProfile } from "./profile.ts";

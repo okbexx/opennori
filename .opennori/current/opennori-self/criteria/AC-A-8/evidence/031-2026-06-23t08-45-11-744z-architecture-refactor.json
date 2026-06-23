@@ -96,11 +96,6 @@
       "type": "artifact",
       "label": "dashboard/index.html",
       "path": "dashboard/index.html"
-    },
-    {
-      "type": "artifact",
-      "label": "dashboard/assets/index-CQhSd-vc.js",
-      "path": "dashboard/assets/index-CQhSd-vc.js"
     }
   ],
   "reviewability": "Inspect the dashboard radar modules to confirm radar-model only assembles the read-only model, radar-nodes owns snapshot-to-node projection, radar-geometry owns layout math, radar-status owns color/pulse/link style classification, and selection.ts reuses shared node projection. Rerun typecheck, dashboard, CLI, lint, check/status, and diff checks.",

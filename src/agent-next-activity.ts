@@ -1,4 +1,4 @@
-import type { AgentNext } from "./types.ts";
+import type { AgentNext } from "./types/agent.ts";
 
 export type AgentNextActivityInput = {
   state: AgentNext["state"];

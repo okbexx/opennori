@@ -2,7 +2,7 @@ import Ajv2020Module from "ajv/dist/2020.js";
 import fs from "node:fs";
 import path from "node:path";
 import { packagePath } from "./package-root.ts";
-import type { JsonObject } from "./types.ts";
+import type { JsonObject } from "./types/common.ts";
 
 const SCHEMA_DIR = packagePath("schemas");
 const SCHEMA_FILES = {

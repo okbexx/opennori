@@ -1,9 +1,6 @@
 import fs from "node:fs";
-import type {
-  EvidenceLedger,
-  NoriContract,
-  ParsedGeneratedAcceptanceReviewMarkdown
-} from "../types.ts";
+import type { NoriContract } from "../types/contract.ts";
+import type { EvidenceLedger, ParsedGeneratedAcceptanceReviewMarkdown } from "../types/evidence.ts";
 import { contractLanguage } from "../language.ts";
 import { inferCriterionLayer } from "./protocol.ts";
 

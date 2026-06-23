@@ -1,9 +1,6 @@
-import type {
-  AcceptanceStatus,
-  CurrentGap,
-  EvidenceLedger,
-  NoriContract
-} from "../types.ts";
+import type { AcceptanceStatus } from "../types/common.ts";
+import type { CurrentGap, NoriContract } from "../types/contract.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
 import { emptyProjectProfile, profileCompliance } from "./profile.ts";
 import { nowIso } from "./shared.ts";
 

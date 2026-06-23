@@ -42,6 +42,7 @@ automated exact-output tests.
 - `test/lifecycle.test.js`: package bin, setup/init/install/upgrade/uninstall/doctor.
 - `test/architecture.test.js`: Architecture Requirement, Baseline, Challenge, apply records, project profiles, and build-vs-buy.
 - `test/docs-schema.test.js`: public schemas and objective docs/Skill asset structure.
+- `test/module-boundaries.test.js`: architecture boundary guards for type imports, MCP read-only scope, generated Markdown authority, and lifecycle adapter parsing.
 - `test/cli-*.test.js`: focused command-module integration tests grouped by command domain.
 - `test/dashboard-selection.test.ts`: dashboard selection model.
 

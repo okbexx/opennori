@@ -14,7 +14,7 @@ import {
 } from "../../../core.ts";
 import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
-import type { ProfileItemInput } from "../../../types.ts";
+import type { ProfileItemInput } from "../../../types/profile.ts";
 import {
   jsonArg,
   rootArg,

@@ -11,7 +11,8 @@ import {
 } from "../../../core.ts";
 import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
-import type { EvidenceBasis, EvidenceInput } from "../../../types.ts";
+import type { EvidenceBasis } from "../../../types/common.ts";
+import type { EvidenceInput } from "../../../types/evidence.ts";
 import { evidenceResult, evidenceSourcesFromArgs } from "./source-parsing.ts";
 
 type CommandRuntimeOverride = Pick<ActiveGoalRuntime, "loadPair"> & Partial<Pick<ActiveGoalRuntime, "savePair" | "refreshManifest">>;

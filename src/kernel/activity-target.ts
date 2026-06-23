@@ -1,7 +1,7 @@
 import { currentGap } from "../core/evidence.ts";
 import { readProjectProfile } from "../core/profile.ts";
 import { findCurrentPairs, readGoalPayload } from "../core/shared.ts";
-import type { NoriActivity, NoriActivityInput, NoriActivityTarget } from "../types.ts";
+import type { NoriActivity, NoriActivityInput, NoriActivityTarget } from "../types/kernel.ts";
 
 type TargetCandidate = NoriActivityTarget & {
   active: boolean;

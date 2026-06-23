@@ -8,7 +8,7 @@ import {
 } from "../../../core.ts";
 import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
-import type { AcceptanceBasis, AcceptanceCriterion } from "../../../types.ts";
+import type { AcceptanceBasis, AcceptanceCriterion } from "../../../types/contract.ts";
 import { jsonArg, rootArg } from "./shared.ts";
 
 type CommandRuntimeOverride = Pick<ActiveGoalRuntime, "loadPair"> & Partial<Pick<ActiveGoalRuntime, "savePair" | "refreshManifest">>;

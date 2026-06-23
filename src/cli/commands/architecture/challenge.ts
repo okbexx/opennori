@@ -11,7 +11,7 @@ import {
 import { ok, slugify, writeJson } from "../../../core.ts";
 import { refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
-import type { ArchitectureChallenge } from "../../../types.ts";
+import type { ArchitectureChallenge } from "../../../types/architecture.ts";
 import { jsonArg, resolveRoot, rootArg } from "./shared.ts";
 
 export const architectureChallengeCommand = defineCommand({

@@ -1,4 +1,4 @@
-import type { NoriIdleSummary, NoriSnapshot } from "../types.ts";
+import type { NoriIdleSummary, NoriSnapshot } from "../types/kernel.ts";
 import type { currentGap } from "../core/evidence.ts";
 import type { profileCompliance, readProjectProfile } from "../core/profile.ts";
 import type { completionAnswer, interventionForProfile } from "../core/report.ts";

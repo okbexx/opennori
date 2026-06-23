@@ -1,17 +1,10 @@
 import { reviewAcceptanceQuality } from "../acceptance.ts";
-import type {
-  AcceptanceQualityAudit,
-  ArchitectureState,
-  CapabilityProfile,
-  CompletionAnswer,
-  CurrentGap,
-  EvidenceHealth,
-  EvidenceLedger,
-  NextRecommendation,
-  NoriContract,
-  ProfileCompliance,
-  UserIntervention
-} from "../types.ts";
+import type { AcceptanceQualityAudit } from "../types/acceptance.ts";
+import type { NextRecommendation } from "../types/agent.ts";
+import type { ArchitectureState } from "../types/architecture.ts";
+import type { CompletionAnswer, CurrentGap, NoriContract, UserIntervention } from "../types/contract.ts";
+import type { EvidenceHealth, EvidenceLedger } from "../types/evidence.ts";
+import type { CapabilityProfile, ProfileCompliance } from "../types/profile.ts";
 import { completionAnswer } from "./completion-answer.ts";
 import { currentGap, evidenceHealth } from "./evidence.ts";
 import { interventionForProfile } from "./intervention.ts";

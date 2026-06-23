@@ -1,5 +1,6 @@
 import path from "node:path";
-import type { AcceptanceCriterion, CriterionLedgerState, EvidenceLedger, NoriContract } from "../types.ts";
+import type { AcceptanceCriterion, NoriContract } from "../types/contract.ts";
+import type { CriterionLedgerState, EvidenceLedger } from "../types/evidence.ts";
 import { GENERATED_ACCEPTANCE_REVIEW_MARKER } from "./generated-acceptance-markdown.ts";
 import { inferCriterionLayer } from "./protocol.ts";
 

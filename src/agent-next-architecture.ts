@@ -1,4 +1,4 @@
-import type { AgentNext } from "./types.ts";
+import type { AgentNext } from "./types/agent.ts";
 import { agentNext } from "./agent-next-builder.ts";
 
 export function agentNextForArchitectureApply(input: {

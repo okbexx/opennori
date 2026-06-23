@@ -1,9 +1,6 @@
 import { architectureState } from "../architecture.ts";
 import { agentNextForDoctor } from "../agent-next.ts";
-import type {
-  DoctorCheck,
-  DoctorState
-} from "../types.ts";
+import type { DoctorCheck, DoctorState } from "../types/lifecycle.ts";
 import { inspectActiveGoals } from "./doctor/active-goals.ts";
 import { inspectManifestHealth } from "./doctor/manifest-health.ts";
 import { architectureHealthChecks, projectHealthChecks } from "./doctor/project-health.ts";

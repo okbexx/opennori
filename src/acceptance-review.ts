@@ -1,4 +1,4 @@
-import type { AcceptanceQualityAudit } from "./types.ts";
+import type { AcceptanceQualityAudit } from "./types/acceptance.ts";
 
 export function reviewAcceptanceQuality(_contract: unknown): AcceptanceQualityAudit {
   return {

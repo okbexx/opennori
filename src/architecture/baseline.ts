@@ -1,15 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readJson, slugify, writeJson } from "../core.ts";
-import type {
-  ArchitectureBaseline,
-  JsonObject,
-  PreferredLibraryPolicy,
-  TechnicalArchitectureBaseline,
-  TechnicalArchitectureFlow,
-  TechnicalArchitectureItem,
-  ValidationIssue
-} from "../types.ts";
+import type { ArchitectureBaseline, PreferredLibraryPolicy, TechnicalArchitectureBaseline, TechnicalArchitectureFlow, TechnicalArchitectureItem } from "../types/architecture.ts";
+import type { JsonObject, ValidationIssue } from "../types/common.ts";
 import { validateSchema } from "../validation.ts";
 import { resolveArchitectureProfile } from "./profile.ts";
 import { ARCHITECTURE_BASELINE_SCHEMA_VERSION, architectureBaselinePaths } from "./shared.ts";

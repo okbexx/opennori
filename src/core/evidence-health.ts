@@ -1,10 +1,5 @@
-import type {
-  EvidenceHealth,
-  EvidenceHealthFinding,
-  EvidenceLedger,
-  EvidenceRecord,
-  NoriContract
-} from "../types.ts";
+import type { NoriContract } from "../types/contract.ts";
+import type { EvidenceHealth, EvidenceHealthFinding, EvidenceLedger, EvidenceRecord } from "../types/evidence.ts";
 import { EVIDENCE_HEALTH_STALE_DAYS, evidencePathExists, sourceIsProductEvidence } from "./evidence-source.ts";
 import { evidenceView } from "./evidence-view.ts";
 

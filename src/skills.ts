@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import { packagePath } from "./package-root.ts";
-import type { JsonObject } from "./types.ts";
+import type { JsonObject } from "./types/common.ts";
 
 export const OPENNORI_PLUGIN_ROOT = packagePath("plugins", "opennori");
 export const OPENNORI_PLUGIN_MANIFEST_PATH = path.join(OPENNORI_PLUGIN_ROOT, ".codex-plugin", "plugin.json");

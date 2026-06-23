@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { PathPair } from "../types.ts";
+import type { PathPair } from "../types/lifecycle.ts";
 
 export const ARCHITECTURE_BASELINE_SCHEMA_VERSION = "opennori/architecture-baseline-v1";
 export const ARCHITECTURE_CHALLENGE_SCHEMA_VERSION = "opennori/architecture-challenge-v1";

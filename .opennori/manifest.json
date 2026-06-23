@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T09:24:59.282Z",
+  "updated_at": "2026-06-23T10:12:12.939Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -632,6 +632,17 @@
         "summary": "Split Architecture Profile content, model validation, and storage facade boundaries while keeping subjective architecture quality in Skills and user review.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-architecture-profile-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-boundary-guard-architecture",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Internal source modules now import domain type modules instead of the public src/types.ts barrel, and boundary tests guard MCP read-only resources, generated Markdown review-only authority, and lifecycle external command adapters.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-boundary-guard-architecture.json",
         "schema_valid": true,
         "schema_errors": []
       },

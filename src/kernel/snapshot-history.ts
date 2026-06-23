@@ -1,5 +1,5 @@
 import { findHistoryPairs, readGoalPayload } from "../core/shared.ts";
-import type { NoriIdleSummary } from "../types.ts";
+import type { NoriIdleSummary } from "../types/kernel.ts";
 import { projectRelative } from "./snapshot-paths.ts";
 
 export function latestHistorySummary(root: string): NoriIdleSummary {

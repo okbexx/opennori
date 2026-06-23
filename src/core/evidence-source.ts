@@ -1,10 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type {
-  EvidenceInput,
-  EvidenceSource,
-  NormalizedEvidence
-} from "../types.ts";
+import type { EvidenceInput, EvidenceSource, NormalizedEvidence } from "../types/evidence.ts";
 
 export const VALID_EVIDENCE_RESULTS = new Set(["failing", "passing", "blocked", "waived"]);
 export const EVIDENCE_HEALTH_STALE_DAYS = 14;

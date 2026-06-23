@@ -1,4 +1,4 @@
-import type { ContextExport, ContextExportPair } from "../types.ts";
+import type { ContextExport, ContextExportPair } from "../types/lifecycle.ts";
 import { buildContextExportPayload } from "./context-export-payload.ts";
 import { collectContextExportState } from "./context-export-state.ts";
 

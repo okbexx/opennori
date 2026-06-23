@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { nowIso, readJson, writeJson } from "../core/shared.ts";
-import type { NoriActivity, NoriActivityInput, NoriActivityState } from "../types.ts";
+import type { NoriActivity, NoriActivityInput, NoriActivityState } from "../types/kernel.ts";
 
 export const ACTIVITY_SCHEMA_VERSION = "opennori/activity-v1";
 

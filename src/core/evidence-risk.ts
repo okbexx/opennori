@@ -1,10 +1,6 @@
-import type {
-  AcceptanceCriterion,
-  EvidenceResult,
-  NormalizedEvidence,
-  RiskGateResult,
-  RiskLevel
-} from "../types.ts";
+import type { EvidenceResult, RiskLevel } from "../types/common.ts";
+import type { AcceptanceCriterion } from "../types/contract.ts";
+import type { NormalizedEvidence, RiskGateResult } from "../types/evidence.ts";
 import { sourceIsContext } from "./evidence-source.ts";
 
 export function applyRiskGate(criterion: AcceptanceCriterion, evidence: NormalizedEvidence): RiskGateResult {

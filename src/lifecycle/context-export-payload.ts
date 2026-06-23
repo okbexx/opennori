@@ -1,6 +1,6 @@
 import { safeReadManifest } from "./manifest.ts";
 import { contextExportPaths } from "./context-export-paths.ts";
-import type { ContextExport } from "../types.ts";
+import type { ContextExport } from "../types/lifecycle.ts";
 import type { ContextExportState } from "./context-export-state.ts";
 
 export function buildContextExportPayload(state: ContextExportState): ContextExport {

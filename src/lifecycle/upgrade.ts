@@ -19,7 +19,7 @@ import {
   protocolTemplate,
   sameStringSet
 } from "./shared.ts";
-import type { ManagedAction } from "../types.ts";
+import type { ManagedAction } from "../types/lifecycle.ts";
 
 export function applyUpgradeActions(actions: ManagedAction[]): void {
   for (const action of actions) {

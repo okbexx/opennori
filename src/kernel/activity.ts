@@ -1,4 +1,4 @@
-import type { NoriActivity, NoriActivityInput } from "../types.ts";
+import type { NoriActivity, NoriActivityInput } from "../types/kernel.ts";
 import { publishActivityChange, publishActivityFinished } from "./activity-events.ts";
 import { inferActivityTarget, resolveInputTarget } from "./activity-target.ts";
 import { DEFAULT_ACTIVITY_TTL_MS, normalizeActivity, readActivity, saveActivity } from "./activity-store.ts";

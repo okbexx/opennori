@@ -1,4 +1,4 @@
-import type { NoriActivity } from "../types.ts";
+import type { NoriActivity } from "../types/kernel.ts";
 
 export function defaultAgentSummary(message: string) {
   return {

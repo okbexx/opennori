@@ -10,7 +10,8 @@ import {
   type GoalStateLocation
 } from "../core.ts";
 import { refreshManifest } from "../lifecycle.ts";
-import type { EvidenceLedger, NoriContract } from "../types.ts";
+import type { NoriContract } from "../types/contract.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
 import type { ActiveGoalArgs } from "./active-goal-args.ts";
 
 export type ActiveGoalPair = {

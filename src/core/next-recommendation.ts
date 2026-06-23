@@ -1,8 +1,6 @@
-import type {
-  EvidenceLedger,
-  NextRecommendation,
-  NoriContract
-} from "../types.ts";
+import type { NextRecommendation } from "../types/agent.ts";
+import type { NoriContract } from "../types/contract.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
 import { reviewAcceptanceQuality } from "../acceptance.ts";
 import { currentGap, evidenceHealth } from "./evidence.ts";
 import { emptyProjectProfile, profileCompliance } from "./profile.ts";

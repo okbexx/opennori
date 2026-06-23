@@ -1,8 +1,4 @@
-import type {
-  TechnicalArchitectureBaseline,
-  TechnicalArchitectureFlow,
-  TechnicalArchitectureItem
-} from "../types.ts";
+import type { TechnicalArchitectureBaseline, TechnicalArchitectureFlow, TechnicalArchitectureItem } from "../types/architecture.ts";
 
 function asArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? value as T[] : [];

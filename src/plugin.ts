@@ -7,7 +7,8 @@ import {
   OPENNORI_PLUGIN_SKILLS_DIR,
   OPENNORI_SKILLS
 } from "./skills.ts";
-import type { JsonObject, PluginState } from "./types.ts";
+import type { JsonObject } from "./types/common.ts";
+import type { PluginState } from "./types/lifecycle.ts";
 
 const MARKETPLACE_PLUGIN_PATH = "./plugins/opennori";
 const PLUGIN_MANIFEST_PATH = OPENNORI_PLUGIN_MANIFEST_PATH;

@@ -1,10 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readJson, writeJson } from "../core.ts";
-import type {
-  ArchitectureProfile,
-  ArchitectureProfileListItem
-} from "../types.ts";
+import type { ArchitectureProfile, ArchitectureProfileListItem } from "../types/architecture.ts";
 import { BUILTIN_ARCHITECTURE_PROFILES } from "./builtin-profiles.ts";
 import {
   architectureProfileDescriptor,

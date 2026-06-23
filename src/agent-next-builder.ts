@@ -1,4 +1,4 @@
-import type { AgentNext } from "./types.ts";
+import type { AgentNext } from "./types/agent.ts";
 import { dashboardActivityFor } from "./agent-next-activity.ts";
 
 export const AGENT_NEXT_SCHEMA_VERSION = "opennori/agent-next-v1" as const;

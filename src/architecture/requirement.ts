@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { nowIso, readJson, writeJson } from "../core.ts";
-import type { ArchitectureRequirement, ArchitectureRequirementStatus } from "../types.ts";
+import type { ArchitectureRequirement, ArchitectureRequirementStatus } from "../types/architecture.ts";
 import {
   ARCHITECTURE_REQUIREMENT_SCHEMA_VERSION,
   architectureRequirementPath,

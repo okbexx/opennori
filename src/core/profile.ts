@@ -1,15 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import type {
-  CapabilityProfile,
-  CapabilityProfileEvidence,
-  CapabilityProfileItem,
-  EvidenceLedger,
-  ProfileCompliance,
-  ProfileComplianceStatus,
-  ProfileEvidenceInput,
-  ProfileItemInput
-} from "../types.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
+import type { CapabilityProfile, CapabilityProfileEvidence, CapabilityProfileItem, ProfileCompliance, ProfileComplianceStatus, ProfileEvidenceInput, ProfileItemInput } from "../types/profile.ts";
 import { nowIso, readJson, slugify, writeJson } from "./shared.ts";
 
 export const PROJECT_PROFILE_SCHEMA_VERSION = "opennori/project-profile-v1";

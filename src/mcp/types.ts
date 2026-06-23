@@ -1,4 +1,5 @@
-import type { ContextExport, DoctorState, NoriSnapshot } from "../types.ts";
+import type { NoriSnapshot } from "../types/kernel.ts";
+import type { ContextExport, DoctorState } from "../types/lifecycle.ts";
 
 export type McpResourceName = "context" | "snapshot" | "doctor";
 

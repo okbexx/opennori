@@ -1,10 +1,8 @@
-import type {
-  AcceptanceQualityAudit,
-  AgentSkill,
-  ArchitectureState,
-  CapabilityProfile,
-  EvidenceLedger
-} from "../types.ts";
+import type { AcceptanceQualityAudit } from "../types/acceptance.ts";
+import type { AgentSkill } from "../types/agent.ts";
+import type { ArchitectureState } from "../types/architecture.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
+import type { CapabilityProfile } from "../types/profile.ts";
 import { emptyProjectProfile, profileCompliance } from "./profile.ts";
 
 export type CompletionContext = {

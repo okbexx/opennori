@@ -1,8 +1,5 @@
-import type {
-  AgentNext,
-  CurrentGap,
-  NextRecommendation
-} from "./types.ts";
+import type { AgentNext, NextRecommendation } from "./types/agent.ts";
+import type { CurrentGap } from "./types/contract.ts";
 import { agentNext } from "./agent-next-builder.ts";
 
 export function agentNextForRecommendation(

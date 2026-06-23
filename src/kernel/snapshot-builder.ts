@@ -1,5 +1,5 @@
 import { readProjectProfile } from "../core/profile.ts";
-import type { NoriSnapshot } from "../types.ts";
+import type { NoriSnapshot } from "../types/kernel.ts";
 import { readActivity } from "./activity.ts";
 import { latestEvent, readEvents } from "./events.ts";
 import { buildActiveSnapshotFromPair, buildNoGoalSnapshot } from "./snapshot-goal.ts";

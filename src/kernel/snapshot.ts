@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { writeJson } from "../core/shared.ts";
-import type { NoriSnapshot } from "../types.ts";
+import type { NoriSnapshot } from "../types/kernel.ts";
 import { buildSnapshot } from "./snapshot-builder.ts";
 import { snapshotPath } from "./snapshot-paths.ts";
 

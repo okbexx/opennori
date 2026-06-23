@@ -1,9 +1,6 @@
-import type {
-  CapabilityProfile,
-  EvidenceLedger,
-  NoriContract,
-  UserIntervention
-} from "../types.ts";
+import type { NoriContract, UserIntervention } from "../types/contract.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
+import type { CapabilityProfile } from "../types/profile.ts";
 import { profileCompliance } from "./profile.ts";
 
 export function intervention(contract: NoriContract, ledger: EvidenceLedger): UserIntervention {

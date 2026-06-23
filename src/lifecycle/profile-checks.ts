@@ -1,7 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { addProfileEvidence, readJson } from "../core.ts";
-import type { AutoProfileCheck, CapabilityProfile, EvidenceLedger, JsonObject, ProfileEvidenceResult } from "../types.ts";
+import type { JsonObject } from "../types/common.ts";
+import type { EvidenceLedger } from "../types/evidence.ts";
+import type { AutoProfileCheck } from "../types/lifecycle.ts";
+import type { CapabilityProfile, ProfileEvidenceResult } from "../types/profile.ts";
 
 function skillSearchPaths(name: string): string[] {
   const home = process.env.HOME || "";

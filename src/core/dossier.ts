@@ -1,12 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import type {
-  AcceptanceCriterion,
-  EvidenceLedger,
-  EvidenceRecord,
-  NoriContract,
-  NoriEvidencePayload
-} from "../types.ts";
+import type { AcceptanceCriterion, NoriContract } from "../types/contract.ts";
+import type { EvidenceLedger, EvidenceRecord, NoriEvidencePayload } from "../types/evidence.ts";
 import type { GoalStatePair } from "./goal-state.ts";
 import { readJson, writeJson } from "./io.ts";
 import { renderCriterionReadme, renderGoalReadme } from "./dossier-render.ts";

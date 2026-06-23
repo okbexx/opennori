@@ -1,12 +1,5 @@
 import path from "node:path";
-import type {
-  InstallPlan,
-  LifecyclePlanAction,
-  LifecyclePlanSummary,
-  ManagedAction,
-  UninstallPlan,
-  UpgradePlan
-} from "../types.ts";
+import type { InstallPlan, LifecyclePlanAction, LifecyclePlanSummary, ManagedAction, UninstallPlan, UpgradePlan } from "../types/lifecycle.ts";
 
 const WRITING_INSTALL_ACTIONS = new Set(["create", "overwrite", "update", "merge"]);
 const WRITING_UNINSTALL_ACTIONS = new Set(["delete", "delete-tree"]);
