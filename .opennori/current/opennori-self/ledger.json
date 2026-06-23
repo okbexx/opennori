@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T07:59:32.499Z",
+  "updated_at": "2026-06-23T08:06:29.938Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -6222,9 +6222,79 @@
           "limitations": "This is an internal routing boundary refactor. It preserves existing agent_next JSON semantics and does not add new recommendation states, change Skill policy text, or prove subjective agent judgment quality.",
           "gate": "accepted",
           "created_at": "2026-06-23T07:59:32.496Z"
+        },
+        {
+          "kind": "architecture-refactor",
+          "basis": "tool-observation",
+          "summary": "Acceptance responsibilities were split into Skill-prepared input normalization, subjective-review surface, and discovery/brainstorm Markdown rendering while preserving existing public imports.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-acceptance-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-acceptance-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:acceptance",
+              "command": "npm run test:acceptance"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:cli",
+              "command": "npm run test:cli"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:reporting",
+              "command": "npm run test:reporting"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:quick",
+              "command": "npm run test:quick"
+            },
+            {
+              "type": "command",
+              "label": "npm run lint",
+              "command": "npm run lint"
+            },
+            {
+              "type": "artifact",
+              "label": "src/acceptance.ts",
+              "path": "src/acceptance.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/acceptance-skill-input.ts",
+              "path": "src/acceptance-skill-input.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/acceptance-markdown.ts",
+              "path": "src/acceptance-markdown.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/acceptance-review.ts",
+              "path": "src/acceptance-review.ts"
+            }
+          ],
+          "reviewability": "Inspect the split acceptance modules. Confirm Skill-prepared input handling, Markdown review rendering, and subjective review placeholder are separated, and src/acceptance.ts remains a stable export for existing callers. Rerun the listed typecheck and domain tests.",
+          "limitations": "This is an internal boundary refactor. It preserves existing CLI behavior and does not add subjective AC quality validation; Skills and users still own acceptance quality judgment.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T08:06:29.935Z"
         }
       ],
-      "updated_at": "2026-06-23T07:59:32.496Z"
+      "updated_at": "2026-06-23T08:06:29.935Z"
     },
     "AC-A-9": {
       "status": "passing",

@@ -17,24 +17,24 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor - AgentNext routing was split into lifecycle readiness, recommendation routing, and architecture-apply handoff modules while preserving existing CLI JSON routes.
+Latest: architecture-refactor - Acceptance responsibilities were split into Skill-prepared input normalization, subjective-review surface, and discovery/brainstorm Markdown rendering while preserving existing public imports.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the new AgentNext modules. Confirm lifecycle readiness no longer shares a file with recommendation status routing, architecture apply handoff has its own module, and src/agent-next.ts remains a stable export for existing callers. Rerun the listed typecheck and domain tests.
-Limitations: This is an internal routing boundary refactor. It preserves existing agent_next JSON semantics and does not add new recommendation states, change Skill policy text, or prove subjective agent judgment quality.
+Reviewability: Inspect the split acceptance modules. Confirm Skill-prepared input handling, Markdown review rendering, and subjective review placeholder are separated, and src/acceptance.ts remains a stable export for existing callers. Rerun the listed typecheck and domain tests.
+Limitations: This is an internal boundary refactor. It preserves existing CLI behavior and does not add subjective AC quality validation; Skills and users still own acceptance quality judgment.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-agent-next-routing-boundary.json
+- .opennori/architecture/evidence/opennori-self-acceptance-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:architecture
+- npm run test:acceptance
 - npm run test:cli
 - npm run test:reporting
-- npm run test:lifecycle
+- npm run test:quick
 - npm run lint
-- src/agent-next.ts
-- src/agent-next-lifecycle.ts
-- src/agent-next-recommendation.ts
-- src/agent-next-architecture.ts
+- src/acceptance.ts
+- src/acceptance-skill-input.ts
+- src/acceptance-markdown.ts
+- src/acceptance-review.ts
 
 ## Files
 
