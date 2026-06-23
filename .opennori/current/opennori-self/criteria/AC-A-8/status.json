@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 19,
-  "latest_evidence_summary": "Recording evidence for one AC now updates that criterion's own status projection timestamp without rewriting unrelated AC status projections as newly updated.",
-  "updated_at": "2026-06-23T07:15:29.907Z"
+  "evidence_count": 20,
+  "latest_evidence_summary": "Dashboard App shell was split into focused read-only presentation modules while preserving snapshot subscription, radar selection, event console ordering, and the observation-only control boundary.",
+  "updated_at": "2026-06-23T07:24:35.861Z"
 }

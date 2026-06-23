@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-dashboard-shell-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Dashboard App shell now owns subscription and selection state while header, outcome HUD, inspect drawer, event console, and view helpers live in focused read-only modules.",
+  "fit": "The dashboard remains a React/Vite/Tailwind/Motion observation surface and does not gain state-writing controls or completion authority.",
+  "implementation_focus": "Split App.tsx into DashboardHeader, OutcomeHud, InspectDrawer, EventLogConsole, IconButton, OutcomeCard, and dashboard-view helpers while preserving existing snapshot/event APIs.",
+  "evidence": "npm run typecheck:dashboard; npm run build:dashboard; npm run test:dashboard; npm run lint",
+  "limitations": "",
+  "created_at": "2026-06-23T07:24:22.698Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

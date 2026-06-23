@@ -1,0 +1,70 @@
+{
+  "kind": "dashboard-shell-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "Dashboard App shell was split into focused read-only presentation modules while preserving snapshot subscription, radar selection, event console ordering, and the observation-only control boundary.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-dashboard-shell-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-dashboard-shell-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck:dashboard",
+      "command": "npm run typecheck:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run build:dashboard",
+      "command": "npm run build:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/App.tsx",
+      "path": "src/dashboard/src/App.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/dashboard-view.ts",
+      "path": "src/dashboard/src/dashboard-view.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/DashboardHeader.tsx",
+      "path": "src/dashboard/src/components/DashboardHeader.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/OutcomeHud.tsx",
+      "path": "src/dashboard/src/components/OutcomeHud.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/InspectDrawer.tsx",
+      "path": "src/dashboard/src/components/InspectDrawer.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/EventLogConsole.tsx",
+      "path": "src/dashboard/src/components/EventLogConsole.tsx"
+    }
+  ],
+  "reviewability": "Inspect App.tsx and the new dashboard components. App should own fetch/subscribe/selection state, while extracted components render only read-only snapshot/event data and expose no OpenNori write actions.",
+  "limitations": "This is a structural dashboard refactor. It does not add new dashboard UI behavior, screenshot verification, or browser pixel regression coverage.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T07:24:35.861Z"
+}

@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T07:15:30.012Z",
+  "updated_at": "2026-06-23T07:24:35.960Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -643,6 +643,17 @@
         "summary": "Split dashboard inspect rendering into node-type read-only panels while keeping the dashboard as an observation surface over projected OpenNori state.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-dashboard-inspect-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-dashboard-shell-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Dashboard App shell now owns subscription and selection state while header, outcome HUD, inspect drawer, event console, and view helpers live in focused read-only modules.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-dashboard-shell-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

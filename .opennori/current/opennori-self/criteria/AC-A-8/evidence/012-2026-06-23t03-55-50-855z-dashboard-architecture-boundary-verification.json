@@ -81,11 +81,6 @@
       "type": "artifact",
       "label": "dashboard/index.html",
       "path": "dashboard/index.html"
-    },
-    {
-      "type": "artifact",
-      "label": "dashboard/assets/index-QMqd8O4F.js",
-      "path": "dashboard/assets/index-QMqd8O4F.js"
     }
   ],
   "reviewability": "Inspect the listed dashboard source files. Confirm InspectNodePanel is now only a node-type router, the node panels are read-only renderers over snapshot rawData, Project Profile remains project-level observation, evidence panels only show review sources, and no confirmation or state-write controls were added. Rerun the listed dashboard, typecheck, lint, doctor, and status commands.",
