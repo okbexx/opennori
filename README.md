@@ -67,14 +67,11 @@ After installing the capability bundle, open a new Codex session and say:
 Use OpenNori for this goal.
 ```
 
-For advanced recovery, the setup command is equivalent to previewing and then
-confirming the same official Codex and npm actions:
-
-```bash
-codex plugin marketplace add okbexx/opennori --ref main
-codex plugin add opennori@opennori
-npm install -g opennori@latest
-```
+For recovery, rerun `npx opennori setup` or `opennori doctor` first. They show
+the missing bundle part and the recovery action without making Plugin, Skills,
+and CLI separate user choices. Internally setup delegates to official Codex
+Plugin and npm commands, but users should not need to run those commands by
+hand unless they are debugging Codex or npm itself.
 
 If only the installed Codex Plugin cache is stale during local development or
 recovery, preview and then confirm the refresh:
@@ -85,9 +82,10 @@ opennori plugin sync --confirm
 ```
 
 Direct CLI use is an advanced or automation path, not a separate product path
-from the Plugin and Skills. In an interactive terminal, common lifecycle and
-status commands print short human summaries by default; pass `--json` when an
-agent, script, or CI job needs the full deterministic payload.
+from the Plugin and Skills. In an interactive terminal, lifecycle, health,
+status, report, dashboard, profile, architecture, and plugin sync commands
+print short human summaries by default; pass `--json` when an agent, script, or
+CI job needs the full deterministic payload.
 
 ## Quick Start
 
@@ -926,13 +924,7 @@ opennori plugin sync --local --confirm
 使用 OpenNori 来完成这个目标。
 ```
 
-对于高级修复，`setup` 命令行等同于预览并执行以下官方的 Codex 和 npm 动作：
-
-```bash
-codex plugin marketplace add okbexx/opennori --ref main
-codex plugin add opennori@opennori
-npm install -g opennori@latest
-```
+排障恢复时，优先重新运行 `npx opennori setup` 或 `opennori doctor`。它们会说明缺少的是能力包的哪一部分，并给出恢复动作，而不是把 Plugin、Skills 和 CLI 拆成多个用户选择。setup 内部会委托官方 Codex Plugin 和 npm 命令执行，但除非是在排查 Codex 或 npm 本身的问题，否则用户不应该手动执行这些底层命令。
 
 如果只是本地开发或恢复时 Codex Plugin 缓存落后，可以先预览再确认刷新插件缓存：
 
@@ -941,7 +933,7 @@ opennori plugin sync
 opennori plugin sync --confirm
 ```
 
-直接使用 CLI 命令行是高级调试或 CI/CD 自动化的通道，绝非与插件/技能相脱离的独立产品线。在交互式终端里，常见生命周期和状态命令默认输出短摘要；当 agent、脚本或 CI 需要完整确定性状态时，请显式传入 `--json`。
+直接使用 CLI 命令行是高级调试或 CI/CD 自动化的通道，绝非与插件/技能相脱离的独立产品线。在交互式终端里，生命周期、健康诊断、状态、报告、dashboard、profile、architecture 和插件同步命令默认输出短摘要；当 agent、脚本或 CI 需要完整确定性状态时，请显式传入 `--json`。
 
 ## 快速开始
 

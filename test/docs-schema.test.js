@@ -169,6 +169,8 @@ test("public product surfaces present OpenNori as one capability bundle", { tags
     assert.doesNotMatch(text, /Try the CLI once/);
     assert.doesNotMatch(text, /Pin the CLI to a project/);
     assert.doesNotMatch(text, /npm install -D opennori/);
+    assert.doesNotMatch(text, /codex plugin marketplace add okbexx\/opennori/);
+    assert.doesNotMatch(text, /npm install -g opennori@latest/);
   }
 });
 
