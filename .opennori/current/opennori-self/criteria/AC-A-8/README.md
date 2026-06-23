@@ -17,28 +17,30 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: activity-command-boundary-refactor - Activity CLI internals now separate citty argument definitions, activity input/target normalization, dashboard signal payload writing, and snapshot summary response projection. The opennori activity commands still publish only dashboard_activity_only signals, return no full snapshot payload, and do not write Product AC evidence or contract state.
+Latest: goal-review-state-boundary-refactor - OpenNori now centralizes read-only goal outcome assembly in GoalReviewState. Status, resume, report, check, and context export share the same current gap, completion, intervention, acceptance review, evidence health, architecture, Project Profile compliance, next recommendation, and agent_next projection without adding any new state writer or subjective validator.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed activity command modules. Confirm activity.ts only defines commands, args.ts defines CLI args, input.ts normalizes target/input, payload.ts performs dashboard signal writes and refreshes the snapshot projection, and response.ts returns only a compact snapshot_summary with side_effect dashboard_activity_only. Rerun the listed commands.
-Limitations: This verifies CLI activity boundary and tests. It does not add new dashboard UI behavior or long-running agent telemetry beyond the existing activity/event projections.
+Reviewability: Inspect goal-review-state.ts and the listed command modules. Confirm the projection is read-only, uses existing core/domain computations, and does not write .opennori state. Rerun the listed commands and compare status/report/context export output shape.
+Limitations: This centralizes outcome assembly for current CLI/report/context surfaces. Some lower-level helpers and dashboard snapshot builders still compute their own specialized projections and may be future cleanup candidates.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-activity-command-boundary.json
+- .opennori/architecture/evidence/opennori-self-goal-review-state-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:dashboard
+- npm run test:reporting
 - npm run test:cli
+- npx vitest run test/mcp.test.ts test/cli-acceptance.test.js test/cli-reporting.test.js test/cli-human-output.test.js
 - npm run lint
 - node ./bin/opennori.js check --root . --json
 - node ./bin/opennori.js status --root . --json
-- node ./bin/opennori.js activity show --root . --json
-- src/cli/commands/activity.ts
-- src/cli/commands/activity/args.ts
-- src/cli/commands/activity/input.ts
-- src/cli/commands/activity/payload.ts
-- src/cli/commands/activity/response.ts
-- test/cli-dashboard.test.js
-- test/cli-human-output.test.js
+- node ./bin/opennori.js context export --root . --json
+- src/lifecycle/goal-review-state.ts
+- src/lifecycle/context-export-state.ts
+- src/cli/commands/acceptance/runtime-status.ts
+- src/cli/commands/reporting.ts
+- src/cli/commands/check.ts
+- test/reporting.test.js
+- test/cli-reporting.test.js
+- test/cli-acceptance.test.js
 
 ## Files
 

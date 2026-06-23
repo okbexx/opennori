@@ -1,11 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { defineCommand } from "citty";
-import { reviewAcceptanceQuality } from "../../acceptance.ts";
-import { agentNextForRecommendation } from "../../agent-next.ts";
-import { appendEvent, completionAnswer, currentGap, evidenceHealth, fail, interventionForProfile, nextRecommendation, ok, pathsForGoal, readProjectProfile, refreshSnapshot, recomputeWorkflowStatus } from "../../core.ts";
-import { architectureState, renderReportWithArchitecture } from "../../architecture.ts";
-import { refreshManifest } from "../../lifecycle.ts";
+import { appendEvent, fail, ok, pathsForGoal, readProjectProfile, refreshSnapshot, recomputeWorkflowStatus } from "../../core.ts";
+import { renderReportWithArchitecture } from "../../architecture.ts";
+import { goalReviewState, refreshManifest } from "../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../runtime.ts";
 
 type CommandRuntimeOverride = Pick<ActiveGoalRuntime, "loadPair"> & Partial<Pick<ActiveGoalRuntime, "savePair" | "refreshManifest">>;
@@ -29,18 +27,15 @@ export const reportCommand = defineCommand({
   },
   run({ args, data }) {
     const { contract, ledger, root } = data.loadPair(args);
-    const architecture = architectureState(root, contract.goal_id);
-    const profile = readProjectProfile(root);
     const output = path.resolve(args.output || pathsForGoal(root, contract.goal_id).reportPath);
     fs.mkdirSync(path.dirname(output), { recursive: true });
     fs.writeFileSync(output, renderReportWithArchitecture(root, contract, ledger));
     refreshManifest(root);
-    const gap = currentGap(contract, ledger, profile);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
+    const review = goalReviewState(root, contract, ledger);
     appendEvent(root, {
       type: "report.generated",
       goal_id: contract.goal_id,
-      gap_id: gap?.id,
+      gap_id: review.current_gap?.id,
       actor: { kind: "agent", name: "Agent", skill: "nori-reporting" },
       summary: `Generated OpenNori report for ${contract.goal_id}.`,
       data: { report_path: output, workflow_status: ledger.status }
@@ -52,18 +47,18 @@ export const reportCommand = defineCommand({
         presentation: contract.presentation,
         report_path: output,
         workflow_status: ledger.status,
-        current_gap: gap,
-        completion: completionAnswer(contract, ledger, { root, architecture, profile }),
-        intervention: interventionForProfile(contract, ledger, profile),
-        acceptance_review: reviewAcceptanceQuality(contract),
-        evidence_health: evidenceHealth(contract, ledger, { root }),
-        architecture,
-        next_recommendation: recommendation,
-        agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation)
+        current_gap: review.current_gap,
+        completion: review.completion,
+        intervention: review.intervention,
+        acceptance_review: review.acceptance_review,
+        evidence_health: review.evidence_health,
+        architecture: review.architecture,
+        next_recommendation: review.next_recommendation,
+        agent_next: review.agent_next
       },
       [{ kind: "acceptance_report", path: output }],
       [],
-      recommendation.actions
+      review.next_recommendation.actions
     );
   }
 });

@@ -1,0 +1,100 @@
+{
+  "kind": "goal-review-state-boundary-refactor",
+  "basis": "tool-observation",
+  "summary": "OpenNori now centralizes read-only goal outcome assembly in GoalReviewState. Status, resume, report, check, and context export share the same current gap, completion, intervention, acceptance review, evidence health, architecture, Project Profile compliance, next recommendation, and agent_next projection without adding any new state writer or subjective validator.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-goal-review-state-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-goal-review-state-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:reporting",
+      "command": "npm run test:reporting"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli",
+      "command": "npm run test:cli"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/mcp.test.ts test/cli-acceptance.test.js test/cli-reporting.test.js test/cli-human-output.test.js",
+      "command": "npx vitest run test/mcp.test.ts test/cli-acceptance.test.js test/cli-reporting.test.js test/cli-human-output.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js context export --root . --json",
+      "command": "node ./bin/opennori.js context export --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/goal-review-state.ts",
+      "path": "src/lifecycle/goal-review-state.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/context-export-state.ts",
+      "path": "src/lifecycle/context-export-state.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/runtime-status.ts",
+      "path": "src/cli/commands/acceptance/runtime-status.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/reporting.ts",
+      "path": "src/cli/commands/reporting.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/check.ts",
+      "path": "src/cli/commands/check.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/reporting.test.js",
+      "path": "test/reporting.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-reporting.test.js",
+      "path": "test/cli-reporting.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-acceptance.test.js",
+      "path": "test/cli-acceptance.test.js"
+    }
+  ],
+  "reviewability": "Inspect goal-review-state.ts and the listed command modules. Confirm the projection is read-only, uses existing core/domain computations, and does not write .opennori state. Rerun the listed commands and compare status/report/context export output shape.",
+  "limitations": "This centralizes outcome assembly for current CLI/report/context surfaces. Some lower-level helpers and dashboard snapshot builders still compute their own specialized projections and may be future cleanup candidates.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T09:05:19.541Z"
+}

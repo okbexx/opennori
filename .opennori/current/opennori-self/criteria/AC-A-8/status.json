@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 33,
-  "latest_evidence_summary": "Activity CLI internals now separate citty argument definitions, activity input/target normalization, dashboard signal payload writing, and snapshot summary response projection. The opennori activity commands still publish only dashboard_activity_only signals, return no full snapshot payload, and do not write Product AC evidence or contract state.",
-  "updated_at": "2026-06-23T08:59:09.974Z"
+  "evidence_count": 34,
+  "latest_evidence_summary": "OpenNori now centralizes read-only goal outcome assembly in GoalReviewState. Status, resume, report, check, and context export share the same current gap, completion, intervention, acceptance review, evidence health, architecture, Project Profile compliance, next recommendation, and agent_next projection without adding any new state writer or subjective validator.",
+  "updated_at": "2026-06-23T09:05:19.541Z"
 }

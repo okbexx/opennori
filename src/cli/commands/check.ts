@@ -1,8 +1,6 @@
 import { defineCommand } from "citty";
-import { reviewAcceptanceQuality } from "../../acceptance.ts";
-import { architectureState } from "../../architecture.ts";
-import { agentNextForRecommendation } from "../../agent-next.ts";
-import { currentGap, evidenceHealth, fail, nextRecommendation, ok, readProjectProfile, profileCompliance, validateContract } from "../../core.ts";
+import { fail, ok, validateContract } from "../../core.ts";
+import { goalReviewState } from "../../lifecycle.ts";
 import type { JsonObject } from "../../types.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
 
@@ -25,8 +23,9 @@ export const checkCommand = defineCommand({
     if (issues.length > 0) {
       return { ...fail("invalid_acceptance", "Acceptance contract failed validation", "Fix reported issues before continuing"), issues };
     }
-    const acceptanceReview = reviewAcceptanceQuality(contract);
-    const projectProfile = readProjectProfile(root);
+    const review = goalReviewState(root, contract, ledger);
+    const acceptanceReview = review.acceptance_review;
+    const projectProfile = review.profile;
     const warnings = acceptanceReview.findings.map((finding: JsonObject) => ({
       type: "acceptance_review",
       criterion_id: finding.criterion_id,
@@ -38,7 +37,7 @@ export const checkCommand = defineCommand({
     const nextActions = acceptanceReview.status === "needs-user-review"
       ? ["Use nori-acceptance to review unresolved acceptance ambiguity with the user, then revise criteria, record assumptions, or accept the review risk before claiming confident completion."]
       : [];
-    const architecture = architectureState(root, contract.goal_id);
+    const architecture = review.architecture;
     const architectureWarnings: JsonObject[] = [];
     if (architecture.requirement.status === "unknown") {
       architectureWarnings.push({
@@ -112,7 +111,7 @@ export const checkCommand = defineCommand({
       recovery: finding.recovery
     }))
       : [];
-    const health = evidenceHealth(contract, ledger, { root });
+    const health = review.evidence_health;
     const evidenceHealthWarnings = health.findings.map((finding: JsonObject) => ({
       type: "evidence_health",
       criterion_id: finding.criterion_id,
@@ -121,7 +120,7 @@ export const checkCommand = defineCommand({
       message: finding.message,
       recovery: finding.recovery
     }));
-    const profile = profileCompliance(projectProfile, ledger);
+    const profile = review.capability_compliance;
     const profileWarnings = profile.review.map((item: JsonObject) => ({
       type: "profile_review",
       item_id: item.id,
@@ -148,13 +147,11 @@ export const checkCommand = defineCommand({
     if (profile.review.length > 0) {
       nextActions.push("Review profile_review warnings before treating this goal as confidently complete.");
     }
-    const gap = currentGap(contract, ledger, projectProfile);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile: projectProfile });
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
       workflow_status: ledger.status,
-      current_gap: gap,
+      current_gap: review.current_gap,
       statuses: Object.fromEntries(Object.entries(ledger.criteria).map(([id, state]) => [id, (state as any).status])),
       acceptance_review: acceptanceReview,
       capability_profile: projectProfile,
@@ -166,8 +163,8 @@ export const checkCommand = defineCommand({
         architecture
       },
       evidence_health: health,
-      next_recommendation: recommendation,
-      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation)
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next
     }, [], combinedWarnings, nextActions);
   }
 });

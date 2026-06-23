@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-goal-review-state-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Goal review outcome assembly will be centralized as a read-only lifecycle projection so status, resume, report, check, and context export do not each assemble completion, current gap, evidence health, architecture, profile, and agent_next independently.",
+  "fit": "The change follows the TypeScript agent-state CLI baseline: structured .opennori state remains authoritative, CLI commands stay deterministic, and the projection has no write side effects or subjective AC validation.",
+  "implementation_focus": "Introduce a shared read-only GoalReviewState projection and route reporting/context/status commands through it without changing user-facing schemas.",
+  "evidence": "status/resume/report/check/context export currently repeat currentGap, completionAnswer, evidenceHealth, nextRecommendation, and agentNextForRecommendation assembly.",
+  "limitations": "This apply record covers read-only outcome assembly; validation is required after command refactors.",
+  "created_at": "2026-06-23T09:01:03.712Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

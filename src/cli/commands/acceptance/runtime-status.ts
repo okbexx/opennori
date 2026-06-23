@@ -1,20 +1,13 @@
 import { defineCommand } from "citty";
-import { reviewAcceptanceQuality } from "../../../acceptance.ts";
-import { architectureState } from "../../../architecture.ts";
-import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
-  completionAnswer,
   acceptanceBasisView,
   criterionStatusRows,
   currentGap,
-  evidenceHealth,
-  interventionForProfile,
-  nextRecommendation,
   ok,
   readProjectProfile,
   recomputeWorkflowStatus
 } from "../../../core.ts";
-import { refreshManifest } from "../../../lifecycle.ts";
+import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
 import { jsonArg, rootArg } from "./shared.ts";
 
@@ -31,18 +24,15 @@ export const nextCommand = defineCommand({
   },
   run({ args, data }) {
     const { contract, ledger, root = process.cwd() } = data.loadPair(args);
-    const architecture = architectureState(root, contract.goal_id);
-    const profile = readProjectProfile(root);
-    const gap = currentGap(contract, ledger, profile);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
+    const review = goalReviewState(root, contract, ledger);
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
-      current_gap: gap,
-      complete: gap === null,
-      next_recommendation: recommendation,
-      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation)
-    }, [], [], recommendation.actions);
+      current_gap: review.current_gap,
+      complete: review.current_gap === null,
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next
+    }, [], [], review.next_recommendation.actions);
   }
 });
 
@@ -61,26 +51,23 @@ export const resumeCommand = defineCommand({
   },
   run({ args, data }) {
     const { contract, ledger, acceptancePath, evidencePath, root } = data.loadPair(args);
-    const architecture = architectureState(root, contract.goal_id);
-    const profile = readProjectProfile(root);
-    const gap = currentGap(contract, ledger, profile);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
+    const review = goalReviewState(root, contract, ledger);
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
       acceptance_basis: acceptanceBasisView(contract),
       workflow_status: ledger.status,
-      current_gap: gap,
-      completion: completionAnswer(contract, ledger, { root, architecture, profile }),
-      intervention: interventionForProfile(contract, ledger, profile),
-      acceptance_review: reviewAcceptanceQuality(contract),
-      evidence_health: evidenceHealth(contract, ledger, { root }),
-      architecture,
-      next_recommendation: recommendation,
-      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation),
+      current_gap: review.current_gap,
+      completion: review.completion,
+      intervention: review.intervention,
+      acceptance_review: review.acceptance_review,
+      evidence_health: review.evidence_health,
+      architecture: review.architecture,
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next,
       acceptance_path: acceptancePath,
       evidence_path: evidencePath
-    }, [], [], recommendation.actions);
+    }, [], [], review.next_recommendation.actions);
   }
 });
 
@@ -99,25 +86,22 @@ export const statusCommand = defineCommand({
   },
   run({ args, data }) {
     const { contract, ledger, root } = data.loadPair(args);
-    const architecture = architectureState(root, contract.goal_id);
-    const profile = readProjectProfile(root);
-    const gap = currentGap(contract, ledger, profile);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
+    const review = goalReviewState(root, contract, ledger);
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
       acceptance_basis: acceptanceBasisView(contract),
       workflow_status: ledger.status,
-      current_gap: gap,
-      completion: completionAnswer(contract, ledger, { root, architecture, profile }),
-      intervention: interventionForProfile(contract, ledger, profile),
-      acceptance_review: reviewAcceptanceQuality(contract),
-      evidence_health: evidenceHealth(contract, ledger, { root }),
-      architecture,
-      next_recommendation: recommendation,
-      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation),
+      current_gap: review.current_gap,
+      completion: review.completion,
+      intervention: review.intervention,
+      acceptance_review: review.acceptance_review,
+      evidence_health: review.evidence_health,
+      architecture: review.architecture,
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next,
       criteria: criterionStatusRows(contract, ledger, { root })
-    }, [], [], recommendation.actions);
+    }, [], [], review.next_recommendation.actions);
   }
 });
 
