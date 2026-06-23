@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-types-domain-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Split the OpenNori protocol type surface into domain modules while preserving src/types.ts as the compatibility barrel.",
+  "fit": "The confirmed baseline requires domain-first modules and thin contract surfaces; the type definitions now live beside their product domains instead of accumulating in one broad protocol file.",
+  "implementation_focus": "Move common, contract, profile, evidence, agent, kernel, acceptance, architecture, and lifecycle types into src/types/* with src/types.ts re-exporting them for existing callers.",
+  "evidence": "npx tsc --noEmit --pretty false; npm run test:quick; inspect src/types.ts and src/types/*.ts",
+  "limitations": "This slice only modularizes the type surface. It does not yet split every runtime domain module or expand Biome coverage for core TypeScript files.",
+  "created_at": "2026-06-23T02:25:01.948Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

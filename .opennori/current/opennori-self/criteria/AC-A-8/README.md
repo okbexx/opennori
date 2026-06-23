@@ -17,19 +17,28 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: review-result - OpenNori self-dogfood no longer lets Product AC completion hide architecture risk: missing Architecture Baseline, stale agent guide, challenged baseline, or unhealthy build-vs-buy now prevents confident completion while preserving objective_complete and Product current_gap semantics.
+Latest: architecture-refactor-verification - OpenNori status/check now show the TypeScript agent-state architecture baseline remains valid after splitting the protocol type surface into domain modules; src/types.ts is a barrel, src/types/* holds domain-specific type definitions, and Project Profile core types no longer depend on evidence source types.
 Result: passing
 Basis: tool-observation
-Reviewability: Run npm run check and the targeted tests, then inspect README and reporting Skill for the same review-risk language.
-Limitations: This verifies the current self-dogfood boundary; a real non-OpenNori project dogfood remains a separate AC-A-10 adoption proof.
+Reviewability: Inspect src/types.ts and src/types/*.ts, rerun the listed commands, and confirm check/status list opennori-self-types-domain-boundary as a valid architecture apply record while Product and Architecture decisions remain complete/valid.
+Limitations: This evidence covers the type-surface architecture hardening slice. Runtime domain modules and Biome coverage for all core TypeScript files remain separate architecture work.
 
 Sources:
-- npm run check
-- npx vitest run test/core.test.js -t 'missing architecture baseline|build-vs-buy'
-- src/core/report.ts
-- test/core.test.js
-- README.md
-- plugins/opennori/skills/nori-reporting/SKILL.md
+- .opennori/architecture/evidence/opennori-self-types-domain-boundary.json
+- npx tsc --noEmit --pretty false
+- npm run test:quick
+- node ./bin/opennori.js check --root . --json
+- node ./bin/opennori.js status --root . --json
+- src/types.ts
+- src/types/common.ts
+- src/types/contract.ts
+- src/types/profile.ts
+- src/types/evidence.ts
+- src/types/agent.ts
+- src/types/kernel.ts
+- src/types/acceptance.ts
+- src/types/architecture.ts
+- src/types/lifecycle.ts
 
 ## Files
 

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import http from "node:http";
 import { test } from "vitest";
-import { tempRoot, writeBriefFile, writeActiveGoal, writeActiveGoalWithId, runDraftCommand, runInitCommand, runActivityFinishCommand, runActivityHeartbeatCommand, runActivityShowCommand, runActivityStartCommand, runDashboardCommand, runDoctorCommand, runProfileAddCommand, appendEvent, readEvents, refreshSnapshot, snapshotPath, writeJson, startDashboardServer, goalPaths, readGoalPayloadFromPaths } from "./support/command-fixtures.js";
+import { tempRoot, writeBriefFile, writeActiveGoal, writeActiveGoalWithId, runDraftCommand, runInitCommand, runActivityFinishCommand, runActivityHeartbeatCommand, runActivityShowCommand, runActivityStartCommand, runDashboardCommand, runDoctorCommand, runProfileAddCommand, appendEvent, readEvents, refreshSnapshot, snapshotPath, startDashboardServer, goalPaths } from "./support/command-fixtures.js";
 
 test("kernel events activity and snapshot expose dashboard state without replacing source files", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();

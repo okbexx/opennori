@@ -1,0 +1,90 @@
+{
+  "kind": "architecture-refactor-verification",
+  "basis": "tool-observation",
+  "summary": "OpenNori status/check now show the TypeScript agent-state architecture baseline remains valid after splitting the protocol type surface into domain modules; src/types.ts is a barrel, src/types/* holds domain-specific type definitions, and Project Profile core types no longer depend on evidence source types.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-types-domain-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-types-domain-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:quick",
+      "command": "npm run test:quick"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types.ts",
+      "path": "src/types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/common.ts",
+      "path": "src/types/common.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/contract.ts",
+      "path": "src/types/contract.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/profile.ts",
+      "path": "src/types/profile.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/evidence.ts",
+      "path": "src/types/evidence.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/agent.ts",
+      "path": "src/types/agent.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/kernel.ts",
+      "path": "src/types/kernel.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/acceptance.ts",
+      "path": "src/types/acceptance.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/architecture.ts",
+      "path": "src/types/architecture.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/lifecycle.ts",
+      "path": "src/types/lifecycle.ts"
+    }
+  ],
+  "reviewability": "Inspect src/types.ts and src/types/*.ts, rerun the listed commands, and confirm check/status list opennori-self-types-domain-boundary as a valid architecture apply record while Product and Architecture decisions remain complete/valid.",
+  "limitations": "This evidence covers the type-surface architecture hardening slice. Runtime domain modules and Biome coverage for all core TypeScript files remain separate architecture work.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T02:25:58.688Z"
+}
