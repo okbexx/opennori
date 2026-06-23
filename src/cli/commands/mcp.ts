@@ -1,6 +1,6 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { ok } from "../../core.ts";
+import { ok } from "../../core/io.ts";
 import { PACKAGE_JSON } from "../../lifecycle/shared.ts";
 import { MCP_CAPABILITY_MODEL, mcpResourceSummary } from "../../mcp/resources.ts";
 import { serveOpenNoriMcpStdio } from "../../mcp/server.ts";

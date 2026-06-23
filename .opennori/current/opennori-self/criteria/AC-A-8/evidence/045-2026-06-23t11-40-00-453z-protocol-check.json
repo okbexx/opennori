@@ -1,0 +1,40 @@
+{
+  "kind": "protocol-check",
+  "basis": "tool-observation",
+  "summary": "MCP read-only boundary tightened: opennori mcp command imports only core/io, module-boundary tests now reject MCP write APIs and tool registration, and MCP metadata still reports tools: [] with write_capability: none.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-mcp-readonly-boundary-tightening",
+      "path": ".opennori/architecture/evidence/opennori-self-mcp-readonly-boundary-tightening.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/mcp.test.ts test/module-boundaries.test.js",
+      "command": "npx vitest run test/mcp.test.ts test/module-boundaries.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js mcp --root . --json",
+      "command": "node ./bin/opennori.js mcp --root . --json"
+    },
+    {
+      "type": "url",
+      "label": "https://github.com/modelcontextprotocol/typescript-sdk",
+      "url": "https://github.com/modelcontextprotocol/typescript-sdk"
+    }
+  ],
+  "reviewability": "Review src/cli/commands/mcp.ts, test/module-boundaries.test.js, test/mcp.test.ts, and the MCP --json metadata output.",
+  "limitations": "This verifies current read-only MCP boundaries only; future MCP write tools still require a separate architecture challenge and user approval.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T11:40:00.453Z"
+}

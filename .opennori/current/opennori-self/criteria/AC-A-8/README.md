@@ -17,21 +17,18 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: docs - Command-boundary guidance is now persistent for future OpenNori development: AGENTS, testing strategy, CLI build-vs-buy decision, and local nori-product-development Skill all state that command modules should stay thin and prefer narrow imports, while module-boundary tests remain objective architecture guards.
+Latest: protocol-check - MCP read-only boundary tightened: opennori mcp command imports only core/io, module-boundary tests now reject MCP write APIs and tool registration, and MCP metadata still reports tools: [] with write_capability: none.
 Result: passing
-Basis: artifact-review
-Reviewability: Open the referenced guidance files and rerun the focused docs/module-boundary tests, typecheck, and OpenNori check.
-Limitations: This records guidance for future agent behavior and command work; it does not itself remove all remaining wide imports.
+Basis: tool-observation
+Reviewability: Review src/cli/commands/mcp.ts, test/module-boundaries.test.js, test/mcp.test.ts, and the MCP --json metadata output.
+Limitations: This verifies current read-only MCP boundaries only; future MCP write tools still require a separate architecture challenge and user approval.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-command-boundary-doc-sync.json
-- npx vitest run test/docs-schema.test.js test/module-boundaries.test.js
+- .opennori/architecture/evidence/opennori-self-mcp-readonly-boundary-tightening.json
+- npx vitest run test/mcp.test.ts test/module-boundaries.test.js
 - npx tsc --noEmit --pretty false
-- node ./bin/opennori.js check --root . --json
-- AGENTS.md
-- docs/testing.md
-- .opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.md
-- /Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md
+- node ./bin/opennori.js mcp --root . --json
+- https://github.com/modelcontextprotocol/typescript-sdk
 
 ## Files
 

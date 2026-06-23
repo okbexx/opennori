@@ -4,7 +4,7 @@
   "confidence": "high",
   "required": true,
   "risk": "high",
-  "evidence_count": 44,
-  "latest_evidence_summary": "Command-boundary guidance is now persistent for future OpenNori development: AGENTS, testing strategy, CLI build-vs-buy decision, and local nori-product-development Skill all state that command modules should stay thin and prefer narrow imports, while module-boundary tests remain objective architecture guards.",
-  "updated_at": "2026-06-23T11:26:13.594Z"
+  "evidence_count": 45,
+  "latest_evidence_summary": "MCP read-only boundary tightened: opennori mcp command imports only core/io, module-boundary tests now reject MCP write APIs and tool registration, and MCP metadata still reports tools: [] with write_capability: none.",
+  "updated_at": "2026-06-23T11:40:00.453Z"
 }

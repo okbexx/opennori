@@ -88,6 +88,9 @@ test("MCP source stays read-only and does not register write tools", { tags: ["a
 
   assert.deepEqual(toolRegistrationOffenders, []);
   assert.deepEqual(writeBoundaryOffenders, []);
+  assert.deepEqual(mcpFiles
+    .filter((filePath) => /writeFileSync|appendFileSync|rmSync|mkdirSync|renameSync|copyFileSync|refreshSnapshot|recordEvent|writeActivitySignal/.test(fs.readFileSync(filePath, "utf8")))
+    .map(relative), []);
   assert.match(fs.readFileSync(path.join(ROOT, "src", "mcp", "server.ts"), "utf8"), /registerResource/);
   assert.match(fs.readFileSync(path.join(ROOT, "src", "mcp", "resources.ts"), "utf8"), /write_capability:\s*["']none["']/);
   assert.match(fs.readFileSync(path.join(ROOT, "src", "mcp", "resources.ts"), "utf8"), /tools:\s*\[\]/);
