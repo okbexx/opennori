@@ -252,6 +252,9 @@ test("architecture apply records do not count as Product AC evidence", { tags: [
   assert.equal(applied.data.agent_next.state, "evidence_ready_for_recording");
   assert.equal(applied.data.agent_next.recommended_skill, "nori-evidence");
   assert.match(applied.data.agent_next.instruction, /Product AC evidence/);
+  const applyMarkdown = fs.readFileSync(applied.data.markdown_path, "utf8");
+  assert.equal(applyMarkdown.endsWith("\n"), true);
+  assert.equal(applyMarkdown.endsWith("\n\n"), false);
 
   const status = run(["status", "--root", root, "--json"]);
   assert.equal(status.data.architecture.decision, "valid");

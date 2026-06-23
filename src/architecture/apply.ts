@@ -50,8 +50,7 @@ export function renderArchitectureApplyMarkdown(record: ArchitectureApplyRecord)
     "",
     "## Rule",
     "",
-    "This record documents architecture alignment for an acceptance gap. It is not Product AC evidence by itself.",
-    ""
+    "This record documents architecture alignment for an acceptance gap. It is not Product AC evidence by itself."
   ];
   return `${lines.join("\n")}\n`;
 }
