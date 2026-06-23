@@ -1,21 +1,17 @@
 import { defineCommand } from "citty";
 import fs from "node:fs";
-import { architectureState } from "../../../architecture.ts";
-import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
-  currentGap,
   appendEvent,
   fail,
   findCurrentPairs,
   pathsForGoal,
-  nextRecommendation,
   ok,
   readProjectProfile,
   refreshSnapshot,
   recomputeWorkflowStatus,
   writeGoalDossier
 } from "../../../core.ts";
-import { refreshManifest } from "../../../lifecycle.ts";
+import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
 import { withContractLanguage } from "../../../language.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
 import { jsonArg, rootArg } from "./shared.ts";
@@ -73,13 +69,11 @@ export const approveCommand = defineCommand({
       fs.rmSync(pair.goalDir, { recursive: true, force: true });
     }
     refreshManifest(root);
-    const architecture = architectureState(root, contract.goal_id);
-    const gap = currentGap(contract, ledger, profile);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
+    const review = goalReviewState(root, contract, ledger);
     appendEvent(root, {
       type: "contract.approved",
       goal_id: contract.goal_id,
-      gap_id: gap?.id,
+      gap_id: review.current_gap?.id,
       actor: { kind: "agent", name: "Agent", skill: "nori-acceptance" },
       summary: String(args.summary || "User approved acceptance criteria."),
       data: {
@@ -98,11 +92,11 @@ export const approveCommand = defineCommand({
       evidence_path: targetPaths.evidencePath,
       acceptance_basis: contract.acceptance_basis,
       workflow_status: ledger.status,
-      current_gap: gap,
-      architecture,
-      next_recommendation: recommendation,
-      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation)
-    }, [], [], recommendation.actions);
+      current_gap: review.current_gap,
+      architecture: review.architecture,
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next
+    }, [], [], review.next_recommendation.actions);
   }
 });
 

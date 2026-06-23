@@ -2,13 +2,12 @@ import { defineCommand } from "citty";
 import {
   addProfileEvidence,
   appendEvent,
-  currentGap,
   ok,
   readProjectProfile,
-  profileCompliance,
   refreshSnapshot,
   recomputeWorkflowStatus
 } from "../../../core.ts";
+import { goalReviewState } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../../runtime.ts";
 import type { ProfileEvidenceInput } from "../../../types.ts";
 import {
@@ -58,10 +57,11 @@ export const profileEvidenceCommand = defineCommand({
     recomputeWorkflowStatus(contract, ledger, profile);
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     data.refreshManifest(root);
+    const review = goalReviewState(root, contract, ledger);
     appendEvent(root, {
       type: "profile.changed",
       goal_id: contract.goal_id,
-      gap_id: currentGap(contract, ledger, profile)?.id,
+      gap_id: review.current_gap?.id,
       actor: { kind: "agent", name: "Agent", skill: "nori-capability-profile" },
       summary: evidence.summary,
       data: { item_id: itemId, result: evidence.result }
@@ -71,10 +71,12 @@ export const profileEvidenceCommand = defineCommand({
       goal_id: contract.goal_id,
       item: itemId,
       profile,
-      compliance: profileCompliance(profile, ledger),
+      compliance: review.capability_compliance,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger, profile)
-    });
+      current_gap: review.current_gap,
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next
+    }, [], [], review.next_recommendation.actions);
   }
 });
 

@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 36,
-  "latest_evidence_summary": "OpenNori now has a core ReviewState projection shared by lifecycle goalReviewState and report rendering. The projection derives current gap, completion, user intervention, acceptance review, evidence health, Project Profile compliance, and next recommendation from contract, ledger, Project Profile, and ArchitectureState. Lifecycle adds only agent_next, while report rendering consumes the same projection instead of recomputing a parallel outcome model.",
-  "updated_at": "2026-06-23T09:18:36.846Z"
+  "evidence_count": 37,
+  "latest_evidence_summary": "State-mutating CLI commands now route post-write current_gap, next_recommendation, and agent_next through goalReviewState instead of assembling routing responses with ad hoc currentGap/nextRecommendation calls. Evidence, profile, acceptance approval/evaluate/criterion, and architecture requirement/baseline command responses now use the shared read model after deterministic writes.",
+  "updated_at": "2026-06-23T09:24:46.993Z"
 }

@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T09:18:47.975Z",
+  "updated_at": "2026-06-23T09:24:59.282Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -918,6 +918,17 @@
         "summary": "Split the OpenNori protocol type surface into domain modules while preserving src/types.ts as the compatibility barrel.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-types-domain-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-write-command-review-routing-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "State-mutating CLI commands should return current_gap, next_recommendation, and agent_next from the shared goalReviewState instead of assembling routing fields with ad hoc currentGap and nextRecommendation calls.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-write-command-review-routing-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       }

@@ -1,0 +1,110 @@
+{
+  "kind": "write-command-review-routing-boundary-refactor",
+  "basis": "tool-observation",
+  "summary": "State-mutating CLI commands now route post-write current_gap, next_recommendation, and agent_next through goalReviewState instead of assembling routing responses with ad hoc currentGap/nextRecommendation calls. Evidence, profile, acceptance approval/evaluate/criterion, and architecture requirement/baseline command responses now use the shared read model after deterministic writes.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-write-command-review-routing-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-write-command-review-routing-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli",
+      "command": "npm run test:cli"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:evidence",
+      "command": "npm run test:evidence"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:profile",
+      "command": "npm run test:profile"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:architecture",
+      "command": "npm run test:architecture"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/evidence/add.ts",
+      "path": "src/cli/commands/evidence/add.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/evidence/prune.ts",
+      "path": "src/cli/commands/evidence/prune.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/profile/add.ts",
+      "path": "src/cli/commands/profile/add.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/profile/check.ts",
+      "path": "src/cli/commands/profile/check.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/profile/evidence.ts",
+      "path": "src/cli/commands/profile/evidence.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/approval.ts",
+      "path": "src/cli/commands/acceptance/approval.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/criterion.ts",
+      "path": "src/cli/commands/acceptance/criterion.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/acceptance/runtime-status.ts",
+      "path": "src/cli/commands/acceptance/runtime-status.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/architecture/requirement.ts",
+      "path": "src/cli/commands/architecture/requirement.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/architecture/baseline.ts",
+      "path": "src/cli/commands/architecture/baseline.ts"
+    }
+  ],
+  "reviewability": "Inspect the listed command files and confirm state writes remain command-local while response routing fields come from goalReviewState. Rerun the listed validation commands.",
+  "limitations": "This only centralizes response routing after deterministic writes. Inventory/probe surfaces such as manifest, doctor, list, changes, activity-target, and draft creation may still compute lightweight current_gap summaries because they are not completion routing authorities.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T09:24:46.993Z"
+}

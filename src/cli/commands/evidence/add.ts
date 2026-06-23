@@ -1,19 +1,15 @@
 import { defineCommand } from "citty";
-import { architectureState } from "../../../architecture.ts";
-import { agentNextForRecommendation } from "../../../agent-next.ts";
 import {
   addEvidence,
   appendEvent,
   criterionStatusRows,
-  currentGap,
-  nextRecommendation,
   ok,
   pruneInvalidEvidence,
   readProjectProfile,
   refreshSnapshot,
   recomputeWorkflowStatus,
 } from "../../../core.ts";
-import { refreshManifest } from "../../../lifecycle.ts";
+import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
 import type { EvidenceBasis, EvidenceInput } from "../../../types.ts";
 import { evidenceResult, evidenceSourcesFromArgs } from "./source-parsing.ts";
@@ -115,9 +111,7 @@ export const evidenceAddCommand = defineCommand({
     recomputeWorkflowStatus(contract, ledger, profile);
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
-    const architecture = architectureState(root, contract.goal_id);
-    const gap = currentGap(contract, ledger, profile);
-    const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
+    const review = goalReviewState(root, contract, ledger);
     appendEvent(root, {
       type: "evidence.added",
       goal_id: contract.goal_id,
@@ -140,10 +134,10 @@ export const evidenceAddCommand = defineCommand({
       latest_evidence: criterionStatusRows(contract, ledger, { root }).find((row) => row.id === criterionId)?.latest_evidence,
       gate: ledger.criteria[criterionId].evidence.at(-1)?.gate,
       workflow_status: ledger.status,
-      current_gap: gap,
-      next_recommendation: recommendation,
-      agent_next: agentNextForRecommendation(contract.goal_id, gap, recommendation)
-    }, [], [], recommendation.actions);
+      current_gap: review.current_gap,
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next
+    }, [], [], review.next_recommendation.actions);
   }
 });
 

@@ -17,27 +17,32 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: core-review-projection-boundary-refactor - OpenNori now has a core ReviewState projection shared by lifecycle goalReviewState and report rendering. The projection derives current gap, completion, user intervention, acceptance review, evidence health, Project Profile compliance, and next recommendation from contract, ledger, Project Profile, and ArchitectureState. Lifecycle adds only agent_next, while report rendering consumes the same projection instead of recomputing a parallel outcome model.
+Latest: write-command-review-routing-boundary-refactor - State-mutating CLI commands now route post-write current_gap, next_recommendation, and agent_next through goalReviewState instead of assembling routing responses with ad hoc currentGap/nextRecommendation calls. Evidence, profile, acceptance approval/evaluate/criterion, and architecture requirement/baseline command responses now use the shared read model after deterministic writes.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect src/core/review-state.ts and confirm it owns deterministic outcome projection below lifecycle and kernel. Inspect lifecycle/reporting files to confirm they consume that projection, and lifecycle alone adds agent_next. Rerun the listed commands.
-Limitations: This verifies outcome projection sharing for lifecycle status/report/context surfaces. It does not change report Markdown structure, dashboard visuals, persisted protocol fields, or subjective Skill/user acceptance-quality review.
+Reviewability: Inspect the listed command files and confirm state writes remain command-local while response routing fields come from goalReviewState. Rerun the listed validation commands.
+Limitations: This only centralizes response routing after deterministic writes. Inventory/probe surfaces such as manifest, doctor, list, changes, activity-target, and draft creation may still compute lightweight current_gap summaries because they are not completion routing authorities.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-core-review-projection-boundary.json
+- .opennori/architecture/evidence/opennori-self-write-command-review-routing-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:reporting
 - npm run test:cli
-- npx vitest run test/mcp.test.ts test/cli-reporting.test.js test/cli-human-output.test.js
+- npm run test:evidence
+- npm run test:profile
+- npm run test:architecture
 - npm run lint
 - node ./bin/opennori.js check --root . --json
 - node ./bin/opennori.js status --root . --json
-- node ./bin/opennori.js context export --root . --json
-- src/core/review-state.ts
-- src/lifecycle/goal-review-state.ts
-- src/core/report-render.ts
-- src/architecture/report.ts
-- src/cli/commands/reporting.ts
+- src/cli/commands/evidence/add.ts
+- src/cli/commands/evidence/prune.ts
+- src/cli/commands/profile/add.ts
+- src/cli/commands/profile/check.ts
+- src/cli/commands/profile/evidence.ts
+- src/cli/commands/acceptance/approval.ts
+- src/cli/commands/acceptance/criterion.ts
+- src/cli/commands/acceptance/runtime-status.ts
+- src/cli/commands/architecture/requirement.ts
+- src/cli/commands/architecture/baseline.ts
 
 ## Files
 

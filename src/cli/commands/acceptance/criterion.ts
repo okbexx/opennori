@@ -1,13 +1,12 @@
 import { defineCommand } from "citty";
 import {
-  currentGap,
   inferCriterionLayer,
   ok,
   readProjectProfile,
   recomputeWorkflowStatus,
   validateContract
 } from "../../../core.ts";
-import { refreshManifest } from "../../../lifecycle.ts";
+import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
 import type { AcceptanceBasis, AcceptanceCriterion } from "../../../types.ts";
 import { jsonArg, rootArg } from "./shared.ts";
@@ -122,13 +121,16 @@ export const criterionAddCommand = defineCommand({
     recomputeWorkflowStatus(contract, ledger, profile);
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
+    const review = goalReviewState(root, contract, ledger);
     return ok({
       goal_id: contract.goal_id,
       criterion,
       acceptance_basis: contract.acceptance_basis,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger, profile)
-    });
+      current_gap: review.current_gap,
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next
+    }, [], [], review.next_recommendation.actions);
   }
 });
 
@@ -216,13 +218,16 @@ export const criterionUpdateCommand = defineCommand({
     recomputeWorkflowStatus(contract, ledger, profile);
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
+    const review = goalReviewState(root, contract, ledger);
     return ok({
       goal_id: contract.goal_id,
       criterion,
       acceptance_basis: contract.acceptance_basis,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger, profile)
-    });
+      current_gap: review.current_gap,
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next
+    }, [], [], review.next_recommendation.actions);
   }
 });
 

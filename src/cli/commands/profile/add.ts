@@ -3,18 +3,16 @@ import { defineCommand } from "citty";
 import {
   addProfileItem,
   appendEvent,
-  currentGap,
   ok,
   findCurrentPairs,
   readGoalPayload,
   readProjectProfile,
-  profileCompliance,
   refreshSnapshot,
   recomputeWorkflowStatus,
   writeProjectProfile,
   writeGoalDossier
 } from "../../../core.ts";
-import { refreshManifest } from "../../../lifecycle.ts";
+import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
 import { runJsonCommand } from "../../runtime.ts";
 import type { ProfileItemInput } from "../../../types.ts";
 import {
@@ -86,10 +84,10 @@ export const profileAddCommand = defineCommand({
     for (const pair of findCurrentPairs(root)) {
       const { contract, ledger } = readGoalPayload(pair);
       recomputeWorkflowStatus(contract, ledger, profile);
-      const nextGap = currentGap(contract, ledger, profile);
       writeGoalDossier(pair.goalDir, contract, ledger);
-      touchedGoals.push({ goal_id: contract.goal_id, workflow_status: ledger.status, current_gap: nextGap });
-      singleCurrentGoal = touchedGoals.length === 1 ? { contract, ledger, current_gap: nextGap } : null;
+      const review = goalReviewState(root, contract, ledger);
+      touchedGoals.push({ goal_id: contract.goal_id, workflow_status: ledger.status, current_gap: review.current_gap });
+      singleCurrentGoal = touchedGoals.length === 1 ? { contract, ledger, review } : null;
       refreshSnapshot(root, { goalId: contract.goal_id });
     }
     refreshManifest(root);
@@ -103,12 +101,14 @@ export const profileAddCommand = defineCommand({
       profile,
       touched_current_goals: touchedGoals,
       compliance: singleCurrentGoal
-        ? profileCompliance(profile, singleCurrentGoal.ledger)
+        ? singleCurrentGoal.review.capability_compliance
         : null,
       goal_id: singleCurrentGoal?.contract.goal_id || null,
       workflow_status: singleCurrentGoal?.ledger.status || null,
-      current_gap: singleCurrentGoal?.current_gap || null
-    });
+      current_gap: singleCurrentGoal?.review.current_gap || null,
+      next_recommendation: singleCurrentGoal?.review.next_recommendation || null,
+      agent_next: singleCurrentGoal?.review.agent_next || null
+    }, [], [], singleCurrentGoal?.review.next_recommendation.actions || []);
   }
 });
 

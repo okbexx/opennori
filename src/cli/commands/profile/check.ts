@@ -2,16 +2,14 @@ import path from "node:path";
 import { defineCommand } from "citty";
 import {
   appendEvent,
-  currentGap,
   findCurrentPairs,
   ok,
   readGoalPayload,
   readProjectProfile,
-  profileCompliance,
   refreshSnapshot,
   recomputeWorkflowStatus
 } from "../../../core.ts";
-import { autoProfileChecks, recordAutoProfileChecks } from "../../../lifecycle.ts";
+import { autoProfileChecks, goalReviewState, recordAutoProfileChecks } from "../../../lifecycle.ts";
 import { savePair, runJsonCommand } from "../../runtime.ts";
 import {
   jsonArg,
@@ -47,6 +45,7 @@ export const profileCheckCommand = defineCommand({
     let compliance = null;
     let workflowStatus = null;
     let gap = null;
+    let review = null;
     if (args.record) {
       if (!pair) {
         throw new Error("No current OpenNori goal is available for recording Project Profile compliance evidence.");
@@ -55,20 +54,20 @@ export const profileCheckCommand = defineCommand({
       recordAutoProfileChecks(profile, ledger, checks);
       recomputeWorkflowStatus(contract, ledger, profile);
       savePair(pair.acceptancePath, pair.evidencePath, contract, ledger);
-      const nextGap = currentGap(contract, ledger, profile);
+      review = goalReviewState(root, contract, ledger);
       appendEvent(root, {
         type: "profile.changed",
         goal_id: contract.goal_id,
-        gap_id: nextGap?.id,
+        gap_id: review.current_gap?.id,
         actor: { kind: "agent", name: "Agent", skill: "nori-capability-profile" },
         summary: "Recorded automatic Project Profile compliance checks.",
         data: { check_count: checks.length }
       });
       refreshSnapshot(root, { goalId: contract.goal_id });
       recordedGoal = contract.goal_id;
-      compliance = profileCompliance(profile, ledger);
+      compliance = review.capability_compliance;
       workflowStatus = ledger.status;
-      gap = nextGap;
+      gap = review.current_gap;
     }
 
     return ok({
@@ -78,8 +77,10 @@ export const profileCheckCommand = defineCommand({
       profile,
       compliance,
       workflow_status: workflowStatus,
-      current_gap: gap
-    });
+      current_gap: gap,
+      next_recommendation: review?.next_recommendation || null,
+      agent_next: review?.agent_next || null
+    }, [], [], review?.next_recommendation.actions || []);
   }
 });
 

@@ -2,7 +2,6 @@ import { defineCommand } from "citty";
 import {
   acceptanceBasisView,
   criterionStatusRows,
-  currentGap,
   ok,
   readProjectProfile,
   recomputeWorkflowStatus
@@ -124,11 +123,14 @@ export const evaluateCommand = defineCommand({
     recomputeWorkflowStatus(contract, ledger, profile);
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
+    const review = goalReviewState(root, contract, ledger);
     return ok({
       goal_id: contract.goal_id,
       presentation: contract.presentation,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger, profile)
+      current_gap: review.current_gap,
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next
     });
   }
 });

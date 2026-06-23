@@ -1,12 +1,10 @@
 import { defineCommand } from "citty";
 import {
   criterionStatusRows,
-  currentGap,
   ok,
   pruneCriterionEvidence
 } from "../../../core.ts";
-import { readProjectProfile } from "../../../core/profile.ts";
-import { refreshManifest } from "../../../lifecycle.ts";
+import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
 
 type CommandRuntimeOverride = Pick<ActiveGoalRuntime, "loadPair"> & Partial<Pick<ActiveGoalRuntime, "savePair" | "refreshManifest">>;
@@ -34,14 +32,16 @@ export const evidencePruneCommand = defineCommand({
   },
   run({ args, data }) {
     const { contract, ledger, acceptancePath, evidencePath, root, evidencePrune } = data.loadPair(args);
-    const profile = readProjectProfile(root);
     if (!args.criterion) {
+      const review = goalReviewState(root, contract, ledger);
       return ok({
         goal_id: contract.goal_id,
         evidence_prune: evidencePrune || { changed: false, removed_records: 0, removed_sources: 0 },
         workflow_status: ledger.status,
-        current_gap: currentGap(contract, ledger, profile)
-      });
+        current_gap: review.current_gap,
+        next_recommendation: review.next_recommendation,
+        agent_next: review.agent_next
+      }, [], [], review.next_recommendation.actions);
     }
 
     const criterionId = String(args.criterion);
@@ -49,6 +49,7 @@ export const evidencePruneCommand = defineCommand({
     const prune = pruneCriterionEvidence(contract, ledger, criterionId, { reason });
     data.savePair(acceptancePath, evidencePath, contract, ledger);
     refreshManifest(root);
+    const review = goalReviewState(root, contract, ledger);
 
     return ok({
       goal_id: contract.goal_id,
@@ -58,8 +59,10 @@ export const evidencePruneCommand = defineCommand({
       confidence: ledger.criteria[criterionId]?.confidence || "none",
       latest_evidence: criterionStatusRows(contract, ledger, { root }).find((row) => row.id === criterionId)?.latest_evidence || null,
       workflow_status: ledger.status,
-      current_gap: currentGap(contract, ledger, profile)
-    });
+      current_gap: review.current_gap,
+      next_recommendation: review.next_recommendation,
+      agent_next: review.agent_next
+    }, [], [], review.next_recommendation.actions);
   }
 });
 
