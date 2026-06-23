@@ -1,0 +1,31 @@
+# OpenNori Architecture Apply Record
+
+Status: aligned
+Goal: opennori-self
+Criterion: AC-A-8
+Baseline: typescript-agent-state-cli
+Accepted at: 2026-06-23T06:28:29.131Z
+
+## Summary
+
+Dashboard radar model will separate OpenNori read-only node semantics from geometric layout and visual style helpers.
+
+## Fit
+
+The confirmed dashboard boundary says the dashboard is a read-only observation surface over snapshots, events, and activity. Keeping status semantics, profile nodes, passed AC aggregation, evidence node ids, layout math, and SVG style rules in one module makes visual code look like state authority and risks drift between selection and rendering.
+
+## Implementation Focus
+
+Split dashboard radar helpers into shared status, node projection, geometry, and model assembly modules while preserving the existing radar-model compatibility export and dashboard behavior.
+
+## Evidence
+
+Read src/dashboard/src/radar-model.ts, selection.ts, AcceptanceRadarNet.tsx, dashboard types, and dashboard-selection tests. The current radar-model owns status classification, node rawData projection, passed aggregate construction, geometry, and link styling, while selection duplicates passed aggregate and profile node projection.
+
+## Limitations
+
+This apply record covers frontend dashboard read-model boundaries only. It does not change the kernel snapshot schema, dashboard API, Product AC evidence semantics, event stream semantics, or dashboard write restrictions.
+
+## Rule
+
+This record documents architecture alignment for an acceptance gap. It is not Product AC evidence by itself.

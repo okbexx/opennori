@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 30,
-  "latest_evidence_summary": "Activity CLI responses now publish dashboard activity signals without embedding the full dashboard snapshot. start, heartbeat, finish, and show return activity, target, snapshot_summary, snapshot_path, and side_effect while still refreshing .opennori/snapshots/current.json for dashboard and MCP readers.",
-  "updated_at": "2026-06-23T08:37:19.141Z"
+  "evidence_count": 31,
+  "latest_evidence_summary": "Dashboard radar code now separates read-only OpenNori node semantics from geometry and visual style helpers. radar-model remains the compatibility assembly surface, while radar-nodes owns goal/profile/passed/criterion/evidence node projection, radar-geometry owns layout math, radar-status owns status/style classification, and selection reuses the shared node projection instead of duplicating Passed and Project Profile semantics.",
+  "updated_at": "2026-06-23T08:45:11.744Z"
 }

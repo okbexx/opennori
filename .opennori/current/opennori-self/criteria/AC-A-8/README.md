@@ -17,25 +17,32 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor - Activity CLI responses now publish dashboard activity signals without embedding the full dashboard snapshot. start, heartbeat, finish, and show return activity, target, snapshot_summary, snapshot_path, and side_effect while still refreshing .opennori/snapshots/current.json for dashboard and MCP readers.
+Latest: architecture-refactor - Dashboard radar code now separates read-only OpenNori node semantics from geometry and visual style helpers. radar-model remains the compatibility assembly surface, while radar-nodes owns goal/profile/passed/criterion/evidence node projection, radar-geometry owns layout math, radar-status owns status/style classification, and selection reuses the shared node projection instead of duplicating Passed and Project Profile semantics.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect activity.ts and human-output.ts to confirm activity commands return a compact acknowledgement plus snapshot path, not the full snapshot object. Inspect cli-dashboard and cli-human-output tests for assertions that snapshot is absent from activity payloads while the persisted snapshot file is refreshed. Rerun the listed typecheck, dashboard, CLI, lint, check/status, and diff checks.
-Limitations: This refactor only changes activity CLI response ergonomics. It does not change dashboard snapshot schema, dashboard API, MCP snapshot resource, event/activity persistence schemas, or Product AC evidence semantics.
+Reviewability: Inspect the dashboard radar modules to confirm radar-model only assembles the read-only model, radar-nodes owns snapshot-to-node projection, radar-geometry owns layout math, radar-status owns color/pulse/link style classification, and selection.ts reuses shared node projection. Rerun typecheck, dashboard, CLI, lint, check/status, and diff checks.
+Limitations: This refactor does not change dashboard UI controls, dashboard API, kernel snapshot schema, event stream behavior, Product AC evidence semantics, or dashboard write restrictions. It preserves the existing radar-model import surface for components and tests.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-activity-cli-response-boundary.json
+- .opennori/architecture/evidence/opennori-self-dashboard-radar-boundary.json
 - npx tsc --noEmit --pretty false
+- npm run typecheck:dashboard
 - npm run test:dashboard
 - npm run test:cli
 - npm run lint
 - node ./bin/opennori.js check --root . --json
 - node ./bin/opennori.js status --root . --json
 - git diff --check
-- src/cli/commands/activity.ts
-- src/cli/human-output.ts
+- src/dashboard/src/radar-model.ts
+- src/dashboard/src/radar-nodes.ts
+- src/dashboard/src/radar-geometry.ts
+- src/dashboard/src/radar-status.ts
+- src/dashboard/src/radar-types.ts
+- src/dashboard/src/selection.ts
+- test/dashboard-selection.test.ts
 - test/cli-dashboard.test.js
-- test/cli-human-output.test.js
+- dashboard/index.html
+- dashboard/assets/index-CQhSd-vc.js
 
 ## Files
 
