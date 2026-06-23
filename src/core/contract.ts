@@ -39,13 +39,15 @@ export function buildContractFromBrief(brief: NoriBrief): NoriContract {
 
 export function buildEvidenceLedger(contract: NoriContract): EvidenceLedger {
   const criteria: EvidenceLedger["criteria"] = {};
+  const now = nowIso();
   for (const criterion of contract.criteria) {
     criteria[criterion.id] = {
       status: "unknown",
       confidence: "none",
       required: criterion.required !== false,
       risk: criterion.risk || "medium",
-      evidence: []
+      evidence: [],
+      updated_at: now
     };
   }
 
@@ -53,7 +55,7 @@ export function buildEvidenceLedger(contract: NoriContract): EvidenceLedger {
     protocol_version: PROTOCOL_VERSION,
     goal_id: contract.goal_id,
     status: contract.acceptance_basis?.status === "approved" ? "active" : "draft",
-    updated_at: nowIso(),
+    updated_at: now,
     criteria
   };
 }

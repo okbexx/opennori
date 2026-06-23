@@ -1,0 +1,65 @@
+{
+  "kind": "criterion-status-projection-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "Recording evidence for one AC now updates that criterion's own status projection timestamp without rewriting unrelated AC status projections as newly updated.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-criterion-status-projection-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-criterion-status-projection-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-evidence.test.js",
+      "command": "npx vitest run test/cli-evidence.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:evidence",
+      "command": "npm run test:evidence"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/dossier.ts",
+      "path": "src/core/dossier.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence-record.ts",
+      "path": "src/core/evidence-record.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence-prune.ts",
+      "path": "src/core/evidence-prune.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/evidence.ts",
+      "path": "src/types/evidence.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-evidence.test.js",
+      "path": "test/cli-evidence.test.js"
+    }
+  ],
+  "reviewability": "Inspect the regression test 'evidence add only refreshes the touched criterion status projection' plus dossier/evidence code. It verifies AC-2 status.json keeps its old updated_at when AC-1 evidence is recorded.",
+  "limitations": "This narrows generated status projection timestamps. It does not change ledger-level updated_at semantics, current-gap selection, or subjective evidence sufficiency.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T07:15:29.907Z"
+}

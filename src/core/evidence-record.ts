@@ -19,6 +19,7 @@ export function addEvidence(contract: NoriContract, ledger: EvidenceLedger, crit
 
   const state = ledger.criteria[criterionId];
   if (!state) throw new Error(`Evidence ledger state not found: ${criterionId}`);
+  const now = nowIso();
   const normalized = normalizeEvidence(evidence);
   const accepted = applyRiskGate(criterion, normalized);
   state.evidence.push({
@@ -32,11 +33,12 @@ export function addEvidence(contract: NoriContract, ledger: EvidenceLedger, crit
     reviewability: normalized.reviewability,
     limitations: normalized.limitations,
     gate: accepted.gate,
-    created_at: nowIso()
+    created_at: now
   });
   state.status = accepted.result;
   state.confidence = accepted.confidence;
-  ledger.updated_at = nowIso();
+  state.updated_at = now;
+  ledger.updated_at = now;
   recomputeWorkflowStatus(contract, ledger);
   return ledger;
 }

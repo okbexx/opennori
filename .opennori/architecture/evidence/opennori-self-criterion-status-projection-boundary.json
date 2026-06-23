@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-criterion-status-projection-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Criterion status projections now use per-criterion ledger timestamps so recording one AC evidence does not make unrelated AC status files look updated.",
+  "fit": "The change keeps JSON ledger as source of truth, preserves deterministic dossier generation, and narrows projection write semantics without adding subjective validators.",
+  "implementation_focus": "Update criterion ledger state with optional updated_at, stamp touched evidence states, preserve existing projection timestamps for untouched ACs, and add an objective regression test.",
+  "evidence": "npx vitest run test/cli-evidence.test.js; npm run test:evidence; npx tsc --noEmit --pretty false; npm run lint",
+  "limitations": "",
+  "created_at": "2026-06-23T07:15:16.537Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

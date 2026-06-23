@@ -98,7 +98,8 @@ export const criterionAddCommand = defineCommand({
       confidence: "none",
       required: criterion.required !== false,
       risk: criterion.risk || "medium",
-      evidence: []
+      evidence: [],
+      updated_at: new Date().toISOString()
     };
     contract.acceptance_basis = revisedAcceptanceBasis(location, contract.acceptance_basis, args.summary, `User added ${criterionId}.`);
 
@@ -193,7 +194,8 @@ export const criterionUpdateCommand = defineCommand({
         confidence: "none",
         required: criterion.required !== false,
         risk: criterion.risk || "medium",
-        evidence: []
+        evidence: [],
+        updated_at: new Date().toISOString()
       };
     }
     contract.acceptance_basis = revisedAcceptanceBasis(location, contract.acceptance_basis, args.summary, `User revised ${criterionId}.`);

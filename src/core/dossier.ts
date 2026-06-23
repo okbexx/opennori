@@ -11,6 +11,10 @@ import type { GoalStatePair } from "./goal-state.ts";
 import { readJson, writeJson } from "./io.ts";
 import { renderCriterionReadme, renderGoalReadme } from "./dossier-render.ts";
 
+type CriterionStatusProjection = {
+  updated_at?: string;
+};
+
 function criteriaDirForGoalDir(goalDir: string): string {
   return path.join(goalDir, "criteria");
 }
@@ -34,6 +38,14 @@ function evidenceFileName(evidence: EvidenceRecord, index: number): string {
   return `${sequence}-${stamp}-${kind}.json`;
 }
 
+function readCriterionStatusProjection(dir: string): CriterionStatusProjection | null {
+  try {
+    return readJson<CriterionStatusProjection>(path.join(dir, "status.json"));
+  } catch {
+    return null;
+  }
+}
+
 function writeCriterionDossier(goalDir: string, contract: NoriContract, ledger: EvidenceLedger, criterion: AcceptanceCriterion, order: number): void {
   const dir = criterionDir(goalDir, criterion.id);
   const evidenceDir = path.join(dir, "evidence");
@@ -46,6 +58,7 @@ function writeCriterionDossier(goalDir: string, contract: NoriContract, ledger: 
     ...criterion,
     order
   });
+  const previousProjection = readCriterionStatusProjection(dir);
   writeJson(path.join(dir, "status.json"), {
     criterion_id: criterion.id,
     status: state?.status || "unknown",
@@ -54,7 +67,7 @@ function writeCriterionDossier(goalDir: string, contract: NoriContract, ledger: 
     risk: criterion.risk || state?.risk || "medium",
     evidence_count: Array.isArray(state?.evidence) ? state.evidence.length : 0,
     latest_evidence_summary: state?.evidence?.at(-1)?.summary || null,
-    updated_at: ledger.updated_at
+    updated_at: state?.updated_at || previousProjection?.updated_at || ledger.updated_at
   });
 
   for (const fileName of fs.readdirSync(evidenceDir)) {

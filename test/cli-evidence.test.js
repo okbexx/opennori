@@ -78,6 +78,63 @@ test("evidence add command module records flexible reviewable sources", { tags: 
   assert.equal(JSON.parse(fs.readFileSync(evidencePath, "utf8")).criteria["AC-1"].status, "passing");
 });
 
+test("evidence add only refreshes the touched criterion status projection", { tags: ["cli", "evidence", "quick"] }, async () => {
+  const root = tempRoot();
+  const paths = goalPaths(root, "projection-goal", "current");
+  const acceptancePath = paths.acceptancePath;
+  const evidencePath = paths.evidencePath;
+  const contract = {
+    schema_version: "opennori/contract-v1",
+    protocol_version: "opennori/v1",
+    goal_id: "projection-goal",
+    goal: "Avoid noisy status projection writes",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "As a user, I can review the first result.",
+        measurement: "Open the first status projection.",
+        threshold: "It reflects only first-result evidence."
+      },
+      {
+        id: "AC-2",
+        user_story: "As a user, I can review the second result.",
+        measurement: "Open the second status projection.",
+        threshold: "It is not rewritten when AC-1 changes."
+      }
+    ],
+    acceptance_basis: { status: "approved" }
+  };
+  const ledger = buildEvidenceLedger(contract);
+  ledger.updated_at = "2026-06-01T00:00:00.000Z";
+  ledger.criteria["AC-1"].updated_at = "2026-06-01T00:00:00.000Z";
+  ledger.criteria["AC-2"].updated_at = "2026-06-01T00:00:00.000Z";
+  writeGoalDossier(paths.goalDir, contract, ledger);
+
+  await new Promise((resolve) => setTimeout(resolve, 5));
+  const added = await runEvidenceAddCommand([
+    "--criterion", "AC-1",
+    "--kind", "review-result",
+    "--basis", "tool-observation",
+    "--summary", "AC-1 has reviewable evidence.",
+    "--source-command", "npm test",
+    "--reviewability", "Run the command.",
+    "--limitations", "This fixture checks projection writes.",
+    "--confidence", "verified",
+    "--result", "passing",
+    "--json"
+  ], {
+    loadPair: () => ({ contract, ledger, acceptancePath, evidencePath, root })
+  });
+
+  assert.equal(added.ok, true);
+  const ac1Status = JSON.parse(fs.readFileSync(path.join(paths.goalDir, "criteria", "AC-1", "status.json"), "utf8"));
+  const ac2Status = JSON.parse(fs.readFileSync(path.join(paths.goalDir, "criteria", "AC-2", "status.json"), "utf8"));
+  assert.equal(ac1Status.status, "passing");
+  assert.notEqual(ac1Status.updated_at, "2026-06-01T00:00:00.000Z");
+  assert.equal(ac2Status.status, "unknown");
+  assert.equal(ac2Status.updated_at, "2026-06-01T00:00:00.000Z");
+});
+
 test("evidence prune command module removes obsolete criterion evidence", { tags: ["cli", "evidence", "acceptance", "quick"] }, async () => {
   const root = tempRoot();
   const paths = goalPaths(root, "module-goal", "current");

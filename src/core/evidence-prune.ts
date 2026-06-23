@@ -19,6 +19,7 @@ export function pruneInvalidEvidence(contract: NoriContract, ledger: EvidenceLed
   for (const criterion of contract.criteria || []) {
     const state = ledger.criteria?.[criterion.id];
     if (!state || !Array.isArray(state.evidence)) continue;
+    let criterionChanged = false;
     const nextEvidence: EvidenceRecord[] = [];
     for (const evidence of state.evidence) {
       const originalSources = Array.isArray(evidence.sources) ? evidence.sources : [];
@@ -30,6 +31,7 @@ export function pruneInvalidEvidence(contract: NoriContract, ledger: EvidenceLed
       const view = evidenceView(evidence, { root });
       if (!view) {
         changed = true;
+        criterionChanged = true;
         removedRecords += 1;
         continue;
       }
@@ -38,21 +40,34 @@ export function pruneInvalidEvidence(contract: NoriContract, ledger: EvidenceLed
         path: pathStillExists ? evidence.path : undefined,
         sources
       };
-      if (removedForRecord > 0) changed = true;
+      if (removedForRecord > 0) {
+        changed = true;
+        criterionChanged = true;
+      }
       nextEvidence.push(nextRecord);
     }
 
-    if (nextEvidence.length !== state.evidence.length) changed = true;
+    if (nextEvidence.length !== state.evidence.length) {
+      changed = true;
+      criterionChanged = true;
+    }
     state.evidence = nextEvidence;
     const latest = nextEvidence.at(-1);
     if (latest) {
-      state.status = latest.result as AcceptanceStatus;
-      state.confidence = latest.confidence || confidenceForEvidence(criterion.risk, latest.result);
+      const nextStatus = latest.result as AcceptanceStatus;
+      const nextConfidence = latest.confidence || confidenceForEvidence(criterion.risk, latest.result);
+      if (state.status !== nextStatus || state.confidence !== nextConfidence) criterionChanged = true;
+      state.status = nextStatus;
+      state.confidence = nextConfidence;
     } else {
-      if (state.status !== "unknown" || state.confidence !== "none") changed = true;
+      if (state.status !== "unknown" || state.confidence !== "none") {
+        changed = true;
+        criterionChanged = true;
+      }
       state.status = "unknown";
       state.confidence = "none";
     }
+    if (criterionChanged) state.updated_at = nowIso();
   }
 
   if (changed) {
@@ -78,15 +93,18 @@ export function pruneCriterionEvidence(
   const state = ledger.criteria?.[criterionId];
   if (!state) throw new Error(`Evidence ledger state not found: ${criterionId}`);
   const removedRecords = Array.isArray(state.evidence) ? state.evidence.length : 0;
+  const changed = removedRecords > 0 || state.status !== "unknown" || state.confidence !== "none";
   state.status = "unknown";
   state.confidence = "none";
   state.required = criterion.required !== false;
   state.risk = criterion.risk || "medium";
   state.evidence = [];
-  ledger.updated_at = nowIso();
+  const now = nowIso();
+  state.updated_at = now;
+  ledger.updated_at = now;
   recomputeWorkflowStatus(contract, ledger);
   return {
-    changed: removedRecords > 0,
+    changed,
     removed_records: removedRecords,
     removed_sources: 0,
     criteria: [criterionId],

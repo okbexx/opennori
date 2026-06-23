@@ -61,6 +61,7 @@ export type CriterionLedgerState = {
   required: boolean;
   risk: RiskLevel;
   evidence: EvidenceRecord[];
+  updated_at?: string;
   [key: string]: unknown;
 };
 

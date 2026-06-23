@@ -17,20 +17,23 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: mcp-resource-type-boundary-verification - MCP resource payload types are separated from read-only resource construction: src/mcp/types.ts owns resource descriptor/payload types, resources.ts builds read-only context/snapshot/doctor resources, and mcp.ts preserves public type exports without adding MCP write tools or state authority.
+Latest: criterion-status-projection-boundary-verification - Recording evidence for one AC now updates that criterion's own status projection timestamp without rewriting unrelated AC status projections as newly updated.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect src/mcp/types.ts, src/mcp/resources.ts, and src/mcp.ts. Confirm MCP still exposes only read-only context/snapshot/doctor resources and no write tools.
-Limitations: This is structural only. It does not add MCP tools, HTTP transport, OAuth, or writable MCP semantics.
+Reviewability: Inspect the regression test 'evidence add only refreshes the touched criterion status projection' plus dossier/evidence code. It verifies AC-2 status.json keeps its old updated_at when AC-1 evidence is recorded.
+Limitations: This narrows generated status projection timestamps. It does not change ledger-level updated_at semantics, current-gap selection, or subjective evidence sufficiency.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-mcp-resource-type-boundary.json
+- .opennori/architecture/evidence/opennori-self-criterion-status-projection-boundary.json
+- npx vitest run test/cli-evidence.test.js
+- npm run test:evidence
 - npx tsc --noEmit --pretty false
-- npx vitest run test/mcp.test.ts
 - npm run lint
-- src/mcp/types.ts
-- src/mcp/resources.ts
-- src/mcp.ts
+- src/core/dossier.ts
+- src/core/evidence-record.ts
+- src/core/evidence-prune.ts
+- src/types/evidence.ts
+- test/cli-evidence.test.js
 
 ## Files
 
