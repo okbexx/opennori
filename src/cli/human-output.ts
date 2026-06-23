@@ -11,6 +11,7 @@ type OutputCommand =
   | "status"
   | "report"
   | "dashboard"
+  | "activity"
   | string;
 
 type HumanOutputOptions = {
@@ -181,6 +182,22 @@ function printDashboard(stdout: NodeJS.WriteStream, data: JsonObject): void {
   line(stdout, `Project: ${data.root || "."}`);
 }
 
+function printActivity(stdout: NodeJS.WriteStream, data: JsonObject, subcommand?: string): void {
+  const activity = asObject(data.activity);
+  const target = data.target === null ? null : asObject(data.target);
+  const snapshot = asObject(data.snapshot_summary);
+  line(stdout, `OpenNori activity ${subcommand || "updated"}.`);
+  line(stdout, `Agent: ${activity.agent || "none"}`);
+  line(stdout, `State: ${activity.state || snapshot.agent_state || "unknown"}`);
+  if (activity.skill || snapshot.agent_skill) line(stdout, `Skill: ${activity.skill || snapshot.agent_skill}`);
+  if (activity.summary) line(stdout, `Summary: ${activity.summary}`);
+  line(stdout, `Goal: ${target?.goal_id || snapshot.goal_id || "none"}`);
+  line(stdout, `Current gap: ${target?.gap_id || snapshot.current_gap_id || "none"}`);
+  line(stdout, `Decision: ${snapshot.decision || "unknown"}`);
+  if (snapshot.need_user !== undefined) line(stdout, `Need user: ${snapshot.need_user ? "yes" : "no"}`);
+  if (data.snapshot_path) line(stdout, `Snapshot: ${data.snapshot_path}`);
+}
+
 export function shouldPrintHuman(args: string[], stdout: NodeJS.WriteStream = process.stdout): boolean {
   return !args.includes("--json") && Boolean(stdout.isTTY);
 }
@@ -205,6 +222,7 @@ export function printHumanResult(payload: NoriResult, options: HumanOutputOption
   else if (command === "status" || command === "resume" || command === "next") printAcceptanceStatus(stdout, "OpenNori status", data);
   else if (command === "report") printReport(stdout, data);
   else if (command === "dashboard") printDashboard(stdout, data);
+  else if (command === "activity") printActivity(stdout, data, subcommand);
   else return false;
 
   if (!["status", "resume", "next", "report"].includes(String(command))) {

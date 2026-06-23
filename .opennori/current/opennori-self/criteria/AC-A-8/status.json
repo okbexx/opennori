@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 29,
-  "latest_evidence_summary": "Kernel snapshot read model was split into active/no-goal snapshot assembly, criteria projection, agent activity summary, and history summary modules while preserving dashboard, MCP, CLI, and snapshot behavior.",
-  "updated_at": "2026-06-23T08:28:44.672Z"
+  "evidence_count": 30,
+  "latest_evidence_summary": "Activity CLI responses now publish dashboard activity signals without embedding the full dashboard snapshot. start, heartbeat, finish, and show return activity, target, snapshot_summary, snapshot_path, and side_effect while still refreshing .opennori/snapshots/current.json for dashboard and MCP readers.",
+  "updated_at": "2026-06-23T08:37:19.141Z"
 }

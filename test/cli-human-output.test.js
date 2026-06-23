@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { test } from "vitest";
-import { tempRoot, writeActiveGoalWithId, activeGoalRuntimeFor, setupRunner, renderHuman, runStatusCommand, runCheckCommand, runDashboardCommand, runDoctorCommand, runInstallCommand, runPluginSyncCommand, runReportCommand, runUninstallCommand, runUpgradeCommand, printHumanResult } from "./support/command-fixtures.js";
+import { tempRoot, writeActiveGoalWithId, activeGoalRuntimeFor, setupRunner, renderHuman, runActivityStartCommand, runStatusCommand, runCheckCommand, runDashboardCommand, runDoctorCommand, runInstallCommand, runPluginSyncCommand, runReportCommand, runUninstallCommand, runUpgradeCommand, printHumanResult } from "./support/command-fixtures.js";
 
 test("human output summarizes lifecycle commands instead of printing full JSON", { tags: ["cli", "reporting", "quick"] }, async () => {
   const root = tempRoot();
@@ -56,6 +56,21 @@ test("human output summarizes doctor check status report and dashboard", { tags:
   const dashboardText = renderHuman(dashboard, ["dashboard"]);
   assert.match(dashboardText, /OpenNori dashboard running/);
   assert.match(dashboardText, /URL:/);
+
+  const activity = await runActivityStartCommand([
+    "--root", root,
+    "--agent", "Codex",
+    "--skill", "nori-evidence",
+    "--state", "verifying",
+    "--summary", "Checking current gap.",
+    "--json"
+  ]);
+  const activityText = renderHuman(activity, ["activity", "start"]);
+  assert.match(activityText, /OpenNori activity start/);
+  assert.match(activityText, /Agent: Codex/);
+  assert.match(activityText, /Current gap: AC-1/);
+  assert.match(activityText, /Snapshot: \.opennori\/snapshots\/current\.json/);
+  assert.doesNotMatch(activityText, /"snapshot_summary"/);
 });
 
 test("human status output shows enhanced autogoal acceptance basis", { tags: ["cli", "reporting", "acceptance", "quick"] }, () => {

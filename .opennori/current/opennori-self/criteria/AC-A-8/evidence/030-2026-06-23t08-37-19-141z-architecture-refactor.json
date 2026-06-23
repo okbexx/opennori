@@ -1,0 +1,75 @@
+{
+  "kind": "architecture-refactor",
+  "basis": "tool-observation",
+  "summary": "Activity CLI responses now publish dashboard activity signals without embedding the full dashboard snapshot. start, heartbeat, finish, and show return activity, target, snapshot_summary, snapshot_path, and side_effect while still refreshing .opennori/snapshots/current.json for dashboard and MCP readers.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-activity-cli-response-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-activity-cli-response-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli",
+      "command": "npm run test:cli"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "git diff --check",
+      "command": "git diff --check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/activity.ts",
+      "path": "src/cli/commands/activity.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/human-output.ts",
+      "path": "src/cli/human-output.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-dashboard.test.js",
+      "path": "test/cli-dashboard.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-human-output.test.js",
+      "path": "test/cli-human-output.test.js"
+    }
+  ],
+  "reviewability": "Inspect activity.ts and human-output.ts to confirm activity commands return a compact acknowledgement plus snapshot path, not the full snapshot object. Inspect cli-dashboard and cli-human-output tests for assertions that snapshot is absent from activity payloads while the persisted snapshot file is refreshed. Rerun the listed typecheck, dashboard, CLI, lint, check/status, and diff checks.",
+  "limitations": "This refactor only changes activity CLI response ergonomics. It does not change dashboard snapshot schema, dashboard API, MCP snapshot resource, event/activity persistence schemas, or Product AC evidence semantics.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T08:37:19.141Z"
+}

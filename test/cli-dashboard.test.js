@@ -37,18 +37,23 @@ test("kernel events activity and snapshot expose dashboard state without replaci
   ]);
   assert.equal(started.ok, true);
   assert.equal(started.data.activity.agent, "Codex");
-  assert.equal(started.data.snapshot.agent.state, "verifying");
-  assert.equal(started.data.snapshot.current_gap.id, "AC-1");
+  assert.equal("snapshot" in started.data, false);
+  assert.equal(started.data.snapshot_summary.agent_state, "verifying");
+  assert.equal(started.data.snapshot_summary.current_gap_id, "AC-1");
+  assert.equal(started.data.snapshot_path, ".opennori/snapshots/current.json");
   assert.equal(readEvents(root).some((event) => event.type === "ac.started" && event.gap_id === "AC-1"), true);
 
   const heartbeat = await runActivityHeartbeatCommand(["--root", root, "--agent", "Codex", "--state", "working", "--json"]);
   assert.equal(heartbeat.data.activity.state, "working");
+  assert.equal(heartbeat.data.snapshot_summary.agent_state, "working");
 
   const shown = await runActivityShowCommand(["--root", root, "--json"]);
   assert.equal(shown.data.activity.state, "working");
+  assert.equal(shown.data.snapshot_summary.agent_state, "working");
 
   const finished = await runActivityFinishCommand(["--root", root, "--summary", "Done for now.", "--json"]);
   assert.equal(finished.data.activity.state, "idle");
+  assert.equal(finished.data.snapshot_summary.agent_state, "idle");
   assert.equal(readEvents(root).some((event) => event.type === "ac.finished" && event.gap_id === "AC-1"), true);
 
   const snapshot = refreshSnapshot(root, { goalId: "module-goal" });
@@ -118,8 +123,10 @@ test("activity commands infer the unique current gap for dashboard publishing on
   assert.equal(started.data.activity.goal_id, "module-goal");
   assert.equal(started.data.activity.gap_id, "AC-1");
   assert.equal(started.data.target.inferred, true);
-  assert.equal(started.data.snapshot.goal.id, "module-goal");
-  assert.equal(started.data.snapshot.current_gap.id, "AC-1");
+  assert.equal("snapshot" in started.data, false);
+  assert.equal(started.data.snapshot_summary.goal_id, "module-goal");
+  assert.equal(started.data.snapshot_summary.current_gap_id, "AC-1");
+  assert.equal(fs.existsSync(snapshotPath(root)), true);
 
   const heartbeat = await runActivityHeartbeatCommand([
     "--root", root,
@@ -172,7 +179,8 @@ test("activity start ignores drafts and requires a current goal before publishin
 
   assert.equal(noCurrent.ok, true);
   assert.equal(noCurrent.data.target, null);
-  assert.equal(noCurrent.data.snapshot.status, "no_active_goal");
+  assert.equal(noCurrent.data.snapshot_summary.status, "no_active_goal");
+  assert.equal(noCurrent.data.snapshot_summary.goal_id, null);
 });
 
 test("dashboard no-current snapshot summarizes the latest historical outcome", { tags: ["cli", "dashboard", "quick"] }, () => {

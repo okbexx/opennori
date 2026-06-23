@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T08:28:44.800Z",
+  "updated_at": "2026-06-23T08:37:19.286Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -577,6 +577,17 @@
         "summary": "Acceptance module responsibilities are split into Skill-prepared input normalization, subjective-review surface, and discovery/brainstorm Markdown rendering while keeping src/acceptance.ts as the stable export.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-acceptance-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-activity-cli-response-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Activity CLI responses will become lightweight dashboard signal acknowledgements while the full dashboard snapshot remains available as the persisted snapshot projection.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-activity-cli-response-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

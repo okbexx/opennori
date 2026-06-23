@@ -1,6 +1,7 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { fail, finishActivity, inferActivityTarget, ok, readActivity, refreshSnapshot, writeActivity } from "../../core.ts";
+import { fail, finishActivity, inferActivityTarget, ok, readActivity, refreshSnapshot, snapshotPath, writeActivity } from "../../core.ts";
+import type { NoriActivity, NoriActivityTarget, NoriSnapshot } from "../../types.ts";
 import { runJsonCommand } from "../runtime.ts";
 
 const rootArg = {
@@ -77,6 +78,56 @@ function activityTarget(root: string, args: Record<string, any>) {
   });
 }
 
+function projectSnapshotPath(root: string): string {
+  const filePath = snapshotPath(root);
+  const relative = path.relative(root, filePath);
+  if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) return filePath;
+  return relative;
+}
+
+function activitySnapshotSummary(snapshot: NoriSnapshot) {
+  return {
+    status: snapshot.status,
+    goal_id: snapshot.goal?.id ?? null,
+    current_gap_id: snapshot.current_gap?.id ?? null,
+    decision: snapshot.decision,
+    need_user: snapshot.need_user,
+    agent_state: snapshot.agent.state,
+    agent_skill: snapshot.agent.skill ?? null,
+    generated_at: snapshot.generated_at
+  };
+}
+
+function responseTarget(target: NoriActivityTarget | null) {
+  return target
+    ? {
+        goal_id: target.goal_id,
+        gap_id: target.gap_id,
+        gap_summary: target.gap_summary,
+        inferred: target.inferred
+      }
+    : null;
+}
+
+function targetFromActivity(activity: NoriActivity | null): NoriActivityTarget | null {
+  if (!activity?.goal_id) return null;
+  return {
+    goal_id: activity.goal_id,
+    gap_id: activity.gap_id || null,
+    inferred: false
+  };
+}
+
+function activityResponse(root: string, activity: NoriActivity | null, target: NoriActivityTarget | null, snapshot: NoriSnapshot) {
+  return ok({
+    activity,
+    target: responseTarget(target),
+    snapshot_summary: activitySnapshotSummary(snapshot),
+    snapshot_path: projectSnapshotPath(root),
+    side_effect: "dashboard_activity_only"
+  });
+}
+
 function activityPayload(root: string, args: Record<string, any>, action: "start" | "heartbeat" | "finish") {
   try {
     const previous = readActivity(root);
@@ -105,19 +156,7 @@ function activityPayload(root: string, args: Record<string, any>, action: "start
           { mode: action }
         );
     const snapshot = refreshSnapshot(root, { goalId: activity.goal_id });
-    return ok({
-      activity,
-      target: target
-        ? {
-            goal_id: target.goal_id,
-            gap_id: target.gap_id,
-            gap_summary: target.gap_summary,
-            inferred: target.inferred
-          }
-        : null,
-      snapshot,
-      side_effect: "dashboard_activity_only"
-    });
+    return activityResponse(root, activity, target, snapshot);
   } catch (error) {
     return fail(
       "ambiguous_activity_target",
@@ -210,10 +249,9 @@ export const activityShowCommand = defineCommand({
   },
   run({ args }) {
     const root = path.resolve(String(args.root || process.cwd()));
-    return ok({
-      activity: readActivity(root),
-      snapshot: refreshSnapshot(root)
-    });
+    const activity = readActivity(root);
+    const snapshot = refreshSnapshot(root, { goalId: activity?.goal_id });
+    return activityResponse(root, activity, targetFromActivity(activity), snapshot);
   }
 });
 

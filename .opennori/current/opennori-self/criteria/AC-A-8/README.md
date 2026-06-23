@@ -17,23 +17,25 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor - Kernel snapshot read model was split into active/no-goal snapshot assembly, criteria projection, agent activity summary, and history summary modules while preserving dashboard, MCP, CLI, and snapshot behavior.
+Latest: architecture-refactor - Activity CLI responses now publish dashboard activity signals without embedding the full dashboard snapshot. start, heartbeat, finish, and show return activity, target, snapshot_summary, snapshot_path, and side_effect while still refreshing .opennori/snapshots/current.json for dashboard and MCP readers.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the snapshot modules. Confirm snapshot-builder.ts only coordinates common inputs and delegates to snapshot-goal.ts, snapshot-criteria.ts owns criterion projection, snapshot-agent.ts owns activity-to-agent summary, and snapshot-history.ts owns no-current-goal history. Rerun the listed typecheck, dashboard, MCP, and CLI tests.
-Limitations: This refactor does not change dashboard UI, snapshot schema fields, MCP resource names, event schema, or the .opennori source-of-truth model.
+Reviewability: Inspect activity.ts and human-output.ts to confirm activity commands return a compact acknowledgement plus snapshot path, not the full snapshot object. Inspect cli-dashboard and cli-human-output tests for assertions that snapshot is absent from activity payloads while the persisted snapshot file is refreshed. Rerun the listed typecheck, dashboard, CLI, lint, check/status, and diff checks.
+Limitations: This refactor only changes activity CLI response ergonomics. It does not change dashboard snapshot schema, dashboard API, MCP snapshot resource, event/activity persistence schemas, or Product AC evidence semantics.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-kernel-snapshot-read-model-boundary.json
+- .opennori/architecture/evidence/opennori-self-activity-cli-response-boundary.json
 - npx tsc --noEmit --pretty false
 - npm run test:dashboard
-- npx vitest run test/mcp.test.ts --tagsFilter=quick
 - npm run test:cli
-- src/kernel/snapshot-builder.ts
-- src/kernel/snapshot-goal.ts
-- src/kernel/snapshot-criteria.ts
-- src/kernel/snapshot-agent.ts
-- src/kernel/snapshot-history.ts
+- npm run lint
+- node ./bin/opennori.js check --root . --json
+- node ./bin/opennori.js status --root . --json
+- git diff --check
+- src/cli/commands/activity.ts
+- src/cli/human-output.ts
+- test/cli-dashboard.test.js
+- test/cli-human-output.test.js
 
 ## Files
 
