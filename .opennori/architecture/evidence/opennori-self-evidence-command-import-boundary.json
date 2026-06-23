@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-evidence-command-import-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Evidence add/prune commands now import narrow core, lifecycle, and kernel modules instead of wide core/lifecycle barrels, keeping evidence CLI behavior on deterministic state writes and review projection boundaries.",
+  "fit": "Fits the confirmed TypeScript agent-state CLI baseline by keeping command modules as thin citty entrypoints over focused domain modules, while .opennori remains the state authority and Skills retain subjective evidence sufficiency judgment.",
+  "implementation_focus": "Refactor evidence add/prune command imports and add a module-boundary test that prevents those commands from importing wide core.ts or lifecycle.ts barrels.",
+  "evidence": "src/cli/commands/evidence/add.ts; src/cli/commands/evidence/prune.ts; test/module-boundaries.test.js; npx vitest run test/cli-evidence.test.js test/evidence.test.js test/module-boundaries.test.js; npx tsc --noEmit --pretty false",
+  "limitations": "This architecture apply covers evidence command module boundaries only. Other command groups still need separate narrow-import slices before the wide barrels can be fully retired.",
+  "created_at": "2026-06-23T11:21:20.001Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

@@ -17,18 +17,18 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-boundary-verification - MCP context export now uses a typed read-only capability model, registers only resource descriptors, avoids write-capable barrels, and focused MCP/module-boundary tests plus typecheck pass.
+Latest: test - Evidence command boundary refactor is reviewable: evidence add/prune now use narrow imports, module-boundary test prevents wide core/lifecycle barrel regression, evidence/domain tests pass, and TypeScript compilation passes.
 Result: passing
-Basis: tool-observation
-Reviewability: Review src/mcp/resources.ts, src/mcp/types.ts, src/mcp/server.ts, test/mcp.test.ts, test/module-boundaries.test.js, and rerun the focused verification command.
-Limitations: Evidence is scoped to MCP read-only boundary and does not cover later MCP write-tool design or unrelated OpenNori architecture slices.
+Basis: command-output
+Reviewability: Open the referenced source files and rerun the two commands to verify the evidence CLI stays on narrow deterministic state modules.
+Limitations: This proves the evidence command boundary only; remaining CLI command groups still require separate boundary slices.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-ac-a-8-mcp-explicit-capability-model.json
-- npx vitest run test/mcp.test.ts test/module-boundaries.test.js && npx tsc --noEmit --pretty false
-- src/mcp/resources.ts
-- src/mcp/types.ts
-- test/mcp.test.ts
+- .opennori/architecture/evidence/opennori-self-evidence-command-import-boundary.json
+- npx vitest run test/cli-evidence.test.js test/evidence.test.js test/module-boundaries.test.js
+- npx tsc --noEmit --pretty false
+- src/cli/commands/evidence/add.ts
+- src/cli/commands/evidence/prune.ts
 - test/module-boundaries.test.js
 
 ## Files

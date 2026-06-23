@@ -4,7 +4,7 @@
   "confidence": "high",
   "required": true,
   "risk": "high",
-  "evidence_count": 42,
-  "latest_evidence_summary": "MCP context export now uses a typed read-only capability model, registers only resource descriptors, avoids write-capable barrels, and focused MCP/module-boundary tests plus typecheck pass.",
-  "updated_at": "2026-06-23T11:07:42.022Z"
+  "evidence_count": 43,
+  "latest_evidence_summary": "Evidence command boundary refactor is reviewable: evidence add/prune now use narrow imports, module-boundary test prevents wide core/lifecycle barrel regression, evidence/domain tests pass, and TypeScript compilation passes.",
+  "updated_at": "2026-06-23T11:21:31.612Z"
 }

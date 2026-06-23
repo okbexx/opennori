@@ -1,10 +1,9 @@
 import { defineCommand } from "citty";
-import {
-  criterionStatusRows,
-  ok,
-  pruneCriterionEvidence
-} from "../../../core.ts";
-import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
+import { pruneCriterionEvidence } from "../../../core/evidence-prune.ts";
+import { criterionStatusRows } from "../../../core/evidence-view.ts";
+import { ok } from "../../../core/io.ts";
+import { goalReviewState } from "../../../lifecycle/goal-review-state.ts";
+import { refreshManifest } from "../../../lifecycle/manifest.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
 
 type CommandRuntimeOverride = Pick<ActiveGoalRuntime, "loadPair"> & Partial<Pick<ActiveGoalRuntime, "savePair" | "refreshManifest">>;

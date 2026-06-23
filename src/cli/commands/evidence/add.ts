@@ -1,15 +1,14 @@
 import { defineCommand } from "citty";
-import {
-  addEvidence,
-  appendEvent,
-  criterionStatusRows,
-  ok,
-  pruneInvalidEvidence,
-  readProjectProfile,
-  refreshSnapshot,
-  recomputeWorkflowStatus,
-} from "../../../core.ts";
-import { goalReviewState, refreshManifest } from "../../../lifecycle.ts";
+import { addEvidence } from "../../../core/evidence-record.ts";
+import { pruneInvalidEvidence } from "../../../core/evidence-prune.ts";
+import { criterionStatusRows } from "../../../core/evidence-view.ts";
+import { recomputeWorkflowStatus } from "../../../core/evidence-workflow.ts";
+import { ok } from "../../../core/io.ts";
+import { readProjectProfile } from "../../../core/profile.ts";
+import { appendEvent } from "../../../kernel/events.ts";
+import { refreshSnapshot } from "../../../kernel/snapshot.ts";
+import { goalReviewState } from "../../../lifecycle/goal-review-state.ts";
+import { refreshManifest } from "../../../lifecycle/manifest.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand, savePair } from "../../runtime.ts";
 import type { EvidenceBasis } from "../../../types/common.ts";
 import type { EvidenceInput } from "../../../types/evidence.ts";

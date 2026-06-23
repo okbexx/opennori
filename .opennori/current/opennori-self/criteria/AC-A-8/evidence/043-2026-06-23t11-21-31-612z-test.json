@@ -1,0 +1,45 @@
+{
+  "kind": "test",
+  "basis": "command-output",
+  "summary": "Evidence command boundary refactor is reviewable: evidence add/prune now use narrow imports, module-boundary test prevents wide core/lifecycle barrel regression, evidence/domain tests pass, and TypeScript compilation passes.",
+  "result": "passing",
+  "confidence": "high",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-evidence-command-import-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-evidence-command-import-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-evidence.test.js test/evidence.test.js test/module-boundaries.test.js",
+      "command": "npx vitest run test/cli-evidence.test.js test/evidence.test.js test/module-boundaries.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/evidence/add.ts",
+      "path": "src/cli/commands/evidence/add.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/evidence/prune.ts",
+      "path": "src/cli/commands/evidence/prune.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/module-boundaries.test.js",
+      "path": "test/module-boundaries.test.js"
+    }
+  ],
+  "reviewability": "Open the referenced source files and rerun the two commands to verify the evidence CLI stays on narrow deterministic state modules.",
+  "limitations": "This proves the evidence command boundary only; remaining CLI command groups still require separate boundary slices.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T11:21:31.612Z"
+}

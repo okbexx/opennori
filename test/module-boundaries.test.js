@@ -23,6 +23,11 @@ function importSpecifiers(source) {
   return [...source.matchAll(/from\s+["']([^"']+)["']/g)].map((match) => match[1]);
 }
 
+function resolvesTo(filePath, specifier, targetPath) {
+  if (!specifier.startsWith(".")) return false;
+  return path.resolve(path.dirname(filePath), specifier) === targetPath;
+}
+
 test("source and tests import domain types instead of restoring a central type barrel", { tags: ["architecture", "unit", "quick"] }, () => {
   const publicTypeBarrel = path.join(ROOT, "src", "types.ts");
   assert.equal(fs.existsSync(publicTypeBarrel), false);
@@ -97,6 +102,21 @@ test("MCP CLI startup stays behind command registry policy", { tags: ["architect
   assert.equal(cliEntrypoint.includes("serveOpenNoriMcpStdio"), false);
   assert.match(registry, /stdioServer:\s*true/);
   assert.match(mcpCommand, /serveOpenNoriMcpStdio/);
+});
+
+test("evidence commands use narrow state modules instead of wide barrels", { tags: ["architecture", "evidence", "cli", "unit", "quick"] }, () => {
+  const forbiddenTargets = [
+    path.join(ROOT, "src", "core.ts"),
+    path.join(ROOT, "src", "lifecycle.ts")
+  ];
+  const offenders = sourceFiles(path.join(ROOT, "src", "cli", "commands", "evidence"))
+    .filter((filePath) => {
+      const specifiers = importSpecifiers(fs.readFileSync(filePath, "utf8"));
+      return specifiers.some((specifier) => forbiddenTargets.some((target) => resolvesTo(filePath, specifier, target)));
+    })
+    .map(relative);
+
+  assert.deepEqual(offenders, []);
 });
 
 test("setup and plugin sync command output parsing stays inside lifecycle adapters", { tags: ["architecture", "lifecycle", "unit"] }, () => {
