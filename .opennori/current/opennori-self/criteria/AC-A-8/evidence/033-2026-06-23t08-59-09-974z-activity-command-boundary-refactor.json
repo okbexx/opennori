@@ -1,0 +1,90 @@
+{
+  "kind": "activity-command-boundary-refactor",
+  "basis": "tool-observation",
+  "summary": "Activity CLI internals now separate citty argument definitions, activity input/target normalization, dashboard signal payload writing, and snapshot summary response projection. The opennori activity commands still publish only dashboard_activity_only signals, return no full snapshot payload, and do not write Product AC evidence or contract state.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-activity-command-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-activity-command-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli",
+      "command": "npm run test:cli"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js activity show --root . --json",
+      "command": "node ./bin/opennori.js activity show --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/activity.ts",
+      "path": "src/cli/commands/activity.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/activity/args.ts",
+      "path": "src/cli/commands/activity/args.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/activity/input.ts",
+      "path": "src/cli/commands/activity/input.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/activity/payload.ts",
+      "path": "src/cli/commands/activity/payload.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/activity/response.ts",
+      "path": "src/cli/commands/activity/response.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-dashboard.test.js",
+      "path": "test/cli-dashboard.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/cli-human-output.test.js",
+      "path": "test/cli-human-output.test.js"
+    }
+  ],
+  "reviewability": "Inspect the listed activity command modules. Confirm activity.ts only defines commands, args.ts defines CLI args, input.ts normalizes target/input, payload.ts performs dashboard signal writes and refreshes the snapshot projection, and response.ts returns only a compact snapshot_summary with side_effect dashboard_activity_only. Rerun the listed commands.",
+  "limitations": "This verifies CLI activity boundary and tests. It does not add new dashboard UI behavior or long-running agent telemetry beyond the existing activity/event projections.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T08:59:09.974Z"
+}

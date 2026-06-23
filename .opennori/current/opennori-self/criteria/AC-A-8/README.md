@@ -17,32 +17,28 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: context-export-boundary-refactor - Context export now has separate read-only state collection, review payload assembly, relative path projection, and explicit artifact writing boundaries. The public context export schema and CLI behavior remain stable, MCP still consumes it as a read-only resource, and default context export performs no artifact write.
+Latest: activity-command-boundary-refactor - Activity CLI internals now separate citty argument definitions, activity input/target normalization, dashboard signal payload writing, and snapshot summary response projection. The opennori activity commands still publish only dashboard_activity_only signals, return no full snapshot payload, and do not write Product AC evidence or contract state.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed context export modules: state collection should read existing core/.opennori state, payload assembly should project review context only, path projection should remain relative, and artifact writing should only happen through explicit --output. Rerun the listed commands and confirm MCP resources still report side_effect none.
-Limitations: This verifies context export boundaries and existing read-only MCP consumption. It does not add new external review integrations or MCP write tools.
+Reviewability: Inspect the listed activity command modules. Confirm activity.ts only defines commands, args.ts defines CLI args, input.ts normalizes target/input, payload.ts performs dashboard signal writes and refreshes the snapshot projection, and response.ts returns only a compact snapshot_summary with side_effect dashboard_activity_only. Rerun the listed commands.
+Limitations: This verifies CLI activity boundary and tests. It does not add new dashboard UI behavior or long-running agent telemetry beyond the existing activity/event projections.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-context-export-boundary.json
+- .opennori/architecture/evidence/opennori-self-activity-command-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:reporting
+- npm run test:dashboard
 - npm run test:cli
-- npx vitest run test/mcp.test.ts
 - npm run lint
 - node ./bin/opennori.js check --root . --json
 - node ./bin/opennori.js status --root . --json
-- node ./bin/opennori.js context export --root . --json
-- src/lifecycle/context-export.ts
-- src/lifecycle/context-export-state.ts
-- src/lifecycle/context-export-payload.ts
-- src/lifecycle/context-export-paths.ts
-- src/lifecycle/context-export-artifact.ts
-- src/cli/commands/context.ts
-- src/types/lifecycle.ts
-- test/reporting.test.js
-- test/cli-reporting.test.js
-- test/mcp.test.ts
+- node ./bin/opennori.js activity show --root . --json
+- src/cli/commands/activity.ts
+- src/cli/commands/activity/args.ts
+- src/cli/commands/activity/input.ts
+- src/cli/commands/activity/payload.ts
+- src/cli/commands/activity/response.ts
+- test/cli-dashboard.test.js
+- test/cli-human-output.test.js
 
 ## Files
 

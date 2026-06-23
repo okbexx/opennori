@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-activity-command-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Activity CLI command code will be split so dashboard activity remains a lightweight signal surface: argument normalization, target handling, signal writing, snapshot summary projection, and command definitions stay separated.",
+  "fit": "The change follows the dashboard/kernel boundary in the TypeScript agent-state CLI baseline. Activity writes only .opennori/activity and event/snapshot projections, never Product AC evidence or contract state.",
+  "implementation_focus": "Split src/cli/commands/activity.ts without changing opennori activity start/heartbeat/finish/show behavior.",
+  "evidence": "src/cli/commands/activity.ts currently combines activity args, TTL parsing, target inference, signal writes, snapshot refresh, response projection, and command definitions in one file.",
+  "limitations": "This apply record covers CLI activity module boundaries; validation will still be needed after code changes.",
+  "created_at": "2026-06-23T08:56:45.208Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}
