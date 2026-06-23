@@ -17,24 +17,21 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor - Plugin sync lifecycle responsibilities were split into type definitions, action builders, plan construction, and execution orchestration while preserving preview-first Codex Plugin cache refresh behavior.
+Latest: architecture-refactor - Kernel activity publishing was split into target resolution, activity storage, and event projection modules while preserving dashboard activity, SSE, snapshot, and observation-only behavior.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the plugin sync lifecycle modules. Confirm plugin-sync.ts remains a compatibility export, plugin-sync-types.ts owns public sync types, plugin-sync-actions.ts owns marketplace/plugin/packaged-skill action construction, plugin-sync-plan.ts builds preview plans, and plugin-sync-execution.ts performs confirm-time orchestration. Rerun the listed typecheck, lifecycle, CLI, reporting, and lint commands.
-Limitations: This is an internal lifecycle boundary refactor. It does not change opennori plugin sync flags, Codex Plugin command strings, local mode, preview/confirm safety, or the rule that plugin sync does not write project .opennori state.
+Reviewability: Inspect the kernel activity modules. Confirm activity.ts only coordinates public write/finish flows, activity-target.ts owns current-goal/gap inference, activity-store.ts owns projection file normalization and persistence, and activity-events.ts owns AC/activity event emission. Rerun the listed typecheck, dashboard, and CLI tests.
+Limitations: This refactor does not change dashboard UI, activity CLI flags, event schema, snapshot response shape, or the rule that dashboard activity is not Product AC evidence.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-plugin-sync-lifecycle-boundary.json
+- .opennori/architecture/evidence/opennori-self-kernel-activity-event-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:lifecycle
+- npm run test:dashboard
 - npm run test:cli
-- npm run test:reporting
-- npm run lint
-- src/lifecycle/plugin-sync.ts
-- src/lifecycle/plugin-sync-types.ts
-- src/lifecycle/plugin-sync-actions.ts
-- src/lifecycle/plugin-sync-plan.ts
-- src/lifecycle/plugin-sync-execution.ts
+- src/kernel/activity.ts
+- src/kernel/activity-target.ts
+- src/kernel/activity-store.ts
+- src/kernel/activity-events.ts
 
 ## Files
 

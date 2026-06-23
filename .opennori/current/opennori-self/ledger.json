@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T08:17:40.281Z",
+  "updated_at": "2026-06-23T08:24:35.072Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -6427,9 +6427,64 @@
           "limitations": "This is an internal lifecycle boundary refactor. It does not change opennori plugin sync flags, Codex Plugin command strings, local mode, preview/confirm safety, or the rule that plugin sync does not write project .opennori state.",
           "gate": "accepted",
           "created_at": "2026-06-23T08:17:40.278Z"
+        },
+        {
+          "kind": "architecture-refactor",
+          "basis": "tool-observation",
+          "summary": "Kernel activity publishing was split into target resolution, activity storage, and event projection modules while preserving dashboard activity, SSE, snapshot, and observation-only behavior.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-kernel-activity-event-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-kernel-activity-event-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:cli",
+              "command": "npm run test:cli"
+            },
+            {
+              "type": "artifact",
+              "label": "src/kernel/activity.ts",
+              "path": "src/kernel/activity.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/kernel/activity-target.ts",
+              "path": "src/kernel/activity-target.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/kernel/activity-store.ts",
+              "path": "src/kernel/activity-store.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/kernel/activity-events.ts",
+              "path": "src/kernel/activity-events.ts"
+            }
+          ],
+          "reviewability": "Inspect the kernel activity modules. Confirm activity.ts only coordinates public write/finish flows, activity-target.ts owns current-goal/gap inference, activity-store.ts owns projection file normalization and persistence, and activity-events.ts owns AC/activity event emission. Rerun the listed typecheck, dashboard, and CLI tests.",
+          "limitations": "This refactor does not change dashboard UI, activity CLI flags, event schema, snapshot response shape, or the rule that dashboard activity is not Product AC evidence.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T08:24:35.069Z"
         }
       ],
-      "updated_at": "2026-06-23T08:17:40.278Z"
+      "updated_at": "2026-06-23T08:24:35.069Z"
     },
     "AC-A-9": {
       "status": "passing",
