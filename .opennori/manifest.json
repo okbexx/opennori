@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T08:06:30.041Z",
+  "updated_at": "2026-06-23T08:12:43.788Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -775,6 +775,17 @@
         "summary": "Split OpenNori completion/routing decisions from Markdown report rendering while preserving src/core/report.ts as the public compatibility export.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-report-completion-render-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-setup-lifecycle-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Setup lifecycle responsibilities will be split into setup type definitions, action builders, plan construction, and execution orchestration while preserving preview-first bundle setup semantics.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-setup-lifecycle-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-setup-lifecycle-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Setup lifecycle responsibilities will be split into setup type definitions, action builders, plan construction, and execution orchestration while preserving preview-first bundle setup semantics.",
+  "fit": "The confirmed TypeScript agent-state CLI baseline keeps lifecycle state deterministic: setup remains a CLI/core orchestration surface over official Codex and npm CLIs, project bootstrap, and doctor, with no project-local Skill copy path.",
+  "implementation_focus": "Refactor src/lifecycle/setup.ts into focused lifecycle modules so future setup/plugin capability changes do not mix external command probes, action rendering, project initialization, and result assembly in one module.",
+  "evidence": "Read src/lifecycle/setup.ts, plugin-sync.ts, external-actions.ts, lifecycle adapters, and lifecycle tests; setup.ts currently mixes action construction, plan building, command execution, bootstrap, doctor, and result assembly.",
+  "limitations": "This architecture apply covers internal setup module boundaries only. It does not change first-time setup UX, Codex Plugin commands, npm install behavior, or project .opennori state semantics.",
+  "created_at": "2026-06-23T08:08:51.463Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

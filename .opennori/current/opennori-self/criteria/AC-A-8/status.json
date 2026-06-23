@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 25,
-  "latest_evidence_summary": "Acceptance responsibilities were split into Skill-prepared input normalization, subjective-review surface, and discovery/brainstorm Markdown rendering while preserving existing public imports.",
-  "updated_at": "2026-06-23T08:06:29.935Z"
+  "evidence_count": 26,
+  "latest_evidence_summary": "Setup lifecycle responsibilities were split into setup types, action builders, plan construction, and execution orchestration while preserving the preview-first OpenNori capability bundle setup behavior.",
+  "updated_at": "2026-06-23T08:12:43.665Z"
 }

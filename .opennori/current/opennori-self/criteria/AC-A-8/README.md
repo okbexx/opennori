@@ -17,24 +17,23 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor - Acceptance responsibilities were split into Skill-prepared input normalization, subjective-review surface, and discovery/brainstorm Markdown rendering while preserving existing public imports.
+Latest: architecture-refactor - Setup lifecycle responsibilities were split into setup types, action builders, plan construction, and execution orchestration while preserving the preview-first OpenNori capability bundle setup behavior.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the split acceptance modules. Confirm Skill-prepared input handling, Markdown review rendering, and subjective review placeholder are separated, and src/acceptance.ts remains a stable export for existing callers. Rerun the listed typecheck and domain tests.
-Limitations: This is an internal boundary refactor. It preserves existing CLI behavior and does not add subjective AC quality validation; Skills and users still own acceptance quality judgment.
+Reviewability: Inspect the setup lifecycle modules. Confirm setup.ts remains a compatibility export, setup-types.ts owns public setup types, setup-actions.ts owns bundle action construction and external probes, setup-plan.ts builds preview plans, and setup-execution.ts performs confirm-time orchestration. Rerun the listed typecheck, lifecycle, CLI, and lint commands.
+Limitations: This is an internal lifecycle boundary refactor. It does not change npx opennori setup, dry-run/confirm behavior, Codex Plugin commands, npm global install commands, or project .opennori initialization semantics.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-acceptance-boundary.json
+- .opennori/architecture/evidence/opennori-self-setup-lifecycle-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:acceptance
+- npm run test:lifecycle
 - npm run test:cli
-- npm run test:reporting
-- npm run test:quick
 - npm run lint
-- src/acceptance.ts
-- src/acceptance-skill-input.ts
-- src/acceptance-markdown.ts
-- src/acceptance-review.ts
+- src/lifecycle/setup.ts
+- src/lifecycle/setup-types.ts
+- src/lifecycle/setup-actions.ts
+- src/lifecycle/setup-plan.ts
+- src/lifecycle/setup-execution.ts
 
 ## Files
 
