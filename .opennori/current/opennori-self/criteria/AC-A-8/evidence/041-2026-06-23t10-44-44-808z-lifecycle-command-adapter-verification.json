@@ -1,0 +1,80 @@
+{
+  "kind": "lifecycle-command-adapter-verification",
+  "basis": "tool-observation",
+  "summary": "Lifecycle external command execution is now isolated in lifecycle/adapters/external-command-runner.ts, while external-actions.ts only models preview/confirm action state and setup/plugin-sync keep orchestration behavior.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-external-command-runner-adapter",
+      "path": ".opennori/architecture/evidence/opennori-self-external-command-runner-adapter.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/module-boundaries.test.js test/lifecycle-adapters.test.ts test/cli-lifecycle.test.js",
+      "command": "npx vitest run test/module-boundaries.test.js test/lifecycle-adapters.test.ts test/cli-lifecycle.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/adapters/external-command-runner.ts",
+      "path": "src/lifecycle/adapters/external-command-runner.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/external-actions.ts",
+      "path": "src/lifecycle/external-actions.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/adapters/codex-plugin.ts",
+      "path": "src/lifecycle/adapters/codex-plugin.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/adapters/npm-global.ts",
+      "path": "src/lifecycle/adapters/npm-global.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/setup-execution.ts",
+      "path": "src/lifecycle/setup-execution.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/plugin-sync-execution.ts",
+      "path": "src/lifecycle/plugin-sync-execution.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/setup-plan.ts",
+      "path": "src/lifecycle/setup-plan.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/plugin-sync-plan.ts",
+      "path": "src/lifecycle/plugin-sync-plan.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/module-boundaries.test.js",
+      "path": "test/module-boundaries.test.js"
+    }
+  ],
+  "reviewability": "Inspect external-actions.ts to confirm it no longer imports child_process or owns runExternalCommandAction; inspect lifecycle/adapters/external-command-runner.ts for process execution and action result adaptation; inspect codex/npm adapters for stdout parsing; rerun the listed lifecycle tests and typecheck.",
+  "limitations": "This verifies internal lifecycle boundaries and existing setup/plugin-sync behavior through focused tests. It does not add a new external process library or change setup/plugin sync UX.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T10:44:44.808Z"
+}

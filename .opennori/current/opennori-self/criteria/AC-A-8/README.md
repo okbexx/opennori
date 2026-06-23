@@ -17,26 +17,25 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: type-boundary-verification - The central src/types.ts type barrel was removed; source and tests now import owned domain type modules directly, and boundary tests prevent restoring the central barrel.
+Latest: lifecycle-command-adapter-verification - Lifecycle external command execution is now isolated in lifecycle/adapters/external-command-runner.ts, while external-actions.ts only models preview/confirm action state and setup/plugin-sync keep orchestration behavior.
 Result: passing
 Basis: tool-observation
-Reviewability: Confirm src/types.ts is absent; inspect test/module-boundaries.test.js for the guard; inspect test/mcp.test.ts for domain type imports; rerun the listed typecheck, focused tests, and lint.
-Limitations: This lowers central type coupling but does not exhaustively redesign every domain type. Existing domain type modules remain intentionally separate.
+Reviewability: Inspect external-actions.ts to confirm it no longer imports child_process or owns runExternalCommandAction; inspect lifecycle/adapters/external-command-runner.ts for process execution and action result adaptation; inspect codex/npm adapters for stdout parsing; rerun the listed lifecycle tests and typecheck.
+Limitations: This verifies internal lifecycle boundaries and existing setup/plugin-sync behavior through focused tests. It does not add a new external process library or change setup/plugin sync UX.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-central-type-barrel-removal.json
+- .opennori/architecture/evidence/opennori-self-external-command-runner-adapter.json
+- npx vitest run test/module-boundaries.test.js test/lifecycle-adapters.test.ts test/cli-lifecycle.test.js
 - npx tsc --noEmit --pretty false
-- npx vitest run test/module-boundaries.test.js test/mcp.test.ts
 - npm run lint
-- src/types/common.ts
-- src/types/lifecycle.ts
-- src/types/contract.ts
-- src/types/evidence.ts
-- src/types/profile.ts
-- src/types/architecture.ts
-- src/mcp/types.ts
-- src/cli/command-types.ts
-- test/mcp.test.ts
+- src/lifecycle/adapters/external-command-runner.ts
+- src/lifecycle/external-actions.ts
+- src/lifecycle/adapters/codex-plugin.ts
+- src/lifecycle/adapters/npm-global.ts
+- src/lifecycle/setup-execution.ts
+- src/lifecycle/plugin-sync-execution.ts
+- src/lifecycle/setup-plan.ts
+- src/lifecycle/plugin-sync-plan.ts
 - test/module-boundaries.test.js
 
 ## Files

@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 40,
-  "latest_evidence_summary": "The central src/types.ts type barrel was removed; source and tests now import owned domain type modules directly, and boundary tests prevent restoring the central barrel.",
-  "updated_at": "2026-06-23T10:40:22.004Z"
+  "evidence_count": 41,
+  "latest_evidence_summary": "Lifecycle external command execution is now isolated in lifecycle/adapters/external-command-runner.ts, while external-actions.ts only models preview/confirm action state and setup/plugin-sync keep orchestration behavior.",
+  "updated_at": "2026-06-23T10:44:44.808Z"
 }

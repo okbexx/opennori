@@ -1,9 +1,8 @@
 import type { InstallPlan, NoriResult } from "../types/lifecycle.ts";
+import type { ExternalCommandResult, ExternalCommandRunner } from "./adapters/external-command-runner.ts";
 import type {
   ExternalActionStatus,
-  ExternalCommandAction,
-  ExternalCommandResult,
-  ExternalCommandRunner
+  ExternalCommandAction
 } from "./external-actions.ts";
 
 export type SetupActionId = "codex_marketplace" | "codex_plugin" | "packaged_skills" | "global_cli" | "project_state" | "doctor";

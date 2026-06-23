@@ -1,4 +1,4 @@
-import type { ExternalCommandResult, ExternalCommandRunner } from "../external-actions.ts";
+import type { ExternalCommandResult, ExternalCommandRunner } from "./external-command-runner.ts";
 
 export type GlobalNpmPackageProbe = {
   available: boolean;

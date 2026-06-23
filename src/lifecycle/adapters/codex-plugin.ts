@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { ExternalCommandResult, ExternalCommandRunner } from "../external-actions.ts";
+import type { ExternalCommandResult, ExternalCommandRunner } from "./external-command-runner.ts";
 
 const DEFAULT_MARKETPLACE_NAME = "opennori";
 const DEFAULT_PLUGIN_ID = "opennori@opennori";

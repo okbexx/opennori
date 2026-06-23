@@ -1,9 +1,8 @@
 import type { NoriResult } from "../types/lifecycle.ts";
+import type { ExternalCommandResult, ExternalCommandRunner } from "./adapters/external-command-runner.ts";
 import type {
   ExternalActionStatus,
-  ExternalCommandAction,
-  ExternalCommandResult,
-  ExternalCommandRunner
+  ExternalCommandAction
 } from "./external-actions.ts";
 
 export type PluginSyncActionStatus = ExternalActionStatus;

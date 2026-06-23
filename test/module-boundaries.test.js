@@ -62,6 +62,7 @@ test("MCP CLI startup stays behind command registry policy", { tags: ["architect
 test("setup and plugin sync command output parsing stays inside lifecycle adapters", { tags: ["architecture", "lifecycle", "unit"] }, () => {
   const allowed = new Set([
     path.join(ROOT, "src", "lifecycle", "adapters", "codex-plugin.ts"),
+    path.join(ROOT, "src", "lifecycle", "adapters", "external-command-runner.ts"),
     path.join(ROOT, "src", "lifecycle", "adapters", "npm-global.ts"),
     path.join(ROOT, "src", "lifecycle", "external-actions.ts")
   ]);
@@ -72,6 +73,17 @@ test("setup and plugin sync command output parsing stays inside lifecycle adapte
     .map(relative);
 
   assert.deepEqual(offenders, []);
+});
+
+test("external action modeling does not own process execution infrastructure", { tags: ["architecture", "lifecycle", "unit", "quick"] }, () => {
+  const actionModel = fs.readFileSync(path.join(ROOT, "src", "lifecycle", "external-actions.ts"), "utf8");
+  const runnerAdapter = fs.readFileSync(path.join(ROOT, "src", "lifecycle", "adapters", "external-command-runner.ts"), "utf8");
+
+  assert.equal(actionModel.includes("node:child_process"), false);
+  assert.equal(actionModel.includes("spawnSync"), false);
+  assert.equal(actionModel.includes("runExternalCommandAction"), false);
+  assert.match(runnerAdapter, /node:child_process/);
+  assert.match(runnerAdapter, /runExternalCommandAction/);
 });
 
 test("generated acceptance Markdown parser is not used as a state import path", { tags: ["architecture", "acceptance", "unit"] }, () => {

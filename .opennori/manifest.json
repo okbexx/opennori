@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T10:40:22.108Z",
+  "updated_at": "2026-06-23T10:44:44.919Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -797,6 +797,17 @@
         "summary": "Split the Product evidence state boundary into source normalization, risk gate, workflow status, evidence view, pruning, health, and recording modules while keeping evidence.ts as a compatibility export.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-evidence-state-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-external-command-runner-adapter",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "External command execution moved from lifecycle action modeling into a dedicated lifecycle adapter, while setup and plugin-sync continue to orchestrate plans and consume runner abstractions.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-external-command-runner-adapter.json",
         "schema_valid": true,
         "schema_errors": []
       },

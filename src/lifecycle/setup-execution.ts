@@ -5,9 +5,9 @@ import { bootstrap } from "./bootstrap.ts";
 import { doctor } from "./doctor.ts";
 import {
   defaultExternalCommandRunner,
-  runExternalCommandAction,
-  summarizeExternalActions
-} from "./external-actions.ts";
+  runExternalCommandAction
+} from "./adapters/external-command-runner.ts";
+import { summarizeExternalActions } from "./external-actions.ts";
 import { buildSetupPlan } from "./setup-plan.ts";
 import type { SetupOptions, SetupPlan, SetupPlanAction } from "./setup-types.ts";
 

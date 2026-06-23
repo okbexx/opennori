@@ -1,4 +1,5 @@
-import { defaultExternalCommandRunner, summarizeExternalActions } from "./external-actions.ts";
+import { defaultExternalCommandRunner } from "./adapters/external-command-runner.ts";
+import { summarizeExternalActions } from "./external-actions.ts";
 import { installActions } from "./install.ts";
 import { buildInstallPlan } from "./plans.ts";
 import { buildSetupExternalActions, setupDoctorAction, setupProjectStateAction } from "./setup-actions.ts";

@@ -1,0 +1,31 @@
+# OpenNori Architecture Apply Record
+
+Status: aligned
+Goal: opennori-self
+Criterion: AC-A-8
+Baseline: typescript-agent-state-cli
+Accepted at: 2026-06-23T06:28:29.131Z
+
+## Summary
+
+External command execution moved from lifecycle action modeling into a dedicated lifecycle adapter, while setup and plugin-sync continue to orchestrate plans and consume runner abstractions.
+
+## Fit
+
+This follows the TypeScript agent-state CLI baseline: lifecycle action files model preview/confirm actions, adapter modules own external command execution and stdout parsing, and setup/plugin-sync remain deterministic plan/execution orchestration.
+
+## Implementation Focus
+
+External command runner/stdout parser adapter boundary：进程执行、stdout/stderr捕获和官方CLI输出解析留在 adapters；plan/action 层不拥有基础设施。
+
+## Evidence
+
+src/lifecycle/adapters/external-command-runner.ts, src/lifecycle/external-actions.ts, src/lifecycle/adapters/codex-plugin.ts, src/lifecycle/adapters/npm-global.ts, src/lifecycle/setup-execution.ts, src/lifecycle/plugin-sync-execution.ts, test/module-boundaries.test.js; npx vitest run test/module-boundaries.test.js test/lifecycle-adapters.test.ts test/cli-lifecycle.test.js; npx tsc --noEmit --pretty false
+
+## Limitations
+
+This is an internal lifecycle boundary refactor. It does not change setup/plugin sync user-visible behavior or introduce a new process library.
+
+## Rule
+
+This record documents architecture alignment for an acceptance gap. It is not Product AC evidence by itself.

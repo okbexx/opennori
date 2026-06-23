@@ -2,9 +2,9 @@ import { fail, ok } from "../core.ts";
 import type { NoriResult } from "../types/lifecycle.ts";
 import {
   defaultExternalCommandRunner,
-  runExternalCommandAction,
-  summarizeExternalActions
-} from "./external-actions.ts";
+  runExternalCommandAction
+} from "./adapters/external-command-runner.ts";
+import { summarizeExternalActions } from "./external-actions.ts";
 import { buildPluginSyncPlan } from "./plugin-sync-plan.ts";
 import type { PluginSyncAction, PluginSyncOptions, PluginSyncPlan } from "./plugin-sync-types.ts";
 
