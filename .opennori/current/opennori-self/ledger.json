@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T02:25:58.691Z",
+  "updated_at": "2026-06-23T02:38:55.395Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -4602,6 +4602,86 @@
           "limitations": "This evidence covers the type-surface architecture hardening slice. Runtime domain modules and Biome coverage for all core TypeScript files remain separate architecture work.",
           "gate": "accepted",
           "created_at": "2026-06-23T02:25:58.688Z"
+        },
+        {
+          "kind": "architecture-refactor-verification",
+          "basis": "tool-observation",
+          "summary": "OpenNori core shared helpers are now separated by responsibility: protocol constants/layer inference, deterministic IO/result helpers, goal-state path discovery, dossier rendering, and dossier persistence/hydration. shared.ts remains a narrow compatibility barrel, so existing CLI/kernel imports keep working while the architecture boundary is clearer.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-core-shared-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-core-shared-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:quick",
+              "command": "npm run test:quick"
+            },
+            {
+              "type": "command",
+              "label": "npm run check",
+              "command": "npm run check"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js doctor --root . --json",
+              "command": "node ./bin/opennori.js doctor --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js status --root . --json",
+              "command": "node ./bin/opennori.js status --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "git diff --check",
+              "command": "git diff --check"
+            },
+            {
+              "type": "artifact",
+              "label": "src/core/protocol.ts",
+              "path": "src/core/protocol.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/core/io.ts",
+              "path": "src/core/io.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/core/goal-state.ts",
+              "path": "src/core/goal-state.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/core/dossier-render.ts",
+              "path": "src/core/dossier-render.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/core/dossier.ts",
+              "path": "src/core/dossier.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/core/shared.ts",
+              "path": "src/core/shared.ts"
+            }
+          ],
+          "reviewability": "Inspect the listed src/core files: shared.ts should only re-export; protocol, IO, goal-state discovery, generated dossier rendering, and dossier persistence/hydration should be separate modules. Rerun the listed commands.",
+          "limitations": "This verifies the core module boundary and current behavior. It does not claim the entire OpenNori architecture is fully finished; further slices still need CLI runtime and command/domain boundary review.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T02:38:55.392Z"
         }
       ]
     },

@@ -17,28 +17,26 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor-verification - OpenNori status/check now show the TypeScript agent-state architecture baseline remains valid after splitting the protocol type surface into domain modules; src/types.ts is a barrel, src/types/* holds domain-specific type definitions, and Project Profile core types no longer depend on evidence source types.
+Latest: architecture-refactor-verification - OpenNori core shared helpers are now separated by responsibility: protocol constants/layer inference, deterministic IO/result helpers, goal-state path discovery, dossier rendering, and dossier persistence/hydration. shared.ts remains a narrow compatibility barrel, so existing CLI/kernel imports keep working while the architecture boundary is clearer.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect src/types.ts and src/types/*.ts, rerun the listed commands, and confirm check/status list opennori-self-types-domain-boundary as a valid architecture apply record while Product and Architecture decisions remain complete/valid.
-Limitations: This evidence covers the type-surface architecture hardening slice. Runtime domain modules and Biome coverage for all core TypeScript files remain separate architecture work.
+Reviewability: Inspect the listed src/core files: shared.ts should only re-export; protocol, IO, goal-state discovery, generated dossier rendering, and dossier persistence/hydration should be separate modules. Rerun the listed commands.
+Limitations: This verifies the core module boundary and current behavior. It does not claim the entire OpenNori architecture is fully finished; further slices still need CLI runtime and command/domain boundary review.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-types-domain-boundary.json
+- .opennori/architecture/evidence/opennori-self-core-shared-boundary.json
 - npx tsc --noEmit --pretty false
 - npm run test:quick
-- node ./bin/opennori.js check --root . --json
+- npm run check
+- node ./bin/opennori.js doctor --root . --json
 - node ./bin/opennori.js status --root . --json
-- src/types.ts
-- src/types/common.ts
-- src/types/contract.ts
-- src/types/profile.ts
-- src/types/evidence.ts
-- src/types/agent.ts
-- src/types/kernel.ts
-- src/types/acceptance.ts
-- src/types/architecture.ts
-- src/types/lifecycle.ts
+- git diff --check
+- src/core/protocol.ts
+- src/core/io.ts
+- src/core/goal-state.ts
+- src/core/dossier-render.ts
+- src/core/dossier.ts
+- src/core/shared.ts
 
 ## Files
 
