@@ -1,0 +1,50 @@
+{
+  "kind": "mcp-resource-type-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "MCP resource payload types are separated from read-only resource construction: src/mcp/types.ts owns resource descriptor/payload types, resources.ts builds read-only context/snapshot/doctor resources, and mcp.ts preserves public type exports without adding MCP write tools or state authority.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-mcp-resource-type-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-mcp-resource-type-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/mcp.test.ts",
+      "command": "npx vitest run test/mcp.test.ts"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "artifact",
+      "label": "src/mcp/types.ts",
+      "path": "src/mcp/types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/mcp/resources.ts",
+      "path": "src/mcp/resources.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/mcp.ts",
+      "path": "src/mcp.ts"
+    }
+  ],
+  "reviewability": "Inspect src/mcp/types.ts, src/mcp/resources.ts, and src/mcp.ts. Confirm MCP still exposes only read-only context/snapshot/doctor resources and no write tools.",
+  "limitations": "This is structural only. It does not add MCP tools, HTTP transport, OAuth, or writable MCP semantics.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T07:08:15.416Z"
+}

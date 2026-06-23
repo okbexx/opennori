@@ -14,6 +14,6 @@ export type {
   McpResourceName,
   McpResourcePayload,
   McpSnapshotResource
-} from "./mcp/resources.ts";
+} from "./mcp/types.ts";
 export { createOpenNoriMcpServer, serveOpenNoriMcpStdio } from "./mcp/server.ts";
 export type { OpenNoriMcpServerOptions } from "./mcp/server.ts";

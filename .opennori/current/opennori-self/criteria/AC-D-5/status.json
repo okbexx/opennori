@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 1,
   "latest_evidence_summary": "Dashboard now exposes Project Profile as a readonly project-level overlay and evaluates compliance only when a current goal exists. The header button is labeled Inspect Project Profile, the profile node raw data distinguishes project_only from current_goal_compliance, no-current-goal snapshots still include Project Profile but mark compliance not evaluated, and the overlay stays read-only without add/check/evidence/waive/confirm controls.",
-  "updated_at": "2026-06-23T07:02:39.963Z"
+  "updated_at": "2026-06-23T07:08:15.419Z"
 }

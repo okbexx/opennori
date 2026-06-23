@@ -17,22 +17,20 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: lifecycle-adapter-parser-boundary-verification - Lifecycle external command parsing is kept inside adapters: setup and plugin-sync consume Codex/npm probe objects, and the Codex Plugin adapter now tolerates minor plugin-list stdout status/spacing/version format drift without pushing parsing logic into lifecycle orchestration.
+Latest: mcp-resource-type-boundary-verification - MCP resource payload types are separated from read-only resource construction: src/mcp/types.ts owns resource descriptor/payload types, resources.ts builds read-only context/snapshot/doctor resources, and mcp.ts preserves public type exports without adding MCP write tools or state authority.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the adapter implementation and tests. setup.ts and plugin-sync.ts should call inspectCodexMarketplace/inspectCodexPlugin instead of parsing stdout directly; lifecycle-adapters.test.ts covers status/spacing/version drift inside the adapter.
-Limitations: This still depends on text output from the Codex CLI because no structured Codex Plugin SDK/JSON probe is used here. If one becomes available, OpenNori should revisit this adapter.
+Reviewability: Inspect src/mcp/types.ts, src/mcp/resources.ts, and src/mcp.ts. Confirm MCP still exposes only read-only context/snapshot/doctor resources and no write tools.
+Limitations: This is structural only. It does not add MCP tools, HTTP transport, OAuth, or writable MCP semantics.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-lifecycle-adapter-parser-boundary.json
-- npx vitest run test/lifecycle-adapters.test.ts
-- npm run test:lifecycle
+- .opennori/architecture/evidence/opennori-self-mcp-resource-type-boundary.json
 - npx tsc --noEmit --pretty false
+- npx vitest run test/mcp.test.ts
 - npm run lint
-- src/lifecycle/adapters/codex-plugin.ts
-- src/lifecycle/setup.ts
-- src/lifecycle/plugin-sync.ts
-- test/lifecycle-adapters.test.ts
+- src/mcp/types.ts
+- src/mcp/resources.ts
+- src/mcp.ts
 
 ## Files
 

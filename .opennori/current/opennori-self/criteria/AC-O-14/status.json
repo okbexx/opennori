@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 2,
   "latest_evidence_summary": "AC Review Loop now documents and tests the safe draft criterion add path, preventing agents from manually patching draft acceptance/evidence/manifest files when a missing AC is discovered.",
-  "updated_at": "2026-06-23T07:02:39.963Z"
+  "updated_at": "2026-06-23T07:08:15.419Z"
 }

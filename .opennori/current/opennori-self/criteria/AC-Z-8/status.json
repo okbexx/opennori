@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 2,
   "latest_evidence_summary": "OpenNori status/resume/report now return routeable no-current-goal or health recovery state instead of unexpected_error when a project has no current Nori Contract. In agent-workbench, status now returns ok true with status needs-action, reason no_current_goal, agent_next health_needs_recovery, failed checks for missing .opennori/current and .opennori/drafts, and a short TTY summary pointing to recovery.",
-  "updated_at": "2026-06-23T07:02:39.963Z"
+  "updated_at": "2026-06-23T07:08:15.419Z"
 }

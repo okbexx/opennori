@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 3,
   "latest_evidence_summary": "Dashboard status projection now uses the goal dossier model directly: snapshots include goal-level dossier paths and each criterion includes its own dossier paths, including README, criterion source, status projection, evidence directory, and artifacts directory.",
-  "updated_at": "2026-06-23T07:02:39.963Z"
+  "updated_at": "2026-06-23T07:08:15.419Z"
 }

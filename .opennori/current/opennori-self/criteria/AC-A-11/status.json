@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 1,
   "latest_evidence_summary": "OpenNori now records Architecture Requirement as explicit agent/user state and no longer treats Boolean(goalId) as requiring Architecture Baseline. Unknown routes to architecture_requirement_needs_decision; required routes to baseline review or current-gap work when baseline is valid; not_required routes to Product AC evidence; waived continues with review risk. Packaged Skills, README, protocol, AGENTS, schema, check/doctor/status/report/agent_next, and tests were updated.",
-  "updated_at": "2026-06-23T07:02:39.963Z"
+  "updated_at": "2026-06-23T07:08:15.419Z"
 }
