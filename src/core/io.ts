@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { JsonObject } from "../types/common.ts";
-import type { NoriArtifact, NoriResult, NoriWarning } from "../types/lifecycle.ts";
+import type { NoriArtifact, NoriResult, NoriWarning } from "../types/result.ts";
 
 export function nowIso(): string {
   return new Date().toISOString();

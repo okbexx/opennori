@@ -4,7 +4,7 @@
   "confidence": "high",
   "required": true,
   "risk": "high",
-  "evidence_count": 46,
-  "latest_evidence_summary": "Setup/plugin-sync external command parsing is guarded by adapters: orchestration modules no longer import the wide core barrel, and module-boundary tests reject stdout parsing, child_process, Codex list parsing, and npm global parsing outside lifecycle adapters.",
-  "updated_at": "2026-06-23T11:43:15.668Z"
+  "evidence_count": 47,
+  "latest_evidence_summary": "Lifecycle type coupling reduced: result, path, plugin state, manifest, plan, doctor, bootstrap, profile-check, and context-export types now live in domain files; internal source imports those domain files directly, and module-boundary tests keep lifecycle.ts as a compatibility re-export only.",
+  "updated_at": "2026-06-23T11:49:14.533Z"
 }

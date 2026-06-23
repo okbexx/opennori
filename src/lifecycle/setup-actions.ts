@@ -1,5 +1,5 @@
 import { pluginState } from "../plugin.ts";
-import type { InstallPlan } from "../types/lifecycle.ts";
+import type { InstallPlan } from "../types/lifecycle-plans.ts";
 import { inspectCodexMarketplace, inspectCodexPlugin } from "./adapters/codex-plugin.ts";
 import { inspectGlobalNpmPackage } from "./adapters/npm-global.ts";
 import { commandAction } from "./external-actions.ts";

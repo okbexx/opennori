@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-lifecycle-types-domain-split",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Lifecycle type definitions are split into domain modules for result, paths, plugin state, manifest, lifecycle plans, doctor, bootstrap, profile checks, and context export; src/types/lifecycle.ts remains only as a compatibility re-export.",
+  "fit": "The confirmed TypeScript agent-state CLI baseline favors domain type modules over central barrels so CLI/core/lifecycle/MCP modules depend only on the contracts they actually use.",
+  "implementation_focus": "Reduce type-level coupling by moving lifecycle type definitions into narrow files and adding a module-boundary guard that forbids internal imports from the lifecycle compatibility barrel.",
+  "evidence": "npx vitest run test/module-boundaries.test.js test/mcp.test.ts test/cli-lifecycle.test.js passed; npx tsc --noEmit --pretty false passed; rg found no src/test imports from types/lifecycle.ts.",
+  "limitations": "The compatibility re-export remains for package consumers and migration safety; future internal code should continue importing from domain type modules.",
+  "created_at": "2026-06-23T11:49:03.216Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

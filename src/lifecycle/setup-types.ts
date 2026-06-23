@@ -1,4 +1,5 @@
-import type { InstallPlan, NoriResult } from "../types/lifecycle.ts";
+import type { InstallPlan } from "../types/lifecycle-plans.ts";
+import type { NoriResult } from "../types/result.ts";
 import type { ExternalCommandResult, ExternalCommandRunner } from "./adapters/external-command-runner.ts";
 import type {
   ExternalActionStatus,

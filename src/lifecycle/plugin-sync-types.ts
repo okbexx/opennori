@@ -1,4 +1,4 @@
-import type { NoriResult } from "../types/lifecycle.ts";
+import type { NoriResult } from "../types/result.ts";
 import type { ExternalCommandResult, ExternalCommandRunner } from "./adapters/external-command-runner.ts";
 import type {
   ExternalActionStatus,

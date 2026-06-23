@@ -1,6 +1,6 @@
 import { criterionStatusRows, readGoalPayload } from "../core.ts";
 import type { CriterionStatusRow } from "../types/evidence.ts";
-import type { ContextExportPair } from "../types/lifecycle.ts";
+import type { ContextExportPair } from "../types/context-export.ts";
 import { goalReviewState, type GoalReviewState } from "./goal-review-state.ts";
 
 export type ContextExportState = GoalReviewState & {

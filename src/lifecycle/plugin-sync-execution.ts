@@ -1,5 +1,5 @@
 import { fail, ok } from "../core/io.ts";
-import type { NoriResult } from "../types/lifecycle.ts";
+import type { NoriResult } from "../types/result.ts";
 import {
   defaultExternalCommandRunner,
   runExternalCommandAction

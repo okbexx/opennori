@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { ManagedAction } from "../types/lifecycle.ts";
+import type { ManagedAction } from "../types/lifecycle-plans.ts";
 import {
   AGENT_ROUTE_END,
   AGENT_ROUTE_START,

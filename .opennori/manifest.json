@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T11:43:15.782Z",
+  "updated_at": "2026-06-23T11:49:14.647Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -940,6 +940,17 @@
         "summary": "Lifecycle setup/plugin-sync orchestration now imports only narrow result helpers and module-boundary tests keep Codex/npm stdout parsing plus process execution inside lifecycle adapters.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-lifecycle-external-command-adapter-guard.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-lifecycle-types-domain-split",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Lifecycle type definitions are split into domain modules for result, paths, plugin state, manifest, lifecycle plans, doctor, bootstrap, profile checks, and context export; src/types/lifecycle.ts remains only as a compatibility re-export.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-lifecycle-types-domain-split.json",
         "schema_valid": true,
         "schema_errors": []
       },

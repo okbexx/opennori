@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T11:43:15.672Z",
+  "updated_at": "2026-06-23T11:49:14.539Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -7821,9 +7821,44 @@
           "limitations": "This does not change the external Codex/npm commands themselves; it verifies that parsing and process execution remain behind adapters.",
           "gate": "accepted",
           "created_at": "2026-06-23T11:43:15.668Z"
+        },
+        {
+          "kind": "protocol-check",
+          "basis": "tool-observation",
+          "summary": "Lifecycle type coupling reduced: result, path, plugin state, manifest, plan, doctor, bootstrap, profile-check, and context-export types now live in domain files; internal source imports those domain files directly, and module-boundary tests keep lifecycle.ts as a compatibility re-export only.",
+          "result": "passing",
+          "confidence": "high",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-lifecycle-types-domain-split",
+              "path": ".opennori/architecture/evidence/opennori-self-lifecycle-types-domain-split.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/module-boundaries.test.js test/mcp.test.ts test/cli-lifecycle.test.js",
+              "command": "npx vitest run test/module-boundaries.test.js test/mcp.test.ts test/cli-lifecycle.test.js"
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "rg -n 'from .*types/lifecycle\\.ts|import\\(.*types/lifecycle\\.ts' src test",
+              "command": "rg -n 'from .*types/lifecycle\\.ts|import\\(.*types/lifecycle\\.ts' src test"
+            }
+          ],
+          "reviewability": "Review src/types/*.ts, internal import paths, and the lifecycle type boundary guard in test/module-boundaries.test.js.",
+          "limitations": "src/types/lifecycle.ts intentionally remains as a compatibility re-export; it should not be used by internal source.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T11:49:14.533Z"
         }
       ],
-      "updated_at": "2026-06-23T11:43:15.668Z"
+      "updated_at": "2026-06-23T11:49:14.533Z"
     },
     "AC-A-9": {
       "status": "passing",

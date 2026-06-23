@@ -4,7 +4,8 @@ import { ok } from "../core/io.ts";
 import { buildSnapshot } from "../kernel/snapshot-builder.ts";
 import { buildContextExport } from "../lifecycle/context-export.ts";
 import { doctor } from "../lifecycle/doctor.ts";
-import type { DoctorState, NoriResult } from "../types/lifecycle.ts";
+import type { DoctorState } from "../types/doctor.ts";
+import type { NoriResult } from "../types/result.ts";
 import type {
   McpCapabilityModel,
   McpContextResource,

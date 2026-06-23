@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { pathsForGoal } from "../core.ts";
-import type { ContextExportPaths, ContextExportPair } from "../types/lifecycle.ts";
+import type { ContextExportPaths, ContextExportPair } from "../types/context-export.ts";
 import { manifestPath, relativeTo } from "./shared.ts";
 
 export function contextExportPaths(root: string, goalId: string, pair: ContextExportPair): ContextExportPaths {

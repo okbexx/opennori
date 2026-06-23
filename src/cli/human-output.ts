@@ -1,6 +1,7 @@
 import path from "node:path";
 import type { JsonObject } from "../types/common.ts";
-import type { LifecyclePlanAction, NoriResult } from "../types/lifecycle.ts";
+import type { LifecyclePlanAction } from "../types/lifecycle-plans.ts";
+import type { NoriResult } from "../types/result.ts";
 
 type OutputCommand =
   | "setup"

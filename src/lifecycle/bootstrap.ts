@@ -1,11 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { agentNextForBootstrap } from "../agent-next.ts";
-import { ok } from "../core.ts";
+import { ok } from "../core/io.ts";
 import { doctor } from "./doctor.ts";
 import { installActions } from "./install.ts";
 import { buildInstallPlan } from "./plans.ts";
-import type { BootstrapData, NoriResult } from "../types/lifecycle.ts";
+import type { BootstrapData } from "../types/bootstrap.ts";
+import type { NoriResult } from "../types/result.ts";
 
 export function bootstrap(root: string, { confirmed = false } = {}): NoriResult<BootstrapData> {
   const health = doctor(root);

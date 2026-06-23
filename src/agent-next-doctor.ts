@@ -1,4 +1,5 @@
-import type { ActiveGoalSummary, DoctorState } from "./types/lifecycle.ts";
+import type { DoctorState } from "./types/doctor.ts";
+import type { ActiveGoalSummary } from "./types/manifest.ts";
 
 export function activeGoalCount(doctor: DoctorState | undefined): number {
   return doctor?.active_goals?.filter((goal) => goal.recoverable !== false).length ?? 0;

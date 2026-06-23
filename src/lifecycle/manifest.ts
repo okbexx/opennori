@@ -14,7 +14,8 @@ import {
 } from "../core.ts";
 import { readProjectProfile } from "../core/profile.ts";
 import { pluginState } from "../plugin.ts";
-import type { ActiveGoalSummary, Manifest, ManifestManagedFile, ManifestWriteAction } from "../types/lifecycle.ts";
+import type { ManifestWriteAction } from "../types/lifecycle-plans.ts";
+import type { ActiveGoalSummary, Manifest, ManifestManagedFile } from "../types/manifest.ts";
 import {
   MANIFEST_SCHEMA_VERSION,
   NORI_CAPABILITIES,

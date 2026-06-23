@@ -6,7 +6,7 @@ import {
 } from "../../architecture.ts";
 import { REQUIRED_NORI_DIRS } from "../shared.ts";
 import type { ArchitectureState } from "../../types/architecture.ts";
-import type { DoctorCheck } from "../../types/lifecycle.ts";
+import type { DoctorCheck } from "../../types/doctor.ts";
 import { doctorCheck } from "./shared.ts";
 
 export function projectHealthChecks(root: string): DoctorCheck[] {

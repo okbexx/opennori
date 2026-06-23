@@ -17,16 +17,17 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: protocol-check - Setup/plugin-sync external command parsing is guarded by adapters: orchestration modules no longer import the wide core barrel, and module-boundary tests reject stdout parsing, child_process, Codex list parsing, and npm global parsing outside lifecycle adapters.
+Latest: protocol-check - Lifecycle type coupling reduced: result, path, plugin state, manifest, plan, doctor, bootstrap, profile-check, and context-export types now live in domain files; internal source imports those domain files directly, and module-boundary tests keep lifecycle.ts as a compatibility re-export only.
 Result: passing
 Basis: tool-observation
-Reviewability: Review src/lifecycle/setup-execution.ts, src/lifecycle/plugin-sync-execution.ts, src/lifecycle/adapters/*, and test/module-boundaries.test.js.
-Limitations: This does not change the external Codex/npm commands themselves; it verifies that parsing and process execution remain behind adapters.
+Reviewability: Review src/types/*.ts, internal import paths, and the lifecycle type boundary guard in test/module-boundaries.test.js.
+Limitations: src/types/lifecycle.ts intentionally remains as a compatibility re-export; it should not be used by internal source.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-lifecycle-external-command-adapter-guard.json
-- npx vitest run test/lifecycle-adapters.test.ts test/module-boundaries.test.js test/cli-lifecycle.test.js
+- .opennori/architecture/evidence/opennori-self-lifecycle-types-domain-split.json
+- npx vitest run test/module-boundaries.test.js test/mcp.test.ts test/cli-lifecycle.test.js
 - npx tsc --noEmit --pretty false
+- rg -n 'from .*types/lifecycle\.ts|import\(.*types/lifecycle\.ts' src test
 
 ## Files
 

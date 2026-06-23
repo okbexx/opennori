@@ -13,7 +13,7 @@ import {
   mcpResourceText
 } from "../src/mcp/resources.ts";
 import { snapshotPath } from "../src/core.ts";
-import type { NoriResult } from "../src/types/lifecycle.ts";
+import type { NoriResult } from "../src/types/result.ts";
 import type { McpResourceSummary } from "../src/mcp/types.ts";
 import { tempRoot, writeActiveGoal } from "./support/command-fixtures.js";
 

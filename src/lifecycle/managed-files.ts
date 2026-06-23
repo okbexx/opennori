@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import type { ManagedAction } from "../types/lifecycle.ts";
+import type { ManagedAction } from "../types/lifecycle-plans.ts";
 
 export type WriteOptions = {
   dryRun?: boolean;

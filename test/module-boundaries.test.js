@@ -43,6 +43,25 @@ test("source and tests import domain types instead of restoring a central type b
   assert.deepEqual(offenders, []);
 });
 
+test("lifecycle types stay split by domain with only a compatibility re-export", { tags: ["architecture", "unit", "quick"] }, () => {
+  const lifecycleTypes = path.join(ROOT, "src", "types", "lifecycle.ts");
+  const source = fs.readFileSync(lifecycleTypes, "utf8");
+  assert.equal(source.split(/\r?\n/).filter((line) => line.trim().startsWith("export type")).length > 0, true);
+  assert.equal(source.includes("export type {"), true);
+  assert.equal(source.includes("import type"), false);
+  assert.equal(source.includes("export type NoriResult ="), false);
+  assert.equal(source.includes("export type Manifest ="), false);
+  assert.equal(source.includes("export type DoctorState ="), false);
+
+  const offenders = sourceFiles(path.join(ROOT, "src"))
+    .concat(sourceFiles(path.join(ROOT, "test")))
+    .filter((filePath) => relative(filePath) !== "src/types/lifecycle.ts")
+    .filter((filePath) => importSpecifiers(fs.readFileSync(filePath, "utf8")).some((specifier) => /types\/lifecycle\.ts$/.test(specifier)))
+    .map(relative);
+
+  assert.deepEqual(offenders, []);
+});
+
 test("CLI entrypoint stays on the citty command tree boundary", { tags: ["architecture", "cli", "unit", "quick"] }, () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
   const cliSource = fs.readFileSync(path.join(ROOT, "src", "cli.ts"), "utf8");

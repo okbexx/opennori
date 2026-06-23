@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fail, ok } from "../core/io.ts";
-import type { NoriResult } from "../types/lifecycle.ts";
+import type { NoriResult } from "../types/result.ts";
 import { bootstrap } from "./bootstrap.ts";
 import { doctor } from "./doctor.ts";
 import {

@@ -4,7 +4,7 @@ import { addProfileEvidence, readJson } from "../core.ts";
 import type { JsonObject } from "../types/common.ts";
 import type { EvidenceSource } from "../types/evidence.ts";
 import type { EvidenceLedger } from "../types/evidence.ts";
-import type { AutoProfileCheck } from "../types/lifecycle.ts";
+import type { AutoProfileCheck } from "../types/profile-check.ts";
 import type { CapabilityProfile, ProfileEvidenceResult } from "../types/profile.ts";
 import { inspectSkillCapability } from "./adapters/skill-capability.ts";
 
