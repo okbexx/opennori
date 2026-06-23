@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T10:27:26.678Z",
+  "updated_at": "2026-06-23T10:37:08.502Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -7438,9 +7438,79 @@
           "limitations": "This slice hardens architecture boundaries and tests. It does not add new user-facing OpenNori workflow capability, and it deliberately avoids subjective AC quality validators.",
           "gate": "accepted",
           "created_at": "2026-06-23T10:12:12.817Z"
+        },
+        {
+          "kind": "mcp-cli-entry-boundary-verification",
+          "basis": "tool-observation",
+          "summary": "MCP CLI startup now uses the shared command registry and stdioServer policy while preserving read-only MCP resources and JSON metadata output.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-mcp-cli-entry-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-mcp-cli-entry-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/mcp.test.ts test/module-boundaries.test.js",
+              "command": "npx vitest run test/mcp.test.ts test/module-boundaries.test.js"
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run lint",
+              "command": "npm run lint"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js mcp --root . --json",
+              "command": "node ./bin/opennori.js mcp --root . --json"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli.ts",
+              "path": "src/cli.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/commands/mcp.ts",
+              "path": "src/cli/commands/mcp.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/registry.ts",
+              "path": "src/cli/registry.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/command-types.ts",
+              "path": "src/cli/command-types.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/mcp.test.ts",
+              "path": "test/mcp.test.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/module-boundaries.test.js",
+              "path": "test/module-boundaries.test.js"
+            }
+          ],
+          "reviewability": "Inspect src/cli.ts to confirm it no longer special-cases mcp or imports MCP server internals; inspect registry/policy and mcp command files to confirm stdio startup is command-owned; rerun the listed focused tests and metadata command.",
+          "limitations": "This verifies the OpenNori CLI/MCP entry boundary and metadata path. It does not add MCP write tools, dashboard controls, or external MCP client integration tests.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T10:37:08.497Z"
         }
       ],
-      "updated_at": "2026-06-23T10:12:12.817Z"
+      "updated_at": "2026-06-23T10:37:08.497Z"
     },
     "AC-A-9": {
       "status": "passing",

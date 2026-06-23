@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 38,
-  "latest_evidence_summary": "OpenNori internal source modules now import domain type modules instead of the public type barrel, with guard tests covering type import boundaries, MCP read-only resources, generated Markdown review-only authority, and lifecycle external command adapter parsing.",
-  "updated_at": "2026-06-23T10:12:12.817Z"
+  "evidence_count": 39,
+  "latest_evidence_summary": "MCP CLI startup now uses the shared command registry and stdioServer policy while preserving read-only MCP resources and JSON metadata output.",
+  "updated_at": "2026-06-23T10:37:08.497Z"
 }

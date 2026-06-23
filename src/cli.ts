@@ -4,8 +4,6 @@ import { CLI_NAME, commandLabelFor, helpTextFor, resolveCliCommand, runCliComman
 import { printHumanResult, shouldPrintHuman } from "./cli/human-output.ts";
 import { runInit } from "./cli/init.ts";
 import { runSetup } from "./cli/setup.ts";
-import { PACKAGE_JSON } from "./lifecycle/shared.ts";
-import { mcpResourceSummary } from "./mcp/resources.ts";
 
 type CommandPayload = {
   ok?: boolean;
@@ -33,12 +31,6 @@ function wantsHelp(args: string[]): boolean {
 
 function wantsJson(args: string[]): boolean {
   return args.includes("--json");
-}
-
-function optionValue(args: string[], name: string): string | undefined {
-  const index = args.indexOf(name);
-  const value = index >= 0 ? args[index + 1] : undefined;
-  return value && !value.startsWith("-") ? value : undefined;
 }
 
 export async function main(args: string[]): Promise<void> {
@@ -75,27 +67,6 @@ export async function main(args: string[]): Promise<void> {
     return;
   }
 
-  if (command === "mcp") {
-    const root = optionValue(args, "--root") || process.cwd();
-    if (wantsJson(args)) {
-      printJson(ok({
-        ...mcpResourceSummary(root),
-        command: "opennori mcp",
-        transport: "stdio",
-        version: String(PACKAGE_JSON.version),
-        focused_goal_id: optionValue(args, "--goal") || null
-      }));
-      return;
-    }
-    const { serveOpenNoriMcpStdio } = await import("./mcp/server.ts");
-    await serveOpenNoriMcpStdio({
-      root,
-      goalId: optionValue(args, "--goal"),
-      version: String(PACKAGE_JSON.version)
-    });
-    return;
-  }
-
   const resolved = await resolveCliCommand(args);
   if (!resolved.ok) {
     printJson(fail("unknown_command", resolved.message, `Run ${CLI_NAME} --help to inspect available commands.`));
@@ -104,6 +75,7 @@ export async function main(args: string[]): Promise<void> {
   }
 
   const payload = await runCliCommand(resolved);
+  if (resolved.policy.stdioServer && !wantsJson(args)) return;
   if (shouldPrintHuman(args) && printHumanResult(payload as any, { commandPath: resolved.path })) {
     if (!(payload as CommandPayload).ok) process.exitCode = 1;
     return;

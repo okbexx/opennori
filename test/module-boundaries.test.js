@@ -48,6 +48,17 @@ test("MCP source stays read-only and does not register write tools", { tags: ["a
   assert.match(fs.readFileSync(path.join(ROOT, "src", "mcp", "resources.ts"), "utf8"), /tools:\s*\[\]/);
 });
 
+test("MCP CLI startup stays behind command registry policy", { tags: ["architecture", "cli", "unit"] }, () => {
+  const cliEntrypoint = fs.readFileSync(path.join(ROOT, "src", "cli.ts"), "utf8");
+  const registry = fs.readFileSync(path.join(ROOT, "src", "cli", "registry.ts"), "utf8");
+  const mcpCommand = fs.readFileSync(path.join(ROOT, "src", "cli", "commands", "mcp.ts"), "utf8");
+
+  assert.equal(/command\s*={2,3}\s*["']mcp["']/.test(cliEntrypoint), false);
+  assert.equal(cliEntrypoint.includes("serveOpenNoriMcpStdio"), false);
+  assert.match(registry, /stdioServer:\s*true/);
+  assert.match(mcpCommand, /serveOpenNoriMcpStdio/);
+});
+
 test("setup and plugin sync command output parsing stays inside lifecycle adapters", { tags: ["architecture", "lifecycle", "unit"] }, () => {
   const allowed = new Set([
     path.join(ROOT, "src", "lifecycle", "adapters", "codex-plugin.ts"),

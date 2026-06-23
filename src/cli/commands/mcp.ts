@@ -3,6 +3,7 @@ import { defineCommand } from "citty";
 import { ok } from "../../core.ts";
 import { PACKAGE_JSON } from "../../lifecycle/shared.ts";
 import { mcpResourceSummary } from "../../mcp/resources.ts";
+import { serveOpenNoriMcpStdio } from "../../mcp/server.ts";
 import { runJsonCommand } from "../runtime.ts";
 
 export const mcpCommand = defineCommand({
@@ -26,14 +27,25 @@ export const mcpCommand = defineCommand({
       default: false
     }
   },
-  run({ args }) {
+  async run({ args }) {
     const root = path.resolve(String(args.root || process.cwd()));
+    const goalId = args.goal ? String(args.goal) : undefined;
+    if (!args.json) {
+      await serveOpenNoriMcpStdio({
+        root,
+        goalId,
+        version: String(PACKAGE_JSON.version)
+      });
+      return ok({
+        side_effect: "stdio_server_started"
+      });
+    }
     return ok({
       ...mcpResourceSummary(root),
       command: "opennori mcp",
       transport: "stdio",
       version: String(PACKAGE_JSON.version),
-      focused_goal_id: args.goal ? String(args.goal) : null
+      focused_goal_id: goalId || null
     });
   }
 });

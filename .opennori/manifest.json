@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T10:27:26.811Z",
+  "updated_at": "2026-06-23T10:37:08.634Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -863,6 +863,17 @@
         "summary": "Extracted shared lifecycle external-command action infrastructure used by setup and plugin sync while preserving setup/plugin-sync preview and confirm semantics.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-lifecycle-external-actions-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-mcp-cli-entry-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "MCP stdio startup now routes through the shared citty command registry and an explicit stdioServer policy; src/cli.ts no longer owns a parallel mcp parser or direct server startup path.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-mcp-cli-entry-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

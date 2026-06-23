@@ -12,6 +12,7 @@ export type CommandPolicy = {
   activeGoal?: boolean;
   activeGoalWrite?: boolean;
   commandResult?: boolean;
+  stdioServer?: boolean;
 };
 
 export type ResolvedCliCommand = {

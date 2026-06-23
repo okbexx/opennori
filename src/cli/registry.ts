@@ -88,7 +88,7 @@ export const rootCommand = defineCommand({
     uninstall: withPolicy(asCommand(uninstallCommand), { commandResult: true }),
     upgrade: withPolicy(asCommand(upgradeCommand), { commandResult: true }),
     dashboard: withPolicy(asCommand(dashboardCommand), { commandResult: true }),
-    mcp: asCommand(mcpCommand),
+    mcp: withPolicy(asCommand(mcpCommand), { stdioServer: true }),
     plugin: pluginCommand,
     brainstorm: asCommand(brainstormCommand),
     discover: asCommand(discoverCommand),

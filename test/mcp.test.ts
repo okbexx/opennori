@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { test } from "vitest";
-import { helpTextFor } from "../src/cli/command-tree.ts";
+import { helpTextFor, resolveCliCommand, runCliCommand } from "../src/cli/command-tree.ts";
 import { runMcpCommand } from "../src/cli/commands/mcp.ts";
 import { buildMcpContextResource, buildMcpDoctorResource, buildMcpSnapshotResource, mcpResourceText } from "../src/mcp/resources.ts";
 import { snapshotPath } from "../src/core.ts";
@@ -73,4 +73,20 @@ test("MCP command exposes read-only resource metadata without starting stdio whe
   const help = await helpTextFor(["mcp", "--help"]);
   assert.match(help, /read-only OpenNori MCP context server/);
   assert.match(help, /--root/);
+});
+
+test("MCP command is routed through the shared CLI command registry", { tags: ["cli", "unit", "quick"] }, async () => {
+  const root = tempRoot();
+  const resolved = await resolveCliCommand(["mcp", "--root", root, "--json"]);
+  assert.equal(resolved.ok, true);
+  if (!resolved.ok) return;
+  assert.deepEqual(resolved.path, ["mcp"]);
+  assert.equal(resolved.policy.stdioServer, true);
+
+  const summary = await runCliCommand(resolved) as NoriResult<McpResourceSummary>;
+  assert.equal(summary.ok, true);
+  if (!summary.ok) return;
+  assert.equal(summary.data.root, root);
+  assert.equal(summary.data.transport, "stdio");
+  assert.equal(summary.data.tools.length, 0);
 });
