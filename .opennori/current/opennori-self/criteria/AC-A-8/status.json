@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 26,
-  "latest_evidence_summary": "Setup lifecycle responsibilities were split into setup types, action builders, plan construction, and execution orchestration while preserving the preview-first OpenNori capability bundle setup behavior.",
-  "updated_at": "2026-06-23T08:12:43.665Z"
+  "evidence_count": 27,
+  "latest_evidence_summary": "Plugin sync lifecycle responsibilities were split into type definitions, action builders, plan construction, and execution orchestration while preserving preview-first Codex Plugin cache refresh behavior.",
+  "updated_at": "2026-06-23T08:17:40.278Z"
 }

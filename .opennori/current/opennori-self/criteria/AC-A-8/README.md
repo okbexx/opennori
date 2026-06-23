@@ -17,23 +17,24 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor - Setup lifecycle responsibilities were split into setup types, action builders, plan construction, and execution orchestration while preserving the preview-first OpenNori capability bundle setup behavior.
+Latest: architecture-refactor - Plugin sync lifecycle responsibilities were split into type definitions, action builders, plan construction, and execution orchestration while preserving preview-first Codex Plugin cache refresh behavior.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the setup lifecycle modules. Confirm setup.ts remains a compatibility export, setup-types.ts owns public setup types, setup-actions.ts owns bundle action construction and external probes, setup-plan.ts builds preview plans, and setup-execution.ts performs confirm-time orchestration. Rerun the listed typecheck, lifecycle, CLI, and lint commands.
-Limitations: This is an internal lifecycle boundary refactor. It does not change npx opennori setup, dry-run/confirm behavior, Codex Plugin commands, npm global install commands, or project .opennori initialization semantics.
+Reviewability: Inspect the plugin sync lifecycle modules. Confirm plugin-sync.ts remains a compatibility export, plugin-sync-types.ts owns public sync types, plugin-sync-actions.ts owns marketplace/plugin/packaged-skill action construction, plugin-sync-plan.ts builds preview plans, and plugin-sync-execution.ts performs confirm-time orchestration. Rerun the listed typecheck, lifecycle, CLI, reporting, and lint commands.
+Limitations: This is an internal lifecycle boundary refactor. It does not change opennori plugin sync flags, Codex Plugin command strings, local mode, preview/confirm safety, or the rule that plugin sync does not write project .opennori state.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-setup-lifecycle-boundary.json
+- .opennori/architecture/evidence/opennori-self-plugin-sync-lifecycle-boundary.json
 - npx tsc --noEmit --pretty false
 - npm run test:lifecycle
 - npm run test:cli
+- npm run test:reporting
 - npm run lint
-- src/lifecycle/setup.ts
-- src/lifecycle/setup-types.ts
-- src/lifecycle/setup-actions.ts
-- src/lifecycle/setup-plan.ts
-- src/lifecycle/setup-execution.ts
+- src/lifecycle/plugin-sync.ts
+- src/lifecycle/plugin-sync-types.ts
+- src/lifecycle/plugin-sync-actions.ts
+- src/lifecycle/plugin-sync-plan.ts
+- src/lifecycle/plugin-sync-execution.ts
 
 ## Files
 

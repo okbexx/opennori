@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-plugin-sync-lifecycle-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Plugin sync lifecycle responsibilities will be split into type definitions, action builders, plan construction, and execution orchestration while preserving preview-first Codex Plugin cache refresh semantics.",
+  "fit": "The confirmed TypeScript agent-state CLI baseline treats plugin sync as a lifecycle command over official Codex Plugin CLI commands and packaged Skill assets. It must not write project .opennori state, copy Skills into project directories, or become a second setup path.",
+  "implementation_focus": "Refactor src/lifecycle/plugin-sync.ts into focused modules so local source Skill cache refresh and npm-installed plugin sync share clear action, plan, and execution boundaries.",
+  "evidence": "Read src/lifecycle/plugin-sync.ts, setup lifecycle split, external-actions.ts, Codex plugin adapters, CLI plugin command, human output, and plugin sync tests; plugin-sync.ts currently mixes marketplace probing, action construction, plan building, command execution, and result assembly.",
+  "limitations": "This architecture apply covers internal plugin-sync module boundaries only. It does not change opennori plugin sync CLI flags, Codex Plugin command strings, preview/confirm safety, or project state write boundaries.",
+  "created_at": "2026-06-23T08:14:51.164Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}
