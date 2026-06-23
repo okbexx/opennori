@@ -2,7 +2,7 @@ import path from "node:path";
 import { defineCommand } from "citty";
 import { ok } from "../../core.ts";
 import { PACKAGE_JSON } from "../../lifecycle/shared.ts";
-import { mcpResourceSummary } from "../../mcp/resources.ts";
+import { MCP_CAPABILITY_MODEL, mcpResourceSummary } from "../../mcp/resources.ts";
 import { serveOpenNoriMcpStdio } from "../../mcp/server.ts";
 import { runJsonCommand } from "../runtime.ts";
 
@@ -43,7 +43,7 @@ export const mcpCommand = defineCommand({
     return ok({
       ...mcpResourceSummary(root),
       command: "opennori mcp",
-      transport: "stdio",
+      transport: MCP_CAPABILITY_MODEL.transport,
       version: String(PACKAGE_JSON.version),
       focused_goal_id: goalId || null
     });

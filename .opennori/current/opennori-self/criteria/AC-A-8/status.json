@@ -1,10 +1,10 @@
 {
   "criterion_id": "AC-A-8",
   "status": "passing",
-  "confidence": "verified",
+  "confidence": "high",
   "required": true,
   "risk": "high",
-  "evidence_count": 41,
-  "latest_evidence_summary": "Goal dossier Markdown now remains a generated review surface only: the stale generated acceptance Markdown parser/helper was removed, core.ts no longer exports Markdown parsing, README files declare review-surface-only, and boundary tests prevent Markdown import/parser APIs from returning as state paths.",
-  "updated_at": "2026-06-23T10:55:48.131Z"
+  "evidence_count": 42,
+  "latest_evidence_summary": "MCP context export now uses a typed read-only capability model, registers only resource descriptors, avoids write-capable barrels, and focused MCP/module-boundary tests plus typecheck pass.",
+  "updated_at": "2026-06-23T11:07:42.022Z"
 }

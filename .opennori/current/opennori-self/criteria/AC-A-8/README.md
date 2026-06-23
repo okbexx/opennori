@@ -3,7 +3,7 @@
 Goal: 让 OpenNori 从只保存目标、AC、证据、报告的验收工具，升级为能先确立 Architecture Baseline，并让 agent 在后续实现 AC 时持续沿用该技术架构的验收驱动产品；用户不仅能判断产品目标是否完成，也能判断交付物是否按确认过的优秀技术架构完成。
 Layer: architecture
 Status: passing
-Confidence: verified
+Confidence: high
 Required: yes
 Risk: high
 
@@ -17,23 +17,19 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: goal-dossier-markdown-boundary-verification - Goal dossier Markdown now remains a generated review surface only: the stale generated acceptance Markdown parser/helper was removed, core.ts no longer exports Markdown parsing, README files declare review-surface-only, and boundary tests prevent Markdown import/parser APIs from returning as state paths.
+Latest: architecture-boundary-verification - MCP context export now uses a typed read-only capability model, registers only resource descriptors, avoids write-capable barrels, and focused MCP/module-boundary tests plus typecheck pass.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect that src/core/generated-acceptance-markdown.ts no longer exists, src/core.ts no longer exports generated-acceptance-markdown, goal README files carry opennori/goal-dossier-readme-v1 review-surface-only, and module-boundary tests fail any Markdown import/parser state path.
-Limitations: This intentionally removes editable Markdown parsing from OpenNori. Future Markdown-as-data support would require a new build-vs-buy decision and parser stack selection.
+Reviewability: Review src/mcp/resources.ts, src/mcp/types.ts, src/mcp/server.ts, test/mcp.test.ts, test/module-boundaries.test.js, and rerun the focused verification command.
+Limitations: Evidence is scoped to MCP read-only boundary and does not cover later MCP write-tool design or unrelated OpenNori architecture slices.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-goal-dossier-markdown-review-boundary.json
-- npx vitest run test/acceptance.test.js test/docs-schema.test.js test/module-boundaries.test.js
-- npx tsc --noEmit --pretty false
-- src/core/dossier-render.ts
-- src/core.ts
-- src/types/evidence.ts
+- .opennori/architecture/evidence/opennori-self-ac-a-8-mcp-explicit-capability-model.json
+- npx vitest run test/mcp.test.ts test/module-boundaries.test.js && npx tsc --noEmit --pretty false
+- src/mcp/resources.ts
+- src/mcp/types.ts
+- test/mcp.test.ts
 - test/module-boundaries.test.js
-- test/acceptance.test.js
-- test/docs-schema.test.js
-- .opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json
 
 ## Files
 

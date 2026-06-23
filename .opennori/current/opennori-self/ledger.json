@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T10:55:48.132Z",
+  "updated_at": "2026-06-23T11:07:42.029Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -4442,7 +4442,7 @@
     },
     "AC-A-8": {
       "status": "passing",
-      "confidence": "verified",
+      "confidence": "high",
       "required": true,
       "risk": "high",
       "evidence": [
@@ -7606,9 +7606,54 @@
           "limitations": "This intentionally removes editable Markdown parsing from OpenNori. Future Markdown-as-data support would require a new build-vs-buy decision and parser stack selection.",
           "gate": "accepted",
           "created_at": "2026-06-23T10:53:23.886Z"
+        },
+        {
+          "kind": "architecture-boundary-verification",
+          "basis": "tool-observation",
+          "summary": "MCP context export now uses a typed read-only capability model, registers only resource descriptors, avoids write-capable barrels, and focused MCP/module-boundary tests plus typecheck pass.",
+          "result": "passing",
+          "confidence": "high",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-ac-a-8-mcp-explicit-capability-model",
+              "path": ".opennori/architecture/evidence/opennori-self-ac-a-8-mcp-explicit-capability-model.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/mcp.test.ts test/module-boundaries.test.js && npx tsc --noEmit --pretty false",
+              "command": "npx vitest run test/mcp.test.ts test/module-boundaries.test.js && npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "artifact",
+              "label": "src/mcp/resources.ts",
+              "path": "src/mcp/resources.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/mcp/types.ts",
+              "path": "src/mcp/types.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/mcp.test.ts",
+              "path": "test/mcp.test.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/module-boundaries.test.js",
+              "path": "test/module-boundaries.test.js"
+            }
+          ],
+          "reviewability": "Review src/mcp/resources.ts, src/mcp/types.ts, src/mcp/server.ts, test/mcp.test.ts, test/module-boundaries.test.js, and rerun the focused verification command.",
+          "limitations": "Evidence is scoped to MCP read-only boundary and does not cover later MCP write-tool design or unrelated OpenNori architecture slices.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T11:07:42.022Z"
         }
       ],
-      "updated_at": "2026-06-23T10:55:48.131Z"
+      "updated_at": "2026-06-23T11:07:42.022Z"
     },
     "AC-A-9": {
       "status": "passing",

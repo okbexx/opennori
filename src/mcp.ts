@@ -1,4 +1,5 @@
 export {
+  MCP_CAPABILITY_MODEL,
   MCP_RESOURCE_DESCRIPTORS,
   buildMcpContextResource,
   buildMcpDoctorResource,
@@ -10,9 +11,12 @@ export {
 export type {
   McpContextResource,
   McpDoctorResource,
+  McpCapabilityModel,
   McpResourceDescriptor,
   McpResourceName,
   McpResourcePayload,
+  McpResourceSummary,
+  McpToolDescriptor,
   McpSnapshotResource
 } from "./mcp/types.ts";
 export { createOpenNoriMcpServer, serveOpenNoriMcpStdio } from "./mcp/server.ts";

@@ -19,6 +19,10 @@ function relative(filePath) {
   return path.relative(ROOT, filePath);
 }
 
+function importSpecifiers(source) {
+  return [...source.matchAll(/from\s+["']([^"']+)["']/g)].map((match) => match[1]);
+}
+
 test("source and tests import domain types instead of restoring a central type barrel", { tags: ["architecture", "unit", "quick"] }, () => {
   const publicTypeBarrel = path.join(ROOT, "src", "types.ts");
   assert.equal(fs.existsSync(publicTypeBarrel), false);
@@ -39,12 +43,25 @@ test("MCP source stays read-only and does not register write tools", { tags: ["a
     path.join(ROOT, "src", "mcp.ts"),
     ...sourceFiles(path.join(ROOT, "src", "mcp"))
   ];
-  const offenders = mcpFiles
+  const toolRegistrationOffenders = mcpFiles
     .filter((filePath) => /registerTool|CallTool|setRequestHandler/.test(fs.readFileSync(filePath, "utf8")))
     .map(relative);
+  const writeBoundaryOffenders = mcpFiles
+    .filter((filePath) => importSpecifiers(fs.readFileSync(filePath, "utf8"))
+      .some((specifier) => (
+        /commands\/(?:acceptance|architecture|evidence|profile|activity)/.test(specifier)
+        || /(?:^|\/)\.\.\/core\.ts$/.test(specifier)
+        || /(?:^|\/)\.\.\/lifecycle\.ts$/.test(specifier)
+        || /kernel\/snapshot\.ts$/.test(specifier)
+        || /kernel\/activity/.test(specifier)
+        || /kernel\/events/.test(specifier)
+      )))
+    .map(relative);
 
-  assert.deepEqual(offenders, []);
+  assert.deepEqual(toolRegistrationOffenders, []);
+  assert.deepEqual(writeBoundaryOffenders, []);
   assert.match(fs.readFileSync(path.join(ROOT, "src", "mcp", "server.ts"), "utf8"), /registerResource/);
+  assert.match(fs.readFileSync(path.join(ROOT, "src", "mcp", "resources.ts"), "utf8"), /write_capability:\s*["']none["']/);
   assert.match(fs.readFileSync(path.join(ROOT, "src", "mcp", "resources.ts"), "utf8"), /tools:\s*\[\]/);
 });
 

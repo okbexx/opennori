@@ -3,19 +3,19 @@ import fs from "node:fs";
 import { test } from "vitest";
 import { helpTextFor, resolveCliCommand, runCliCommand } from "../src/cli/command-tree.ts";
 import { runMcpCommand } from "../src/cli/commands/mcp.ts";
-import { buildMcpContextResource, buildMcpDoctorResource, buildMcpSnapshotResource, mcpResourceText } from "../src/mcp/resources.ts";
+import {
+  MCP_CAPABILITY_MODEL,
+  MCP_RESOURCE_DESCRIPTORS,
+  buildMcpContextResource,
+  buildMcpDoctorResource,
+  buildMcpSnapshotResource,
+  mcpResourceSummary,
+  mcpResourceText
+} from "../src/mcp/resources.ts";
 import { snapshotPath } from "../src/core.ts";
-import type { JsonObject } from "../src/types/common.ts";
 import type { NoriResult } from "../src/types/lifecycle.ts";
+import type { McpResourceSummary } from "../src/mcp/types.ts";
 import { tempRoot, writeActiveGoal } from "./support/command-fixtures.js";
-
-type McpResourceSummary = JsonObject & {
-  schema_version: "opennori/mcp-resource-summary-v1";
-  side_effect: "none";
-  transport: "stdio";
-  tools: unknown[];
-  resources: Array<{ uri: string }>;
-};
 
 test("MCP resources expose current OpenNori context without writing snapshot state", { tags: ["cli", "reporting", "dashboard", "quick"] }, async () => {
   const root = tempRoot();
@@ -68,12 +68,30 @@ test("MCP command exposes read-only resource metadata without starting stdio whe
   assert.equal(summary.data.schema_version, "opennori/mcp-resource-summary-v1");
   assert.equal(summary.data.side_effect, "none");
   assert.equal(summary.data.transport, "stdio");
-  assert.equal(summary.data.tools.length, 0);
+  assert.deepEqual(summary.data.transports, ["stdio"]);
+  assert.equal(summary.data.resource_mode, "read_only");
+  assert.equal(summary.data.write_capability, "none");
+  assert.equal(summary.data.state_authority, ".opennori");
+  assert.deepEqual(summary.data.tools, MCP_CAPABILITY_MODEL.tools);
+  assert.deepEqual(summary.data.resources, MCP_RESOURCE_DESCRIPTORS);
   assert.equal(summary.data.resources.some((resource) => resource.uri === "opennori://project/context"), true);
 
   const help = await helpTextFor(["mcp", "--help"]);
   assert.match(help, /read-only OpenNori MCP context server/);
   assert.match(help, /--root/);
+});
+
+test("MCP capability model is the single source for read-only server boundaries", { tags: ["architecture", "unit", "quick"] }, () => {
+  const root = tempRoot();
+  const summary = mcpResourceSummary(root);
+
+  assert.equal(MCP_CAPABILITY_MODEL.write_capability, "none");
+  assert.equal(MCP_CAPABILITY_MODEL.state_authority, ".opennori");
+  assert.equal(MCP_CAPABILITY_MODEL.resource_mode, "read_only");
+  assert.deepEqual(MCP_CAPABILITY_MODEL.tools, []);
+  assert.deepEqual(MCP_CAPABILITY_MODEL.resources, MCP_RESOURCE_DESCRIPTORS);
+  assert.deepEqual(summary.tools, MCP_CAPABILITY_MODEL.tools);
+  assert.deepEqual(summary.resources, MCP_RESOURCE_DESCRIPTORS);
 });
 
 test("MCP command is routed through the shared CLI command registry", { tags: ["cli", "unit", "quick"] }, async () => {
@@ -88,6 +106,7 @@ test("MCP command is routed through the shared CLI command registry", { tags: ["
   assert.equal(summary.ok, true);
   if (!summary.ok) return;
   assert.equal(summary.data.root, root);
-  assert.equal(summary.data.transport, "stdio");
-  assert.equal(summary.data.tools.length, 0);
+  assert.equal(summary.data.transport, MCP_CAPABILITY_MODEL.transport);
+  assert.equal(summary.data.write_capability, "none");
+  assert.deepEqual(summary.data.tools, []);
 });

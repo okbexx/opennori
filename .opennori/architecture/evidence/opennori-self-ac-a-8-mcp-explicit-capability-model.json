@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-ac-a-8-mcp-explicit-capability-model",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "MCP read-only context server now exposes a typed capability model for resources, transport, state authority, tool policy, and no-write boundary.",
+  "fit": "The change keeps MCP as an interoperability read surface over existing context, doctor, and snapshot builders while avoiding CLI write commands, activity/event writers, refreshSnapshot, and wide write-capable barrels.",
+  "implementation_focus": "Make MCP capability boundary explicit and testable without adding MCP tools or a second state layer.",
+  "evidence": "Focused tests verify MCP metadata, empty tools, no snapshot writes, command registry routing, and source import boundaries.",
+  "limitations": "This does not add MCP write tools; future tools require a separate architecture challenge and dry-run/confirm design.",
+  "created_at": "2026-06-23T11:07:27.406Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

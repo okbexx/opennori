@@ -1,15 +1,18 @@
 import path from "node:path";
-import { findCurrentPairs, ok } from "../core.ts";
-import { buildSnapshot } from "../kernel/snapshot.ts";
-import { buildContextExport, doctor } from "../lifecycle.ts";
-import type { JsonObject } from "../types/common.ts";
+import { findCurrentPairs } from "../core/goal-state.ts";
+import { ok } from "../core/io.ts";
+import { buildSnapshot } from "../kernel/snapshot-builder.ts";
+import { buildContextExport } from "../lifecycle/context-export.ts";
+import { doctor } from "../lifecycle/doctor.ts";
 import type { DoctorState, NoriResult } from "../types/lifecycle.ts";
 import type {
+  McpCapabilityModel,
   McpContextResource,
   McpDoctorResource,
   McpResourceDescriptor,
   McpResourceName,
   McpResourcePayload,
+  McpResourceSummary,
   McpSnapshotResource
 } from "./types.ts";
 
@@ -36,6 +39,20 @@ export const MCP_RESOURCE_DESCRIPTORS: McpResourceDescriptor[] = [
     mimeType: "application/json"
   }
 ];
+
+export const MCP_CAPABILITY_MODEL: McpCapabilityModel = {
+  schema_version: "opennori/mcp-resource-summary-v1",
+  side_effect: "none",
+  transport: "stdio",
+  transports: ["stdio"],
+  resource_mode: "read_only",
+  write_capability: "none",
+  state_authority: ".opennori",
+  resources: MCP_RESOURCE_DESCRIPTORS,
+  tools: [],
+  boundary: "read-only resources only; no MCP write tools are registered",
+  tool_policy: "Future MCP tools must be few, controlled, and delegate to existing CLI/core paths with dry-run or explicit confirm for writes."
+};
 
 function nextActionsFromDoctor(state: DoctorState): string[] {
   const next = state.agent_next;
@@ -103,20 +120,17 @@ export function mcpResourceText(payload: NoriResult<McpResourcePayload>): string
   return JSON.stringify(payload, null, 2);
 }
 
-export function mcpResourceSummary(rootInput: string): JsonObject {
+export function mcpResourceSummary(rootInput: string): McpResourceSummary {
   const root = path.resolve(rootInput);
   return {
-    schema_version: "opennori/mcp-resource-summary-v1",
+    ...MCP_CAPABILITY_MODEL,
     root,
-    side_effect: "none",
-    resources: MCP_RESOURCE_DESCRIPTORS.map(({ name, title, uri, description, mimeType }) => ({
+    resources: MCP_CAPABILITY_MODEL.resources.map(({ name, title, uri, description, mimeType }) => ({
       name,
       title,
       uri,
       description,
       mimeType
-    })),
-    tools: [],
-    boundary: "read-only resources only; no MCP write tools are registered"
+    }))
   };
 }
