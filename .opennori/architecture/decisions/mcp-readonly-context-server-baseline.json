@@ -1,0 +1,17 @@
+{
+  "schema_version": "opennori/build-vs-buy-v1",
+  "id": "mcp-readonly-context-server-baseline",
+  "created_at": "2026-06-23T05:56:36.997Z",
+  "area": "mcp-context-export",
+  "need": "Define how OpenNori may expose goal, acceptance, profile, architecture, evidence, report, and dashboard context to agent clients through MCP without creating a second state layer or duplicating the CLI.",
+  "recommendation": "reuse",
+  "status": "active",
+  "summary": "When OpenNori adds MCP, use the official Model Context Protocol TypeScript SDK with read-only resources first and a tiny set of controlled tools that delegate to CLI/core state functions.",
+  "current_project": "OpenNori already exposes deterministic state through CLI commands, .opennori JSON files, context export, dashboard snapshots, and packaged Skills. MCP is currently an integration surface, not a replacement runtime.",
+  "standard_library": "Node stdio and HTTP primitives can transport bytes, but they do not implement MCP capability negotiation, tool/resource schemas, transports, or client expectations.",
+  "official_sdk": "Context7 on 2026-06-23 identified /modelcontextprotocol/typescript-sdk as the high-reputation SDK. The v2 API uses McpServer with registerResource and registerTool plus transports such as StdioServerTransport and Streamable HTTP.",
+  "open_source": "@modelcontextprotocol/typescript-sdk is the mature protocol implementation to reuse. Hono remains the dashboard kernel HTTP framework, but dashboard transport is not MCP and must not become an agent write authority.",
+  "self_build_reason": "",
+  "superseded_by": "",
+  "superseded_reason": ""
+}

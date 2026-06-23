@@ -1,8 +1,8 @@
-import path from "node:path";
 import { fail, ok } from "../core.ts";
 import { packageRoot } from "../package-root.ts";
 import { pluginState } from "../plugin.ts";
-import type { NoriResult } from "../types.ts";
+import type { NoriResult } from "../types/lifecycle.ts";
+import { inspectCodexMarketplace, inspectCodexPlugin, sameResolvedPath } from "./adapters/codex-plugin.ts";
 import {
   commandAction,
   defaultExternalCommandRunner,
@@ -44,22 +44,6 @@ export type PluginSyncOptions = {
   runner?: PluginSyncCommandRunner;
 };
 
-function marketplaceRoot(stdout: string): string | null {
-  const line = stdout.split(/\r?\n/).find((entry) => /^opennori\s+/.test(entry));
-  if (!line) return null;
-  return line.replace(/^opennori\s+/, "").trim() || null;
-}
-
-function samePath(left: string | null, right: string): boolean {
-  if (!left) return false;
-  return path.resolve(left) === path.resolve(right);
-}
-
-function installedPluginVersion(stdout: string): string | null {
-  const match = stdout.match(/^opennori@opennori\s+installed,\s+enabled\s+(\S+)/m);
-  return match?.[1] || null;
-}
-
 function packagedSkillsAction(): PluginSyncAction {
   const plugin = pluginState();
   const available = plugin.packaged && plugin.skill_count > 0 && plugin.skills.some((skill) => skill.name === "nori");
@@ -82,10 +66,10 @@ function marketplaceAction(runner: PluginSyncCommandRunner, confirmed: boolean, 
   const marketplaceCommand = local
     ? ["codex", "plugin", "marketplace", "add", localRoot]
     : ["codex", "plugin", "marketplace", "add", "okbexx/opennori", "--ref", "main"];
-  const marketplaceList = runner("codex", ["plugin", "marketplace", "list"]);
-  const codexAvailable = marketplaceList.status === 0;
-  const root = codexAvailable ? marketplaceRoot(marketplaceList.stdout) : null;
-  const exists = local ? samePath(root, localRoot) : Boolean(root);
+  const marketplace = inspectCodexMarketplace(runner);
+  const codexAvailable = marketplace.available;
+  const root = marketplace.root;
+  const exists = local ? sameResolvedPath(root, localRoot) : marketplace.registered;
 
   return {
     codexAvailable,
@@ -113,8 +97,8 @@ function marketplaceAction(runner: PluginSyncCommandRunner, confirmed: boolean, 
 
 function pluginAction(runner: PluginSyncCommandRunner, codexAvailable: boolean, confirmed: boolean): PluginSyncAction {
   const pluginCommand = ["codex", "plugin", "add", "opennori@opennori"];
-  const pluginList = codexAvailable ? runner("codex", ["plugin", "list"]) : { status: null, stdout: "", stderr: "" };
-  const installedPlugin = pluginList.status === 0 ? installedPluginVersion(pluginList.stdout) : null;
+  const plugin = inspectCodexPlugin(runner, { codexAvailable });
+  const installedPlugin = plugin.installed_version;
   const packageVersion = String(PACKAGE_JSON.version);
   const reason = installedPlugin === packageVersion
     ? `Refresh the OpenNori Codex Plugin cache at ${packageVersion} so Codex can discover current packaged Skills.`

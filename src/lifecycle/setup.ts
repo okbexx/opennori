@@ -1,7 +1,9 @@
 import path from "node:path";
 import { fail, ok } from "../core.ts";
 import { pluginState } from "../plugin.ts";
-import type { InstallPlan, LifecyclePlanAction, NoriResult } from "../types.ts";
+import type { InstallPlan, NoriResult } from "../types/lifecycle.ts";
+import { inspectCodexMarketplace, inspectCodexPlugin } from "./adapters/codex-plugin.ts";
+import { inspectGlobalNpmPackage } from "./adapters/npm-global.ts";
 import { bootstrap } from "./bootstrap.ts";
 import { doctor } from "./doctor.ts";
 import {
@@ -48,24 +50,6 @@ export type SetupOptions = {
   runner?: SetupCommandRunner;
 };
 
-function includesMarketplace(stdout: string): boolean {
-  return /^opennori\s/m.test(stdout);
-}
-
-function installedPluginVersion(stdout: string): string | null {
-  const match = stdout.match(/^opennori@opennori\s+installed,\s+enabled\s+(\S+)/m);
-  return match?.[1] || null;
-}
-
-function globalPackageVersion(stdout: string): string | null {
-  try {
-    const payload = JSON.parse(stdout) as { dependencies?: Record<string, { version?: string }> };
-    return payload.dependencies?.opennori?.version || null;
-  } catch {
-    return null;
-  }
-}
-
 function packagedSkillsAction(): SetupPlanAction {
   const plugin = pluginState();
   const available = plugin.packaged && plugin.skill_count > 0 && plugin.skills.some((skill) => skill.name === "nori");
@@ -88,17 +72,17 @@ function inspectExternalActions(runner: SetupCommandRunner, confirmed: boolean):
   const pluginCommand = ["codex", "plugin", "add", "opennori@opennori"];
   const globalCliCommand = ["npm", "install", "-g", `opennori@${PACKAGE_JSON.version}`, "--min-release-age=0"];
 
-  const marketplaceList = runner("codex", ["plugin", "marketplace", "list"]);
-  const codexAvailable = marketplaceList.status === 0;
-  const marketplaceExists = codexAvailable && includesMarketplace(marketplaceList.stdout);
+  const marketplace = inspectCodexMarketplace(runner);
+  const codexAvailable = marketplace.available;
+  const marketplaceExists = marketplace.registered;
 
-  const pluginList = codexAvailable ? runner("codex", ["plugin", "list"]) : { status: null, stdout: "", stderr: "", error: marketplaceList.error };
-  const installedPlugin = pluginList.status === 0 ? installedPluginVersion(pluginList.stdout) : null;
+  const plugin = inspectCodexPlugin(runner, { codexAvailable, unavailableError: marketplace.result.error });
+  const installedPlugin = plugin.installed_version;
   const pluginExists = installedPlugin === PACKAGE_JSON.version;
 
-  const globalList = runner("npm", ["ls", "-g", "opennori", "--depth=0", "--json"]);
-  const npmAvailable = globalList.error === undefined && globalList.status !== null;
-  const installedVersion = globalPackageVersion(globalList.stdout);
+  const globalPackage = inspectGlobalNpmPackage(runner, "opennori");
+  const npmAvailable = globalPackage.available;
+  const installedVersion = globalPackage.installed_version;
   const globalCliExists = npmAvailable && installedVersion === PACKAGE_JSON.version;
 
   return [

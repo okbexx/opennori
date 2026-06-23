@@ -1,0 +1,95 @@
+{
+  "kind": "architecture-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "OpenNori lifecycle setup and plugin-sync no longer parse Codex/npm stdout inside orchestration modules. Codex Plugin and npm global probes now live under src/lifecycle/adapters, focused adapter tests cover the parser boundary, Markdown parsing is documented as non-authoritative review recovery only, and MCP is recorded as a future read-only context integration that must reuse the official MCP TypeScript SDK instead of creating a second state layer.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-lifecycle-adapters-mcp-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-lifecycle-adapters-mcp-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:lifecycle",
+      "command": "npm run test:lifecycle"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:architecture",
+      "command": "npm run test:architecture"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js doctor --root . --json",
+      "command": "node ./bin/opennori.js doctor --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "git diff --check",
+      "command": "git diff --check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/adapters/codex-plugin.ts",
+      "path": "src/lifecycle/adapters/codex-plugin.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/adapters/npm-global.ts",
+      "path": "src/lifecycle/adapters/npm-global.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/setup.ts",
+      "path": "src/lifecycle/setup.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/plugin-sync.ts",
+      "path": "src/lifecycle/plugin-sync.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/lifecycle-adapters.test.ts",
+      "path": "test/lifecycle-adapters.test.ts"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/lifecycle-external-command-adapters.json",
+      "path": ".opennori/architecture/decisions/lifecycle-external-command-adapters.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/mcp-readonly-context-server-baseline.json",
+      "path": ".opennori/architecture/decisions/mcp-readonly-context-server-baseline.json"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json",
+      "path": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json"
+    }
+  ],
+  "reviewability": "Inspect the listed lifecycle adapter modules, setup/plugin-sync imports, lifecycle-adapters tests, and architecture decisions. Rerun the listed commands to verify type safety, lifecycle behavior, architecture health, lint, doctor/status, and whitespace checks.",
+  "limitations": "This verifies the lifecycle external command adapter boundary, MCP baseline decision, and Markdown parser boundary. It does not implement MCP yet, does not change user-facing setup behavior, and deliberately leaves a broader repo-wide types import migration for a separate architecture slice.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T06:02:23.536Z"
+}

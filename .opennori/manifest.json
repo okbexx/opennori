@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T03:55:50.959Z",
+  "updated_at": "2026-06-23T06:02:23.649Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -635,6 +635,17 @@
         "schema_errors": []
       },
       {
+        "id": "opennori-self-lifecycle-adapters-mcp-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Lifecycle command probes moved behind adapters; MCP is documented as a future read-only context surface; Markdown parsing remains a non-authoritative recovery helper.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-lifecycle-adapters-mcp-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
         "id": "opennori-self-lifecycle-external-actions-boundary",
         "goal_id": "opennori-self",
         "criterion_id": "AC-A-8",
@@ -821,12 +832,12 @@
         "need": "Parse OpenNori generated acceptance and report markdown only where users or agents may edit reviewable documents",
         "recommendation": "self-build",
         "status": "active",
-        "summary": "OpenNori keeps JSON evidence and contract files authoritative and uses Markdown primarily as generated review surface. The current tiny parser only recovers the known OpenNori acceptance table shape, so it can remain local for now; if user-edited Markdown becomes authoritative, micromark/remark/frontmatter libraries must be re-evaluated before expanding parsing.",
-        "current_project": "Current project writes structured JSON as source of truth and has one local parseAcceptanceMarkdown helper for generated acceptance markdown.",
+        "summary": "OpenNori keeps JSON evidence, contract, profile, architecture, and ledger files authoritative and uses Markdown as generated review surface. The current tiny parser may only recover OpenNori-owned generated acceptance tables; it must not become an authoritative import path or general Markdown parser without a new build-vs-buy decision.",
+        "current_project": "Current project writes structured JSON as source of truth and has one local parseAcceptanceMarkdown helper for generated acceptance markdown. Goal dossiers now include README.md review surfaces, which reinforces that Markdown is human/agent review output, not the state authority.",
         "standard_library": "Node has no Markdown or frontmatter parser.",
         "official_sdk": "No official OpenNori Markdown SDK exists; CommonMark-compatible libraries are the relevant ecosystem option.",
         "open_source": "micromark 4.0.2 MIT was checked on npm on 2026-06-12; remark and gray-matter are follow-up candidates if frontmatter/AST editing becomes product scope.",
-        "self_build_reason": "Self-build is limited to parsing OpenNori's own generated table as a recovery/review helper; it is not a general Markdown parser. This boundary avoids adding parser dependencies until Markdown becomes authoritative user input.",
+        "self_build_reason": "Self-build is limited to parsing OpenNori's own generated table as a recovery/review helper; it is not a general Markdown parser, frontmatter parser, import pipeline, or source-of-truth writer. If Markdown editing/import becomes product scope, OpenNori must re-evaluate micromark, remark, gray-matter, unified, and schema-backed conversion before expanding local parsing.",
         "path": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json"
       },
       {
@@ -862,6 +873,42 @@
         "superseded_by": "",
         "superseded_reason": "",
         "path": ".opennori/architecture/decisions/evidence-repeatable-source-flags.json"
+      },
+      {
+        "id": "lifecycle-external-command-adapters",
+        "schema_valid": true,
+        "schema_errors": [],
+        "area": "lifecycle-external-command-adapters",
+        "need": "Keep OpenNori setup and plugin-sync lifecycle orchestration from owning Codex CLI and npm stdout parsing while preserving preview/confirm safety.",
+        "recommendation": "self-build",
+        "status": "active",
+        "summary": "Use narrow OpenNori lifecycle adapters for Codex Plugin and npm-global probes; setup and plugin-sync consume probe results and remain plan orchestration layers.",
+        "current_project": "OpenNori already has lifecycle/external-actions for command execution, setup/plugin-sync plan builders, mock command runners in tests, and package/plugin state helpers. The missing boundary was stdout parsing living inside setup.ts and plugin-sync.ts.",
+        "standard_library": "Node child_process stays behind ExternalCommandRunner and path.resolve is sufficient for local marketplace path comparison. JSON.parse is enough for npm ls --json because npm already produces structured package data.",
+        "official_sdk": "Codex Plugin and npm operations remain delegated to their official CLIs. There is no stable in-process Codex Plugin SDK or npm global package inspection SDK in this project boundary.",
+        "open_source": "Shell parser libraries or process managers would not replace the product-specific probes. execa/cross-spawn could improve process ergonomics later, but the current code already has a small runner facade and tests only need deterministic stdout fixtures.",
+        "self_build_reason": "The self-built code is intentionally limited to adapter glue around known official CLI outputs and npm JSON output. It does not implement package management, plugin installation, command routing, retry, shell parsing, or state authority.",
+        "superseded_by": "",
+        "superseded_reason": "",
+        "path": ".opennori/architecture/decisions/lifecycle-external-command-adapters.json"
+      },
+      {
+        "id": "mcp-readonly-context-server-baseline",
+        "schema_valid": true,
+        "schema_errors": [],
+        "area": "mcp-context-export",
+        "need": "Define how OpenNori may expose goal, acceptance, profile, architecture, evidence, report, and dashboard context to agent clients through MCP without creating a second state layer or duplicating the CLI.",
+        "recommendation": "reuse",
+        "status": "active",
+        "summary": "When OpenNori adds MCP, use the official Model Context Protocol TypeScript SDK with read-only resources first and a tiny set of controlled tools that delegate to CLI/core state functions.",
+        "current_project": "OpenNori already exposes deterministic state through CLI commands, .opennori JSON files, context export, dashboard snapshots, and packaged Skills. MCP is currently an integration surface, not a replacement runtime.",
+        "standard_library": "Node stdio and HTTP primitives can transport bytes, but they do not implement MCP capability negotiation, tool/resource schemas, transports, or client expectations.",
+        "official_sdk": "Context7 on 2026-06-23 identified /modelcontextprotocol/typescript-sdk as the high-reputation SDK. The v2 API uses McpServer with registerResource and registerTool plus transports such as StdioServerTransport and Streamable HTTP.",
+        "open_source": "@modelcontextprotocol/typescript-sdk is the mature protocol implementation to reuse. Hono remains the dashboard kernel HTTP framework, but dashboard transport is not MCP and must not become an agent write authority.",
+        "self_build_reason": "",
+        "superseded_by": "",
+        "superseded_reason": "",
+        "path": ".opennori/architecture/decisions/mcp-readonly-context-server-baseline.json"
       },
       {
         "id": "plugin-skills-package-assets",
@@ -939,8 +986,8 @@
     "build_vs_buy": {
       "status": "clear",
       "summary": "Every recorded build-vs-buy decision includes reviewable reuse candidates and any self-build reason.",
-      "decision_count": 14,
-      "total_decision_count": 15,
+      "decision_count": 16,
+      "total_decision_count": 17,
       "superseded_decision_count": 1,
       "findings": []
     },

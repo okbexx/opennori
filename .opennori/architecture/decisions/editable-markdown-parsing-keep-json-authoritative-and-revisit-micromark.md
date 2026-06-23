@@ -6,15 +6,15 @@ Recommendation: self-build
 
 ## Summary
 
-OpenNori keeps JSON evidence and contract files authoritative and uses Markdown primarily as generated review surface. The current tiny parser only recovers the known OpenNori acceptance table shape, so it can remain local for now; if user-edited Markdown becomes authoritative, micromark/remark/frontmatter libraries must be re-evaluated before expanding parsing.
+OpenNori keeps JSON evidence, contract, profile, architecture, and ledger files authoritative and uses Markdown as generated review surface. The current tiny parser may only recover OpenNori-owned generated acceptance tables; it must not become an authoritative import path or general Markdown parser without a new build-vs-buy decision.
 
 ## Candidates Checked
 
-- Current project: Current project writes structured JSON as source of truth and has one local parseAcceptanceMarkdown helper for generated acceptance markdown.
+- Current project: Current project writes structured JSON as source of truth and has one local parseAcceptanceMarkdown helper for generated acceptance markdown. Goal dossiers now include README.md review surfaces, which reinforces that Markdown is human/agent review output, not the state authority.
 - Standard library: Node has no Markdown or frontmatter parser.
 - Official SDK: No official OpenNori Markdown SDK exists; CommonMark-compatible libraries are the relevant ecosystem option.
 - Open source: micromark 4.0.2 MIT was checked on npm on 2026-06-12; remark and gray-matter are follow-up candidates if frontmatter/AST editing becomes product scope.
 
 ## Self-build Reason
 
-Self-build is limited to parsing OpenNori's own generated table as a recovery/review helper; it is not a general Markdown parser. This boundary avoids adding parser dependencies until Markdown becomes authoritative user input.
+Self-build is limited to parsing OpenNori's own generated table as a recovery/review helper; it is not a general Markdown parser, frontmatter parser, import pipeline, or source-of-truth writer. If Markdown editing/import becomes product scope, OpenNori must re-evaluate micromark, remark, gray-matter, unified, and schema-backed conversion before expanding local parsing.

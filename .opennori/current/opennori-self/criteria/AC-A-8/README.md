@@ -17,29 +17,29 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: dashboard-architecture-boundary-verification - Dashboard inspect rendering is now split by observation node type: the route component delegates to read-only Goal, Passed Criteria, Project Profile, Criterion, and Evidence panels, with shared copy/path/status helpers isolated under components/inspect. The dashboard still renders only projected snapshot data and exposes no approve, waive, evidence, profile, architecture, or report write controls from these panels.
+Latest: architecture-boundary-verification - OpenNori lifecycle setup and plugin-sync no longer parse Codex/npm stdout inside orchestration modules. Codex Plugin and npm global probes now live under src/lifecycle/adapters, focused adapter tests cover the parser boundary, Markdown parsing is documented as non-authoritative review recovery only, and MCP is recorded as a future read-only context integration that must reuse the official MCP TypeScript SDK instead of creating a second state layer.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed dashboard source files. Confirm InspectNodePanel is now only a node-type router, the node panels are read-only renderers over snapshot rawData, Project Profile remains project-level observation, evidence panels only show review sources, and no confirmation or state-write controls were added. Rerun the listed dashboard, typecheck, lint, doctor, and status commands.
-Limitations: This verifies the dashboard inspect boundary and built asset update. It does not redesign the radar visualization, change snapshot semantics, or include a fresh browser screenshot; visual review can still be done by running opennori dashboard.
+Reviewability: Inspect the listed lifecycle adapter modules, setup/plugin-sync imports, lifecycle-adapters tests, and architecture decisions. Rerun the listed commands to verify type safety, lifecycle behavior, architecture health, lint, doctor/status, and whitespace checks.
+Limitations: This verifies the lifecycle external command adapter boundary, MCP baseline decision, and Markdown parser boundary. It does not implement MCP yet, does not change user-facing setup behavior, and deliberately leaves a broader repo-wide types import migration for a separate architecture slice.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-dashboard-inspect-boundary.json
-- npm run test:dashboard
-- npm run typecheck:dashboard
+- .opennori/architecture/evidence/opennori-self-lifecycle-adapters-mcp-boundary.json
 - npx tsc --noEmit --pretty false
+- npm run test:lifecycle
+- npm run test:architecture
 - npm run lint
 - node ./bin/opennori.js doctor --root . --json
 - node ./bin/opennori.js status --root . --json
-- src/dashboard/src/components/InspectNodePanel.tsx
-- src/dashboard/src/components/inspect/GoalInspectPanel.tsx
-- src/dashboard/src/components/inspect/PassedCriteriaPanel.tsx
-- src/dashboard/src/components/inspect/ProfileInspectPanel.tsx
-- src/dashboard/src/components/inspect/CriterionInspectPanel.tsx
-- src/dashboard/src/components/inspect/EvidenceInspectPanel.tsx
-- src/dashboard/src/components/inspect/InspectShared.tsx
-- dashboard/index.html
-- dashboard/assets/index-QMqd8O4F.js
+- git diff --check
+- src/lifecycle/adapters/codex-plugin.ts
+- src/lifecycle/adapters/npm-global.ts
+- src/lifecycle/setup.ts
+- src/lifecycle/plugin-sync.ts
+- test/lifecycle-adapters.test.ts
+- .opennori/architecture/decisions/lifecycle-external-command-adapters.json
+- .opennori/architecture/decisions/mcp-readonly-context-server-baseline.json
+- .opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json
 
 ## Files
 

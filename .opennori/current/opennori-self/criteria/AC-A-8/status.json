@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 12,
-  "latest_evidence_summary": "Dashboard inspect rendering is now split by observation node type: the route component delegates to read-only Goal, Passed Criteria, Project Profile, Criterion, and Evidence panels, with shared copy/path/status helpers isolated under components/inspect. The dashboard still renders only projected snapshot data and exposes no approve, waive, evidence, profile, architecture, or report write controls from these panels.",
-  "updated_at": "2026-06-23T03:55:50.858Z"
+  "evidence_count": 13,
+  "latest_evidence_summary": "OpenNori lifecycle setup and plugin-sync no longer parse Codex/npm stdout inside orchestration modules. Codex Plugin and npm global probes now live under src/lifecycle/adapters, focused adapter tests cover the parser boundary, Markdown parsing is documented as non-authoritative review recovery only, and MCP is recorded as a future read-only context integration that must reuse the official MCP TypeScript SDK instead of creating a second state layer.",
+  "updated_at": "2026-06-23T06:02:23.539Z"
 }
