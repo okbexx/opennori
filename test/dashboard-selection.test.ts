@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
+import { dashboardOutcomeRows } from "../src/dashboard/src/dashboard-view.ts";
 import { buildAcceptanceRadarModel, getNodeColor, getNodePulseClass, getRadarLinkStyle } from "../src/dashboard/src/radar-model.ts";
 import { gapIdFromFocusEvent, profileNodeFromSnapshot, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "../src/dashboard/src/selection.ts";
 import type { NoriSnapshot } from "../src/dashboard/src/types.ts";
@@ -301,4 +302,70 @@ test("dashboard profile node is not evaluated when there is no current goal", { 
   assert.equal(node.status, "not_evaluated");
   assert.equal(rawData.scope, "project_only");
   assert.equal(rawData.idle_summary.last_goal?.id, "completed-goal");
+});
+
+test("dashboard outcome rows explain completion current gap next action and profile scope", { tags: ["dashboard", "quick", "unit"] }, () => {
+  const snapshot = snapshotWithCriteria([
+    {
+      id: "AC-1",
+      user_story: "As a user, I can inspect a completed criterion.",
+      measurement: "Open the dashboard and inspect passed criteria.",
+      threshold: "The completed criterion appears as done.",
+      status: "passing",
+      confidence: "verified",
+      evidence: []
+    },
+    {
+      id: "AC-3",
+      user_story: "As a user, I can inspect the current gap.",
+      measurement: "Open the dashboard and inspect AC-3.",
+      threshold: "AC-3 shows the next action.",
+      status: "needs_evidence",
+      confidence: "review-required",
+      evidence: []
+    }
+  ]);
+  snapshot.outcome_summary = {
+    decision: {
+      state: "not_complete",
+      label: "Not complete yet",
+      detail: "AC-3 has no reviewable evidence."
+    },
+    current_gap: {
+      id: "AC-3",
+      label: "Inspect the current gap.",
+      detail: "AC-3 is needs_evidence: record evidence."
+    },
+    need_user: {
+      required: false,
+      label: "No user action needed",
+      action: "No user action needed."
+    },
+    next: {
+      label: "Next",
+      action: "Verify AC-3 and attach evidence."
+    },
+    profile: {
+      scope: "current_goal_compliance",
+      state: "clear",
+      label: "Project Profile clear",
+      detail: "Current goal has no blocking Project Profile compliance gaps."
+    }
+  };
+
+  const rows = dashboardOutcomeRows(snapshot);
+  assert.equal(rows.find((row) => row.label === "Goal")?.detail, "1/2 acceptance checks have passing or waived evidence.");
+  assert.equal(rows.find((row) => row.label === "Current gap")?.value, "AC-3: Inspect the current gap.");
+  assert.equal(rows.find((row) => row.label === "Agent can continue")?.detail, "Verify AC-3 and attach evidence.");
+  assert.match(rows.find((row) => row.label === "Project Profile")?.detail || "", /current goal/i);
+
+  snapshot.status = "no_active_goal";
+  snapshot.goal = null;
+  snapshot.criteria = [];
+  snapshot.decision = "no_active_goal";
+  snapshot.outcome_summary.profile.scope = "project_only";
+  snapshot.outcome_summary.profile.state = "idle";
+  const idleRows = dashboardOutcomeRows(snapshot);
+  assert.equal(idleRows.find((row) => row.label === "Goal")?.value, "No current Nori Contract");
+  assert.match(idleRows.find((row) => row.label === "Project Profile")?.detail || "", /Project-level preferences/);
 });

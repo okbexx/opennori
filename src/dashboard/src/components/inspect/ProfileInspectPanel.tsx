@@ -77,11 +77,19 @@ export function ProfileInspectPanel({ node }: { node: RadarNode }) {
             </div>
           </div>
           <div className="text-right">
-            <span className="block text-[8px] font-mono uppercase text-slate-500">compliance</span>
+            <span className="block text-[8px] font-mono uppercase text-slate-500">{hasCurrentGoal ? "goal compliance" : "project source"}</span>
             <span className="text-xs font-mono font-bold" style={{ color: panelColor }}>
               {complianceLabel}
             </span>
           </div>
+        </div>
+        <div className="mt-2 rounded border border-slate-900/80 bg-black/20 p-2">
+          <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-slate-500">
+            Scope model
+          </span>
+          <p className="mt-0.5 text-[11px] leading-relaxed text-slate-300">
+            Project Profile is stored once for the project. This panel only evaluates compliance against the current Nori Contract when one exists.
+          </p>
         </div>
       </div>
 

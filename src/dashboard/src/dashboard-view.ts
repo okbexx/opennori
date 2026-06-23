@@ -1,4 +1,4 @@
-import type { NoriEvent, NoriSnapshot, RadarNode } from "./types";
+import type { NoriEvent, NoriSnapshot, RadarNode } from "./types.js";
 
 export type ConnectionState = "connecting" | "live" | "retrying";
 export type DrawerTab = "visual" | "json";
@@ -74,6 +74,73 @@ export function sortedRecentEvents(snapshot: NoriSnapshot | null): NoriEvent[] {
 
 export function findLatestAgentEvent(events: NoriEvent[]): NoriEvent | undefined {
   return events.find((event) => event.actor.kind === "agent");
+}
+
+export type DashboardOutcomeRow = {
+  label: string;
+  value: string;
+  detail: string;
+  tone: "green" | "amber" | "rose" | "cyan" | "purple";
+};
+
+export function dashboardOutcomeRows(snapshot: NoriSnapshot | null): DashboardOutcomeRow[] {
+  if (!snapshot) {
+    return [
+      {
+        label: "Goal",
+        value: "Loading snapshot",
+        detail: "Waiting for the local OpenNori kernel.",
+        tone: "cyan"
+      }
+    ];
+  }
+
+  const summary = snapshot.outcome_summary;
+  const decisionState = String(summary?.decision.state || snapshot.decision || "");
+  const decisionTone = decisionState === "complete" ? "green" : decisionState === "review_risk" ? "amber" : decisionState === "no_active_goal" ? "cyan" : "rose";
+  const goalValue = snapshot.goal?.label || "No current Nori Contract";
+  const completedCount = (snapshot.criteria || []).filter((criterion) => ["passing", "passed", "waived"].includes(String(criterion.status).toLowerCase())).length;
+  const totalCount = snapshot.criteria?.length || 0;
+  const currentGapLabel = summary?.current_gap.id
+    ? `${summary.current_gap.id}: ${summary.current_gap.label}`
+    : summary?.current_gap.label || "No current acceptance gap";
+
+  return [
+    {
+      label: "Goal",
+      value: goalValue,
+      detail: totalCount > 0
+        ? `${completedCount}/${totalCount} acceptance checks have passing or waived evidence.`
+        : snapshot.idle_summary?.message || "OpenNori is waiting for an approved Nori Contract.",
+      tone: snapshot.goal ? "cyan" : "purple"
+    },
+    {
+      label: "Decision",
+      value: summary?.decision.label || formatSignal(snapshot.decision),
+      detail: summary?.decision.detail || "No completion decision is available yet.",
+      tone: decisionTone
+    },
+    {
+      label: "Current gap",
+      value: currentGapLabel,
+      detail: summary?.current_gap.detail || "Approve a Nori Contract before OpenNori can track current gaps.",
+      tone: summary?.current_gap.id ? "rose" : "green"
+    },
+    {
+      label: summary?.need_user.required ? "Need user" : "Agent can continue",
+      value: summary?.need_user.required ? "Reply in agent chat" : "No user action needed",
+      detail: summary?.next.action || "Ask the agent to continue with OpenNori.",
+      tone: summary?.need_user.required ? "amber" : "green"
+    },
+    {
+      label: "Project Profile",
+      value: summary?.profile.label || "Project Profile",
+      detail: summary?.profile.scope === "project_only"
+        ? "Project-level preferences are loaded. Compliance waits for a current goal."
+        : summary?.profile.detail || "Project-level preferences are evaluated against the current goal only.",
+      tone: summary?.profile.state === "blocked" ? "rose" : summary?.profile.state === "review" ? "amber" : summary?.profile.state === "clear" ? "green" : "purple"
+    }
+  ];
 }
 
 export function inspectedNodeTitle(node: RadarNode | null): string {

@@ -1,6 +1,7 @@
 import { Check, Compass, Copy, ListChecks } from "lucide-react";
 import {
   architectureDecisionClass,
+  dashboardOutcomeRows,
   formatSignal,
   outcomeDecisionClass,
   profileImpactClass
@@ -26,6 +27,14 @@ export function OutcomeHud({
   const outcomeSummary = snapshot.outcome_summary;
   const idleSummary = snapshot.idle_summary;
   const hasCurrentGoal = snapshot.status === "active" && !!snapshot.goal;
+  const rows = dashboardOutcomeRows(snapshot);
+  const rowToneClass = {
+    green: "border-[#34d399]/18 bg-[#34d399]/6 text-[#34d399]",
+    amber: "border-[#fbbf24]/20 bg-[#fbbf24]/7 text-[#fbbf24]",
+    rose: "border-rose-400/20 bg-rose-500/7 text-rose-300",
+    cyan: "border-[#00f0ff]/18 bg-[#00f0ff]/7 text-[#00f0ff]",
+    purple: "border-[#bd93f9]/18 bg-[#bd93f9]/7 text-[#bd93f9]"
+  };
 
   return (
     <div className="absolute left-4 top-4 bottom-4 z-20 w-[min(340px,calc(100vw-2rem))] overflow-y-auto scrollbar-hover-visible flex flex-col gap-3 pointer-events-auto pr-1">
@@ -38,6 +47,18 @@ export function OutcomeHud({
           <span className={`shrink-0 rounded border px-2 py-0.5 text-[8.5px] font-mono font-bold uppercase tracking-wider ${outcomeDecisionClass(outcomeSummary?.decision.state || snapshot.decision)}`}>
             {formatSignal(outcomeSummary?.decision.state || snapshot.decision)}
           </span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-1.5">
+          {rows.map((row) => (
+            <div key={row.label} className={`rounded border p-2 ${rowToneClass[row.tone]}`}>
+              <div className="mb-0.5 flex items-center justify-between gap-2">
+                <span className="text-[8px] font-mono font-black uppercase tracking-wider opacity-80">{row.label}</span>
+              </div>
+              <p className="text-[10.5px] font-bold leading-snug text-slate-100 break-words">{row.value}</p>
+              <p className="mt-0.5 text-[9.5px] leading-snug text-slate-400 break-words">{row.detail}</p>
+            </div>
+          ))}
         </div>
 
         <div className="space-y-2">
