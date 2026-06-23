@@ -2,6 +2,9 @@ import path from "node:path";
 import type { JsonObject, LifecyclePlanAction, NoriResult } from "../types.ts";
 
 type OutputCommand =
+  | "setup"
+  | "init"
+  | "bootstrap"
   | "install"
   | "uninstall"
   | "upgrade"
@@ -52,9 +55,9 @@ function changedActionPaths(actions: unknown, root: unknown, limit = 6): string[
     .map((action) => `${relative(root, action.path || action.command_display)} (${action.action})`);
 }
 
-function printFailure(stdout: NodeJS.WriteStream, payload: NoriResult): void {
+function printFailure(stdout: NodeJS.WriteStream, payload: NoriResult, title = "OpenNori command failed."): void {
   if (payload.ok) return;
-  line(stdout, "OpenNori command failed.");
+  line(stdout, title);
   line(stdout, `Problem: ${payload.error.message}`);
   if (payload.error.fix) line(stdout, `Recovery: ${payload.error.fix}`);
 }
@@ -74,6 +77,73 @@ function printPlanSummary(stdout: NodeJS.WriteStream, title: string, data: JsonO
     line(stdout, "Changed:");
     for (const item of paths) line(stdout, `- ${item}`);
   }
+}
+
+function printExternalActionDetails(stdout: NodeJS.WriteStream, actions: unknown, root: unknown, limit = 6): void {
+  if (!Array.isArray(actions)) return;
+  const visible = actions
+    .map(asObject)
+    .filter((action) => action.action !== "exists" || action.reason)
+    .slice(0, limit);
+  if (visible.length === 0) return;
+  line(stdout, "Actions:");
+  for (const action of visible) {
+    const status = action.action === "unavailable"
+      ? "unavailable"
+      : action.action === "failed"
+        ? "failed"
+        : action.action === "applied"
+          ? "done"
+          : action.action === "exists"
+            ? "ready"
+            : action.will_write
+              ? "run"
+              : "preview";
+    const target = relative(root, action.path || action.command_display || action.kind);
+    line(stdout, `- ${status}: ${action.reason || target}${target && action.reason ? ` (${target})` : ""}`);
+  }
+}
+
+function printSetup(stdout: NodeJS.WriteStream, data: JsonObject): void {
+  const plan = asObject(data.setup_plan);
+  const summary = asObject(plan.summary);
+  const confirmed = Boolean(data.confirmed);
+  const title = data.status === "ready"
+    ? "OpenNori setup complete."
+    : data.status === "needs-action"
+      ? "OpenNori setup needs action."
+      : "OpenNori setup preview.";
+  line(stdout, title);
+  line(stdout, `Project: ${data.root || plan.root || "."}`);
+  line(stdout, `Mode: ${plan.dry_run ? "preview" : confirmed ? "confirmed" : "preview"}`);
+  line(stdout, "Bundle: Codex Plugin, packaged Skills, global opennori CLI, project .opennori state, doctor.");
+  line(stdout, `Writes: ${summary.will_write ?? 0} now, ${summary.would_write ?? 0} planned`);
+  if (Number(summary.unavailable || 0) > 0) line(stdout, `Unavailable: ${summary.unavailable}`);
+  printExternalActionDetails(stdout, plan.actions, data.root || plan.root);
+  if (data.next) line(stdout, `Next: ${data.next}`);
+}
+
+function printProjectBootstrap(stdout: NodeJS.WriteStream, data: JsonObject, command: string): void {
+  const plan = asObject(data.install_plan);
+  const summary = asObject(plan.summary);
+  const doctor = asObject(data.doctor);
+  const currentGoal = data.current_goal || doctor.current_goal;
+  const label = command === "init" ? "project init" : "project setup";
+  const title = data.status === "ready"
+    ? "OpenNori project state is ready."
+    : data.status === "installed"
+      ? "OpenNori project state initialized."
+      : `OpenNori ${label} preview.`;
+  line(stdout, title);
+  line(stdout, `Project: ${data.root || plan.root || "."}`);
+  if (data.status !== "ready") {
+    line(stdout, `Mode: ${plan.dry_run ? "preview" : data.confirmed ? "confirmed" : "preview"}`);
+    line(stdout, `Writes: ${summary.will_write ?? 0} now, ${summary.would_write ?? 0} planned`);
+    printExternalActionDetails(stdout, plan.actions, data.root || plan.root, 8);
+  }
+  line(stdout, `Current Nori Contract: ${currentGoal ? asObject(currentGoal).goal_id || "present" : "none"}`);
+  if (!currentGoal) line(stdout, "Empty .opennori/current is normal until a Nori Contract is approved.");
+  if (data.next) line(stdout, `Next: ${data.next}`);
 }
 
 function printPluginSync(stdout: NodeJS.WriteStream, data: JsonObject): void {
@@ -264,15 +334,17 @@ export function shouldPrintHuman(args: string[], stdout: NodeJS.WriteStream = pr
 
 export function printHumanResult(payload: NoriResult, options: HumanOutputOptions): boolean {
   const stdout = options.stdout || process.stdout;
+  const command = options.commandPath[0] as OutputCommand | undefined;
+  const subcommand = options.commandPath[1];
   if (!payload.ok) {
-    printFailure(stdout, payload);
+    printFailure(stdout, payload, command ? `OpenNori ${[command, subcommand].filter(Boolean).join(" ")} failed.` : undefined);
     return true;
   }
 
-  const command = options.commandPath[0] as OutputCommand | undefined;
-  const subcommand = options.commandPath[1];
   const data = payload.data as JsonObject;
-  if (command === "install") printPlanSummary(stdout, data.dry_run ? "OpenNori install preview." : "OpenNori install complete.", data, "install_plan");
+  if (command === "setup") printSetup(stdout, data);
+  else if (command === "init" || command === "bootstrap") printProjectBootstrap(stdout, data, command);
+  else if (command === "install") printPlanSummary(stdout, data.dry_run ? "OpenNori install preview." : "OpenNori install complete.", data, "install_plan");
   else if (command === "upgrade") printPlanSummary(stdout, data.dry_run ? "OpenNori upgrade preview." : "OpenNori upgrade complete.", data, "upgrade_plan");
   else if (command === "uninstall") printPlanSummary(stdout, data.dry_run ? "OpenNori uninstall preview." : "OpenNori uninstall complete.", data, "uninstall_plan");
   else if (command === "plugin" && subcommand === "sync") printPluginSync(stdout, data);

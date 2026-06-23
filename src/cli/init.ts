@@ -1,26 +1,13 @@
 import { parseArgs } from "citty";
 import { bootstrapResult, runBootstrapCommand } from "./commands/bootstrap.ts";
+import { printHumanResult } from "./human-output.ts";
 
 type JsonPrinter = (payload: unknown) => void;
-
-type InitAction = {
-  action: string;
-  path: string;
-  would_write?: boolean;
-};
 
 type InitPayload = {
   data: {
     root: string;
     status: string;
-    next?: string;
-    install_plan: {
-      actions: InitAction[];
-      summary: {
-        would_write: number;
-        will_write: number;
-      };
-    };
   };
 };
 
@@ -65,52 +52,9 @@ function asInitPayload(payload: unknown): InitPayload {
   return payload as InitPayload;
 }
 
-function describeAction(action: InitAction): string {
-  if (action.action === "create") return `create ${action.path}`;
-  if (action.action === "skip") return `keep existing ${action.path}`;
-  if (action.action === "exists") return `already exists ${action.path}`;
-  if (action.action === "update") return `update ${action.path}`;
-  if (action.action === "overwrite") return `overwrite ${action.path}`;
-  return `${action.action} ${action.path}`;
-}
-
-function printInitPreview(stdout: NodeJS.WriteStream, payload: InitPayload): void {
-  const data = payload.data;
+function printInitHuman(stdout: NodeJS.WriteStream, payload: InitPayload): void {
   printText(stdout, "");
-  printText(stdout, "OpenNori project init");
-  printText(stdout, `Project: ${data.root}`);
-  printText(stdout, "");
-  if (data.status === "ready") {
-    printText(stdout, "OpenNori is already ready in this project.");
-    return;
-  }
-  printText(stdout, "This will prepare .opennori project state:");
-  for (const action of data.install_plan.actions.filter((item) => item.would_write).slice(0, 8)) {
-    printText(stdout, `- ${describeAction(action)}`);
-  }
-  const remaining = data.install_plan.summary.would_write - Math.min(data.install_plan.summary.would_write, 8);
-  if (remaining > 0) printText(stdout, `- plus ${remaining} more OpenNori project assets`);
-  printText(stdout, "");
-  printText(stdout, "No project files have been written yet.");
-}
-
-function printInitResult(stdout: NodeJS.WriteStream, payload: InitPayload): void {
-  const data = payload.data;
-  printText(stdout, "");
-  if (data.status === "installed") {
-    printText(stdout, "OpenNori project state initialized.");
-    printText(stdout, `Created or refreshed ${data.install_plan.summary.will_write} project assets.`);
-    printText(stdout, "No current Nori Contract exists yet; empty state directories are normal after init.");
-    printText(stdout, "Next: tell your agent: Use OpenNori for this goal: <your goal>.");
-    return;
-  }
-  if (data.status === "ready") {
-    printText(stdout, "OpenNori project state is ready.");
-    printText(stdout, "If .opennori/current is empty, no Nori Contract has been approved as current yet.");
-    printText(stdout, "Next: tell your agent: Use OpenNori for this goal: <your goal>.");
-    return;
-  }
-  printText(stdout, data.next || "OpenNori init finished.");
+  printHumanResult(payload as never, { commandPath: ["init"], stdout });
 }
 
 async function promptConfirm(stdin: NodeJS.ReadStream, stdout: NodeJS.WriteStream, message: string): Promise<boolean> {
@@ -135,12 +79,12 @@ export async function runInit(args: string[], { stdin = process.stdin, stdout = 
   }
 
   if (parsed.confirm) {
-    printInitResult(stdout, asInitPayload(bootstrapResult({ root: parsed.root, confirmed: true })));
+    printInitHuman(stdout, asInitPayload(bootstrapResult({ root: parsed.root, confirmed: true })));
     return;
   }
 
   const preview = asInitPayload(bootstrapResult({ root: parsed.root, confirmed: false }));
-  printInitPreview(stdout, preview);
+  printInitHuman(stdout, preview);
   if (preview.data.status === "ready") return;
 
   const shouldInit = await promptConfirm(stdin, stdout, "Initialize OpenNori project state?");
@@ -150,5 +94,5 @@ export async function runInit(args: string[], { stdin = process.stdin, stdout = 
     return;
   }
 
-  printInitResult(stdout, asInitPayload(bootstrapResult({ root: preview.data.root, confirmed: true })));
+  printInitHuman(stdout, asInitPayload(bootstrapResult({ root: preview.data.root, confirmed: true })));
 }

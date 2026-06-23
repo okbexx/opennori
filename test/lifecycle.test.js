@@ -115,8 +115,8 @@ test("opennori quickstart is interactive for human terminals", { tags: ["lifecyc
   const declined = runInteractiveSetup(declinedRoot, "n");
 
   assert.equal(declined.status, 0);
-  assert.match(declined.stdout, /OpenNori setup/);
-  assert.match(declined.stdout, /No project files or user-level Codex\/npm settings have been changed yet/);
+  assert.match(declined.stdout, /OpenNori setup preview/);
+  assert.match(declined.stdout, /Bundle: Codex Plugin, packaged Skills, global opennori CLI, project \.opennori state, doctor/);
   assert.match(declined.stdout, /Install OpenNori capability bundle\? \[y\/N\]/);
   assert.match(declined.stdout, /No changes made/);
   assert.equal(fs.existsSync(path.join(declinedRoot, ".opennori")), false);

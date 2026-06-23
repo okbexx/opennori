@@ -2,10 +2,30 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { test } from "vitest";
-import { tempRoot, writeActiveGoalWithId, activeGoalRuntimeFor, setupRunner, renderHuman, runActivityStartCommand, runArchitectureBaselineCommand, runArchitectureProfilesCommand, runArchitectureRequirementCommand, runArchitectureShowCommand, runStatusCommand, runCheckCommand, runDashboardCommand, runDoctorCommand, runInstallCommand, runPluginSyncCommand, runProfileAddCommand, runProfileCheckCommand, runProfileShowCommand, runReportCommand, runUninstallCommand, runUpgradeCommand, printHumanResult } from "./support/command-fixtures.js";
+import { tempRoot, writeActiveGoalWithId, activeGoalRuntimeFor, setupRunner, renderHuman, runActivityStartCommand, runArchitectureBaselineCommand, runArchitectureProfilesCommand, runArchitectureRequirementCommand, runArchitectureShowCommand, runStatusCommand, runCheckCommand, runDashboardCommand, runDoctorCommand, runInstallCommand, runPluginSyncCommand, runProfileAddCommand, runProfileCheckCommand, runProfileShowCommand, runReportCommand, runSetupCommand, runInitCommand, runBootstrapCommand, runUninstallCommand, runUpgradeCommand, printHumanResult } from "./support/command-fixtures.js";
 
 test("human output summarizes lifecycle commands instead of printing full JSON", { tags: ["cli", "reporting", "quick"] }, async () => {
   const root = tempRoot();
+  const { runner } = setupRunner();
+  const setup = await runSetupCommand(["--root", root, "--json"], { runner });
+  const setupText = renderHuman(setup, ["setup"]);
+  assert.match(setupText, /OpenNori setup preview/);
+  assert.match(setupText, /Bundle: Codex Plugin, packaged Skills, global opennori CLI, project \.opennori state, doctor/);
+  assert.doesNotMatch(setupText.trimStart(), /^\{/);
+  assert.doesNotMatch(setupText, /"setup_plan"/);
+
+  const init = await runInitCommand(["--root", root, "--json"]);
+  const initText = renderHuman(init, ["init"]);
+  assert.match(initText, /OpenNori project init preview/);
+  assert.match(initText, /Current Nori Contract: none/);
+  assert.match(initText, /Empty \.opennori\/current is normal/);
+  assert.doesNotMatch(initText, /"install_plan"/);
+
+  const bootstrap = await runBootstrapCommand(["--root", root, "--json"]);
+  const bootstrapText = renderHuman(bootstrap, ["bootstrap"]);
+  assert.match(bootstrapText, /OpenNori project setup preview/);
+  assert.doesNotMatch(bootstrapText, /"doctor"/);
+
   await runInstallCommand(["--root", root, "--json"]);
   fs.writeFileSync(path.join(root, ".opennori", "protocol.md"), "old protocol\n");
 
