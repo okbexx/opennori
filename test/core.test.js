@@ -31,12 +31,18 @@ test("CLI entrypoint delegates command dispatch to the citty command tree", { ta
   const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
   const cliSource = fs.readFileSync(path.join(ROOT, "src", "cli.ts"), "utf8");
   const commandTree = fs.readFileSync(path.join(ROOT, "src", "cli", "command-tree.ts"), "utf8");
+  const registrySource = fs.readFileSync(path.join(ROOT, "src", "cli", "registry.ts"), "utf8");
+  const runnerSource = fs.readFileSync(path.join(ROOT, "src", "cli", "runner.ts"), "utf8");
+  const resolverSource = fs.readFileSync(path.join(ROOT, "src", "cli", "resolver.ts"), "utf8");
 
   assert.equal(packageJson.dependencies.citty.startsWith("^"), true);
   assert.equal(fs.existsSync(path.join(ROOT, "src", "cli", "routes.ts")), false);
   assert.match(cliSource, /from "\.\/cli\/command-tree\.ts"/);
   assert.match(cliSource, /runCliCommand\(resolved\)/);
-  assert.match(commandTree, /defineCommand/);
-  assert.match(commandTree, /runCommand/);
-  assert.match(commandTree, /subCommands/);
+  assert.match(commandTree, /from "\.\/registry\.ts"/);
+  assert.match(commandTree, /from "\.\/resolver\.ts"/);
+  assert.match(commandTree, /from "\.\/runner\.ts"/);
+  assert.match(registrySource, /defineCommand/);
+  assert.match(runnerSource, /runCommand/);
+  assert.match(resolverSource, /subCommands/);
 });

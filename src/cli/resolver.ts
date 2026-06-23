@@ -1,0 +1,168 @@
+import type { CommandDef, SubCommandsDef } from "citty";
+import { CLI_NAME, rootCommand } from "./registry.ts";
+import { asCommand, resolveValue, type AnyCommand, type ResolvedCliCommand, type UsageArgDefinition } from "./command-types.ts";
+import { policyFor } from "./policies.ts";
+
+async function commandName(command: AnyCommand, fallback: string): Promise<string> {
+  const meta = await resolveValue(command.meta);
+  return meta?.name || fallback;
+}
+
+async function subCommandsFor(command: AnyCommand): Promise<SubCommandsDef | undefined> {
+  return await resolveValue(command.subCommands);
+}
+
+function firstSubCommandIndex(rawArgs: string[]): number {
+  return rawArgs.findIndex((arg) => arg !== "--" && !arg.startsWith("-"));
+}
+
+async function findSubCommand(subCommands: SubCommandsDef, name: string): Promise<{ key: string; command: AnyCommand } | null> {
+  if (name in subCommands) {
+    return { key: name, command: asCommand(await resolveValue(subCommands[name]) as CommandDef) };
+  }
+
+  for (const [key, subCommand] of Object.entries(subCommands)) {
+    const command = asCommand(await resolveValue(subCommand) as CommandDef);
+    const meta = await resolveValue(command.meta);
+    const aliases = Array.isArray(meta?.alias) ? meta.alias : meta?.alias ? [meta.alias] : [];
+    if (aliases.includes(name)) return { key, command };
+  }
+
+  return null;
+}
+
+export async function resolveCliCommand(rawArgs: string[]): Promise<ResolvedCliCommand> {
+  let command = asCommand(rootCommand);
+  let parent: AnyCommand | undefined;
+  let remaining = rawArgs;
+  const path: string[] = [];
+
+  while (true) {
+    const subCommands = await subCommandsFor(command);
+    if (!subCommands || Object.keys(subCommands).length === 0) {
+      return {
+        ok: true,
+        command,
+        parent,
+        path,
+        rawArgs: remaining,
+        policy: policyFor(command)
+      };
+    }
+
+    const index = firstSubCommandIndex(remaining);
+    const explicitName = index >= 0 ? remaining[index] : undefined;
+    if (!explicitName) {
+      return {
+        ok: false,
+        path,
+        message: path.length > 0
+          ? `No subcommand specified for ${[CLI_NAME, ...path].join(" ")}`
+          : `No command specified for ${CLI_NAME}`
+      };
+    }
+
+    const resolved = await findSubCommand(subCommands, explicitName);
+    if (!resolved) {
+      return {
+        ok: false,
+        path,
+        message: `Unknown command: ${[...path, explicitName].join(" ")}`
+      };
+    }
+
+    parent = command;
+    command = resolved.command;
+    path.push(resolved.key);
+    remaining = remaining.slice(index + 1);
+  }
+}
+
+function kebabCase(name: string): string {
+  return name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+}
+
+function valueHint(name: string): string {
+  return `<${kebabCase(name)}>`;
+}
+
+async function argsUsage(command: AnyCommand): Promise<string> {
+  const args = (await resolveValue(command.args) || {}) as Record<string, UsageArgDefinition>;
+  return Object.entries(args)
+    .map(([name, definition]) => {
+      if (definition.type === "positional") {
+        const token = valueHint(name).toUpperCase();
+        return definition.required === false || definition.default !== undefined ? `[${token}]` : token;
+      }
+      const flag = `--${kebabCase(name)}`;
+      if (definition.type === "boolean") return definition.required ? flag : `[${flag}]`;
+      const token = `${flag} ${valueHint(name)}`;
+      return definition.required ? token : `[${token}]`;
+    })
+    .join(" ");
+}
+
+export async function usageFor(rawArgs: string[]): Promise<string> {
+  const argsWithoutHelp = rawArgs.filter((arg) => arg !== "--help" && arg !== "-h");
+  const resolved = argsWithoutHelp.length > 0 ? await resolveCliCommand(argsWithoutHelp) : { ok: true as const, command: rootCommand, path: [], rawArgs: [], policy: {} };
+  const command = resolved.ok ? resolved.command : rootCommand;
+  const path = resolved.ok ? resolved.path : [];
+  const subCommands = await subCommandsFor(command);
+  const commandLabel = [CLI_NAME, ...path].join(" ");
+  const usageParts = [commandLabel];
+
+  const options = await argsUsage(command);
+  if (options) usageParts.push(options);
+  if (subCommands && Object.keys(subCommands).length > 0) usageParts.push(`<${Object.keys(subCommands).join("|")}>`);
+
+  return usageParts.join(" ");
+}
+
+export async function helpTextFor(rawArgs: string[]): Promise<string> {
+  const argsWithoutHelp = rawArgs.filter((arg) => arg !== "--help" && arg !== "-h");
+  const resolved = argsWithoutHelp.length > 0 ? await resolveCliCommand(argsWithoutHelp) : { ok: true as const, command: rootCommand, path: [], rawArgs: [], policy: {} };
+  const command = resolved.ok ? resolved.command : rootCommand;
+  const path = resolved.ok ? resolved.path : [];
+  const subCommands = await subCommandsFor(command);
+  const meta = await resolveValue(command.meta);
+  const usage = await usageFor(rawArgs);
+  const lines = [
+    path.length === 0 ? "OpenNori" : [CLI_NAME, ...path].join(" "),
+    meta?.description ? String(meta.description) : "OpenNori acceptance-driven agent state CLI.",
+    "",
+    `Usage: ${usage}`
+  ];
+
+  if (subCommands && Object.keys(subCommands).length > 0) {
+    lines.push("", "Commands:");
+    for (const [name, subCommand] of Object.entries(subCommands)) {
+      const child = asCommand(await resolveValue(subCommand) as CommandDef);
+      const childMeta = await resolveValue(child.meta);
+      lines.push(`  ${name.padEnd(14)} ${childMeta?.description || ""}`.trimEnd());
+    }
+  }
+
+  const args = (await resolveValue(command.args) || {}) as Record<string, UsageArgDefinition>;
+  const options = Object.entries(args)
+    .filter(([name]) => name !== "json")
+    .map(([name, definition]) => ({
+      flag: definition.type === "positional" ? valueHint(name).toUpperCase() : `--${kebabCase(name)}`,
+      description: String((definition as { description?: string }).description || "")
+    }));
+  if (options.length > 0) {
+    lines.push("", "Options:");
+    for (const option of options) lines.push(`  ${option.flag.padEnd(18)} ${option.description}`.trimEnd());
+  }
+
+  lines.push("", `Use ${CLI_NAME} <command> --help for command details.`);
+  lines.push("Use --json for machine-readable output.");
+  return lines.join("\n");
+}
+
+export async function commandLabelFor(rawArgs: string[]): Promise<string> {
+  const resolved = await resolveCliCommand(rawArgs.filter((arg) => arg !== "--help" && arg !== "-h"));
+  if (!resolved.ok) return [CLI_NAME, ...resolved.path].join(" ");
+  const name = await commandName(resolved.command, resolved.path.at(-1) || CLI_NAME);
+  if (resolved.path.length === 0) return name;
+  return [CLI_NAME, ...resolved.path].join(" ");
+}

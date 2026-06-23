@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 4,
-  "latest_evidence_summary": "OpenNori core shared helpers are now separated by responsibility: protocol constants/layer inference, deterministic IO/result helpers, goal-state path discovery, dossier rendering, and dossier persistence/hydration. shared.ts remains a narrow compatibility barrel, so existing CLI/kernel imports keep working while the architecture boundary is clearer.",
-  "updated_at": "2026-06-23T02:38:55.395Z"
+  "evidence_count": 5,
+  "latest_evidence_summary": "OpenNori CLI command infrastructure is now separated into registry, policies, resolver/help, runner/recovery, command types, and a compatibility command-tree barrel. The implementation still uses citty for defineCommand/subCommands/runCommand, while OpenNori-specific active-goal policy, write locking, no-current-goal recovery, and human/json output routing remain deterministic CLI concerns.",
+  "updated_at": "2026-06-23T02:47:16.624Z"
 }

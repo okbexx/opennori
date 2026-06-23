@@ -17,26 +17,31 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor-verification - OpenNori core shared helpers are now separated by responsibility: protocol constants/layer inference, deterministic IO/result helpers, goal-state path discovery, dossier rendering, and dossier persistence/hydration. shared.ts remains a narrow compatibility barrel, so existing CLI/kernel imports keep working while the architecture boundary is clearer.
+Latest: architecture-refactor-verification - OpenNori CLI command infrastructure is now separated into registry, policies, resolver/help, runner/recovery, command types, and a compatibility command-tree barrel. The implementation still uses citty for defineCommand/subCommands/runCommand, while OpenNori-specific active-goal policy, write locking, no-current-goal recovery, and human/json output routing remain deterministic CLI concerns.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed src/core files: shared.ts should only re-export; protocol, IO, goal-state discovery, generated dossier rendering, and dossier persistence/hydration should be separate modules. Rerun the listed commands.
-Limitations: This verifies the core module boundary and current behavior. It does not claim the entire OpenNori architecture is fully finished; further slices still need CLI runtime and command/domain boundary review.
+Reviewability: Inspect the listed CLI files: command-tree.ts should only re-export; registry.ts should own command grouping and citty defineCommand; policies.ts should own command policy metadata; resolver.ts should own command resolution and help/usage; runner.ts should own citty runCommand execution and active-goal recovery. Rerun the listed commands.
+Limitations: This verifies the CLI command layer boundary and behavior. It does not claim every command module is fully domain-thin; later slices should audit lifecycle/setup and individual command modules.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-core-shared-boundary.json
+- .opennori/architecture/evidence/opennori-self-cli-command-layer-boundary.json
+- npx ctx7@latest library citty 'citty command framework defineCommand runCommand subcommands command args help'
+- npx ctx7@latest docs /unjs/citty 'citty command framework defineCommand runCommand subcommands command args help'
+- npm run test:core
+- npm run test:cli
 - npx tsc --noEmit --pretty false
-- npm run test:quick
 - npm run check
+- node ./bin/opennori.js --help
 - node ./bin/opennori.js doctor --root . --json
 - node ./bin/opennori.js status --root . --json
 - git diff --check
-- src/core/protocol.ts
-- src/core/io.ts
-- src/core/goal-state.ts
-- src/core/dossier-render.ts
-- src/core/dossier.ts
-- src/core/shared.ts
+- src/cli/registry.ts
+- src/cli/policies.ts
+- src/cli/resolver.ts
+- src/cli/runner.ts
+- src/cli/command-types.ts
+- src/cli/command-tree.ts
+- test/core.test.js
 
 ## Files
 
