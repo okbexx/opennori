@@ -2,9 +2,34 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { test } from "vitest";
+import { parse as parseYaml } from "yaml";
 import { buildContractFromBrief, buildEvidenceLedger, renderGeneratedAcceptanceReviewMarkdown, validateContract } from "../src/core.ts";
 import { validateSchema } from "../src/validation.ts";
 import { ROOT, run, tempRoot, draftArgsFromGoal, draftAndApprove, recordArchitectureRequirement } from "./support/cli.js";
+
+const EXPECTED_SKILL_NAMES = [
+  "nori",
+  "nori-acceptance",
+  "nori-architecture-apply",
+  "nori-architecture-brainstorm",
+  "nori-architecture-challenge",
+  "nori-autogoal",
+  "nori-build-vs-buy",
+  "nori-capability-profile",
+  "nori-evidence",
+  "nori-project-health",
+  "nori-reporting"
+];
+
+function readSkillFrontmatter(skillPath) {
+  const asset = fs.readFileSync(skillPath, "utf8");
+  const match = asset.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  assert.ok(match, `${skillPath} must include YAML frontmatter`);
+  return {
+    asset,
+    frontmatter: parseYaml(match[1] || "")
+  };
+}
 
 test("protocol v1 example is structurally loadable", { tags: ["docs", "quick"] }, () => {
   const brief = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "opennori-self.json"), "utf8"));
@@ -51,19 +76,7 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", { tags
   const names = fs.readdirSync(path.join(pluginRoot, "skills"))
     .filter((name) => fs.existsSync(path.join(pluginRoot, "skills", name, "SKILL.md")))
     .sort();
-  assert.deepEqual(names.sort(), [
-    "nori",
-    "nori-acceptance",
-    "nori-architecture-apply",
-    "nori-architecture-brainstorm",
-    "nori-architecture-challenge",
-    "nori-autogoal",
-    "nori-build-vs-buy",
-    "nori-capability-profile",
-    "nori-evidence",
-    "nori-project-health",
-    "nori-reporting"
-  ].sort());
+  assert.deepEqual(names.sort(), [...EXPECTED_SKILL_NAMES].sort());
 
   const behaviorProtocolSections = [
     "## Mission",
@@ -75,9 +88,10 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", { tags
     "## Misuse Guards"
   ];
   for (const name of names) {
-    const asset = fs.readFileSync(path.join(pluginRoot, "skills", name, "SKILL.md"), "utf8");
-    assert.match(asset, /^---\nname: /);
-    assert.match(asset, /\ndescription: /);
+    const { asset, frontmatter } = readSkillFrontmatter(path.join(pluginRoot, "skills", name, "SKILL.md"));
+    assert.equal(frontmatter.name, name);
+    assert.equal(typeof frontmatter.description, "string");
+    assert.equal(frontmatter.description.trim().length > 80, true);
     for (const section of behaviorProtocolSections) {
       assert.match(asset, new RegExp(section.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     }
@@ -86,6 +100,37 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", { tags
     assert.doesNotMatch(asset, /refresh-skill/);
     assert.doesNotMatch(asset, /skill export/);
   }
+});
+
+test("OpenNori Skill descriptions expose routing surfaces before Skill bodies load", { tags: ["docs"] }, () => {
+  const pluginRoot = path.join(ROOT, "plugins", "opennori");
+  const descriptions = Object.fromEntries(EXPECTED_SKILL_NAMES.map((name) => {
+    const { frontmatter } = readSkillFrontmatter(path.join(pluginRoot, "skills", name, "SKILL.md"));
+    return [name, frontmatter.description];
+  }));
+
+  assert.match(descriptions.nori, /autogoal/i);
+  assert.match(descriptions.nori, /AC discussion|acceptance criteria/i);
+  assert.match(descriptions.nori, /complete|evidence|profile|architecture|MCP/i);
+  assert.match(descriptions.nori, /UI\/CRUD\/dashboard\/list\/form\/settings\/admin/i);
+  assert.match(descriptions.nori, /Plugin discovery.*packaged Skills.*opennori CLI.*\.opennori state/i);
+
+  assert.match(descriptions["nori-acceptance"], /Nori Contract/i);
+  assert.match(descriptions["nori-acceptance"], /Acceptance Surface Modeling/i);
+  assert.match(descriptions["nori-acceptance"], /operation paths/i);
+
+  assert.match(descriptions["nori-autogoal"], /standard OpenNori Nori Contract Draft/i);
+  assert.match(descriptions["nori-autogoal"], /enhanced autogoal|self-grill/i);
+  assert.match(descriptions["nori-autogoal"], /complete product\/UI\/CRUD\/dashboard/i);
+
+  assert.match(descriptions["nori-evidence"], /broad UI\/CRUD\/dashboard evidence/i);
+  assert.match(descriptions["nori-reporting"], /broad UI\/CRUD\/dashboard\/list\/form\/settings\/admin AC/i);
+  assert.match(descriptions["nori-capability-profile"], /Product AC operation paths/i);
+  assert.match(descriptions["nori-architecture-brainstorm"], /after Product AC operation paths are concrete/i);
+  assert.match(descriptions["nori-architecture-apply"], /AC has modeled user operation paths/i);
+  assert.match(descriptions["nori-architecture-challenge"], /real architecture drift from missing UI\/CRUD\/dashboard Product AC operation-path detail/i);
+  assert.match(descriptions["nori-build-vs-buy"], /after UI\/CRUD\/dashboard Product AC operation paths are defined/i);
+  assert.match(descriptions["nori-project-health"], /broad UI\/CRUD\/dashboard AC still need acceptance review/i);
 });
 
 test("public product surfaces present OpenNori as one capability bundle", { tags: ["docs", "quick"] }, () => {

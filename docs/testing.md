@@ -13,6 +13,7 @@ Automated tests cover objective behavior:
 - Report, status, check, context export, and dashboard projection output shapes.
 - Architecture requirement, baseline, apply records, challenges, and build-vs-buy state health.
 - Packaged Skill asset structure: plugin manifest, expected Skill directories, frontmatter, required protocol sections, and absence of deprecated install/copy routes.
+- Packaged Skill discovery metadata: frontmatter descriptions should expose the major user routing surfaces before Codex loads full Skill bodies, while avoiding tests that prove subjective judgment by matching long body word lists.
 
 ## What Tests Must Not Own
 
@@ -23,6 +24,7 @@ Automated tests must not pretend to prove subjective agent ability:
 - Whether Enhanced Discovery or AC Review Loop improved the user's judgment in a real conversation.
 - Whether a specific prompt must produce an exact wording, gap id, checklist, or question.
 - Whether a particular word list appears inside every Skill body.
+- Whether a Skill description's presence of a trigger category proves the agent will make the right subjective decision in a real conversation.
 
 Those belong to packaged Skill behavior, user review, dogfood, and eval prompts. Code can expose review surfaces and store state; it should not become a hidden product manager.
 
