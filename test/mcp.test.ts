@@ -5,7 +5,8 @@ import { helpTextFor, resolveCliCommand, runCliCommand } from "../src/cli/comman
 import { runMcpCommand } from "../src/cli/commands/mcp.ts";
 import { buildMcpContextResource, buildMcpDoctorResource, buildMcpSnapshotResource, mcpResourceText } from "../src/mcp/resources.ts";
 import { snapshotPath } from "../src/core.ts";
-import type { JsonObject, NoriResult } from "../src/types.ts";
+import type { JsonObject } from "../src/types/common.ts";
+import type { NoriResult } from "../src/types/lifecycle.ts";
 import { tempRoot, writeActiveGoal } from "./support/command-fixtures.js";
 
 type McpResourceSummary = JsonObject & {

@@ -28,7 +28,6 @@ Sources:
 - npm test -- --run test/cli-commands.test.js test/core.test.js
 - src/cli/commands/reporting.ts
 - src/lifecycle/context-export.ts
-- src/types.ts
 - test/core.test.js
 
 ## Files

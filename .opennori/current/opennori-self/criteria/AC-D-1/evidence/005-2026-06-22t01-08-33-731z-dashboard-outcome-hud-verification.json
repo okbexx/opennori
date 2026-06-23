@@ -32,11 +32,6 @@
     },
     {
       "type": "artifact",
-      "label": "src/types.ts",
-      "path": "src/types.ts"
-    },
-    {
-      "type": "artifact",
       "label": "test/cli-dashboard.test.js",
       "path": "test/cli-dashboard.test.js"
     },

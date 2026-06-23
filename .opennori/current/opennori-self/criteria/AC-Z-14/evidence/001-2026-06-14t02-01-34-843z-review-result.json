@@ -27,11 +27,6 @@
     },
     {
       "type": "artifact",
-      "label": "src/types.ts",
-      "path": "src/types.ts"
-    },
-    {
-      "type": "artifact",
       "label": "src/cli/commands/acceptance/runtime-status.ts",
       "path": "src/cli/commands/acceptance/runtime-status.ts"
     },

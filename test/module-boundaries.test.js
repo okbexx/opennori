@@ -19,10 +19,10 @@ function relative(filePath) {
   return path.relative(ROOT, filePath);
 }
 
-test("internal source imports domain types instead of the public type barrel", { tags: ["architecture", "unit"] }, () => {
+test("source and tests import domain types instead of restoring a central type barrel", { tags: ["architecture", "unit", "quick"] }, () => {
   const publicTypeBarrel = path.join(ROOT, "src", "types.ts");
+  assert.equal(fs.existsSync(publicTypeBarrel), false);
   const offenders = sourceFiles(path.join(ROOT, "src"))
-    .filter((filePath) => path.basename(filePath) !== "types.ts")
     .filter((filePath) => !filePath.includes(`${path.sep}dashboard${path.sep}`))
     .filter((filePath) => {
       const source = fs.readFileSync(filePath, "utf8");

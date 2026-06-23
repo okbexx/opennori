@@ -44,11 +44,6 @@
     },
     {
       "type": "artifact",
-      "label": "src/types.ts",
-      "path": "src/types.ts"
-    },
-    {
-      "type": "artifact",
       "label": "src/cli/commands/profile/add.ts",
       "path": "src/cli/commands/profile/add.ts"
     },

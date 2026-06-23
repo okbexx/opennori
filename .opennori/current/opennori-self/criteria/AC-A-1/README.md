@@ -28,7 +28,6 @@ Sources:
 - npm run check
 - src/core/report.ts
 - src/agent-next.ts
-- src/types.ts
 - test/core.test.js
 - plugins/opennori/skills/nori/SKILL.md
 

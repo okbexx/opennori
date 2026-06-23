@@ -17,21 +17,24 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: mcp-cli-entry-boundary-verification - MCP CLI startup now uses the shared command registry and stdioServer policy while preserving read-only MCP resources and JSON metadata output.
+Latest: type-boundary-verification - The central src/types.ts type barrel was removed; source and tests now import owned domain type modules directly, and boundary tests prevent restoring the central barrel.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect src/cli.ts to confirm it no longer special-cases mcp or imports MCP server internals; inspect registry/policy and mcp command files to confirm stdio startup is command-owned; rerun the listed focused tests and metadata command.
-Limitations: This verifies the OpenNori CLI/MCP entry boundary and metadata path. It does not add MCP write tools, dashboard controls, or external MCP client integration tests.
+Reviewability: Confirm src/types.ts is absent; inspect test/module-boundaries.test.js for the guard; inspect test/mcp.test.ts for domain type imports; rerun the listed typecheck, focused tests, and lint.
+Limitations: This lowers central type coupling but does not exhaustively redesign every domain type. Existing domain type modules remain intentionally separate.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-mcp-cli-entry-boundary.json
-- npx vitest run test/mcp.test.ts test/module-boundaries.test.js
+- .opennori/architecture/evidence/opennori-self-central-type-barrel-removal.json
 - npx tsc --noEmit --pretty false
+- npx vitest run test/module-boundaries.test.js test/mcp.test.ts
 - npm run lint
-- node ./bin/opennori.js mcp --root . --json
-- src/cli.ts
-- src/cli/commands/mcp.ts
-- src/cli/registry.ts
+- src/types/common.ts
+- src/types/lifecycle.ts
+- src/types/contract.ts
+- src/types/evidence.ts
+- src/types/profile.ts
+- src/types/architecture.ts
+- src/mcp/types.ts
 - src/cli/command-types.ts
 - test/mcp.test.ts
 - test/module-boundaries.test.js

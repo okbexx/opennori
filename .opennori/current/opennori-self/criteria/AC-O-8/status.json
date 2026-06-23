@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 3,
   "latest_evidence_summary": "Project Profile automatic Skill checks now resolve Skills from OpenNori package assets, Codex Plugin cache, and user-local Skill directories while preserving Project Profile as project-level state and current-goal ledger profile evidence only.",
-  "updated_at": "2026-06-23T10:27:26.672Z"
+  "updated_at": "2026-06-23T10:40:21.942Z"
 }

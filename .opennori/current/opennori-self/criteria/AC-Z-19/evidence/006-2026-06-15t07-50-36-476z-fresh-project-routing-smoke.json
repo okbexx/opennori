@@ -22,11 +22,6 @@
     },
     {
       "type": "artifact",
-      "label": "src/types.ts",
-      "path": "src/types.ts"
-    },
-    {
-      "type": "artifact",
       "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
       "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
     },

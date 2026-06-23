@@ -1,0 +1,85 @@
+{
+  "kind": "type-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "The central src/types.ts type barrel was removed; source and tests now import owned domain type modules directly, and boundary tests prevent restoring the central barrel.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-central-type-barrel-removal",
+      "path": ".opennori/architecture/evidence/opennori-self-central-type-barrel-removal.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/module-boundaries.test.js test/mcp.test.ts",
+      "command": "npx vitest run test/module-boundaries.test.js test/mcp.test.ts"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/common.ts",
+      "path": "src/types/common.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/lifecycle.ts",
+      "path": "src/types/lifecycle.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/contract.ts",
+      "path": "src/types/contract.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/evidence.ts",
+      "path": "src/types/evidence.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/profile.ts",
+      "path": "src/types/profile.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/architecture.ts",
+      "path": "src/types/architecture.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/mcp/types.ts",
+      "path": "src/mcp/types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/command-types.ts",
+      "path": "src/cli/command-types.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/mcp.test.ts",
+      "path": "test/mcp.test.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/module-boundaries.test.js",
+      "path": "test/module-boundaries.test.js"
+    }
+  ],
+  "reviewability": "Confirm src/types.ts is absent; inspect test/module-boundaries.test.js for the guard; inspect test/mcp.test.ts for domain type imports; rerun the listed typecheck, focused tests, and lint.",
+  "limitations": "This lowers central type coupling but does not exhaustively redesign every domain type. Existing domain type modules remain intentionally separate.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T10:40:22.004Z"
+}

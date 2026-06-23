@@ -1,9 +1,0 @@
-export type * from "./types/common.ts";
-export type * from "./types/contract.ts";
-export type * from "./types/profile.ts";
-export type * from "./types/evidence.ts";
-export type * from "./types/agent.ts";
-export type * from "./types/kernel.ts";
-export type * from "./types/acceptance.ts";
-export type * from "./types/architecture.ts";
-export type * from "./types/lifecycle.ts";

@@ -64,11 +64,6 @@
     },
     {
       "type": "artifact",
-      "label": "src/types.ts",
-      "path": "src/types.ts"
-    },
-    {
-      "type": "artifact",
       "label": "test/core.test.js",
       "path": "test/core.test.js"
     },

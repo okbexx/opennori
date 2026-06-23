@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 39,
-  "latest_evidence_summary": "MCP CLI startup now uses the shared command registry and stdioServer policy while preserving read-only MCP resources and JSON metadata output.",
-  "updated_at": "2026-06-23T10:37:08.497Z"
+  "evidence_count": 40,
+  "latest_evidence_summary": "The central src/types.ts type barrel was removed; source and tests now import owned domain type modules directly, and boundary tests prevent restoring the central barrel.",
+  "updated_at": "2026-06-23T10:40:22.004Z"
 }

@@ -32,11 +32,6 @@
     },
     {
       "type": "artifact",
-      "label": "src/types.ts",
-      "path": "src/types.ts"
-    },
-    {
-      "type": "artifact",
       "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
       "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
     },

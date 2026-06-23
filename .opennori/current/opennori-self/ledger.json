@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T10:37:08.502Z",
+  "updated_at": "2026-06-23T10:40:22.009Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -1688,11 +1688,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "src/cli/commands/profile/add.ts",
               "path": "src/cli/commands/profile/add.ts"
             },
@@ -1856,7 +1851,7 @@
           "created_at": "2026-06-23T10:27:26.672Z"
         }
       ],
-      "updated_at": "2026-06-23T10:27:26.672Z"
+      "updated_at": "2026-06-23T10:40:21.942Z"
     },
     "AC-Z-1": {
       "status": "passing",
@@ -2950,11 +2945,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
               "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
             },
@@ -3031,11 +3021,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "test/core.test.js",
               "path": "test/core.test.js"
             }
@@ -3045,7 +3030,8 @@
           "gate": "accepted",
           "created_at": "2026-06-15T12:22:55.433Z"
         }
-      ]
+      ],
+      "updated_at": "2026-06-23T10:40:21.942Z"
     },
     "AC-Z-13": {
       "status": "passing",
@@ -3166,11 +3152,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "src/cli/commands/acceptance/runtime-status.ts",
               "path": "src/cli/commands/acceptance/runtime-status.ts"
             },
@@ -3272,11 +3253,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "test/core.test.js",
               "path": "test/core.test.js"
             },
@@ -3315,11 +3291,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "test/core.test.js",
               "path": "test/core.test.js"
             },
@@ -3344,7 +3315,8 @@
           "gate": "accepted",
           "created_at": "2026-06-15T12:14:59.454Z"
         }
-      ]
+      ],
+      "updated_at": "2026-06-23T10:40:21.943Z"
     },
     "AC-Z-15": {
       "status": "passing",
@@ -3661,11 +3633,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "test/core.test.js",
               "path": "test/core.test.js"
             },
@@ -3680,7 +3647,8 @@
           "gate": "accepted",
           "created_at": "2026-06-15T09:02:54.484Z"
         }
-      ]
+      ],
+      "updated_at": "2026-06-23T10:40:21.943Z"
     },
     "AC-A-2": {
       "status": "passing",
@@ -4612,11 +4580,6 @@
               "type": "command",
               "label": "node ./bin/opennori.js status --root . --json",
               "command": "node ./bin/opennori.js status --root . --json"
-            },
-            {
-              "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
             },
             {
               "type": "artifact",
@@ -7405,11 +7368,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "src/types",
               "path": "src/types"
             },
@@ -7508,9 +7466,94 @@
           "limitations": "This verifies the OpenNori CLI/MCP entry boundary and metadata path. It does not add MCP write tools, dashboard controls, or external MCP client integration tests.",
           "gate": "accepted",
           "created_at": "2026-06-23T10:37:08.497Z"
+        },
+        {
+          "kind": "type-boundary-verification",
+          "basis": "tool-observation",
+          "summary": "The central src/types.ts type barrel was removed; source and tests now import owned domain type modules directly, and boundary tests prevent restoring the central barrel.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-central-type-barrel-removal",
+              "path": ".opennori/architecture/evidence/opennori-self-central-type-barrel-removal.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/module-boundaries.test.js test/mcp.test.ts",
+              "command": "npx vitest run test/module-boundaries.test.js test/mcp.test.ts"
+            },
+            {
+              "type": "command",
+              "label": "npm run lint",
+              "command": "npm run lint"
+            },
+            {
+              "type": "artifact",
+              "label": "src/types/common.ts",
+              "path": "src/types/common.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/types/lifecycle.ts",
+              "path": "src/types/lifecycle.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/types/contract.ts",
+              "path": "src/types/contract.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/types/evidence.ts",
+              "path": "src/types/evidence.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/types/profile.ts",
+              "path": "src/types/profile.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/types/architecture.ts",
+              "path": "src/types/architecture.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/mcp/types.ts",
+              "path": "src/mcp/types.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/command-types.ts",
+              "path": "src/cli/command-types.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/mcp.test.ts",
+              "path": "test/mcp.test.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/module-boundaries.test.js",
+              "path": "test/module-boundaries.test.js"
+            }
+          ],
+          "reviewability": "Confirm src/types.ts is absent; inspect test/module-boundaries.test.js for the guard; inspect test/mcp.test.ts for domain type imports; rerun the listed typecheck, focused tests, and lint.",
+          "limitations": "This lowers central type coupling but does not exhaustively redesign every domain type. Existing domain type modules remain intentionally separate.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T10:40:22.004Z"
         }
       ],
-      "updated_at": "2026-06-23T10:37:08.497Z"
+      "updated_at": "2026-06-23T10:40:22.004Z"
     },
     "AC-A-9": {
       "status": "passing",
@@ -7998,11 +8041,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
               "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
             },
@@ -8055,7 +8093,8 @@
           "gate": "accepted",
           "created_at": "2026-06-15T08:02:36.952Z"
         }
-      ]
+      ],
+      "updated_at": "2026-06-23T10:40:21.945Z"
     },
     "AC-Z-20": {
       "status": "passing",
@@ -8412,11 +8451,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "test/cli-dashboard.test.js",
               "path": "test/cli-dashboard.test.js"
             },
@@ -8436,7 +8470,8 @@
           "gate": "accepted",
           "created_at": "2026-06-22T01:08:33.731Z"
         }
-      ]
+      ],
+      "updated_at": "2026-06-23T10:40:21.945Z"
     },
     "AC-D-2": {
       "status": "passing",
@@ -9260,11 +9295,6 @@
             },
             {
               "type": "artifact",
-              "label": "src/types.ts",
-              "path": "src/types.ts"
-            },
-            {
-              "type": "artifact",
               "label": "test/core.test.js",
               "path": "test/core.test.js"
             },
@@ -9438,7 +9468,8 @@
           "gate": "accepted",
           "created_at": "2026-06-20T11:19:57.455Z"
         }
-      ]
+      ],
+      "updated_at": "2026-06-23T10:40:21.945Z"
     },
     "AC-O-14": {
       "status": "passing",

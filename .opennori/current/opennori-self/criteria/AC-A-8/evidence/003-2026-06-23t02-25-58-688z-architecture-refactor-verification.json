@@ -34,11 +34,6 @@
     },
     {
       "type": "artifact",
-      "label": "src/types.ts",
-      "path": "src/types.ts"
-    },
-    {
-      "type": "artifact",
       "label": "src/types/common.ts",
       "path": "src/types/common.ts"
     },

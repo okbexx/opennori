@@ -27,7 +27,6 @@ Sources:
 - npm run typecheck
 - npm test -- --run test/cli-commands.test.js test/core.test.js
 - src/agent-next.ts
-- src/types.ts
 - test/core.test.js
 - plugins/opennori/skills/nori/SKILL.md
 - plugins/opennori/skills/nori-acceptance/SKILL.md

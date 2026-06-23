@@ -29,7 +29,6 @@ Sources:
 - src/kernel/snapshot.ts
 - src/dashboard/src/App.tsx
 - src/dashboard/src/types.ts
-- src/types.ts
 - test/cli-dashboard.test.js
 - dashboard/index.html
 - output/playwright/dashboard-outcome-hud.png
