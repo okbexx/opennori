@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T08:24:35.178Z",
+  "updated_at": "2026-06-23T08:28:44.800Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -731,6 +731,17 @@
         "summary": "Kernel activity responsibilities will be split into target resolution, activity storage, and event projection so dashboard live activity remains a projection over current OpenNori state rather than a second workflow state layer.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-kernel-activity-event-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-kernel-snapshot-read-model-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Kernel snapshot building will be split into active/no-goal read models, criteria projection, agent activity summary, and history summary so dashboard/MCP observe a clear outcome model instead of a mixed builder.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-kernel-snapshot-read-model-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

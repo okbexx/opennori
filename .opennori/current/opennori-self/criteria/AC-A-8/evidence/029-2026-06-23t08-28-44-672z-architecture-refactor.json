@@ -1,0 +1,65 @@
+{
+  "kind": "architecture-refactor",
+  "basis": "tool-observation",
+  "summary": "Kernel snapshot read model was split into active/no-goal snapshot assembly, criteria projection, agent activity summary, and history summary modules while preserving dashboard, MCP, CLI, and snapshot behavior.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-kernel-snapshot-read-model-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-kernel-snapshot-read-model-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/mcp.test.ts --tagsFilter=quick",
+      "command": "npx vitest run test/mcp.test.ts --tagsFilter=quick"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli",
+      "command": "npm run test:cli"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot-builder.ts",
+      "path": "src/kernel/snapshot-builder.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot-goal.ts",
+      "path": "src/kernel/snapshot-goal.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot-criteria.ts",
+      "path": "src/kernel/snapshot-criteria.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot-agent.ts",
+      "path": "src/kernel/snapshot-agent.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot-history.ts",
+      "path": "src/kernel/snapshot-history.ts"
+    }
+  ],
+  "reviewability": "Inspect the snapshot modules. Confirm snapshot-builder.ts only coordinates common inputs and delegates to snapshot-goal.ts, snapshot-criteria.ts owns criterion projection, snapshot-agent.ts owns activity-to-agent summary, and snapshot-history.ts owns no-current-goal history. Rerun the listed typecheck, dashboard, MCP, and CLI tests.",
+  "limitations": "This refactor does not change dashboard UI, snapshot schema fields, MCP resource names, event schema, or the .opennori source-of-truth model.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T08:28:44.672Z"
+}

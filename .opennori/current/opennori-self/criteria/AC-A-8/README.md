@@ -17,21 +17,23 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor - Kernel activity publishing was split into target resolution, activity storage, and event projection modules while preserving dashboard activity, SSE, snapshot, and observation-only behavior.
+Latest: architecture-refactor - Kernel snapshot read model was split into active/no-goal snapshot assembly, criteria projection, agent activity summary, and history summary modules while preserving dashboard, MCP, CLI, and snapshot behavior.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the kernel activity modules. Confirm activity.ts only coordinates public write/finish flows, activity-target.ts owns current-goal/gap inference, activity-store.ts owns projection file normalization and persistence, and activity-events.ts owns AC/activity event emission. Rerun the listed typecheck, dashboard, and CLI tests.
-Limitations: This refactor does not change dashboard UI, activity CLI flags, event schema, snapshot response shape, or the rule that dashboard activity is not Product AC evidence.
+Reviewability: Inspect the snapshot modules. Confirm snapshot-builder.ts only coordinates common inputs and delegates to snapshot-goal.ts, snapshot-criteria.ts owns criterion projection, snapshot-agent.ts owns activity-to-agent summary, and snapshot-history.ts owns no-current-goal history. Rerun the listed typecheck, dashboard, MCP, and CLI tests.
+Limitations: This refactor does not change dashboard UI, snapshot schema fields, MCP resource names, event schema, or the .opennori source-of-truth model.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-kernel-activity-event-boundary.json
+- .opennori/architecture/evidence/opennori-self-kernel-snapshot-read-model-boundary.json
 - npx tsc --noEmit --pretty false
 - npm run test:dashboard
+- npx vitest run test/mcp.test.ts --tagsFilter=quick
 - npm run test:cli
-- src/kernel/activity.ts
-- src/kernel/activity-target.ts
-- src/kernel/activity-store.ts
-- src/kernel/activity-events.ts
+- src/kernel/snapshot-builder.ts
+- src/kernel/snapshot-goal.ts
+- src/kernel/snapshot-criteria.ts
+- src/kernel/snapshot-agent.ts
+- src/kernel/snapshot-history.ts
 
 ## Files
 

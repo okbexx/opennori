@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 28,
-  "latest_evidence_summary": "Kernel activity publishing was split into target resolution, activity storage, and event projection modules while preserving dashboard activity, SSE, snapshot, and observation-only behavior.",
-  "updated_at": "2026-06-23T08:24:35.069Z"
+  "evidence_count": 29,
+  "latest_evidence_summary": "Kernel snapshot read model was split into active/no-goal snapshot assembly, criteria projection, agent activity summary, and history summary modules while preserving dashboard, MCP, CLI, and snapshot behavior.",
+  "updated_at": "2026-06-23T08:28:44.672Z"
 }
