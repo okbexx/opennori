@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 31,
-  "latest_evidence_summary": "Dashboard radar code now separates read-only OpenNori node semantics from geometry and visual style helpers. radar-model remains the compatibility assembly surface, while radar-nodes owns goal/profile/passed/criterion/evidence node projection, radar-geometry owns layout math, radar-status owns status/style classification, and selection reuses the shared node projection instead of duplicating Passed and Project Profile semantics.",
-  "updated_at": "2026-06-23T08:45:11.744Z"
+  "evidence_count": 32,
+  "latest_evidence_summary": "Context export now has separate read-only state collection, review payload assembly, relative path projection, and explicit artifact writing boundaries. The public context export schema and CLI behavior remain stable, MCP still consumes it as a read-only resource, and default context export performs no artifact write.",
+  "updated_at": "2026-06-23T08:54:02.495Z"
 }

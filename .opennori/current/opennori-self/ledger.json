@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T08:45:11.748Z",
+  "updated_at": "2026-06-23T08:54:02.501Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -6732,9 +6732,119 @@
           "limitations": "This refactor does not change dashboard UI controls, dashboard API, kernel snapshot schema, event stream behavior, Product AC evidence semantics, or dashboard write restrictions. It preserves the existing radar-model import surface for components and tests.",
           "gate": "accepted",
           "created_at": "2026-06-23T08:45:11.744Z"
+        },
+        {
+          "kind": "context-export-boundary-refactor",
+          "basis": "tool-observation",
+          "summary": "Context export now has separate read-only state collection, review payload assembly, relative path projection, and explicit artifact writing boundaries. The public context export schema and CLI behavior remain stable, MCP still consumes it as a read-only resource, and default context export performs no artifact write.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-context-export-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-context-export-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:reporting",
+              "command": "npm run test:reporting"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:cli",
+              "command": "npm run test:cli"
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/mcp.test.ts",
+              "command": "npx vitest run test/mcp.test.ts"
+            },
+            {
+              "type": "command",
+              "label": "npm run lint",
+              "command": "npm run lint"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js check --root . --json",
+              "command": "node ./bin/opennori.js check --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js status --root . --json",
+              "command": "node ./bin/opennori.js status --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js context export --root . --json",
+              "command": "node ./bin/opennori.js context export --root . --json"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle/context-export.ts",
+              "path": "src/lifecycle/context-export.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle/context-export-state.ts",
+              "path": "src/lifecycle/context-export-state.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle/context-export-payload.ts",
+              "path": "src/lifecycle/context-export-payload.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle/context-export-paths.ts",
+              "path": "src/lifecycle/context-export-paths.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle/context-export-artifact.ts",
+              "path": "src/lifecycle/context-export-artifact.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/commands/context.ts",
+              "path": "src/cli/commands/context.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/types/lifecycle.ts",
+              "path": "src/types/lifecycle.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/reporting.test.js",
+              "path": "test/reporting.test.js"
+            },
+            {
+              "type": "artifact",
+              "label": "test/cli-reporting.test.js",
+              "path": "test/cli-reporting.test.js"
+            },
+            {
+              "type": "artifact",
+              "label": "test/mcp.test.ts",
+              "path": "test/mcp.test.ts"
+            }
+          ],
+          "reviewability": "Inspect the listed context export modules: state collection should read existing core/.opennori state, payload assembly should project review context only, path projection should remain relative, and artifact writing should only happen through explicit --output. Rerun the listed commands and confirm MCP resources still report side_effect none.",
+          "limitations": "This verifies context export boundaries and existing read-only MCP consumption. It does not add new external review integrations or MCP write tools.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T08:54:02.495Z"
         }
       ],
-      "updated_at": "2026-06-23T08:45:11.744Z"
+      "updated_at": "2026-06-23T08:54:02.495Z"
     },
     "AC-A-9": {
       "status": "passing",

@@ -73,7 +73,7 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 | AC-A-5 | architecture | passing | verified | review-result: Status, report, and context export now pass ArchitectureState into completionAns… | tool-observation |
 | AC-A-6 | architecture | passing | verified | review-result: opennori check/report/context export are clean for opennori-self after architect… | tool-observation |
 | AC-A-7 | architecture | passing | verified | review-result: Unhealthy build-vs-buy decisions now appear as build_vs_buy review risks in comp… | tool-observation |
-| AC-A-8 | architecture | passing | verified | review-result: OpenNori self-dogfood no longer lets Product AC completion hide architecture ris… | tool-observation |
+| AC-A-8 | architecture | passing | verified | context-export-boundary-refactor: Context export now has separate read-only state collection, r… | tool-observation |
 | AC-A-9 | architecture | passing | verified | artifact-review: README, protocol, package Skills, and website describe OpenNori as Product AC… | tool-observation |
 | AC-A-10 | architecture | passing | verified | dogfood-result: OpenNori was dogfooded in the separate opennori-site repo under the current Plu… | tool-observation |
 | AC-Z-18 | productization | passing | verified | artifact-review: README now explains that agent_next.candidate_goals is the Skill routing surfa… | tool-observation |
@@ -1391,26 +1391,45 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 - User acceptance criterion: 作为用户，我查看 OpenNori 自身 dogfood 状态时，能知道 Architecture Baseline 已建立，但后续架构修复是否真的完成不能被最小可运行结果误报。
 - Measurement: 查看 OpenNori 自身 status/report、Architecture Baseline、build-vs-buy decision、代码结构审查和后续架构修复证据。
 - Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些架构风险或未完成缺口；如果核心结构仍未完成修复，目标不能显示 complete。
-- Evidence: review-result: OpenNori self-dogfood no longer lets Product AC completion hide architecture risk:
-  missing Architecture Baseline, stale agent guide, challenged baseline, or unhealthy build-vs-buy now
-  prevents confident completion while preserving objective_complete and Product current_gap semantics.
+- Evidence: context-export-boundary-refactor: Context export now has separate read-only state collection, review
+  payload assembly, relative path projection, and explicit artifact writing boundaries. The public
+  context export schema and CLI behavior remain stable, MCP still consumes it as a read-only resource,
+  and default context export performs no artifact write.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-14T01:36:38.293Z
+- Evidence recorded: 2026-06-23T08:54:02.495Z
 - Sources:
-  - type=command, label=npm run check, command=npm run check
-  - type=command, label=npx vitest run test/core.test.js -t 'missing architecture baseline|build-vs-buy',
-    command=npx vitest run test/core.test.js -t 'missing architecture baseline|build-vs-buy'
-  - type=artifact, label=src/core/report.ts, path=src/core/report.ts
-  - type=artifact, label=test/core.test.js, path=test/core.test.js
-  - type=artifact, label=README.md, path=README.md
-  - type=artifact, label=plugins/opennori/skills/nori-reporting/SKILL.md,
-    path=plugins/opennori/skills/nori-reporting/SKILL.md
-- Reviewability: Run npm run check and the targeted tests, then inspect README and reporting Skill for the same
-  review-risk language.
-- Limitations: This verifies the current self-dogfood boundary; a real non-OpenNori project dogfood remains a
-  separate AC-A-10 adoption proof.
+  - type=architecture-apply, label=opennori-self-context-export-boundary,
+    path=.opennori/architecture/evidence/opennori-self-context-export-boundary.json, summary=Architecture Baseline
+    alignment context. This is not Product AC evidence by itself., role=context
+  - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
+  - type=command, label=npm run test:reporting, command=npm run test:reporting
+  - type=command, label=npm run test:cli, command=npm run test:cli
+  - type=command, label=npx vitest run test/mcp.test.ts, command=npx vitest run test/mcp.test.ts
+  - type=command, label=npm run lint, command=npm run lint
+  - type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root .
+    --json
+  - type=command, label=node ./bin/opennori.js status --root . --json, command=node ./bin/opennori.js status --root
+    . --json
+  - type=command, label=node ./bin/opennori.js context export --root . --json, command=node ./bin/opennori.js
+    context export --root . --json
+  - type=artifact, label=src/lifecycle/context-export.ts, path=src/lifecycle/context-export.ts
+  - type=artifact, label=src/lifecycle/context-export-state.ts, path=src/lifecycle/context-export-state.ts
+  - type=artifact, label=src/lifecycle/context-export-payload.ts, path=src/lifecycle/context-export-payload.ts
+  - type=artifact, label=src/lifecycle/context-export-paths.ts, path=src/lifecycle/context-export-paths.ts
+  - type=artifact, label=src/lifecycle/context-export-artifact.ts, path=src/lifecycle/context-export-artifact.ts
+  - type=artifact, label=src/cli/commands/context.ts, path=src/cli/commands/context.ts
+  - type=artifact, label=src/types/lifecycle.ts, path=src/types/lifecycle.ts
+  - type=artifact, label=test/reporting.test.js, path=test/reporting.test.js
+  - type=artifact, label=test/cli-reporting.test.js, path=test/cli-reporting.test.js
+  - type=artifact, label=test/mcp.test.ts, path=test/mcp.test.ts
+- Reviewability: Inspect the listed context export modules: state collection should read existing core/.opennori
+  state, payload assembly should project review context only, path projection should remain relative,
+  and artifact writing should only happen through explicit --output. Rerun the listed commands and
+  confirm MCP resources still report side_effect none.
+- Limitations: This verifies context export boundaries and existing read-only MCP consumption. It does not add new
+  external review integrations or MCP write tools.
 
 ### AC-A-9
 
@@ -2566,11 +2585,11 @@ Current status: complete
 Architecture decision: valid
 Requirement: required - OpenNori self-goal changes architecture requirement routing, persisted state schema, CLI routes, packaged Skills, lifecycle checks, and tests.
 Baseline: typescript-agent-state-cli (active)
-Technical baseline: 4 runtime, 6 module, 4 contract, 4 flow, 6 dependency, 5 reference items
+Technical baseline: 5 runtime, 7 module, 5 contract, 5 flow, 7 dependency, 6 reference items
 Challenge: none
-Architecture apply records: 21
+Architecture apply records: 50
 Architecture evidence health: clear
-Build-vs-buy: clear (15 decisions)
+Build-vs-buy: clear (17 decisions)
 Agent guide: installed
 
 Paths:
@@ -2589,6 +2608,7 @@ Architecture apply records:
 - AC-O-9: aligned (typescript-agent-state-cli) - Autogoal was implemented as packaged Skill-driven convergence into the existing Nori Contract Draft path, without adding a separate Autogoal Contract or MVP workflow.
 - AC-P-4: aligned (typescript-agent-state-cli) - High-risk evidence handling now preserves objective evidence results while surfacing confidence and evidence_health review risks; the CLI does not use fixed strong/weak natural-language evidence lists to rewrite subjective sufficiency.
 - AC-A-12: aligned (typescript-agent-state-cli) - CLI boundary audit kept subjective product semantics in Skills and narrowed hard validation to objective contract, ledger, evidence, architecture, lifecycle, and schema integrity.
+- AC-A-8: aligned (typescript-agent-state-cli) - MCP read-only context server uses the official @modelcontextprotocol/sdk stdio transport and registers only context, snapshot, and doctor resources over existing OpenNori projections.
 - AC-D-1: aligned (typescript-agent-state-cli) - Dashboard Outcome HUD keeps the React/Vite/Tailwind dashboard as a readonly observation surface while surfacing completion decision, current gap, user intervention, next action, and Project Profile impact from kernel snapshot projection.
 - AC-D-5: aligned (typescript-agent-state-cli) - Dashboard Profile drawer follows the confirmed dashboard web architecture: React/Vite/Tailwind/Motion renders a readonly overlay, kernel snapshot exposes capability_profile and capability_compliance, and .opennori remains the source of truth.
 - AC-D-5: aligned (typescript-agent-state-cli) - Dashboard observes Project Profile and current-goal compliance without becoming a write surface.
@@ -2599,3 +2619,31 @@ Architecture apply records:
 - AC-P-14: aligned (typescript-agent-state-cli) - Report readability work stays inside the confirmed TypeScript agent-state CLI baseline: src/core/report.ts owns human report rendering, tests stay in reporting/domain suites, and .opennori remains the evidence source of truth.
 - AC-P-15: aligned (typescript-agent-state-cli) - The test-system refactor follows the confirmed TypeScript agent-state CLI baseline by preserving domain modules and deterministic test surfaces while moving subjective agent judgment out of hard-coded tests.
 - AC-P-16: aligned (typescript-agent-state-cli) - Goal and criterion dossier state follows the confirmed TypeScript agent-state CLI baseline: structured JSON remains authoritative, generated README files are review surfaces, and CLI/domain modules keep deterministic .opennori writes.
+- AC-A-8: aligned (typescript-agent-state-cli) - Acceptance module responsibilities are split into Skill-prepared input normalization, subjective-review surface, and discovery/brainstorm Markdown rendering while keeping src/acceptance.ts as the stable export.
+- AC-A-8: aligned (typescript-agent-state-cli) - Activity CLI responses will become lightweight dashboard signal acknowledgements while the full dashboard snapshot remains available as the persisted snapshot projection.
+- AC-A-8: aligned (typescript-agent-state-cli) - Split AgentNext construction, dashboard activity command templates, and doctor active-goal helpers while preserving agent-next routing functions.
+- AC-A-8: aligned (typescript-agent-state-cli) - AgentNext routing is split into lifecycle readiness, recommendation routing, and architecture-apply handoff modules while keeping src/agent-next.ts as the compatibility export.
+- AC-A-8: aligned (typescript-agent-state-cli) - Split Architecture Profile content, model validation, and storage facade boundaries while keeping subjective architecture quality in Skills and user review.
+- AC-A-8: aligned (typescript-agent-state-cli) - Split the CLI command layer into registry, policy, resolver, runner, and compatibility barrel modules while keeping citty as the command framework.
+- AC-A-8: aligned (typescript-agent-state-cli) - Split the CLI runtime boundary into executor, active-goal args, active-goal store, active-goal lock, and a compatibility runtime barrel while preserving deterministic .opennori state semantics.
+- AC-A-8: aligned (typescript-agent-state-cli) - Completion logic now separates acceptance basis view, intervention, review risks, completion answer, and next recommendation routing behind a compatibility export.
+- AC-A-8: aligned (typescript-agent-state-cli) - Context export will be split into read-only state collection, review payload assembly, and explicit artifact writing so external review tools can inspect OpenNori context without becoming a second runtime or report authority.
+- AC-A-8: aligned (typescript-agent-state-cli) - Core shared helpers were split into protocol, IO, goal-state, dossier rendering, and dossier persistence modules while preserving shared.ts as a compatibility barrel.
+- AC-A-8: aligned (typescript-agent-state-cli) - Criterion status projections now use per-criterion ledger timestamps so recording one AC evidence does not make unrelated AC status files look updated.
+- AC-A-8: aligned (typescript-agent-state-cli) - Split dashboard inspect rendering into node-type read-only panels while keeping the dashboard as an observation surface over projected OpenNori state.
+- AC-A-8: aligned (typescript-agent-state-cli) - Dashboard radar model will separate OpenNori read-only node semantics from geometric layout and visual style helpers.
+- AC-A-8: aligned (typescript-agent-state-cli) - Dashboard radar projection now has a dedicated model boundary; React renders readonly nodes, links, grid, and styles from that model instead of owning projection logic.
+- AC-A-8: aligned (typescript-agent-state-cli) - Dashboard App shell now owns subscription and selection state while header, outcome HUD, inspect drawer, event console, and view helpers live in focused read-only modules.
+- AC-A-8: aligned (typescript-agent-state-cli) - Split the Product evidence state boundary into source normalization, risk gate, workflow status, evidence view, pruning, health, and recording modules while keeping evidence.ts as a compatibility export.
+- AC-A-8: aligned (typescript-agent-state-cli) - Generated acceptance Markdown is now an explicit review-surface-only helper rather than a contract state or import layer.
+- AC-A-8: aligned (typescript-agent-state-cli) - Kernel activity responsibilities will be split into target resolution, activity storage, and event projection so dashboard live activity remains a projection over current OpenNori state rather than a second workflow state layer.
+- AC-A-8: aligned (typescript-agent-state-cli) - Kernel snapshot building will be split into active/no-goal read models, criteria projection, agent activity summary, and history summary so dashboard/MCP observe a clear outcome model instead of a mixed builder.
+- AC-A-8: aligned (typescript-agent-state-cli) - Lifecycle external command stdout parsing stays inside narrow adapters instead of setup or plugin-sync orchestration.
+- AC-A-8: aligned (typescript-agent-state-cli) - Lifecycle command probes moved behind adapters; MCP is documented as a future read-only context surface; Markdown parsing remains a non-authoritative recovery helper.
+- AC-A-8: aligned (typescript-agent-state-cli) - Extracted shared lifecycle external-command action infrastructure used by setup and plugin sync while preserving setup/plugin-sync preview and confirm semantics.
+- AC-A-8: aligned (typescript-agent-state-cli) - MCP resource payload types are separated from read-only resource construction.
+- AC-A-8: aligned (typescript-agent-state-cli) - Plugin sync lifecycle responsibilities will be split into type definitions, action builders, plan construction, and execution orchestration while preserving preview-first Codex Plugin cache refresh semantics.
+- AC-A-8: aligned (typescript-agent-state-cli) - Split OpenNori completion/routing decisions from Markdown report rendering while preserving src/core/report.ts as the public compatibility export.
+- AC-A-8: aligned (typescript-agent-state-cli) - Setup lifecycle responsibilities will be split into setup type definitions, action builders, plan construction, and execution orchestration while preserving preview-first bundle setup semantics.
+- AC-A-8: aligned (typescript-agent-state-cli) - Snapshot projection now separates builder, outcome, path, and persistence boundaries while keeping MCP and dashboard on the same read-only projection.
+- AC-A-8: aligned (typescript-agent-state-cli) - Split the OpenNori protocol type surface into domain modules while preserving src/types.ts as the compatibility barrel.

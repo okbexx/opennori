@@ -17,32 +17,32 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor - Dashboard radar code now separates read-only OpenNori node semantics from geometry and visual style helpers. radar-model remains the compatibility assembly surface, while radar-nodes owns goal/profile/passed/criterion/evidence node projection, radar-geometry owns layout math, radar-status owns status/style classification, and selection reuses the shared node projection instead of duplicating Passed and Project Profile semantics.
+Latest: context-export-boundary-refactor - Context export now has separate read-only state collection, review payload assembly, relative path projection, and explicit artifact writing boundaries. The public context export schema and CLI behavior remain stable, MCP still consumes it as a read-only resource, and default context export performs no artifact write.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the dashboard radar modules to confirm radar-model only assembles the read-only model, radar-nodes owns snapshot-to-node projection, radar-geometry owns layout math, radar-status owns color/pulse/link style classification, and selection.ts reuses shared node projection. Rerun typecheck, dashboard, CLI, lint, check/status, and diff checks.
-Limitations: This refactor does not change dashboard UI controls, dashboard API, kernel snapshot schema, event stream behavior, Product AC evidence semantics, or dashboard write restrictions. It preserves the existing radar-model import surface for components and tests.
+Reviewability: Inspect the listed context export modules: state collection should read existing core/.opennori state, payload assembly should project review context only, path projection should remain relative, and artifact writing should only happen through explicit --output. Rerun the listed commands and confirm MCP resources still report side_effect none.
+Limitations: This verifies context export boundaries and existing read-only MCP consumption. It does not add new external review integrations or MCP write tools.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-dashboard-radar-boundary.json
+- .opennori/architecture/evidence/opennori-self-context-export-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run typecheck:dashboard
-- npm run test:dashboard
+- npm run test:reporting
 - npm run test:cli
+- npx vitest run test/mcp.test.ts
 - npm run lint
 - node ./bin/opennori.js check --root . --json
 - node ./bin/opennori.js status --root . --json
-- git diff --check
-- src/dashboard/src/radar-model.ts
-- src/dashboard/src/radar-nodes.ts
-- src/dashboard/src/radar-geometry.ts
-- src/dashboard/src/radar-status.ts
-- src/dashboard/src/radar-types.ts
-- src/dashboard/src/selection.ts
-- test/dashboard-selection.test.ts
-- test/cli-dashboard.test.js
-- dashboard/index.html
-- dashboard/assets/index-CQhSd-vc.js
+- node ./bin/opennori.js context export --root . --json
+- src/lifecycle/context-export.ts
+- src/lifecycle/context-export-state.ts
+- src/lifecycle/context-export-payload.ts
+- src/lifecycle/context-export-paths.ts
+- src/lifecycle/context-export-artifact.ts
+- src/cli/commands/context.ts
+- src/types/lifecycle.ts
+- test/reporting.test.js
+- test/cli-reporting.test.js
+- test/mcp.test.ts
 
 ## Files
 

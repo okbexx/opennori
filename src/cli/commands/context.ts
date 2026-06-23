@@ -1,7 +1,7 @@
 import path from "node:path";
 import { defineCommand } from "citty";
-import { ok, writeJson } from "../../core.ts";
-import { buildContextExport } from "../../lifecycle.ts";
+import { ok } from "../../core.ts";
+import { buildContextExport, writeContextExportArtifact } from "../../lifecycle.ts";
 import { activeGoalArgs, type ActiveGoalRuntime, runJsonCommand } from "../runtime.ts";
 
 export const contextExportCommand = defineCommand({
@@ -27,7 +27,7 @@ export const contextExportCommand = defineCommand({
     const context = buildContextExport(root, pair);
     if (args.output) {
       const outputPath = path.resolve(String(args.output));
-      writeJson(outputPath, context);
+      writeContextExportArtifact(outputPath, context);
       return ok(
         { ...context, output_path: outputPath },
         [{ kind: "opennori_context_export", path: outputPath }],

@@ -1,4 +1,5 @@
 export { bootstrap } from "./lifecycle/bootstrap.ts";
+export { writeContextExportArtifact } from "./lifecycle/context-export-artifact.ts";
 export { buildContextExport } from "./lifecycle/context-export.ts";
 export { doctor } from "./lifecycle/doctor.ts";
 export { installActions } from "./lifecycle/install.ts";

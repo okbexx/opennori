@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-context-export-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Context export will be split into read-only state collection, review payload assembly, and explicit artifact writing so external review tools can inspect OpenNori context without becoming a second runtime or report authority.",
+  "fit": "The change follows the TypeScript agent-state CLI baseline: .opennori JSON remains the source of truth, core modules compute objective state, and context export only projects reviewable data for external tools.",
+  "implementation_focus": "Split context export boundaries while preserving the existing opennori context export schema and CLI behavior.",
+  "evidence": "src/lifecycle/context-export.ts currently combines state loading, payload assembly, path projection, and agent_next routing in one function; MCP already consumes it as a read-only resource.",
+  "limitations": "This apply record covers context export module boundaries; validation will still be needed after code changes.",
+  "created_at": "2026-06-23T08:49:04.195Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

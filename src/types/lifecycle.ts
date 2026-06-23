@@ -208,6 +208,14 @@ export type DoctorState = {
   agent_next?: AgentNext;
 };
 
+export type ContextExportPair = {
+  goalDir: string;
+  contractPath: string;
+  ledgerPath: string;
+  acceptancePath: string;
+  evidencePath: string;
+};
+
 export type BootstrapData = {
   root: string;
   status: "ready" | "needs_confirm" | "installed";
@@ -256,12 +264,14 @@ export type ContextExport = {
   capability_profile: CapabilityProfile;
   capability_compliance: ProfileCompliance;
   architecture: ArchitectureState;
-  paths: {
-    acceptance: string;
-    evidence: string;
-    report: string;
-    report_exists: boolean;
-    manifest: string;
-  };
+  paths: ContextExportPaths;
   manifest: Manifest | null;
+};
+
+export type ContextExportPaths = {
+  acceptance: string;
+  evidence: string;
+  report: string;
+  report_exists: boolean;
+  manifest: string;
 };
