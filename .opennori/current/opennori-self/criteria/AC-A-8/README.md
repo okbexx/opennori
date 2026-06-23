@@ -17,23 +17,24 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor-verification - OpenNori lifecycle capability-bundle infrastructure now has a shared external-actions module for command runner, command display, action preview, summary counts, and applied/failed command results. setup.ts and plugin-sync.ts keep their product-specific setup and plugin sync logic, but no longer duplicate the same external command planning/execution infrastructure. Verified that setup and plugin sync preview outputs still expose the same setup-plan/plugin-sync-plan action surfaces and that lifecycle/CLI/typecheck checks pass.
+Latest: architecture-refactor-verification - OpenNori report/completion core boundary was split so src/core/completion.ts owns deterministic completion, intervention, and next-recommendation decisions; src/core/report-render.ts owns human-readable Markdown report rendering; src/core/report.ts remains a compatibility export. Reporting/core tests, typecheck, doctor/status, and diff checks passed after the split.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect external-actions.ts for the shared runner/action/summary/apply helpers, then inspect setup.ts and plugin-sync.ts to confirm they keep product-specific bundle logic while delegating shared command infrastructure. Rerun the listed tests and preview commands; setup should still produce opennori/setup-plan-v1 and plugin sync should still produce opennori/plugin-sync-plan-v1.
-Limitations: This verifies setup/plugin-sync shared lifecycle infrastructure and preview behavior. It does not yet refactor install/upgrade/uninstall managed-file planning or lifecycle doctor internals.
+Reviewability: Inspect src/core/completion.ts for completion/intervention/recommendation decisions, src/core/report-render.ts for Markdown output, and src/core/report.ts for the compatibility export. Rerun the listed commands.
+Limitations: This proves the report/completion module boundary and behavior-preserving verification for the current slice. It does not redesign report content, evidence semantics, or future subjective AC review behavior.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-lifecycle-external-actions-boundary.json
-- npm run test:lifecycle
-- npm run test:cli
+- .opennori/architecture/evidence/opennori-self-report-completion-render-boundary.json
+- npm run test:reporting
+- npm run test:core
 - npx tsc --noEmit --pretty false
-- node ./bin/opennori.js setup --root /tmp/opennori-lifecycle-preview --json
-- node ./bin/opennori.js plugin sync --json
+- node ./bin/opennori.js doctor --root . --json
+- node ./bin/opennori.js status --root . --json
 - git diff --check
-- src/lifecycle/external-actions.ts
-- src/lifecycle/setup.ts
-- src/lifecycle/plugin-sync.ts
+- src/core/completion.ts
+- src/core/report-render.ts
+- src/core/report.ts
+- .opennori/architecture/evidence/opennori-self-report-completion-render-boundary.json
 
 ## Files
 

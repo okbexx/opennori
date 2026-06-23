@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T03:11:16.938Z",
+  "updated_at": "2026-06-23T03:23:37.453Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -598,6 +598,17 @@
         "summary": "Extracted shared lifecycle external-command action infrastructure used by setup and plugin sync while preserving setup/plugin-sync preview and confirm semantics.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-lifecycle-external-actions-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-report-completion-render-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Split OpenNori completion/routing decisions from Markdown report rendering while preserving src/core/report.ts as the public compatibility export.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-report-completion-render-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

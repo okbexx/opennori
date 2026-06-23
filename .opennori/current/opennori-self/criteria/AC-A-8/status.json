@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 7,
-  "latest_evidence_summary": "OpenNori lifecycle capability-bundle infrastructure now has a shared external-actions module for command runner, command display, action preview, summary counts, and applied/failed command results. setup.ts and plugin-sync.ts keep their product-specific setup and plugin sync logic, but no longer duplicate the same external command planning/execution infrastructure. Verified that setup and plugin sync preview outputs still expose the same setup-plan/plugin-sync-plan action surfaces and that lifecycle/CLI/typecheck checks pass.",
-  "updated_at": "2026-06-23T03:11:16.845Z"
+  "evidence_count": 8,
+  "latest_evidence_summary": "OpenNori report/completion core boundary was split so src/core/completion.ts owns deterministic completion, intervention, and next-recommendation decisions; src/core/report-render.ts owns human-readable Markdown report rendering; src/core/report.ts remains a compatibility export. Reporting/core tests, typecheck, doctor/status, and diff checks passed after the split.",
+  "updated_at": "2026-06-23T03:23:37.341Z"
 }

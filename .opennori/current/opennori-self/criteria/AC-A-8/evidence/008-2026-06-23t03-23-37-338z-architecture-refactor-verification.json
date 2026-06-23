@@ -1,0 +1,70 @@
+{
+  "kind": "architecture-refactor-verification",
+  "basis": "tool-observation",
+  "summary": "OpenNori report/completion core boundary was split so src/core/completion.ts owns deterministic completion, intervention, and next-recommendation decisions; src/core/report-render.ts owns human-readable Markdown report rendering; src/core/report.ts remains a compatibility export. Reporting/core tests, typecheck, doctor/status, and diff checks passed after the split.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-report-completion-render-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-report-completion-render-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run test:reporting",
+      "command": "npm run test:reporting"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:core",
+      "command": "npm run test:core"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js doctor --root . --json",
+      "command": "node ./bin/opennori.js doctor --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "git diff --check",
+      "command": "git diff --check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/completion.ts",
+      "path": "src/core/completion.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report-render.ts",
+      "path": "src/core/report-render.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report.ts",
+      "path": "src/core/report.ts"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/evidence/opennori-self-report-completion-render-boundary.json",
+      "path": ".opennori/architecture/evidence/opennori-self-report-completion-render-boundary.json"
+    }
+  ],
+  "reviewability": "Inspect src/core/completion.ts for completion/intervention/recommendation decisions, src/core/report-render.ts for Markdown output, and src/core/report.ts for the compatibility export. Rerun the listed commands.",
+  "limitations": "This proves the report/completion module boundary and behavior-preserving verification for the current slice. It does not redesign report content, evidence semantics, or future subjective AC review behavior.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T03:23:37.338Z"
+}
