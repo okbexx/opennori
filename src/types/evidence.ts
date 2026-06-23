@@ -129,7 +129,13 @@ export type ParsedAcceptanceCriterion = AcceptanceCriterion & {
   status: AcceptanceStatus | string;
 };
 
-export type ParsedAcceptanceMarkdown = {
+export type ParsedGeneratedAcceptanceReviewMarkdown = {
+  schema_version: "opennori/generated-acceptance-review-markdown-v1";
+  authority: "review-surface-only";
+  side_effect: "none";
+  generated_by: "opennori";
+  source: "generated-acceptance-review-markdown";
   goal: string;
   criteria: ParsedAcceptanceCriterion[];
+  warnings: string[];
 };

@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 15,
-  "latest_evidence_summary": "MCP read-only context slice verified after lint/typecheck/build/test cleanup. Official MCP TypeScript SDK documentation confirms registerResource and StdioServerTransport as the right implementation path; OpenNori registers only context, snapshot, and doctor resources, exposes no MCP tools, keeps CLI/core/.opennori as the source of truth, and leaves subjective acceptance or completion decisions to Skills and users.",
-  "updated_at": "2026-06-23T06:36:41.471Z"
+  "evidence_count": 16,
+  "latest_evidence_summary": "Generated Markdown review boundary is hardened: contract state construction no longer owns Markdown parsing, generated review Markdown uses an explicit review-surface-only marker and metadata, arbitrary Markdown without the marker is not parsed as OpenNori state, and docs state JSON/dossier files remain authoritative.",
+  "updated_at": "2026-06-23T06:57:57.528Z"
 }

@@ -164,6 +164,14 @@ Each current or draft goal has:
 - `<goal>/criteria/<AC-id>/README.md` as the per-AC review surface
 - `<goal>/criteria/<AC-id>/evidence/*.json` for reviewable evidence records
 
+Generated Markdown is review-surface-only. OpenNori-owned goal and AC README
+files may carry the `opennori/generated-acceptance-review-markdown-v1` marker so
+agents and tools can read a summary, but Markdown cannot approve, import,
+revise, or update contract state. Arbitrary Markdown without that marker is not
+parsed as OpenNori state. Expanding this into editable Markdown or frontmatter
+import requires a new build-vs-buy decision and parser evaluation; do not grow
+the local generated-review helper into a second state layer.
+
 `.opennori/manifest.json` records the project-local OpenNori registration:
 
 - manifest schema and OpenNori protocol version

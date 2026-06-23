@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 2,
   "latest_evidence_summary": "opennori check/report/context export are clean for opennori-self after architecture/build-vs-buy completion-risk wiring: architecture_check is clear, build_vs_buy is clear, evidence_health is clear, and completion is confident.",
-  "updated_at": "2026-06-23T06:36:41.471Z"
+  "updated_at": "2026-06-23T06:57:57.528Z"
 }

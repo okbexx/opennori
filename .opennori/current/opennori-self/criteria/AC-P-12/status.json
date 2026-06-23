@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 1,
   "latest_evidence_summary": "Existing-project AC review is now Skill-driven rather than a CLI word-list audit: tests no longer assert natural-language ACs must trigger fixed gap ids/questions; discover tests only cover question-source state; project-health, acceptance, reporting, root Skills, AGENTS, README, and protocol tell agents to inspect vague old ACs and ask user-facing questions without mutating existing contracts.",
-  "updated_at": "2026-06-23T06:36:41.471Z"
+  "updated_at": "2026-06-23T06:57:57.528Z"
 }

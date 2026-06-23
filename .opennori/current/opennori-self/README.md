@@ -1,4 +1,7 @@
+<!-- opennori/generated-acceptance-review-markdown-v1 review-surface-only -->
 # opennori-self Nori Contract
+
+This README is only for human and agent review. `contract.json`, `ledger.json`, and `criteria/<AC-id>/*.json` remain the OpenNori state source.
 
 ## Goal
 

@@ -17,33 +17,28 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: mcp-readonly-context-final-verification - MCP read-only context slice verified after lint/typecheck/build/test cleanup. Official MCP TypeScript SDK documentation confirms registerResource and StdioServerTransport as the right implementation path; OpenNori registers only context, snapshot, and doctor resources, exposes no MCP tools, keeps CLI/core/.opennori as the source of truth, and leaves subjective acceptance or completion decisions to Skills and users.
+Latest: generated-markdown-review-boundary-verification - Generated Markdown review boundary is hardened: contract state construction no longer owns Markdown parsing, generated review Markdown uses an explicit review-surface-only marker and metadata, arbitrary Markdown without the marker is not parsed as OpenNori state, and docs state JSON/dossier files remain authoritative.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed MCP source files and run the listed commands. MCP metadata should show tools: [] and resources for opennori://project/context, snapshot, and doctor. Snapshot resource tests assert it does not write .opennori/snapshots/current.json.
-Limitations: This verifies a read-only stdio MCP context skeleton only. It intentionally does not add MCP write tools, dashboard write integration, HTTP transport, OAuth, or external MCP-client dogfood.
+Reviewability: Inspect the listed source files and docs: generated Markdown parser/rendering lives in src/core/generated-acceptance-markdown.ts, contract.ts no longer exports Markdown helpers, dossier README carries the generated review marker, tests cover marker-gated parsing and arbitrary Markdown rejection, and docs state Markdown is review-surface-only.
+Limitations: This verifies OpenNori-owned generated review Markdown only. It intentionally does not add editable Markdown/frontmatter import or arbitrary Markdown parsing; that remains future scope requiring a new build-vs-buy decision.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-ac-a-8-mcp-readonly-context.json
-- npm run lint
+- .opennori/architecture/evidence/opennori-self-generated-markdown-review-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run typecheck:dashboard
-- npx vitest run test/mcp.test.ts
-- npm run test:quick
-- npm run test:architecture
-- npm run test:lifecycle
-- node ./bin/opennori.js mcp --root . --json
-- node ./bin/opennori.js doctor --root . --json
-- node ./bin/opennori.js status --root . --json
+- npm run lint
+- npm run test:acceptance
+- npm run test:docs
 - node ./bin/opennori.js check --root . --json
-- npm audit --omit=dev
-- git diff --check
-- src/mcp/resources.ts
-- src/mcp/server.ts
-- src/cli/commands/mcp.ts
-- src/cli.ts
-- test/mcp.test.ts
-- .opennori/architecture/decisions/mcp-readonly-context-server-baseline.md
+- npm run check
+- src/core/generated-acceptance-markdown.ts
+- src/core/contract.ts
+- src/core/dossier-render.ts
+- src/types/evidence.ts
+- test/acceptance.test.js
+- README.md
+- .opennori/protocol.md
+- AGENTS.md
 
 ## Files
 

@@ -2,13 +2,13 @@
   "schema_version": "opennori/build-vs-buy-v1",
   "id": "editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark",
   "created_at": "2026-06-12T05:13:10.324Z",
-  "area": "editable-markdown-parsing",
-  "need": "Parse OpenNori generated acceptance and report markdown only where users or agents may edit reviewable documents",
+  "area": "generated-markdown-review-surface",
+  "need": "Allow agents and review tools to read OpenNori-generated Markdown summaries without turning Markdown into an import path or state authority",
   "recommendation": "self-build",
-  "summary": "OpenNori keeps JSON evidence, contract, profile, architecture, and ledger files authoritative and uses Markdown as generated review surface. The current tiny parser may only recover OpenNori-owned generated acceptance tables; it must not become an authoritative import path or general Markdown parser without a new build-vs-buy decision.",
-  "current_project": "Current project writes structured JSON as source of truth and has one local parseAcceptanceMarkdown helper for generated acceptance markdown. Goal dossiers now include README.md review surfaces, which reinforces that Markdown is human/agent review output, not the state authority.",
+  "summary": "OpenNori keeps JSON evidence, contract, profile, architecture, and ledger files authoritative and uses Markdown as generated review surface. The local helper is limited to OpenNori-owned generated acceptance review Markdown with an explicit marker and returns review-surface-only metadata. It must not become an authoritative import path, editable Markdown pipeline, frontmatter parser, or general Markdown parser without a new build-vs-buy decision.",
+  "current_project": "Current project writes structured JSON as source of truth. Goal dossiers include contract.json, ledger.json, per-criterion JSON files, evidence records, and generated README.md review surfaces. The old parseAcceptanceMarkdown helper had no runtime call sites and risked implying Markdown import authority.",
   "standard_library": "Node has no Markdown or frontmatter parser.",
   "official_sdk": "No official OpenNori Markdown SDK exists; CommonMark-compatible libraries are the relevant ecosystem option.",
-  "open_source": "micromark 4.0.2 MIT was checked on npm on 2026-06-12; remark and gray-matter are follow-up candidates if frontmatter/AST editing becomes product scope.",
-  "self_build_reason": "Self-build is limited to parsing OpenNori's own generated table as a recovery/review helper; it is not a general Markdown parser, frontmatter parser, import pipeline, or source-of-truth writer. If Markdown editing/import becomes product scope, OpenNori must re-evaluate micromark, remark, gray-matter, unified, and schema-backed conversion before expanding local parsing."
+  "open_source": "micromark 4.0.2 MIT, unified 11.0.5 MIT, remark 15.0.1 MIT, and gray-matter 4.0.3 MIT were checked on npm by 2026-06-23. They remain the candidates if frontmatter, AST editing, arbitrary Markdown parsing, or editable Markdown import becomes product scope.",
+  "self_build_reason": "Self-build is limited to rendering and parsing OpenNori's own generated acceptance review Markdown marker as a read-only review helper. Arbitrary Markdown without the marker is not parsed as OpenNori state, and parsed results declare authority: review-surface-only plus side_effect: none. If Markdown editing/import becomes product scope, OpenNori must re-evaluate micromark, remark, gray-matter, unified, and schema-backed conversion before expanding local parsing."
 }

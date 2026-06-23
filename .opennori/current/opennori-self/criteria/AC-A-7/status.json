@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 2,
   "latest_evidence_summary": "Unhealthy build-vs-buy decisions now appear as build_vs_buy review risks in completion and next_recommendation without creating synthetic Product AC or current_gap; tests cover missing reuse candidates and missing self-build reason.",
-  "updated_at": "2026-06-23T06:36:41.471Z"
+  "updated_at": "2026-06-23T06:57:57.528Z"
 }

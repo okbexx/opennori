@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 1,
   "latest_evidence_summary": "OpenNori preserves language preference across user-reviewable contract assets and Project Profile prose: packaged Skills route wrong-language Project Profile and project Architecture Profile content back to profile/architecture Skills; stable ids and protocol fields remain English, and CLI does not auto-translate existing approved contracts without explicit user-approved revision.",
-  "updated_at": "2026-06-23T06:36:41.471Z"
+  "updated_at": "2026-06-23T06:57:57.528Z"
 }

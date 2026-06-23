@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 2,
   "latest_evidence_summary": "changes groups .opennori/examples acceptance artifacts separately from implementation files so PR review can separate evidence state from code changes.",
-  "updated_at": "2026-06-23T06:36:41.471Z"
+  "updated_at": "2026-06-23T06:57:57.528Z"
 }

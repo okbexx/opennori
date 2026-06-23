@@ -219,6 +219,15 @@ and each `criteria/<AC-id>/` directory keeps that AC's criterion, status,
 evidence, artifacts, and README together. Agents should present this as one
 draft contract, not as a folder full of separate user deliverables.
 
+Generated Markdown files are review surfaces only. OpenNori-owned goal and AC
+`README.md` files may include a generated review marker so agents and tools can
+read them as summaries, but they are not import files and cannot approve,
+revise, or update a Nori Contract. Contract state comes from `contract.json`,
+`ledger.json`, `criteria/<AC-id>/criterion.json`, `status.json`, and evidence
+records. If OpenNori ever adds editable Markdown import, that is a new
+architecture decision and must re-evaluate mature Markdown/frontmatter parsers
+instead of expanding the local generated-review helper.
+
 ## What It Creates
 
 OpenNori uses one project-local state directory:
@@ -1134,6 +1143,11 @@ opennori criterion add --root <repo> --from-draft --goal <goal-id> --id AC-... \
 同样的规则也适用于用户需要阅读的 Project Profile 资产。Project Profile 的名称、目的、范围和合规证据摘要，以及 agent 为项目生成的 Architecture Profile 标题、摘要、检查项、技术基线决策、依赖理由和 build-vs-buy 说明，都应该跟随用户明确要求或当前 Nori Contract 的 `presentation.language`。JSON 字段名、稳定 id、`must` / `prefer` / `avoid` 这类协议值保持稳定英文。内置 Architecture Profile 可以保持包内语言；但为中文目标生成的项目资产不应该默认写成英文，除非用户明确要求英文。
 
 每个 current 或 draft goal 对用户来说是一份 Nori Contract，物理上保存为 goal dossier：`contract.json` 是目标级源数据，`ledger.json` 是 agent 和工具更新的确定性状态账本，goal `README.md` 是审阅面；每条 AC 在 `criteria/<AC-id>/` 下拥有自己的 `criterion.json`、`status.json`、`README.md`、`evidence/` 和 `artifacts/`。agent 应把它表达为“一份草案契约”，而不是一堆并列文件。
+
+生成的 Markdown 只用于审阅。OpenNori 自己生成的 goal / AC `README.md`
+可以带有 generated review marker，方便 agent 和工具读取摘要，但它们不是导入文件，不能批准、修订或更新 Nori Contract。契约状态来自
+`contract.json`、`ledger.json`、`criteria/<AC-id>/criterion.json`、`status.json`
+和 evidence records。如果未来要支持可编辑 Markdown 导入，那是新的架构决策，必须重新评估成熟 Markdown/frontmatter parser，而不是扩展当前的 generated-review helper。
 
 示例：
 

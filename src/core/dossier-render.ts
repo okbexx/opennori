@@ -1,5 +1,6 @@
 import path from "node:path";
 import type { AcceptanceCriterion, CriterionLedgerState, EvidenceLedger, NoriContract } from "../types.ts";
+import { GENERATED_ACCEPTANCE_REVIEW_MARKER } from "./generated-acceptance-markdown.ts";
 import { inferCriterionLayer } from "./protocol.ts";
 
 function criteriaDirForGoalDir(goalDir: string): string {
@@ -98,7 +99,12 @@ export function renderGoalReadme(contract: NoriContract, ledger: EvidenceLedger)
   const openQuestions = list(basis.open_questions);
   const outOfScope = list(basis.out_of_scope);
   const lines = [
+    GENERATED_ACCEPTANCE_REVIEW_MARKER,
     `# ${contract.goal_id} ${zh ? "验收契约" : "Nori Contract"}`,
+    "",
+    zh
+      ? "此 README 只用于人工和 agent review。`contract.json`、`ledger.json` 和 `criteria/<AC-id>/*.json` 才是 OpenNori 状态源。"
+      : "This README is only for human and agent review. `contract.json`, `ledger.json`, and `criteria/<AC-id>/*.json` remain the OpenNori state source.",
     "",
     `## ${zh ? "目标" : "Goal"}`,
     "",

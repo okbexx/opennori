@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { test } from "vitest";
-import { buildContractFromBrief, buildEvidenceLedger, renderAcceptanceMarkdown, validateContract } from "../src/core.ts";
+import { buildContractFromBrief, buildEvidenceLedger, renderGeneratedAcceptanceReviewMarkdown, validateContract } from "../src/core.ts";
 import { validateSchema } from "../src/validation.ts";
 import { ROOT, run, tempRoot, draftArgsFromGoal, draftAndApprove, recordArchitectureRequirement } from "./support/cli.js";
 
@@ -21,7 +21,7 @@ test("protocol v1 example is structurally loadable", { tags: ["docs", "quick"] }
     assert.equal(Boolean(criterion.threshold), true);
     assert.equal(["protocol", "operator", "productization", "architecture", "acceptance"].includes(criterion.layer || "acceptance"), true);
   }
-  const markdown = renderAcceptanceMarkdown(contract, ledger);
+  const markdown = renderGeneratedAcceptanceReviewMarkdown(contract, ledger);
   assert.match(markdown, /## (User Acceptance Criteria|用户验收标准)/);
   assert.match(markdown, /## (Rule|规则)/);
 });

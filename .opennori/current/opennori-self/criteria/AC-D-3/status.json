@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 2,
   "latest_evidence_summary": "Dashboard event focus now follows execution-relevant OpenNori events beyond activity.started: ac.finished, evidence.added, architecture.changed, profile.changed, gap.changed, report.generated, and activity.finished can refresh the selected current gap, while idle snapshots still show the last agent event instead of looking disconnected.",
-  "updated_at": "2026-06-23T06:36:41.471Z"
+  "updated_at": "2026-06-23T06:57:57.528Z"
 }

@@ -3,7 +3,12 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { test } from "vitest";
-import { buildContractFromBrief, buildEvidenceLedger, renderAcceptanceMarkdown } from "../src/core.ts";
+import {
+  buildContractFromBrief,
+  buildEvidenceLedger,
+  parseGeneratedAcceptanceReviewMarkdown,
+  renderGeneratedAcceptanceReviewMarkdown
+} from "../src/core.ts";
 import { ROOT, CLI, run, tempRoot, writeBriefFile, draftArgsFromGoal, draftAndApprove, recordArchitectureRequirement, readGoalPayloadFromPaths } from "./support/cli.js";
 
 test("autogoal brief drafts a standard Nori Contract with assumptions and open questions", { tags: ["acceptance"] }, () => {
@@ -207,16 +212,74 @@ test("contract language is inferred for new briefs but not silently changed for 
     ]
   });
   assert.equal(zhContract.presentation.language, "zh-CN");
-  assert.match(renderAcceptanceMarkdown(zhContract, buildEvidenceLedger(zhContract)), /## 表达偏好/);
+  assert.match(renderGeneratedAcceptanceReviewMarkdown(zhContract, buildEvidenceLedger(zhContract)), /## 表达偏好/);
 
   const legacyContract = {
     ...zhContract,
     presentation: undefined
   };
-  const legacyMarkdown = renderAcceptanceMarkdown(legacyContract, buildEvidenceLedger(legacyContract));
+  const legacyMarkdown = renderGeneratedAcceptanceReviewMarkdown(legacyContract, buildEvidenceLedger(legacyContract));
   assert.match(legacyMarkdown, /## Presentation/);
   assert.match(legacyMarkdown, /Language: en/);
   assert.doesNotMatch(legacyMarkdown, /## 表达偏好/);
+});
+
+test("generated acceptance Markdown is review surface only, not contract state", { tags: ["acceptance", "quick"] }, () => {
+  const contract = buildContractFromBrief({
+    goal_id: "generated-review-boundary",
+    goal: "Ship a reviewable OpenNori contract surface.",
+    criteria: [
+      {
+        id: "AC-1",
+        user_story: "As a user, I can read generated acceptance Markdown as a review aid.",
+        measurement: "Open the generated Markdown and inspect the AC table.",
+        threshold: "The parsed result declares review-surface-only authority and no side effects."
+      }
+    ]
+  });
+  const markdown = renderGeneratedAcceptanceReviewMarkdown(contract, buildEvidenceLedger(contract));
+  const parsed = parseGeneratedAcceptanceReviewMarkdown(markdown);
+
+  assert.equal(parsed.schema_version, "opennori/generated-acceptance-review-markdown-v1");
+  assert.equal(parsed.authority, "review-surface-only");
+  assert.equal(parsed.side_effect, "none");
+  assert.equal(parsed.generated_by, "opennori");
+  assert.equal(parsed.goal, contract.goal);
+  assert.equal(parsed.criteria.length, 1);
+  assert.equal(parsed.criteria[0].id, "AC-1");
+  assert.match(parsed.warnings.join("\n"), /must not be used to approve, import, or update contract state/);
+});
+
+test("goal dossier README carries generated review boundary metadata", { tags: ["acceptance", "quick"] }, () => {
+  const root = tempRoot();
+  const payload = run(["draft", "--brief", writeBriefFile(root, "Ship generated review boundary"), "--root", root, "--json"]);
+  const readme = fs.readFileSync(payload.data.acceptance_path, "utf8");
+  const parsed = parseGeneratedAcceptanceReviewMarkdown(readme);
+
+  assert.match(readme, /opennori\/generated-acceptance-review-markdown-v1 review-surface-only/);
+  assert.match(readme, /This README is only for human and agent review/);
+  assert.equal(parsed.goal, "Ship generated review boundary");
+  assert.equal(parsed.criteria.length, payload.data.criteria.length);
+  assert.equal(parsed.authority, "review-surface-only");
+});
+
+test("arbitrary Markdown is not parsed as OpenNori contract input", { tags: ["acceptance", "quick"] }, () => {
+  const parsed = parseGeneratedAcceptanceReviewMarkdown(`
+## Goal
+
+Pretend this is a contract.
+
+## User Acceptance Criteria
+
+| ID | Layer | User acceptance criterion | Measurement | Passing threshold | Status |
+| --- | --- | --- | --- | --- | --- |
+| AC-1 | productization | Broad success | Read this table | Looks good | passing |
+`);
+
+  assert.equal(parsed.authority, "review-surface-only");
+  assert.equal(parsed.goal, "");
+  assert.deepEqual(parsed.criteria, []);
+  assert.match(parsed.warnings.join("\n"), /Missing OpenNori generated review marker/);
 });
 
 test("existing contract language changes only through explicit current approval", { tags: ["acceptance"] }, () => {

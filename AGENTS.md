@@ -98,6 +98,14 @@ the misplaced file instead of continuing in a half-broken architecture state.
 
 OpenNori has exactly one default current goal. Drafts live under `.opennori/drafts/` and are not executable until approved; completed and blocked goals are history. Legacy `.opennori/active/` is recovery input only and must not be used as the normal work context.
 
+Generated Markdown is not state authority. Goal and AC `README.md` files are
+review surfaces only, even when they contain an OpenNori generated review
+marker. Do not approve, import, revise, or update contracts from Markdown.
+Read/write authoritative state through `contract.json`, `ledger.json`,
+`criteria/<AC-id>/criterion.json`, `status.json`, evidence records, and CLI/core
+commands. If editable Markdown import becomes product scope, create a new
+build-vs-buy decision and evaluate mature Markdown/frontmatter parsers first.
+
 OpenNori product changes must preserve the original acceptance loop:
 
 ```text

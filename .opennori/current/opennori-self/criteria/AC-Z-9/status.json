@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 2,
   "latest_evidence_summary": "install dry-run reports create/exists/skip/update/overwrite actions with will_write, would_write, destructive, managed, and reason fields while writing nothing.",
-  "updated_at": "2026-06-23T06:36:41.471Z"
+  "updated_at": "2026-06-23T06:57:57.528Z"
 }

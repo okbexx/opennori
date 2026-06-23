@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 2,
   "latest_evidence_summary": "criterion update rewrites the user-facing AC, clears stale criterion evidence, preserves acceptance basis, and makes future completion depend on the revised AC.",
-  "updated_at": "2026-06-23T06:36:41.471Z"
+  "updated_at": "2026-06-23T06:57:57.528Z"
 }
