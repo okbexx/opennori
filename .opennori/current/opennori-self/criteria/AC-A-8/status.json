@@ -5,6 +5,6 @@
   "required": true,
   "risk": "high",
   "evidence_count": 41,
-  "latest_evidence_summary": "Lifecycle external command execution is now isolated in lifecycle/adapters/external-command-runner.ts, while external-actions.ts only models preview/confirm action state and setup/plugin-sync keep orchestration behavior.",
-  "updated_at": "2026-06-23T10:44:44.808Z"
+  "latest_evidence_summary": "Goal dossier Markdown now remains a generated review surface only: the stale generated acceptance Markdown parser/helper was removed, core.ts no longer exports Markdown parsing, README files declare review-surface-only, and boundary tests prevent Markdown import/parser APIs from returning as state paths.",
+  "updated_at": "2026-06-23T10:55:48.131Z"
 }

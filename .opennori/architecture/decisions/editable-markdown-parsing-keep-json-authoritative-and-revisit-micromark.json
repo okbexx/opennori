@@ -1,14 +1,17 @@
 {
   "schema_version": "opennori/build-vs-buy-v1",
   "id": "editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark",
-  "created_at": "2026-06-12T05:13:10.324Z",
+  "created_at": "2026-06-23T10:52:44.490Z",
   "area": "generated-markdown-review-surface",
-  "need": "Allow agents and review tools to read OpenNori-generated Markdown summaries without turning Markdown into an import path or state authority",
+  "need": "Render OpenNori goal dossier README review surfaces without creating an editable Markdown import path or parser authority",
   "recommendation": "self-build",
-  "summary": "OpenNori keeps JSON evidence, contract, profile, architecture, and ledger files authoritative and uses Markdown as generated review surface. The local helper is limited to OpenNori-owned generated acceptance review Markdown with an explicit marker and returns review-surface-only metadata. It must not become an authoritative import path, editable Markdown pipeline, frontmatter parser, or general Markdown parser without a new build-vs-buy decision.",
-  "current_project": "Current project writes structured JSON as source of truth. Goal dossiers include contract.json, ledger.json, per-criterion JSON files, evidence records, and generated README.md review surfaces. The old parseAcceptanceMarkdown helper had no runtime call sites and risked implying Markdown import authority.",
-  "standard_library": "Node has no Markdown or frontmatter parser.",
-  "official_sdk": "No official OpenNori Markdown SDK exists; CommonMark-compatible libraries are the relevant ecosystem option.",
-  "open_source": "micromark 4.0.2 MIT, unified 11.0.5 MIT, remark 15.0.1 MIT, and gray-matter 4.0.3 MIT were checked on npm by 2026-06-23. They remain the candidates if frontmatter, AST editing, arbitrary Markdown parsing, or editable Markdown import becomes product scope.",
-  "self_build_reason": "Self-build is limited to rendering and parsing OpenNori's own generated acceptance review Markdown marker as a read-only review helper. Arbitrary Markdown without the marker is not parsed as OpenNori state, and parsed results declare authority: review-surface-only plus side_effect: none. If Markdown editing/import becomes product scope, OpenNori must re-evaluate micromark, remark, gray-matter, unified, and schema-backed conversion before expanding local parsing."
+  "status": "active",
+  "summary": "OpenNori keeps JSON contract, ledger, criterion, evidence, profile, and architecture files authoritative. Goal dossier README files are generated review surfaces only; the old generated acceptance Markdown parser/helper was removed, and Markdown import/editing remains out of scope unless a new build-vs-buy decision selects micromark, remark, gray-matter, unified, or another parser stack.",
+  "current_project": "Current goal dossiers already store authoritative contract.json, ledger.json, criteria/<AC-id>/criterion.json, status.json, and evidence JSON. README.md is regenerated from those files and is explicitly marked review-surface-only.",
+  "standard_library": "Node fs/path and string rendering are enough to write deterministic generated README surfaces. Node has no Markdown AST/frontmatter parser, and OpenNori no longer parses Markdown back into state.",
+  "official_sdk": "No official OpenNori Markdown SDK exists; no platform SDK is needed for generated README text.",
+  "open_source": "micromark, unified/remark, markdown-it, and gray-matter remain candidates only if editable Markdown import, frontmatter extraction, AST transforms, or arbitrary Markdown parsing becomes product scope. TK references such as Tolaria and compound-engineering-plugin show that Markdown-as-data products use explicit parser/model boundaries; OpenNori is not currently that product.",
+  "self_build_reason": "Self-build is limited to deterministic README rendering for OpenNori-owned dossier projections. There is no Markdown-to-state parser, no frontmatter importer, no arbitrary Markdown ingestion, and no second protocol authority.",
+  "superseded_by": "",
+  "superseded_reason": ""
 }

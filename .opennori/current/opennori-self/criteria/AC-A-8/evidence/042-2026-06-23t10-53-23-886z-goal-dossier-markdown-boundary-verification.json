@@ -1,0 +1,65 @@
+{
+  "kind": "goal-dossier-markdown-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "Goal dossier Markdown now remains a generated review surface only: the stale generated acceptance Markdown parser/helper was removed, core.ts no longer exports Markdown parsing, README files declare review-surface-only, and boundary tests prevent Markdown import/parser APIs from returning as state paths.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-goal-dossier-markdown-review-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-goal-dossier-markdown-review-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/acceptance.test.js test/docs-schema.test.js test/module-boundaries.test.js",
+      "command": "npx vitest run test/acceptance.test.js test/docs-schema.test.js test/module-boundaries.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/dossier-render.ts",
+      "path": "src/core/dossier-render.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core.ts",
+      "path": "src/core.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/types/evidence.ts",
+      "path": "src/types/evidence.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/module-boundaries.test.js",
+      "path": "test/module-boundaries.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/acceptance.test.js",
+      "path": "test/acceptance.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/docs-schema.test.js",
+      "path": "test/docs-schema.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json",
+      "path": ".opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json"
+    }
+  ],
+  "reviewability": "Inspect that src/core/generated-acceptance-markdown.ts no longer exists, src/core.ts no longer exports generated-acceptance-markdown, goal README files carry opennori/goal-dossier-readme-v1 review-surface-only, and module-boundary tests fail any Markdown import/parser state path.",
+  "limitations": "This intentionally removes editable Markdown parsing from OpenNori. Future Markdown-as-data support would require a new build-vs-buy decision and parser stack selection.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T10:53:23.886Z"
+}

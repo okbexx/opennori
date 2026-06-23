@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-goal-dossier-markdown-review-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Goal dossier Markdown is now a generated review surface only; the old generated acceptance Markdown parser/helper was removed and core.ts no longer exports Markdown parsing as a state API.",
+  "fit": "This follows the confirmed JSON-authoritative baseline: contract, ledger, criterion, evidence, profile, and architecture JSON remain source of truth, while README files are projections generated from structured state.",
+  "implementation_focus": "Remove stale Markdown-to-state affordance and strengthen module-boundary tests so Markdown cannot become an import path without a new build-vs-buy decision.",
+  "evidence": "Focused tests passed: npx vitest run test/acceptance.test.js test/docs-schema.test.js test/module-boundaries.test.js; TypeScript passed: npx tsc --noEmit --pretty false.",
+  "limitations": "This intentionally does not add editable Markdown import. If OpenNori later needs Markdown-as-data behavior, it must choose a parser stack through a new build-vs-buy decision.",
+  "created_at": "2026-06-23T10:53:01.272Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

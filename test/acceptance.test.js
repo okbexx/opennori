@@ -3,12 +3,6 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { test } from "vitest";
-import {
-  buildContractFromBrief,
-  buildEvidenceLedger,
-  parseGeneratedAcceptanceReviewMarkdown,
-  renderGeneratedAcceptanceReviewMarkdown
-} from "../src/core.ts";
 import { ROOT, CLI, run, tempRoot, writeBriefFile, draftArgsFromGoal, draftAndApprove, recordArchitectureRequirement, readGoalPayloadFromPaths } from "./support/cli.js";
 
 test("autogoal brief drafts a standard Nori Contract with assumptions and open questions", { tags: ["acceptance"] }, () => {
@@ -199,87 +193,33 @@ test("init creates markdown contract and evidence record", { tags: ["acceptance"
 });
 
 test("contract language is inferred for new briefs but not silently changed for legacy contracts", { tags: ["acceptance", "quick"] }, () => {
-  const zhContract = buildContractFromBrief({
-    goal_id: "legacy-language-boundary",
-    goal: "交付设置页",
-    criteria: [
-      {
-        id: "AC-1",
-        user_story: "作为用户，我能保存设置。",
-        measurement: "打开设置页并保存有效字段。",
-        threshold: "刷新后仍能看到保存后的值。"
-      }
-    ]
-  });
-  assert.equal(zhContract.presentation.language, "zh-CN");
-  assert.match(renderGeneratedAcceptanceReviewMarkdown(zhContract, buildEvidenceLedger(zhContract)), /## 表达偏好/);
+  const zhRoot = tempRoot();
+  const zhDraft = run(["draft", "--brief", writeBriefFile(zhRoot, "交付设置页"), "--root", zhRoot, "--json"]);
+  assert.equal(zhDraft.data.presentation.language, "zh-CN");
+  assert.match(fs.readFileSync(zhDraft.data.acceptance_path, "utf8"), /## 表达偏好/);
 
-  const legacyContract = {
-    ...zhContract,
-    presentation: undefined
-  };
-  const legacyMarkdown = renderGeneratedAcceptanceReviewMarkdown(legacyContract, buildEvidenceLedger(legacyContract));
-  assert.match(legacyMarkdown, /## Presentation/);
-  assert.match(legacyMarkdown, /Language: en/);
-  assert.doesNotMatch(legacyMarkdown, /## 表达偏好/);
+  const legacyRoot = tempRoot();
+  const legacyDraft = run(["draft", "--brief", writeBriefFile(legacyRoot, "交付设置页"), "--root", legacyRoot, "--json"]);
+  const legacyContractPath = path.join(legacyRoot, ".opennori", "drafts", legacyDraft.data.goal_id, "contract.json");
+  const legacyContract = JSON.parse(fs.readFileSync(legacyContractPath, "utf8"));
+  delete legacyContract.presentation;
+  fs.writeFileSync(legacyContractPath, JSON.stringify(legacyContract, null, 2));
+  const legacyStatus = run(["status", "--root", legacyRoot, "--from-draft", "--goal", legacyDraft.data.goal_id, "--json"]);
+  assert.equal(legacyStatus.data.presentation?.language, undefined);
 });
 
-test("generated acceptance Markdown is review surface only, not contract state", { tags: ["acceptance", "quick"] }, () => {
-  const contract = buildContractFromBrief({
-    goal_id: "generated-review-boundary",
-    goal: "Ship a reviewable OpenNori contract surface.",
-    criteria: [
-      {
-        id: "AC-1",
-        user_story: "As a user, I can read generated acceptance Markdown as a review aid.",
-        measurement: "Open the generated Markdown and inspect the AC table.",
-        threshold: "The parsed result declares review-surface-only authority and no side effects."
-      }
-    ]
-  });
-  const markdown = renderGeneratedAcceptanceReviewMarkdown(contract, buildEvidenceLedger(contract));
-  const parsed = parseGeneratedAcceptanceReviewMarkdown(markdown);
-
-  assert.equal(parsed.schema_version, "opennori/generated-acceptance-review-markdown-v1");
-  assert.equal(parsed.authority, "review-surface-only");
-  assert.equal(parsed.side_effect, "none");
-  assert.equal(parsed.generated_by, "opennori");
-  assert.equal(parsed.goal, contract.goal);
-  assert.equal(parsed.criteria.length, 1);
-  assert.equal(parsed.criteria[0].id, "AC-1");
-  assert.match(parsed.warnings.join("\n"), /must not be used to approve, import, or update contract state/);
-});
-
-test("goal dossier README carries generated review boundary metadata", { tags: ["acceptance", "quick"] }, () => {
+test("goal dossier README is a review surface, while JSON files remain authoritative", { tags: ["acceptance", "quick"] }, () => {
   const root = tempRoot();
-  const payload = run(["draft", "--brief", writeBriefFile(root, "Ship generated review boundary"), "--root", root, "--json"]);
+  const payload = run(["draft", "--brief", writeBriefFile(root, "Ship dossier boundary"), "--root", root, "--json"]);
   const readme = fs.readFileSync(payload.data.acceptance_path, "utf8");
-  const parsed = parseGeneratedAcceptanceReviewMarkdown(readme);
+  const goalDir = path.join(root, ".opennori", "drafts", payload.data.goal_id);
 
-  assert.match(readme, /opennori\/generated-acceptance-review-markdown-v1 review-surface-only/);
+  assert.match(readme, /opennori\/goal-dossier-readme-v1 review-surface-only/);
   assert.match(readme, /This README is only for human and agent review/);
-  assert.equal(parsed.goal, "Ship generated review boundary");
-  assert.equal(parsed.criteria.length, payload.data.criteria.length);
-  assert.equal(parsed.authority, "review-surface-only");
-});
-
-test("arbitrary Markdown is not parsed as OpenNori contract input", { tags: ["acceptance", "quick"] }, () => {
-  const parsed = parseGeneratedAcceptanceReviewMarkdown(`
-## Goal
-
-Pretend this is a contract.
-
-## User Acceptance Criteria
-
-| ID | Layer | User acceptance criterion | Measurement | Passing threshold | Status |
-| --- | --- | --- | --- | --- | --- |
-| AC-1 | productization | Broad success | Read this table | Looks good | passing |
-`);
-
-  assert.equal(parsed.authority, "review-surface-only");
-  assert.equal(parsed.goal, "");
-  assert.deepEqual(parsed.criteria, []);
-  assert.match(parsed.warnings.join("\n"), /Missing OpenNori generated review marker/);
+  assert.match(readme, /`contract\.json`, `ledger\.json`, and `criteria\/<AC-id>\/\*\.json` remain the OpenNori state source/);
+  assert.equal(fs.existsSync(path.join(goalDir, "contract.json")), true);
+  assert.equal(fs.existsSync(path.join(goalDir, "ledger.json")), true);
+  assert.equal(fs.existsSync(path.join(goalDir, "criteria", "AC-1", "criterion.json")), true);
 });
 
 test("existing contract language changes only through explicit current approval", { tags: ["acceptance"] }, () => {

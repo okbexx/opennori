@@ -86,15 +86,16 @@ test("external action modeling does not own process execution infrastructure", {
   assert.match(runnerAdapter, /runExternalCommandAction/);
 });
 
-test("generated acceptance Markdown parser is not used as a state import path", { tags: ["architecture", "acceptance", "unit"] }, () => {
-  const allowed = new Set([
-    path.join(ROOT, "src", "core.ts"),
-    path.join(ROOT, "src", "core", "generated-acceptance-markdown.ts")
-  ]);
+test("goal dossier Markdown stays a generated review surface, not a state import path", { tags: ["architecture", "acceptance", "unit", "quick"] }, () => {
+  assert.equal(fs.existsSync(path.join(ROOT, "src", "core", "generated-acceptance-markdown.ts")), false);
+
+  const forbiddenPattern = /parseGeneratedAcceptanceReviewMarkdown|ParsedGeneratedAcceptanceReviewMarkdown|fromMarkdown|markdownToContract|importMarkdown/;
   const offenders = sourceFiles(path.join(ROOT, "src"))
-    .filter((filePath) => !allowed.has(filePath))
-    .filter((filePath) => /parseGeneratedAcceptanceReviewMarkdown/.test(fs.readFileSync(filePath, "utf8")))
+    .filter((filePath) => forbiddenPattern.test(fs.readFileSync(filePath, "utf8")))
     .map(relative);
 
   assert.deepEqual(offenders, []);
+
+  const coreBarrel = fs.readFileSync(path.join(ROOT, "src", "core.ts"), "utf8");
+  assert.equal(coreBarrel.includes("generated-acceptance-markdown"), false);
 });

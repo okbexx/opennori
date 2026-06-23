@@ -17,26 +17,23 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: lifecycle-command-adapter-verification - Lifecycle external command execution is now isolated in lifecycle/adapters/external-command-runner.ts, while external-actions.ts only models preview/confirm action state and setup/plugin-sync keep orchestration behavior.
+Latest: goal-dossier-markdown-boundary-verification - Goal dossier Markdown now remains a generated review surface only: the stale generated acceptance Markdown parser/helper was removed, core.ts no longer exports Markdown parsing, README files declare review-surface-only, and boundary tests prevent Markdown import/parser APIs from returning as state paths.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect external-actions.ts to confirm it no longer imports child_process or owns runExternalCommandAction; inspect lifecycle/adapters/external-command-runner.ts for process execution and action result adaptation; inspect codex/npm adapters for stdout parsing; rerun the listed lifecycle tests and typecheck.
-Limitations: This verifies internal lifecycle boundaries and existing setup/plugin-sync behavior through focused tests. It does not add a new external process library or change setup/plugin sync UX.
+Reviewability: Inspect that src/core/generated-acceptance-markdown.ts no longer exists, src/core.ts no longer exports generated-acceptance-markdown, goal README files carry opennori/goal-dossier-readme-v1 review-surface-only, and module-boundary tests fail any Markdown import/parser state path.
+Limitations: This intentionally removes editable Markdown parsing from OpenNori. Future Markdown-as-data support would require a new build-vs-buy decision and parser stack selection.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-external-command-runner-adapter.json
-- npx vitest run test/module-boundaries.test.js test/lifecycle-adapters.test.ts test/cli-lifecycle.test.js
+- .opennori/architecture/evidence/opennori-self-goal-dossier-markdown-review-boundary.json
+- npx vitest run test/acceptance.test.js test/docs-schema.test.js test/module-boundaries.test.js
 - npx tsc --noEmit --pretty false
-- npm run lint
-- src/lifecycle/adapters/external-command-runner.ts
-- src/lifecycle/external-actions.ts
-- src/lifecycle/adapters/codex-plugin.ts
-- src/lifecycle/adapters/npm-global.ts
-- src/lifecycle/setup-execution.ts
-- src/lifecycle/plugin-sync-execution.ts
-- src/lifecycle/setup-plan.ts
-- src/lifecycle/plugin-sync-plan.ts
+- src/core/dossier-render.ts
+- src/core.ts
+- src/types/evidence.ts
 - test/module-boundaries.test.js
+- test/acceptance.test.js
+- test/docs-schema.test.js
+- .opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json
 
 ## Files
 

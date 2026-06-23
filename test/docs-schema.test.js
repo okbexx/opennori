@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { test } from "vitest";
 import { parse as parseYaml } from "yaml";
-import { buildContractFromBrief, buildEvidenceLedger, renderGeneratedAcceptanceReviewMarkdown, validateContract } from "../src/core.ts";
+import { buildContractFromBrief, validateContract } from "../src/core.ts";
 import { validateSchema } from "../src/validation.ts";
 import { ROOT, run, tempRoot, draftArgsFromGoal, draftAndApprove, recordArchitectureRequirement } from "./support/cli.js";
 
@@ -34,7 +34,6 @@ function readSkillFrontmatter(skillPath) {
 test("protocol v1 example is structurally loadable", { tags: ["docs", "quick"] }, () => {
   const brief = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "opennori-self.json"), "utf8"));
   const contract = buildContractFromBrief(brief);
-  const ledger = buildEvidenceLedger(contract);
   const ids = contract.criteria.map((criterion) => criterion.id);
   assert.equal(contract.goal_id, brief.goal_id);
   assert.equal(contract.criteria.length > 0, true);
@@ -46,9 +45,8 @@ test("protocol v1 example is structurally loadable", { tags: ["docs", "quick"] }
     assert.equal(Boolean(criterion.threshold), true);
     assert.equal(["protocol", "operator", "productization", "architecture", "acceptance"].includes(criterion.layer || "acceptance"), true);
   }
-  const markdown = renderGeneratedAcceptanceReviewMarkdown(contract, ledger);
-  assert.match(markdown, /## (User Acceptance Criteria|用户验收标准)/);
-  assert.match(markdown, /## (Rule|规则)/);
+  assert.equal(contract.presentation.language, "zh-CN");
+  assert.equal(contract.acceptance_basis.status, "approved");
 });
 
 test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", { tags: ["docs"] }, () => {

@@ -1,8 +1,9 @@
 import path from "node:path";
 import type { AcceptanceCriterion, NoriContract } from "../types/contract.ts";
 import type { CriterionLedgerState, EvidenceLedger } from "../types/evidence.ts";
-import { GENERATED_ACCEPTANCE_REVIEW_MARKER } from "./generated-acceptance-markdown.ts";
 import { inferCriterionLayer } from "./protocol.ts";
+
+const DOSSIER_REVIEW_SURFACE_MARKER = "<!-- opennori/goal-dossier-readme-v1 review-surface-only -->";
 
 function criteriaDirForGoalDir(goalDir: string): string {
   return path.join(goalDir, "criteria");
@@ -100,7 +101,7 @@ export function renderGoalReadme(contract: NoriContract, ledger: EvidenceLedger)
   const openQuestions = list(basis.open_questions);
   const outOfScope = list(basis.out_of_scope);
   const lines = [
-    GENERATED_ACCEPTANCE_REVIEW_MARKER,
+    DOSSIER_REVIEW_SURFACE_MARKER,
     `# ${contract.goal_id} ${zh ? "验收契约" : "Nori Contract"}`,
     "",
     zh
