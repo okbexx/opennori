@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T07:24:35.960Z",
+  "updated_at": "2026-06-23T07:33:24.723Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -731,6 +731,17 @@
         "summary": "Split OpenNori completion/routing decisions from Markdown report rendering while preserving src/core/report.ts as the public compatibility export.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-report-completion-render-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-snapshot-projection-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Snapshot projection now separates builder, outcome, path, and persistence boundaries while keeping MCP and dashboard on the same read-only projection.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-snapshot-projection-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

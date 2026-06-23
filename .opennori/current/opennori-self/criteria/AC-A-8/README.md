@@ -17,24 +17,24 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: dashboard-shell-boundary-verification - Dashboard App shell was split into focused read-only presentation modules while preserving snapshot subscription, radar selection, event console ordering, and the observation-only control boundary.
+Latest: snapshot-projection-boundary-verification - Kernel snapshot projection was split so dashboard and MCP share the same read-only builder while snapshot.ts remains the narrow persistence/export boundary.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect App.tsx and the new dashboard components. App should own fetch/subscribe/selection state, while extracted components render only read-only snapshot/event data and expose no OpenNori write actions.
-Limitations: This is a structural dashboard refactor. It does not add new dashboard UI behavior, screenshot verification, or browser pixel regression coverage.
+Reviewability: Inspect the snapshot modules and verify that buildSnapshot constructs read-only projections, snapshot.ts only exports and persists current.json, dashboard HTTP refresh and MCP snapshot resource both consume the same builder, and no dashboard or MCP write authority was added.
+Limitations: This is an internal architecture boundary refactor. It does not add new dashboard UI behavior, new MCP resources, or browser screenshot coverage.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-dashboard-shell-boundary.json
-- npm run typecheck:dashboard
-- npm run build:dashboard
+- .opennori/architecture/evidence/opennori-self-snapshot-projection-boundary.json
+- npx tsc --noEmit --pretty false
 - npm run test:dashboard
+- npx vitest run test/mcp.test.ts
 - npm run lint
-- src/dashboard/src/App.tsx
-- src/dashboard/src/dashboard-view.ts
-- src/dashboard/src/components/DashboardHeader.tsx
-- src/dashboard/src/components/OutcomeHud.tsx
-- src/dashboard/src/components/InspectDrawer.tsx
-- src/dashboard/src/components/EventLogConsole.tsx
+- src/kernel/snapshot.ts
+- src/kernel/snapshot-builder.ts
+- src/kernel/snapshot-outcome.ts
+- src/kernel/snapshot-paths.ts
+- src/kernel/http/app.ts
+- src/mcp/resources.ts
 
 ## Files
 

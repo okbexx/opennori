@@ -1,0 +1,70 @@
+{
+  "kind": "snapshot-projection-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "Kernel snapshot projection was split so dashboard and MCP share the same read-only builder while snapshot.ts remains the narrow persistence/export boundary.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-snapshot-projection-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-snapshot-projection-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/mcp.test.ts",
+      "command": "npx vitest run test/mcp.test.ts"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot.ts",
+      "path": "src/kernel/snapshot.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot-builder.ts",
+      "path": "src/kernel/snapshot-builder.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot-outcome.ts",
+      "path": "src/kernel/snapshot-outcome.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/snapshot-paths.ts",
+      "path": "src/kernel/snapshot-paths.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/http/app.ts",
+      "path": "src/kernel/http/app.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/mcp/resources.ts",
+      "path": "src/mcp/resources.ts"
+    }
+  ],
+  "reviewability": "Inspect the snapshot modules and verify that buildSnapshot constructs read-only projections, snapshot.ts only exports and persists current.json, dashboard HTTP refresh and MCP snapshot resource both consume the same builder, and no dashboard or MCP write authority was added.",
+  "limitations": "This is an internal architecture boundary refactor. It does not add new dashboard UI behavior, new MCP resources, or browser screenshot coverage.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T07:33:24.582Z"
+}
