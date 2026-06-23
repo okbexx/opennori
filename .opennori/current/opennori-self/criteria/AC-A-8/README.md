@@ -17,18 +17,16 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: protocol-check - MCP read-only boundary tightened: opennori mcp command imports only core/io, module-boundary tests now reject MCP write APIs and tool registration, and MCP metadata still reports tools: [] with write_capability: none.
+Latest: protocol-check - Setup/plugin-sync external command parsing is guarded by adapters: orchestration modules no longer import the wide core barrel, and module-boundary tests reject stdout parsing, child_process, Codex list parsing, and npm global parsing outside lifecycle adapters.
 Result: passing
 Basis: tool-observation
-Reviewability: Review src/cli/commands/mcp.ts, test/module-boundaries.test.js, test/mcp.test.ts, and the MCP --json metadata output.
-Limitations: This verifies current read-only MCP boundaries only; future MCP write tools still require a separate architecture challenge and user approval.
+Reviewability: Review src/lifecycle/setup-execution.ts, src/lifecycle/plugin-sync-execution.ts, src/lifecycle/adapters/*, and test/module-boundaries.test.js.
+Limitations: This does not change the external Codex/npm commands themselves; it verifies that parsing and process execution remain behind adapters.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-mcp-readonly-boundary-tightening.json
-- npx vitest run test/mcp.test.ts test/module-boundaries.test.js
+- .opennori/architecture/evidence/opennori-self-lifecycle-external-command-adapter-guard.json
+- npx vitest run test/lifecycle-adapters.test.ts test/module-boundaries.test.js test/cli-lifecycle.test.js
 - npx tsc --noEmit --pretty false
-- node ./bin/opennori.js mcp --root . --json
-- https://github.com/modelcontextprotocol/typescript-sdk
 
 ## Files
 

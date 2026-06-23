@@ -129,13 +129,27 @@ test("setup and plugin sync command output parsing stays inside lifecycle adapte
     path.join(ROOT, "src", "lifecycle", "adapters", "npm-global.ts"),
     path.join(ROOT, "src", "lifecycle", "external-actions.ts")
   ]);
-  const outputParsingPattern = /result\.stdout|JSON\.parse\(stdout\)|stdout\.split\(|parseCodexMarketplaceRoot|parseInstalledCodexPluginVersion|parseGlobalNpmPackageVersion/;
+  const outputParsingPattern = /result\.stdout|JSON\.parse\(stdout\)|stdout\.split\(|parseCodexMarketplaceRoot|parseInstalledCodexPluginVersion|parseGlobalNpmPackageVersion|child_process|spawnSync|codex plugin (?:marketplace )?list|npm ls -g/;
   const offenders = sourceFiles(path.join(ROOT, "src", "lifecycle"))
     .filter((filePath) => !allowed.has(filePath))
     .filter((filePath) => outputParsingPattern.test(fs.readFileSync(filePath, "utf8")))
     .map(relative);
 
   assert.deepEqual(offenders, []);
+
+  const orchestrationFiles = [
+    "setup-plan.ts",
+    "setup-actions.ts",
+    "setup-execution.ts",
+    "plugin-sync-plan.ts",
+    "plugin-sync-actions.ts",
+    "plugin-sync-execution.ts"
+  ].map((fileName) => path.join(ROOT, "src", "lifecycle", fileName));
+  const wideCoreImportOffenders = orchestrationFiles
+    .filter((filePath) => importSpecifiers(fs.readFileSync(filePath, "utf8")).some((specifier) => resolvesTo(filePath, specifier, path.join(ROOT, "src", "core.ts"))))
+    .map(relative);
+
+  assert.deepEqual(wideCoreImportOffenders, []);
 });
 
 test("external action modeling does not own process execution infrastructure", { tags: ["architecture", "lifecycle", "unit", "quick"] }, () => {

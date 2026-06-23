@@ -4,7 +4,7 @@
   "confidence": "high",
   "required": true,
   "risk": "high",
-  "evidence_count": 45,
-  "latest_evidence_summary": "MCP read-only boundary tightened: opennori mcp command imports only core/io, module-boundary tests now reject MCP write APIs and tool registration, and MCP metadata still reports tools: [] with write_capability: none.",
-  "updated_at": "2026-06-23T11:40:00.453Z"
+  "evidence_count": 46,
+  "latest_evidence_summary": "Setup/plugin-sync external command parsing is guarded by adapters: orchestration modules no longer import the wide core barrel, and module-boundary tests reject stdout parsing, child_process, Codex list parsing, and npm global parsing outside lifecycle adapters.",
+  "updated_at": "2026-06-23T11:43:15.668Z"
 }

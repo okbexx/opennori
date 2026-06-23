@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T11:40:00.457Z",
+  "updated_at": "2026-06-23T11:43:15.672Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -7791,9 +7791,39 @@
           "limitations": "This verifies current read-only MCP boundaries only; future MCP write tools still require a separate architecture challenge and user approval.",
           "gate": "accepted",
           "created_at": "2026-06-23T11:40:00.453Z"
+        },
+        {
+          "kind": "protocol-check",
+          "basis": "tool-observation",
+          "summary": "Setup/plugin-sync external command parsing is guarded by adapters: orchestration modules no longer import the wide core barrel, and module-boundary tests reject stdout parsing, child_process, Codex list parsing, and npm global parsing outside lifecycle adapters.",
+          "result": "passing",
+          "confidence": "high",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-lifecycle-external-command-adapter-guard",
+              "path": ".opennori/architecture/evidence/opennori-self-lifecycle-external-command-adapter-guard.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/lifecycle-adapters.test.ts test/module-boundaries.test.js test/cli-lifecycle.test.js",
+              "command": "npx vitest run test/lifecycle-adapters.test.ts test/module-boundaries.test.js test/cli-lifecycle.test.js"
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            }
+          ],
+          "reviewability": "Review src/lifecycle/setup-execution.ts, src/lifecycle/plugin-sync-execution.ts, src/lifecycle/adapters/*, and test/module-boundaries.test.js.",
+          "limitations": "This does not change the external Codex/npm commands themselves; it verifies that parsing and process execution remain behind adapters.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T11:43:15.668Z"
         }
       ],
-      "updated_at": "2026-06-23T11:40:00.453Z"
+      "updated_at": "2026-06-23T11:43:15.668Z"
     },
     "AC-A-9": {
       "status": "passing",
