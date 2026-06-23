@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T09:13:28.771Z",
+  "updated_at": "2026-06-23T09:18:47.975Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -676,6 +676,17 @@
         "summary": "Context export will be split into read-only state collection, review payload assembly, and explicit artifact writing so external review tools can inspect OpenNori context without becoming a second runtime or report authority.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-context-export-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-core-review-projection-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Report rendering and lifecycle status should consume the same core review projection instead of each path recomputing current gap, completion, evidence health, profile compliance, intervention, and recommendation.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-core-review-projection-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

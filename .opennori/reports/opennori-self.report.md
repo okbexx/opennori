@@ -73,7 +73,7 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 | AC-A-5 | architecture | passing | verified | review-result: Status, report, and context export now pass ArchitectureState into completionAns… | tool-observation |
 | AC-A-6 | architecture | passing | verified | review-result: opennori check/report/context export are clean for opennori-self after architect… | tool-observation |
 | AC-A-7 | architecture | passing | verified | review-result: Unhealthy build-vs-buy decisions now appear as build_vs_buy review risks in comp… | tool-observation |
-| AC-A-8 | architecture | passing | verified | snapshot-review-state-boundary-refactor: Dashboard active snapshot now consumes the shared Goal… | tool-observation |
+| AC-A-8 | architecture | passing | verified | core-review-projection-boundary-refactor: OpenNori now has a core ReviewState projection shared… | tool-observation |
 | AC-A-9 | architecture | passing | verified | artifact-review: README, protocol, package Skills, and website describe OpenNori as Product AC… | tool-observation |
 | AC-A-10 | architecture | passing | verified | dogfood-result: OpenNori was dogfooded in the separate opennori-site repo under the current Plu… | tool-observation |
 | AC-Z-18 | productization | passing | verified | artifact-review: README now explains that agent_next.candidate_goals is the Skill routing surfa… | tool-observation |
@@ -1391,22 +1391,23 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 - User acceptance criterion: 作为用户，我查看 OpenNori 自身 dogfood 状态时，能知道 Architecture Baseline 已建立，但后续架构修复是否真的完成不能被最小可运行结果误报。
 - Measurement: 查看 OpenNori 自身 status/report、Architecture Baseline、build-vs-buy decision、代码结构审查和后续架构修复证据。
 - Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些架构风险或未完成缺口；如果核心结构仍未完成修复，目标不能显示 complete。
-- Evidence: snapshot-review-state-boundary-refactor: Dashboard active snapshot now consumes the shared
-  GoalReviewState read model for current gap, completion, intervention, acceptance review, evidence
-  health, Project Profile compliance, and architecture decision. goalReviewState now imports direct
-  core modules instead of the core barrel, preventing the shared outcome model from indirectly
-  depending on kernel/dashboard exports. Dashboard remains a read-only projection surface.
+- Evidence: core-review-projection-boundary-refactor: OpenNori now has a core ReviewState projection shared by
+  lifecycle goalReviewState and report rendering. The projection derives current gap, completion, user
+  intervention, acceptance review, evidence health, Project Profile compliance, and next
+  recommendation from contract, ledger, Project Profile, and ArchitectureState. Lifecycle adds only
+  agent_next, while report rendering consumes the same projection instead of recomputing a parallel
+  outcome model.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-23T09:12:59.161Z
+- Evidence recorded: 2026-06-23T09:18:36.846Z
 - Sources:
-  - type=architecture-apply, label=opennori-self-snapshot-goal-review-state-boundary,
-    path=.opennori/architecture/evidence/opennori-self-snapshot-goal-review-state-boundary.json,
-    summary=Architecture Baseline alignment context. This is not Product AC evidence by itself., role=context
+  - type=architecture-apply, label=opennori-self-core-review-projection-boundary,
+    path=.opennori/architecture/evidence/opennori-self-core-review-projection-boundary.json, summary=Architecture
+    Baseline alignment context. This is not Product AC evidence by itself., role=context
   - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
-  - type=command, label=npm run test:dashboard, command=npm run test:dashboard
   - type=command, label=npm run test:reporting, command=npm run test:reporting
+  - type=command, label=npm run test:cli, command=npm run test:cli
   - type=command, label=npx vitest run test/mcp.test.ts test/cli-reporting.test.js test/cli-human-output.test.js,
     command=npx vitest run test/mcp.test.ts test/cli-reporting.test.js test/cli-human-output.test.js
   - type=command, label=npm run lint, command=npm run lint
@@ -1416,16 +1417,17 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
     . --json
   - type=command, label=node ./bin/opennori.js context export --root . --json, command=node ./bin/opennori.js
     context export --root . --json
+  - type=artifact, label=src/core/review-state.ts, path=src/core/review-state.ts
   - type=artifact, label=src/lifecycle/goal-review-state.ts, path=src/lifecycle/goal-review-state.ts
-  - type=artifact, label=src/kernel/snapshot-goal.ts, path=src/kernel/snapshot-goal.ts
-  - type=artifact, label=src/kernel/snapshot-builder.ts, path=src/kernel/snapshot-builder.ts
-  - type=artifact, label=src/kernel/snapshot-outcome.ts, path=src/kernel/snapshot-outcome.ts
-- Reviewability: Inspect the listed source files and confirm active dashboard snapshots call goalReviewState before
-  rendering snapshot fields, snapshot outcome helpers only format already-computed state, and
-  goalReviewState imports direct core modules rather than the core barrel. Rerun the listed commands.
-- Limitations: This verifies the shared read-model boundary and dashboard projection behavior. It does not change
-  dashboard UI layout, persisted snapshot schema, or subjective AC quality rules, and it does not
-  replace future review if report rendering is refactored into the same model.
+  - type=artifact, label=src/core/report-render.ts, path=src/core/report-render.ts
+  - type=artifact, label=src/architecture/report.ts, path=src/architecture/report.ts
+  - type=artifact, label=src/cli/commands/reporting.ts, path=src/cli/commands/reporting.ts
+- Reviewability: Inspect src/core/review-state.ts and confirm it owns deterministic outcome projection below
+  lifecycle and kernel. Inspect lifecycle/reporting files to confirm they consume that projection, and
+  lifecycle alone adds agent_next. Rerun the listed commands.
+- Limitations: This verifies outcome projection sharing for lifecycle status/report/context surfaces. It does not
+  change report Markdown structure, dashboard visuals, persisted protocol fields, or subjective
+  Skill/user acceptance-quality review.
 
 ### AC-A-9
 
@@ -2583,7 +2585,7 @@ Requirement: required - OpenNori self-goal changes architecture requirement rout
 Baseline: typescript-agent-state-cli (active)
 Technical baseline: 5 runtime, 7 module, 5 contract, 5 flow, 7 dependency, 6 reference items
 Challenge: none
-Architecture apply records: 53
+Architecture apply records: 54
 Architecture evidence health: clear
 Build-vs-buy: clear (17 decisions)
 Agent guide: installed
@@ -2625,6 +2627,7 @@ Architecture apply records:
 - AC-A-8: aligned (typescript-agent-state-cli) - Split the CLI runtime boundary into executor, active-goal args, active-goal store, active-goal lock, and a compatibility runtime barrel while preserving deterministic .opennori state semantics.
 - AC-A-8: aligned (typescript-agent-state-cli) - Completion logic now separates acceptance basis view, intervention, review risks, completion answer, and next recommendation routing behind a compatibility export.
 - AC-A-8: aligned (typescript-agent-state-cli) - Context export will be split into read-only state collection, review payload assembly, and explicit artifact writing so external review tools can inspect OpenNori context without becoming a second runtime or report authority.
+- AC-A-8: aligned (typescript-agent-state-cli) - Report rendering and lifecycle status should consume the same core review projection instead of each path recomputing current gap, completion, evidence health, profile compliance, intervention, and recommendation.
 - AC-A-8: aligned (typescript-agent-state-cli) - Core shared helpers were split into protocol, IO, goal-state, dossier rendering, and dossier persistence modules while preserving shared.ts as a compatibility barrel.
 - AC-A-8: aligned (typescript-agent-state-cli) - Criterion status projections now use per-criterion ledger timestamps so recording one AC evidence does not make unrelated AC status files look updated.
 - AC-A-8: aligned (typescript-agent-state-cli) - Split dashboard inspect rendering into node-type read-only panels while keeping the dashboard as an observation surface over projected OpenNori state.

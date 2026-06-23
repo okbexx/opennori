@@ -1,5 +1,6 @@
 import { renderReport } from "../core.ts";
 import { readProjectProfile } from "../core/profile.ts";
+import { reviewState, type ReviewState } from "../core/review-state.ts";
 import type { EvidenceLedger, NoriContract } from "../types.ts";
 import { architectureState } from "./state.ts";
 
@@ -63,9 +64,10 @@ function renderArchitectureReportSection(root: string, goalId: string | undefine
   return lines.join("\n");
 }
 
-export function renderReportWithArchitecture(root: string, contract: NoriContract, ledger: EvidenceLedger): string {
+export function renderReportWithArchitecture(root: string, contract: NoriContract, ledger: EvidenceLedger, input: { review?: ReviewState } = {}): string {
   const architecture = architectureState(root, contract.goal_id);
   const profile = readProjectProfile(root);
-  const base = renderReport(contract, ledger, { root, architecture, profile }).trimEnd();
+  const review = input.review ?? reviewState(contract, ledger, { root, architecture, profile });
+  const base = renderReport(contract, ledger, { root, architecture, profile, review }).trimEnd();
   return `${base}\n\n${renderArchitectureReportSection(root, contract.goal_id).trimEnd()}\n`;
 }

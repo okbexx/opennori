@@ -4,17 +4,14 @@ import type {
   EvidenceSource,
   NoriContract
 } from "../types.ts";
-import { reviewAcceptanceQuality } from "../acceptance.ts";
-import { currentGap, evidenceHealth, evidenceView } from "./evidence.ts";
-import { emptyProjectProfile, profileCompliance, renderProfileLines } from "./profile.ts";
+import { evidenceView } from "./evidence.ts";
+import { emptyProjectProfile, renderProfileLines } from "./profile.ts";
 import { inferCriterionLayer } from "./shared.ts";
 import {
   acceptanceBasisView,
-  completionAnswer,
-  interventionForProfile,
-  nextRecommendation,
   type CompletionContext
 } from "./completion.ts";
+import { reviewState, type ReviewState } from "./review-state.ts";
 
 function escapeTableCell(value: unknown): string {
   return String(value || "")
@@ -94,15 +91,16 @@ function pushEvidenceSources(lines: string[], evidence: EvidenceRecord | null | 
 export function renderReport(
   contract: NoriContract,
   ledger: EvidenceLedger,
-  { root = process.cwd(), architecture = undefined, profile = emptyProjectProfile() }: CompletionContext = {}
+  { root = process.cwd(), architecture = undefined, profile = emptyProjectProfile(), review = undefined }: CompletionContext & { review?: ReviewState } = {}
 ): string {
-  const gap = currentGap(contract, ledger, profile);
-  const needed = interventionForProfile(contract, ledger, profile);
-  const completion = completionAnswer(contract, ledger, { root, architecture, profile });
-  const health = evidenceHealth(contract, ledger, { root });
-  const acceptanceReview = reviewAcceptanceQuality(contract);
-  const profileStatus = profileCompliance(profile, ledger);
-  const recommendation = nextRecommendation(contract, ledger, { root, architecture, profile });
+  const state = review ?? reviewState(contract, ledger, { root, architecture, profile });
+  const gap = state.current_gap;
+  const needed = state.intervention;
+  const completion = state.completion;
+  const health = state.evidence_health;
+  const acceptanceReview = state.acceptance_review;
+  const profileStatus = state.capability_compliance;
+  const recommendation = state.next_recommendation;
   const basis = acceptanceBasisView(contract);
   const lines = [
     `# ${contract.goal_id} Acceptance Report`,

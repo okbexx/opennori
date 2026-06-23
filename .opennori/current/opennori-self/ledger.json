@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T09:12:59.165Z",
+  "updated_at": "2026-06-23T09:18:36.850Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -7112,9 +7112,94 @@
           "limitations": "This verifies the shared read-model boundary and dashboard projection behavior. It does not change dashboard UI layout, persisted snapshot schema, or subjective AC quality rules, and it does not replace future review if report rendering is refactored into the same model.",
           "gate": "accepted",
           "created_at": "2026-06-23T09:12:59.161Z"
+        },
+        {
+          "kind": "core-review-projection-boundary-refactor",
+          "basis": "tool-observation",
+          "summary": "OpenNori now has a core ReviewState projection shared by lifecycle goalReviewState and report rendering. The projection derives current gap, completion, user intervention, acceptance review, evidence health, Project Profile compliance, and next recommendation from contract, ledger, Project Profile, and ArchitectureState. Lifecycle adds only agent_next, while report rendering consumes the same projection instead of recomputing a parallel outcome model.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-core-review-projection-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-core-review-projection-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:reporting",
+              "command": "npm run test:reporting"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:cli",
+              "command": "npm run test:cli"
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/mcp.test.ts test/cli-reporting.test.js test/cli-human-output.test.js",
+              "command": "npx vitest run test/mcp.test.ts test/cli-reporting.test.js test/cli-human-output.test.js"
+            },
+            {
+              "type": "command",
+              "label": "npm run lint",
+              "command": "npm run lint"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js check --root . --json",
+              "command": "node ./bin/opennori.js check --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js status --root . --json",
+              "command": "node ./bin/opennori.js status --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js context export --root . --json",
+              "command": "node ./bin/opennori.js context export --root . --json"
+            },
+            {
+              "type": "artifact",
+              "label": "src/core/review-state.ts",
+              "path": "src/core/review-state.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle/goal-review-state.ts",
+              "path": "src/lifecycle/goal-review-state.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/core/report-render.ts",
+              "path": "src/core/report-render.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/architecture/report.ts",
+              "path": "src/architecture/report.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/commands/reporting.ts",
+              "path": "src/cli/commands/reporting.ts"
+            }
+          ],
+          "reviewability": "Inspect src/core/review-state.ts and confirm it owns deterministic outcome projection below lifecycle and kernel. Inspect lifecycle/reporting files to confirm they consume that projection, and lifecycle alone adds agent_next. Rerun the listed commands.",
+          "limitations": "This verifies outcome projection sharing for lifecycle status/report/context surfaces. It does not change report Markdown structure, dashboard visuals, persisted protocol fields, or subjective Skill/user acceptance-quality review.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T09:18:36.846Z"
         }
       ],
-      "updated_at": "2026-06-23T09:12:59.161Z"
+      "updated_at": "2026-06-23T09:18:36.846Z"
     },
     "AC-A-9": {
       "status": "passing",

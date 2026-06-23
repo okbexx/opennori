@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 35,
-  "latest_evidence_summary": "Dashboard active snapshot now consumes the shared GoalReviewState read model for current gap, completion, intervention, acceptance review, evidence health, Project Profile compliance, and architecture decision. goalReviewState now imports direct core modules instead of the core barrel, preventing the shared outcome model from indirectly depending on kernel/dashboard exports. Dashboard remains a read-only projection surface.",
-  "updated_at": "2026-06-23T09:12:59.161Z"
+  "evidence_count": 36,
+  "latest_evidence_summary": "OpenNori now has a core ReviewState projection shared by lifecycle goalReviewState and report rendering. The projection derives current gap, completion, user intervention, acceptance review, evidence health, Project Profile compliance, and next recommendation from contract, ledger, Project Profile, and ArchitectureState. Lifecycle adds only agent_next, while report rendering consumes the same projection instead of recomputing a parallel outcome model.",
+  "updated_at": "2026-06-23T09:18:36.846Z"
 }

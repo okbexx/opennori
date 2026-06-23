@@ -28,10 +28,10 @@ export const reportCommand = defineCommand({
   run({ args, data }) {
     const { contract, ledger, root } = data.loadPair(args);
     const output = path.resolve(args.output || pathsForGoal(root, contract.goal_id).reportPath);
-    fs.mkdirSync(path.dirname(output), { recursive: true });
-    fs.writeFileSync(output, renderReportWithArchitecture(root, contract, ledger));
-    refreshManifest(root);
     const review = goalReviewState(root, contract, ledger);
+    fs.mkdirSync(path.dirname(output), { recursive: true });
+    fs.writeFileSync(output, renderReportWithArchitecture(root, contract, ledger, { review }));
+    refreshManifest(root);
     appendEvent(root, {
       type: "report.generated",
       goal_id: contract.goal_id,
@@ -102,8 +102,9 @@ export const archiveCommand = defineCommand({
     }
 
     data.savePair(acceptancePath, evidencePath, contract, ledger);
+    const review = goalReviewState(root, contract, ledger);
     fs.mkdirSync(path.dirname(reportPath), { recursive: true });
-    fs.writeFileSync(reportPath, renderReportWithArchitecture(root, contract, ledger));
+    fs.writeFileSync(reportPath, renderReportWithArchitecture(root, contract, ledger, { review }));
     fs.mkdirSync(path.dirname(targetGoalDir), { recursive: true });
     if (fs.existsSync(targetGoalDir) && args.force) fs.rmSync(targetGoalDir, { recursive: true, force: true });
     fs.renameSync(goalDir, targetGoalDir);

@@ -17,26 +17,27 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: snapshot-review-state-boundary-refactor - Dashboard active snapshot now consumes the shared GoalReviewState read model for current gap, completion, intervention, acceptance review, evidence health, Project Profile compliance, and architecture decision. goalReviewState now imports direct core modules instead of the core barrel, preventing the shared outcome model from indirectly depending on kernel/dashboard exports. Dashboard remains a read-only projection surface.
+Latest: core-review-projection-boundary-refactor - OpenNori now has a core ReviewState projection shared by lifecycle goalReviewState and report rendering. The projection derives current gap, completion, user intervention, acceptance review, evidence health, Project Profile compliance, and next recommendation from contract, ledger, Project Profile, and ArchitectureState. Lifecycle adds only agent_next, while report rendering consumes the same projection instead of recomputing a parallel outcome model.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed source files and confirm active dashboard snapshots call goalReviewState before rendering snapshot fields, snapshot outcome helpers only format already-computed state, and goalReviewState imports direct core modules rather than the core barrel. Rerun the listed commands.
-Limitations: This verifies the shared read-model boundary and dashboard projection behavior. It does not change dashboard UI layout, persisted snapshot schema, or subjective AC quality rules, and it does not replace future review if report rendering is refactored into the same model.
+Reviewability: Inspect src/core/review-state.ts and confirm it owns deterministic outcome projection below lifecycle and kernel. Inspect lifecycle/reporting files to confirm they consume that projection, and lifecycle alone adds agent_next. Rerun the listed commands.
+Limitations: This verifies outcome projection sharing for lifecycle status/report/context surfaces. It does not change report Markdown structure, dashboard visuals, persisted protocol fields, or subjective Skill/user acceptance-quality review.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-snapshot-goal-review-state-boundary.json
+- .opennori/architecture/evidence/opennori-self-core-review-projection-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:dashboard
 - npm run test:reporting
+- npm run test:cli
 - npx vitest run test/mcp.test.ts test/cli-reporting.test.js test/cli-human-output.test.js
 - npm run lint
 - node ./bin/opennori.js check --root . --json
 - node ./bin/opennori.js status --root . --json
 - node ./bin/opennori.js context export --root . --json
+- src/core/review-state.ts
 - src/lifecycle/goal-review-state.ts
-- src/kernel/snapshot-goal.ts
-- src/kernel/snapshot-builder.ts
-- src/kernel/snapshot-outcome.ts
+- src/core/report-render.ts
+- src/architecture/report.ts
+- src/cli/commands/reporting.ts
 
 ## Files
 
