@@ -2,7 +2,7 @@ import { readProjectProfile } from "../core/profile.ts";
 import type { NoriSnapshot } from "../types.ts";
 import { readActivity } from "./activity.ts";
 import { latestEvent, readEvents } from "./events.ts";
-import { buildActiveSnapshot, buildNoGoalSnapshot } from "./snapshot-goal.ts";
+import { buildActiveSnapshotFromPair, buildNoGoalSnapshot } from "./snapshot-goal.ts";
 import { latestHistorySummary } from "./snapshot-history.ts";
 import { chooseActivePair } from "./snapshot-paths.ts";
 
@@ -28,11 +28,10 @@ export function buildSnapshot(root: string, options: { goalId?: string } = {}): 
     });
   }
 
-  return buildActiveSnapshot(root, {
+  return buildActiveSnapshotFromPair(root, {
     schemaVersion: SNAPSHOT_SCHEMA_VERSION,
     generatedAt,
     pair,
-    projectProfile,
     activity,
     event,
     events

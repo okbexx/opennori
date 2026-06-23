@@ -1,15 +1,11 @@
-import { agentNextForRecommendation } from "../agent-next.ts";
+import { agentNextForRecommendation } from "../agent-next-recommendation.ts";
 import { reviewAcceptanceQuality } from "../acceptance.ts";
 import { architectureState } from "../architecture.ts";
-import {
-  completionAnswer,
-  currentGap,
-  evidenceHealth,
-  interventionForProfile,
-  nextRecommendation,
-  profileCompliance,
-  readProjectProfile
-} from "../core.ts";
+import { completionAnswer } from "../core/completion-answer.ts";
+import { currentGap, evidenceHealth } from "../core/evidence.ts";
+import { interventionForProfile } from "../core/intervention.ts";
+import { nextRecommendation } from "../core/next-recommendation.ts";
+import { profileCompliance, readProjectProfile } from "../core/profile.ts";
 import type {
   AcceptanceQualityAudit,
   AgentNext,

@@ -1,10 +1,7 @@
-import { architectureState } from "../architecture.ts";
-import { reviewAcceptanceQuality } from "../acceptance.ts";
-import { currentGap, evidenceHealth } from "../core/evidence.ts";
-import { profileCompliance, readProjectProfile } from "../core/profile.ts";
-import { completionAnswer, interventionForProfile } from "../core/report.ts";
 import { readGoalPayload } from "../core/shared.ts";
+import { goalReviewState, type GoalReviewState } from "../lifecycle/goal-review-state.ts";
 import type { NoriActivity, NoriEvent, NoriIdleSummary, NoriSnapshot } from "../types.ts";
+import type { profileCompliance, readProjectProfile } from "../core/profile.ts";
 import { activityAgentSummary, defaultAgentSummary } from "./snapshot-agent.ts";
 import { latestEvidenceSummary, snapshotCriteria } from "./snapshot-criteria.ts";
 import { activeOutcomeSummary, noGoalOutcomeSummary } from "./snapshot-outcome.ts";
@@ -61,20 +58,19 @@ export function buildActiveSnapshot(root: string, input: {
   schemaVersion: string;
   generatedAt: string;
   pair: SnapshotGoalPair;
-  projectProfile: ReturnType<typeof readProjectProfile>;
+  review: GoalReviewState;
   activity: NoriActivity | null;
   event: NoriEvent | null;
   events: NoriEvent[];
 }): NoriSnapshot {
-  const payload = readGoalPayload(input.pair);
-  const { contract, ledger } = payload;
-  const architecture = architectureState(root, contract.goal_id);
-  const gap = currentGap(contract, ledger, input.projectProfile);
-  const completion = completionAnswer(contract, ledger, { root, architecture, profile: input.projectProfile });
-  const userIntervention = interventionForProfile(contract, ledger, input.projectProfile);
-  const acceptanceReview = reviewAcceptanceQuality(contract);
-  const evidence = evidenceHealth(contract, ledger, { root });
-  const capabilityCompliance = profileCompliance(input.projectProfile, ledger);
+  const { contract, ledger } = input.review;
+  const architecture = input.review.architecture;
+  const gap = input.review.current_gap;
+  const completion = input.review.completion;
+  const userIntervention = input.review.intervention;
+  const acceptanceReview = input.review.acceptance_review;
+  const evidence = input.review.evidence_health;
+  const capabilityCompliance = input.review.capability_compliance;
   const activityState = input.activity?.state || "idle";
   const decision = completion.complete
     ? completion.confidence === "review-risk" ? "review_risk" : "complete"
@@ -122,7 +118,7 @@ export function buildActiveSnapshot(root: string, input: {
       gap,
       completion,
       userIntervention,
-      projectProfile: input.projectProfile,
+      projectProfile: input.review.profile,
       capabilityCompliance
     }),
     completion,
@@ -140,7 +136,7 @@ export function buildActiveSnapshot(root: string, input: {
       profile_title: architecture.baseline?.profile_title || null,
       open_challenges: architecture.open_challenges?.length || 0
     },
-    capability_profile: input.projectProfile,
+    capability_profile: input.review.profile,
     capability_compliance: capabilityCompliance,
     loop: {
       goal: "ready",
@@ -156,4 +152,19 @@ export function buildActiveSnapshot(root: string, input: {
     }),
     events: input.events
   };
+}
+
+export function buildActiveSnapshotFromPair(root: string, input: {
+  schemaVersion: string;
+  generatedAt: string;
+  pair: SnapshotGoalPair;
+  activity: NoriActivity | null;
+  event: NoriEvent | null;
+  events: NoriEvent[];
+}): NoriSnapshot {
+  const payload = readGoalPayload(input.pair);
+  return buildActiveSnapshot(root, {
+    ...input,
+    review: goalReviewState(root, payload.contract, payload.ledger)
+  });
 }

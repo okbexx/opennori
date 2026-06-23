@@ -1,7 +1,7 @@
-import { currentGap } from "../core/evidence.ts";
-import { profileCompliance, readProjectProfile } from "../core/profile.ts";
-import { completionAnswer, interventionForProfile } from "../core/report.ts";
 import type { NoriIdleSummary, NoriSnapshot } from "../types.ts";
+import type { currentGap } from "../core/evidence.ts";
+import type { profileCompliance, readProjectProfile } from "../core/profile.ts";
+import type { completionAnswer, interventionForProfile } from "../core/report.ts";
 
 export function profileOutcomeSummary(input: {
   hasCurrentGoal: boolean;

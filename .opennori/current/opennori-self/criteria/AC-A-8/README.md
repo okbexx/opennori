@@ -17,30 +17,26 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: goal-review-state-boundary-refactor - OpenNori now centralizes read-only goal outcome assembly in GoalReviewState. Status, resume, report, check, and context export share the same current gap, completion, intervention, acceptance review, evidence health, architecture, Project Profile compliance, next recommendation, and agent_next projection without adding any new state writer or subjective validator.
+Latest: snapshot-review-state-boundary-refactor - Dashboard active snapshot now consumes the shared GoalReviewState read model for current gap, completion, intervention, acceptance review, evidence health, Project Profile compliance, and architecture decision. goalReviewState now imports direct core modules instead of the core barrel, preventing the shared outcome model from indirectly depending on kernel/dashboard exports. Dashboard remains a read-only projection surface.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect goal-review-state.ts and the listed command modules. Confirm the projection is read-only, uses existing core/domain computations, and does not write .opennori state. Rerun the listed commands and compare status/report/context export output shape.
-Limitations: This centralizes outcome assembly for current CLI/report/context surfaces. Some lower-level helpers and dashboard snapshot builders still compute their own specialized projections and may be future cleanup candidates.
+Reviewability: Inspect the listed source files and confirm active dashboard snapshots call goalReviewState before rendering snapshot fields, snapshot outcome helpers only format already-computed state, and goalReviewState imports direct core modules rather than the core barrel. Rerun the listed commands.
+Limitations: This verifies the shared read-model boundary and dashboard projection behavior. It does not change dashboard UI layout, persisted snapshot schema, or subjective AC quality rules, and it does not replace future review if report rendering is refactored into the same model.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-goal-review-state-boundary.json
+- .opennori/architecture/evidence/opennori-self-snapshot-goal-review-state-boundary.json
 - npx tsc --noEmit --pretty false
+- npm run test:dashboard
 - npm run test:reporting
-- npm run test:cli
-- npx vitest run test/mcp.test.ts test/cli-acceptance.test.js test/cli-reporting.test.js test/cli-human-output.test.js
+- npx vitest run test/mcp.test.ts test/cli-reporting.test.js test/cli-human-output.test.js
 - npm run lint
 - node ./bin/opennori.js check --root . --json
 - node ./bin/opennori.js status --root . --json
 - node ./bin/opennori.js context export --root . --json
 - src/lifecycle/goal-review-state.ts
-- src/lifecycle/context-export-state.ts
-- src/cli/commands/acceptance/runtime-status.ts
-- src/cli/commands/reporting.ts
-- src/cli/commands/check.ts
-- test/reporting.test.js
-- test/cli-reporting.test.js
-- test/cli-acceptance.test.js
+- src/kernel/snapshot-goal.ts
+- src/kernel/snapshot-builder.ts
+- src/kernel/snapshot-outcome.ts
 
 ## Files
 

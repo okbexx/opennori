@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-snapshot-goal-review-state-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Dashboard active snapshot will consume the shared GoalReviewState outcome projection so status, report, context export, and dashboard do not grow separate completion authorities.",
+  "fit": "The confirmed TypeScript agent-state CLI baseline keeps .opennori JSON as source of truth, goalReviewState as the shared read model, and dashboard/kernel as a read-only projection surface.",
+  "implementation_focus": "Refactor kernel snapshot assembly to reuse GoalReviewState and remove duplicate current gap, completion, evidence health, profile compliance, and intervention computation from dashboard snapshot code.",
+  "evidence": "src/lifecycle/goal-review-state.ts centralizes review state; src/kernel/snapshot-goal.ts currently duplicates this assembly for dashboard projection.",
+  "limitations": "This record only covers the read-model boundary; it does not change dashboard UI, persisted protocol schema, or subjective AC quality rules.",
+  "created_at": "2026-06-23T09:08:44.733Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

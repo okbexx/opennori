@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T09:05:19.545Z",
+  "updated_at": "2026-06-23T09:12:59.165Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -7032,9 +7032,89 @@
           "limitations": "This centralizes outcome assembly for current CLI/report/context surfaces. Some lower-level helpers and dashboard snapshot builders still compute their own specialized projections and may be future cleanup candidates.",
           "gate": "accepted",
           "created_at": "2026-06-23T09:05:19.541Z"
+        },
+        {
+          "kind": "snapshot-review-state-boundary-refactor",
+          "basis": "tool-observation",
+          "summary": "Dashboard active snapshot now consumes the shared GoalReviewState read model for current gap, completion, intervention, acceptance review, evidence health, Project Profile compliance, and architecture decision. goalReviewState now imports direct core modules instead of the core barrel, preventing the shared outcome model from indirectly depending on kernel/dashboard exports. Dashboard remains a read-only projection surface.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-snapshot-goal-review-state-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-snapshot-goal-review-state-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:reporting",
+              "command": "npm run test:reporting"
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/mcp.test.ts test/cli-reporting.test.js test/cli-human-output.test.js",
+              "command": "npx vitest run test/mcp.test.ts test/cli-reporting.test.js test/cli-human-output.test.js"
+            },
+            {
+              "type": "command",
+              "label": "npm run lint",
+              "command": "npm run lint"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js check --root . --json",
+              "command": "node ./bin/opennori.js check --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js status --root . --json",
+              "command": "node ./bin/opennori.js status --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js context export --root . --json",
+              "command": "node ./bin/opennori.js context export --root . --json"
+            },
+            {
+              "type": "artifact",
+              "label": "src/lifecycle/goal-review-state.ts",
+              "path": "src/lifecycle/goal-review-state.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/kernel/snapshot-goal.ts",
+              "path": "src/kernel/snapshot-goal.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/kernel/snapshot-builder.ts",
+              "path": "src/kernel/snapshot-builder.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/kernel/snapshot-outcome.ts",
+              "path": "src/kernel/snapshot-outcome.ts"
+            }
+          ],
+          "reviewability": "Inspect the listed source files and confirm active dashboard snapshots call goalReviewState before rendering snapshot fields, snapshot outcome helpers only format already-computed state, and goalReviewState imports direct core modules rather than the core barrel. Rerun the listed commands.",
+          "limitations": "This verifies the shared read-model boundary and dashboard projection behavior. It does not change dashboard UI layout, persisted snapshot schema, or subjective AC quality rules, and it does not replace future review if report rendering is refactored into the same model.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T09:12:59.161Z"
         }
       ],
-      "updated_at": "2026-06-23T09:05:19.541Z"
+      "updated_at": "2026-06-23T09:12:59.161Z"
     },
     "AC-A-9": {
       "status": "passing",
