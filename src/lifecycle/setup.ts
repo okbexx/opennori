@@ -1,30 +1,26 @@
-import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fail, ok } from "../core.ts";
 import { pluginState } from "../plugin.ts";
 import type { InstallPlan, LifecyclePlanAction, NoriResult } from "../types.ts";
 import { bootstrap } from "./bootstrap.ts";
 import { doctor } from "./doctor.ts";
+import {
+  commandAction,
+  defaultExternalCommandRunner,
+  runExternalCommandAction,
+  summarizeExternalActions,
+  type ExternalActionStatus,
+  type ExternalCommandAction,
+  type ExternalCommandResult,
+  type ExternalCommandRunner
+} from "./external-actions.ts";
 import { installActions } from "./install.ts";
 import { buildInstallPlan } from "./plans.ts";
 import { PACKAGE_JSON } from "./shared.ts";
 
-export type SetupActionStatus = "exists" | "will-run" | "unavailable" | "applied" | "failed";
-
-export type SetupPlanAction = {
-  id: "codex_marketplace" | "codex_plugin" | "packaged_skills" | "global_cli" | "project_state" | "doctor";
-  kind: string;
-  action: SetupActionStatus;
-  command?: string[];
-  command_display?: string;
-  would_write: boolean;
-  will_write: boolean;
-  destructive: boolean;
-  reason: string;
-  recovery?: string;
-  stdout?: string;
-  stderr?: string;
-};
+export type SetupActionId = "codex_marketplace" | "codex_plugin" | "packaged_skills" | "global_cli" | "project_state" | "doctor";
+export type SetupActionStatus = ExternalActionStatus;
+export type SetupPlanAction = ExternalCommandAction<SetupActionId>;
 
 export type SetupPlan = {
   schema_version: "opennori/setup-plan-v1";
@@ -42,14 +38,8 @@ export type SetupPlan = {
   project_install_plan: InstallPlan;
 };
 
-export type SetupCommandResult = {
-  status: number | null;
-  stdout: string;
-  stderr: string;
-  error?: Error;
-};
-
-export type SetupCommandRunner = (command: string, args: string[]) => SetupCommandResult;
+export type SetupCommandResult = ExternalCommandResult;
+export type SetupCommandRunner = ExternalCommandRunner;
 
 export type SetupOptions = {
   root?: string;
@@ -57,67 +47,6 @@ export type SetupOptions = {
   confirmed?: boolean;
   runner?: SetupCommandRunner;
 };
-
-function defaultRunner(command: string, args: string[]): SetupCommandResult {
-  const result = spawnSync(command, args, { encoding: "utf8" });
-  return {
-    status: result.status,
-    stdout: result.stdout || "",
-    stderr: result.stderr || "",
-    error: result.error
-  };
-}
-
-function commandDisplay(command: string[]): string {
-  return command.map((part) => (/^[a-zA-Z0-9_./@:=,-]+$/.test(part) ? part : JSON.stringify(part))).join(" ");
-}
-
-function commandAction(
-  id: SetupPlanAction["id"],
-  kind: string,
-  command: string[],
-  reason: string,
-  { exists = false, available = true, confirmed = false, recovery }: { exists?: boolean; available?: boolean; confirmed?: boolean; recovery?: string } = {}
-): SetupPlanAction {
-  if (!available) {
-    return {
-      id,
-      kind,
-      action: "unavailable",
-      command,
-      command_display: commandDisplay(command),
-      would_write: false,
-      will_write: false,
-      destructive: false,
-      reason,
-      recovery
-    };
-  }
-  if (exists) {
-    return {
-      id,
-      kind,
-      action: "exists",
-      command,
-      command_display: commandDisplay(command),
-      would_write: false,
-      will_write: false,
-      destructive: false,
-      reason
-    };
-  }
-  return {
-    id,
-    kind,
-    action: "will-run",
-    command,
-    command_display: commandDisplay(command),
-    would_write: true,
-    will_write: confirmed,
-    destructive: false,
-    reason
-  };
-}
 
 function includesMarketplace(stdout: string): boolean {
   return /^opennori\s/m.test(stdout);
@@ -251,17 +180,7 @@ function doctorAction(confirmed: boolean): SetupPlanAction {
   };
 }
 
-function summarize(actions: SetupPlanAction[]) {
-  return {
-    total: actions.length,
-    would_write: actions.filter((action) => action.would_write).length,
-    will_write: actions.filter((action) => action.will_write).length,
-    unavailable: actions.filter((action) => action.action === "unavailable").length,
-    destructive: actions.filter((action) => action.destructive).length
-  };
-}
-
-export function buildSetupPlan(root: string, { dryRun = true, confirmed = false, runner = defaultRunner }: SetupOptions = {}): SetupPlan {
+export function buildSetupPlan(root: string, { dryRun = true, confirmed = false, runner = defaultExternalCommandRunner }: SetupOptions = {}): SetupPlan {
   const willApply = confirmed && !dryRun;
   const projectActions = installActions(root, { dryRun: !willApply, force: false, mergeAgentRoute: false });
   const projectInstallPlan = buildInstallPlan(root, projectActions, { dryRun: !willApply, force: false, mergeAgentRoute: false });
@@ -275,34 +194,13 @@ export function buildSetupPlan(root: string, { dryRun = true, confirmed = false,
     root,
     dry_run: !willApply,
     confirmed,
-    summary: summarize(actions),
+    summary: summarizeExternalActions(actions),
     actions,
     project_install_plan: projectInstallPlan
   };
 }
 
-function runSetupAction(action: SetupPlanAction, runner: SetupCommandRunner): SetupPlanAction {
-  if (!action.command || !action.will_write || action.action !== "will-run") return action;
-  const [command, ...args] = action.command;
-  if (!command) return action;
-  const result = runner(command, args);
-  if (result.status === 0) {
-    return {
-      ...action,
-      action: "applied",
-      stdout: result.stdout.trim() || undefined,
-      stderr: result.stderr.trim() || undefined
-    };
-  }
-  return {
-    ...action,
-    action: "failed",
-    stdout: result.stdout.trim() || undefined,
-    stderr: result.stderr.trim() || result.error?.message || undefined
-  };
-}
-
-export function setup(root: string, { dryRun = true, confirmed = false, runner = defaultRunner }: SetupOptions = {}): NoriResult {
+export function setup(root: string, { dryRun = true, confirmed = false, runner = defaultExternalCommandRunner }: SetupOptions = {}): NoriResult {
   const projectRoot = path.resolve(root);
   const plan = buildSetupPlan(projectRoot, { dryRun, confirmed, runner });
   const needsConfirm = !confirmed || dryRun;
@@ -336,7 +234,7 @@ export function setup(root: string, { dryRun = true, confirmed = false, runner =
       appliedActions.push(action);
       continue;
     }
-    const applied = runSetupAction(action, runner);
+    const applied = runExternalCommandAction(action, runner);
     appliedActions.push(applied);
     if (applied.action === "failed") {
       return fail(
@@ -352,7 +250,7 @@ export function setup(root: string, { dryRun = true, confirmed = false, runner =
   const health = doctor(projectRoot);
   const completedPlan: SetupPlan = {
     ...plan,
-    summary: summarize(appliedActions),
+    summary: summarizeExternalActions(appliedActions),
     actions: appliedActions.map((action) => {
       if (action.id === "project_state") {
         return {

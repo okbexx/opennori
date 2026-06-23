@@ -1,0 +1,65 @@
+{
+  "kind": "architecture-refactor-verification",
+  "basis": "tool-observation",
+  "summary": "OpenNori lifecycle capability-bundle infrastructure now has a shared external-actions module for command runner, command display, action preview, summary counts, and applied/failed command results. setup.ts and plugin-sync.ts keep their product-specific setup and plugin sync logic, but no longer duplicate the same external command planning/execution infrastructure. Verified that setup and plugin sync preview outputs still expose the same setup-plan/plugin-sync-plan action surfaces and that lifecycle/CLI/typecheck checks pass.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-lifecycle-external-actions-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-lifecycle-external-actions-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run test:lifecycle",
+      "command": "npm run test:lifecycle"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli",
+      "command": "npm run test:cli"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js setup --root /tmp/opennori-lifecycle-preview --json",
+      "command": "node ./bin/opennori.js setup --root /tmp/opennori-lifecycle-preview --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js plugin sync --json",
+      "command": "node ./bin/opennori.js plugin sync --json"
+    },
+    {
+      "type": "command",
+      "label": "git diff --check",
+      "command": "git diff --check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/external-actions.ts",
+      "path": "src/lifecycle/external-actions.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/setup.ts",
+      "path": "src/lifecycle/setup.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/plugin-sync.ts",
+      "path": "src/lifecycle/plugin-sync.ts"
+    }
+  ],
+  "reviewability": "Inspect external-actions.ts for the shared runner/action/summary/apply helpers, then inspect setup.ts and plugin-sync.ts to confirm they keep product-specific bundle logic while delegating shared command infrastructure. Rerun the listed tests and preview commands; setup should still produce opennori/setup-plan-v1 and plugin sync should still produce opennori/plugin-sync-plan-v1.",
+  "limitations": "This verifies setup/plugin-sync shared lifecycle infrastructure and preview behavior. It does not yet refactor install/upgrade/uninstall managed-file planning or lifecycle doctor internals.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T03:11:16.842Z"
+}

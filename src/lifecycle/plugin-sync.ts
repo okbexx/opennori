@@ -1,27 +1,23 @@
-import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fail, ok } from "../core.ts";
 import { packageRoot } from "../package-root.ts";
 import { pluginState } from "../plugin.ts";
 import type { NoriResult } from "../types.ts";
+import {
+  commandAction,
+  defaultExternalCommandRunner,
+  runExternalCommandAction,
+  summarizeExternalActions,
+  type ExternalActionStatus,
+  type ExternalCommandAction,
+  type ExternalCommandResult,
+  type ExternalCommandRunner
+} from "./external-actions.ts";
 import { PACKAGE_JSON } from "./shared.ts";
 
-export type PluginSyncActionStatus = "exists" | "will-run" | "unavailable" | "applied" | "failed";
+export type PluginSyncActionStatus = ExternalActionStatus;
 
-export type PluginSyncAction = {
-  id: "codex_marketplace" | "codex_plugin" | "packaged_skills";
-  kind: string;
-  action: PluginSyncActionStatus;
-  command?: string[];
-  command_display?: string;
-  would_write: boolean;
-  will_write: boolean;
-  destructive: boolean;
-  reason: string;
-  recovery?: string;
-  stdout?: string;
-  stderr?: string;
-};
+export type PluginSyncAction = ExternalCommandAction<"codex_marketplace" | "codex_plugin" | "packaged_skills">;
 
 export type PluginSyncPlan = {
   schema_version: "opennori/plugin-sync-plan-v1";
@@ -38,14 +34,8 @@ export type PluginSyncPlan = {
   actions: PluginSyncAction[];
 };
 
-export type PluginSyncCommandResult = {
-  status: number | null;
-  stdout: string;
-  stderr: string;
-  error?: Error;
-};
-
-export type PluginSyncCommandRunner = (command: string, args: string[]) => PluginSyncCommandResult;
+export type PluginSyncCommandResult = ExternalCommandResult;
+export type PluginSyncCommandRunner = ExternalCommandRunner;
 
 export type PluginSyncOptions = {
   dryRun?: boolean;
@@ -53,20 +43,6 @@ export type PluginSyncOptions = {
   local?: boolean;
   runner?: PluginSyncCommandRunner;
 };
-
-function defaultRunner(command: string, args: string[]): PluginSyncCommandResult {
-  const result = spawnSync(command, args, { encoding: "utf8" });
-  return {
-    status: result.status,
-    stdout: result.stdout || "",
-    stderr: result.stderr || "",
-    error: result.error
-  };
-}
-
-function commandDisplay(command: string[]): string {
-  return command.map((part) => (/^[a-zA-Z0-9_./@:=,-]+$/.test(part) ? part : JSON.stringify(part))).join(" ");
-}
 
 function marketplaceRoot(stdout: string): string | null {
   const line = stdout.split(/\r?\n/).find((entry) => /^opennori\s+/.test(entry));
@@ -82,53 +58,6 @@ function samePath(left: string | null, right: string): boolean {
 function installedPluginVersion(stdout: string): string | null {
   const match = stdout.match(/^opennori@opennori\s+installed,\s+enabled\s+(\S+)/m);
   return match?.[1] || null;
-}
-
-function commandAction(
-  id: PluginSyncAction["id"],
-  kind: string,
-  command: string[],
-  reason: string,
-  { exists = false, available = true, confirmed = false, recovery }: { exists?: boolean; available?: boolean; confirmed?: boolean; recovery?: string } = {}
-): PluginSyncAction {
-  if (!available) {
-    return {
-      id,
-      kind,
-      action: "unavailable",
-      command,
-      command_display: commandDisplay(command),
-      would_write: false,
-      will_write: false,
-      destructive: false,
-      reason,
-      recovery
-    };
-  }
-  if (exists) {
-    return {
-      id,
-      kind,
-      action: "exists",
-      command,
-      command_display: commandDisplay(command),
-      would_write: false,
-      will_write: false,
-      destructive: false,
-      reason
-    };
-  }
-  return {
-    id,
-    kind,
-    action: "will-run",
-    command,
-    command_display: commandDisplay(command),
-    would_write: true,
-    will_write: confirmed,
-    destructive: false,
-    reason
-  };
 }
 
 function packagedSkillsAction(): PluginSyncAction {
@@ -201,17 +130,7 @@ function pluginAction(runner: PluginSyncCommandRunner, codexAvailable: boolean, 
   });
 }
 
-function summarize(actions: PluginSyncAction[]) {
-  return {
-    total: actions.length,
-    would_write: actions.filter((action) => action.would_write).length,
-    will_write: actions.filter((action) => action.will_write).length,
-    unavailable: actions.filter((action) => action.action === "unavailable").length,
-    destructive: actions.filter((action) => action.destructive).length
-  };
-}
-
-export function buildPluginSyncPlan({ dryRun = true, confirmed = false, local = false, runner = defaultRunner }: PluginSyncOptions = {}): PluginSyncPlan {
+export function buildPluginSyncPlan({ dryRun = true, confirmed = false, local = false, runner = defaultExternalCommandRunner }: PluginSyncOptions = {}): PluginSyncPlan {
   const willApply = confirmed && !dryRun;
   const marketplace = marketplaceAction(runner, willApply, local);
   const actions = [
@@ -224,33 +143,12 @@ export function buildPluginSyncPlan({ dryRun = true, confirmed = false, local = 
     dry_run: !willApply,
     confirmed,
     local,
-    summary: summarize(actions),
+    summary: summarizeExternalActions(actions),
     actions
   };
 }
 
-function runPluginSyncAction(action: PluginSyncAction, runner: PluginSyncCommandRunner): PluginSyncAction {
-  if (!action.command || !action.will_write || action.action !== "will-run") return action;
-  const [command, ...args] = action.command;
-  if (!command) return action;
-  const result = runner(command, args);
-  if (result.status === 0) {
-    return {
-      ...action,
-      action: "applied",
-      stdout: result.stdout.trim() || undefined,
-      stderr: result.stderr.trim() || undefined
-    };
-  }
-  return {
-    ...action,
-    action: "failed",
-    stdout: result.stdout.trim() || undefined,
-    stderr: result.stderr.trim() || result.error?.message || undefined
-  };
-}
-
-export function syncPlugin({ dryRun = true, confirmed = false, local = false, runner = defaultRunner }: PluginSyncOptions = {}): NoriResult {
+export function syncPlugin({ dryRun = true, confirmed = false, local = false, runner = defaultExternalCommandRunner }: PluginSyncOptions = {}): NoriResult {
   const plan = buildPluginSyncPlan({ dryRun, confirmed, local, runner });
   const needsConfirm = !confirmed || dryRun;
   if (needsConfirm) {
@@ -278,7 +176,7 @@ export function syncPlugin({ dryRun = true, confirmed = false, local = false, ru
 
   const appliedActions: PluginSyncAction[] = [];
   for (const action of plan.actions) {
-    const applied = runPluginSyncAction(action, runner);
+    const applied = runExternalCommandAction(action, runner);
     appliedActions.push(applied);
     if (applied.action === "failed") {
       return fail(
@@ -291,7 +189,7 @@ export function syncPlugin({ dryRun = true, confirmed = false, local = false, ru
 
   const completedPlan: PluginSyncPlan = {
     ...plan,
-    summary: summarize(appliedActions),
+    summary: summarizeExternalActions(appliedActions),
     actions: appliedActions
   };
 

@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T03:01:35.436Z",
+  "updated_at": "2026-06-23T03:11:16.938Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -591,6 +591,17 @@
         "schema_errors": []
       },
       {
+        "id": "opennori-self-lifecycle-external-actions-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Extracted shared lifecycle external-command action infrastructure used by setup and plugin sync while preserving setup/plugin-sync preview and confirm semantics.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-lifecycle-external-actions-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
         "id": "opennori-self-types-domain-boundary",
         "goal_id": "opennori-self",
         "criterion_id": "AC-A-8",
@@ -634,7 +645,7 @@
         "recommendation": "self-build",
         "status": "active",
         "summary": "Use a small project-local write lock around active-goal mutating CLI commands so read-modify-write operations on .opennori/active are serialized.",
-        "current_project": "src/cli/command-tree.ts already centralizes command execution policy, and src/cli/runtime.ts already owns active-goal loading and saving; the lock belongs at this CLI runtime boundary.",
+        "current_project": "src/cli/registry.ts and src/cli/runner.ts centralize command policy and execution; src/cli/active-goal-store.ts owns active-goal loading and saving; src/cli/active-goal-lock.ts owns the single-writer lock. src/cli/runtime.ts remains only a compatibility barrel.",
         "standard_library": "Node fs.mkdirSync provides atomic directory creation that works as a local filesystem lock for this single-host project-state use case.",
         "official_sdk": "No official SDK applies to OpenNori local state consistency.",
         "open_source": "proper-lockfile and lockfile-style libraries were considered, but this need is a narrow local single-writer guard around one project-state directory; adding a dependency would increase product surface without improving the acceptance loop.",

@@ -17,25 +17,23 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor-verification - OpenNori CLI runtime infrastructure is now separated into executor, active-goal args, active-goal store, active-goal lock, and a compatibility runtime barrel. runner.ts consumes lock/store directly, while command modules can continue importing the runtime barrel during migration. The split keeps objective .opennori state loading, dossier writes, stale-evidence pruning, citty command execution, and single-writer locking in deterministic code, without adding subjective AC or architecture-quality validators.
+Latest: architecture-refactor-verification - OpenNori lifecycle capability-bundle infrastructure now has a shared external-actions module for command runner, command display, action preview, summary counts, and applied/failed command results. setup.ts and plugin-sync.ts keep their product-specific setup and plugin sync logic, but no longer duplicate the same external command planning/execution infrastructure. Verified that setup and plugin sync preview outputs still expose the same setup-plan/plugin-sync-plan action surfaces and that lifecycle/CLI/typecheck checks pass.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed CLI runtime files: executor.ts should only wrap citty runCommand, active-goal-args.ts should only define shared CLI args, active-goal-store.ts should own load/save/prune/dossier state, active-goal-lock.ts should own the local write lock and should not read goal payloads, runtime.ts should only re-export. Rerun the listed commands.
-Limitations: This verifies the CLI runtime infrastructure boundary and current behavior. It does not yet split every individual command module or lifecycle/setup orchestration module.
+Reviewability: Inspect external-actions.ts for the shared runner/action/summary/apply helpers, then inspect setup.ts and plugin-sync.ts to confirm they keep product-specific bundle logic while delegating shared command infrastructure. Rerun the listed tests and preview commands; setup should still produce opennori/setup-plan-v1 and plugin sync should still produce opennori/plugin-sync-plan-v1.
+Limitations: This verifies setup/plugin-sync shared lifecycle infrastructure and preview behavior. It does not yet refactor install/upgrade/uninstall managed-file planning or lifecycle doctor internals.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-cli-runtime-boundary.json
-- npx tsc --noEmit --pretty false
-- npm run test:core
+- .opennori/architecture/evidence/opennori-self-lifecycle-external-actions-boundary.json
+- npm run test:lifecycle
 - npm run test:cli
+- npx tsc --noEmit --pretty false
+- node ./bin/opennori.js setup --root /tmp/opennori-lifecycle-preview --json
+- node ./bin/opennori.js plugin sync --json
 - git diff --check
-- src/cli/executor.ts
-- src/cli/active-goal-args.ts
-- src/cli/active-goal-store.ts
-- src/cli/active-goal-lock.ts
-- src/cli/runtime.ts
-- src/cli/runner.ts
-- test/core.test.js
+- src/lifecycle/external-actions.ts
+- src/lifecycle/setup.ts
+- src/lifecycle/plugin-sync.ts
 
 ## Files
 

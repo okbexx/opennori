@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-lifecycle-external-actions-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Extracted shared lifecycle external-command action infrastructure used by setup and plugin sync while preserving setup/plugin-sync preview and confirm semantics.",
+  "fit": "OpenNori's confirmed baseline treats lifecycle commands as deterministic capability-bundle state orchestration. The shared external-actions module keeps command runner, command display, preview action, summary, and apply-result behavior in one infrastructure boundary, while setup.ts and plugin-sync.ts keep their product-specific bundle logic.",
+  "implementation_focus": "Lifecycle setup/plugin-sync external command planning and execution boundary.",
+  "evidence": "git diff --check",
+  "limitations": "This verifies setup/plugin-sync shared lifecycle infrastructure. It does not yet refactor install/upgrade/uninstall managed-file planning or lifecycle doctor internals.",
+  "created_at": "2026-06-23T03:11:01.271Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}
