@@ -17,24 +17,29 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: agent-next-boundary-verification - AgentNext route-surface boundaries were split: src/agent-next.ts keeps the exported routing functions; src/agent-next-builder.ts builds the standard AgentNext payload; src/agent-next-activity.ts builds optional dashboard activity command templates; src/agent-next-doctor.ts filters recoverable active goals. Typecheck, focused CLI tests, reporting tests, doctor/status, and diff checks passed, and status still returns agent_next ready_for_next_loop.
+Latest: dashboard-architecture-boundary-verification - Dashboard inspect rendering is now split by observation node type: the route component delegates to read-only Goal, Passed Criteria, Project Profile, Criterion, and Evidence panels, with shared copy/path/status helpers isolated under components/inspect. The dashboard still renders only projected snapshot data and exposes no approve, waive, evidence, profile, architecture, or report write controls from these panels.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed AgentNext modules to confirm routing prose, payload construction, dashboard activity templates, and doctor active-goal helpers are separated while public route functions remain stable. Rerun the listed focused verification commands.
-Limitations: This proves the AgentNext module boundary and output behavior for the current route surface. It does not redesign route wording, add new states, or change Skill behavior.
+Reviewability: Inspect the listed dashboard source files. Confirm InspectNodePanel is now only a node-type router, the node panels are read-only renderers over snapshot rawData, Project Profile remains project-level observation, evidence panels only show review sources, and no confirmation or state-write controls were added. Rerun the listed dashboard, typecheck, lint, doctor, and status commands.
+Limitations: This verifies the dashboard inspect boundary and built asset update. It does not redesign the radar visualization, change snapshot semantics, or include a fresh browser screenshot; visual review can still be done by running opennori dashboard.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-agent-next-boundary.json
+- .opennori/architecture/evidence/opennori-self-dashboard-inspect-boundary.json
+- npm run test:dashboard
+- npm run typecheck:dashboard
 - npx tsc --noEmit --pretty false
-- npm run test:cli -- --run test/cli-lifecycle.test.js test/cli-acceptance.test.js test/cli-architecture.test.js test/cli-reporting.test.js
-- npm run test:reporting
+- npm run lint
 - node ./bin/opennori.js doctor --root . --json
 - node ./bin/opennori.js status --root . --json
-- git diff --check
-- src/agent-next.ts
-- src/agent-next-builder.ts
-- src/agent-next-activity.ts
-- src/agent-next-doctor.ts
+- src/dashboard/src/components/InspectNodePanel.tsx
+- src/dashboard/src/components/inspect/GoalInspectPanel.tsx
+- src/dashboard/src/components/inspect/PassedCriteriaPanel.tsx
+- src/dashboard/src/components/inspect/ProfileInspectPanel.tsx
+- src/dashboard/src/components/inspect/CriterionInspectPanel.tsx
+- src/dashboard/src/components/inspect/EvidenceInspectPanel.tsx
+- src/dashboard/src/components/inspect/InspectShared.tsx
+- dashboard/index.html
+- dashboard/assets/index-QMqd8O4F.js
 
 ## Files
 

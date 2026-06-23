@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 11,
-  "latest_evidence_summary": "AgentNext route-surface boundaries were split: src/agent-next.ts keeps the exported routing functions; src/agent-next-builder.ts builds the standard AgentNext payload; src/agent-next-activity.ts builds optional dashboard activity command templates; src/agent-next-doctor.ts filters recoverable active goals. Typecheck, focused CLI tests, reporting tests, doctor/status, and diff checks passed, and status still returns agent_next ready_for_next_loop.",
-  "updated_at": "2026-06-23T03:45:59.733Z"
+  "evidence_count": 12,
+  "latest_evidence_summary": "Dashboard inspect rendering is now split by observation node type: the route component delegates to read-only Goal, Passed Criteria, Project Profile, Criterion, and Evidence panels, with shared copy/path/status helpers isolated under components/inspect. The dashboard still renders only projected snapshot data and exposes no approve, waive, evidence, profile, architecture, or report write controls from these panels.",
+  "updated_at": "2026-06-23T03:55:50.858Z"
 }

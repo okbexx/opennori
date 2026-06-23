@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T03:45:59.733Z",
+  "updated_at": "2026-06-23T03:55:50.858Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -5237,6 +5237,101 @@
           "limitations": "This proves the AgentNext module boundary and output behavior for the current route surface. It does not redesign route wording, add new states, or change Skill behavior.",
           "gate": "accepted",
           "created_at": "2026-06-23T03:45:59.731Z"
+        },
+        {
+          "kind": "dashboard-architecture-boundary-verification",
+          "basis": "tool-observation",
+          "summary": "Dashboard inspect rendering is now split by observation node type: the route component delegates to read-only Goal, Passed Criteria, Project Profile, Criterion, and Evidence panels, with shared copy/path/status helpers isolated under components/inspect. The dashboard still renders only projected snapshot data and exposes no approve, waive, evidence, profile, architecture, or report write controls from these panels.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-dashboard-inspect-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-dashboard-inspect-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run typecheck:dashboard",
+              "command": "npm run typecheck:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run lint",
+              "command": "npm run lint"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js doctor --root . --json",
+              "command": "node ./bin/opennori.js doctor --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js status --root . --json",
+              "command": "node ./bin/opennori.js status --root . --json"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/InspectNodePanel.tsx",
+              "path": "src/dashboard/src/components/InspectNodePanel.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/inspect/GoalInspectPanel.tsx",
+              "path": "src/dashboard/src/components/inspect/GoalInspectPanel.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/inspect/PassedCriteriaPanel.tsx",
+              "path": "src/dashboard/src/components/inspect/PassedCriteriaPanel.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/inspect/ProfileInspectPanel.tsx",
+              "path": "src/dashboard/src/components/inspect/ProfileInspectPanel.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/inspect/CriterionInspectPanel.tsx",
+              "path": "src/dashboard/src/components/inspect/CriterionInspectPanel.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/inspect/EvidenceInspectPanel.tsx",
+              "path": "src/dashboard/src/components/inspect/EvidenceInspectPanel.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/inspect/InspectShared.tsx",
+              "path": "src/dashboard/src/components/inspect/InspectShared.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "dashboard/index.html",
+              "path": "dashboard/index.html"
+            },
+            {
+              "type": "artifact",
+              "label": "dashboard/assets/index-QMqd8O4F.js",
+              "path": "dashboard/assets/index-QMqd8O4F.js"
+            }
+          ],
+          "reviewability": "Inspect the listed dashboard source files. Confirm InspectNodePanel is now only a node-type router, the node panels are read-only renderers over snapshot rawData, Project Profile remains project-level observation, evidence panels only show review sources, and no confirmation or state-write controls were added. Rerun the listed dashboard, typecheck, lint, doctor, and status commands.",
+          "limitations": "This verifies the dashboard inspect boundary and built asset update. It does not redesign the radar visualization, change snapshot semantics, or include a fresh browser screenshot; visual review can still be done by running opennori dashboard.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T03:55:50.855Z"
         }
       ]
     },

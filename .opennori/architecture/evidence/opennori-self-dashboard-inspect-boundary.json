@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-dashboard-inspect-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Split dashboard inspect rendering into node-type read-only panels while keeping the dashboard as an observation surface over projected OpenNori state.",
+  "fit": "The change follows the dashboard-observation-layer and React-dashboard baseline: node details render from snapshot data, no approval/waiver/evidence/profile/architecture write controls are added, and .opennori remains the state source of truth.",
+  "implementation_focus": "Dashboard inspect panel module boundaries for goal, passed criteria, Project Profile, individual criterion, evidence, and shared display helpers.",
+  "evidence": "npm run test:dashboard; npm run typecheck:dashboard; npx tsc --noEmit --pretty false; node ./bin/opennori.js doctor --root . --json; node ./bin/opennori.js status --root . --json",
+  "limitations": "This is a source and built-asset boundary refactor. It preserves existing dashboard behavior and does not add a new browser screenshot or visual redesign evidence.",
+  "created_at": "2026-06-23T03:55:20.119Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}
