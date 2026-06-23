@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T07:52:00.659Z",
+  "updated_at": "2026-06-23T07:59:32.619Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -577,6 +577,17 @@
         "summary": "Split AgentNext construction, dashboard activity command templates, and doctor active-goal helpers while preserving agent-next routing functions.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-agent-next-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-agent-next-routing-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "AgentNext routing is split into lifecycle readiness, recommendation routing, and architecture-apply handoff modules while keeping src/agent-next.ts as the compatibility export.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-agent-next-routing-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

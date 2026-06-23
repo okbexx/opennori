@@ -17,21 +17,24 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor - Dashboard radar projection was split into a dedicated model boundary while preserving the readonly observation surface and existing visual behavior.
+Latest: architecture-refactor - AgentNext routing was split into lifecycle readiness, recommendation routing, and architecture-apply handoff modules while preserving existing CLI JSON routes.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect radar-model.ts to verify node/link/grid projection is separate from the React/SVG component; inspect AcceptanceRadarNet.tsx to verify it only observes dimensions and renders the model; run the listed typecheck, dashboard test, and lint commands.
-Limitations: This is an internal dashboard architecture boundary refactor. It does not change dashboard user-facing content, add write controls, or prove subjective UX quality beyond preserving the existing radar projection behavior.
+Reviewability: Inspect the new AgentNext modules. Confirm lifecycle readiness no longer shares a file with recommendation status routing, architecture apply handoff has its own module, and src/agent-next.ts remains a stable export for existing callers. Rerun the listed typecheck and domain tests.
+Limitations: This is an internal routing boundary refactor. It preserves existing agent_next JSON semantics and does not add new recommendation states, change Skill policy text, or prove subjective agent judgment quality.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-dashboard-radar-model-boundary.json
+- .opennori/architecture/evidence/opennori-self-agent-next-routing-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run typecheck:dashboard
-- npm run test:dashboard
+- npm run test:architecture
+- npm run test:cli
+- npm run test:reporting
+- npm run test:lifecycle
 - npm run lint
-- src/dashboard/src/radar-model.ts
-- src/dashboard/src/components/AcceptanceRadarNet.tsx
-- test/dashboard-selection.test.ts
+- src/agent-next.ts
+- src/agent-next-lifecycle.ts
+- src/agent-next-recommendation.ts
+- src/agent-next-architecture.ts
 
 ## Files
 

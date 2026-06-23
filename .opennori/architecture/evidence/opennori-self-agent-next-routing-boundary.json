@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-agent-next-routing-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "AgentNext routing is split into lifecycle readiness, recommendation routing, and architecture-apply handoff modules while keeping src/agent-next.ts as the compatibility export.",
+  "fit": "Keeps agent Skill routing as deterministic CLI state projection while separating health/setup, acceptance/architecture/evidence recommendation, and architecture apply follow-up boundaries.",
+  "implementation_focus": "Added src/agent-next-lifecycle.ts, src/agent-next-recommendation.ts, and src/agent-next-architecture.ts; src/agent-next.ts now re-exports stable public functions for existing CLI and lifecycle call sites.",
+  "evidence": "npm run lint",
+  "limitations": "",
+  "created_at": "2026-06-23T07:59:21.554Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

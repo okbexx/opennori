@@ -1,0 +1,70 @@
+{
+  "kind": "architecture-refactor",
+  "basis": "tool-observation",
+  "summary": "AgentNext routing was split into lifecycle readiness, recommendation routing, and architecture-apply handoff modules while preserving existing CLI JSON routes.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-agent-next-routing-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-agent-next-routing-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:architecture",
+      "command": "npm run test:architecture"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli",
+      "command": "npm run test:cli"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:reporting",
+      "command": "npm run test:reporting"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:lifecycle",
+      "command": "npm run test:lifecycle"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next.ts",
+      "path": "src/agent-next.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next-lifecycle.ts",
+      "path": "src/agent-next-lifecycle.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next-recommendation.ts",
+      "path": "src/agent-next-recommendation.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next-architecture.ts",
+      "path": "src/agent-next-architecture.ts"
+    }
+  ],
+  "reviewability": "Inspect the new AgentNext modules. Confirm lifecycle readiness no longer shares a file with recommendation status routing, architecture apply handoff has its own module, and src/agent-next.ts remains a stable export for existing callers. Rerun the listed typecheck and domain tests.",
+  "limitations": "This is an internal routing boundary refactor. It preserves existing agent_next JSON semantics and does not add new recommendation states, change Skill policy text, or prove subjective agent judgment quality.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T07:59:32.496Z"
+}
