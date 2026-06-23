@@ -17,30 +17,24 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor-verification - OpenNori CLI command infrastructure is now separated into registry, policies, resolver/help, runner/recovery, command types, and a compatibility command-tree barrel. The implementation still uses citty for defineCommand/subCommands/runCommand, while OpenNori-specific active-goal policy, write locking, no-current-goal recovery, and human/json output routing remain deterministic CLI concerns.
+Latest: architecture-refactor-verification - OpenNori CLI runtime infrastructure is now separated into executor, active-goal args, active-goal store, active-goal lock, and a compatibility runtime barrel. runner.ts consumes lock/store directly, while command modules can continue importing the runtime barrel during migration. The split keeps objective .opennori state loading, dossier writes, stale-evidence pruning, citty command execution, and single-writer locking in deterministic code, without adding subjective AC or architecture-quality validators.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed CLI files: command-tree.ts should only re-export; registry.ts should own command grouping and citty defineCommand; policies.ts should own command policy metadata; resolver.ts should own command resolution and help/usage; runner.ts should own citty runCommand execution and active-goal recovery. Rerun the listed commands.
-Limitations: This verifies the CLI command layer boundary and behavior. It does not claim every command module is fully domain-thin; later slices should audit lifecycle/setup and individual command modules.
+Reviewability: Inspect the listed CLI runtime files: executor.ts should only wrap citty runCommand, active-goal-args.ts should only define shared CLI args, active-goal-store.ts should own load/save/prune/dossier state, active-goal-lock.ts should own the local write lock and should not read goal payloads, runtime.ts should only re-export. Rerun the listed commands.
+Limitations: This verifies the CLI runtime infrastructure boundary and current behavior. It does not yet split every individual command module or lifecycle/setup orchestration module.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-cli-command-layer-boundary.json
-- npx ctx7@latest library citty 'citty command framework defineCommand runCommand subcommands command args help'
-- npx ctx7@latest docs /unjs/citty 'citty command framework defineCommand runCommand subcommands command args help'
+- .opennori/architecture/evidence/opennori-self-cli-runtime-boundary.json
+- npx tsc --noEmit --pretty false
 - npm run test:core
 - npm run test:cli
-- npx tsc --noEmit --pretty false
-- npm run check
-- node ./bin/opennori.js --help
-- node ./bin/opennori.js doctor --root . --json
-- node ./bin/opennori.js status --root . --json
 - git diff --check
-- src/cli/registry.ts
-- src/cli/policies.ts
-- src/cli/resolver.ts
+- src/cli/executor.ts
+- src/cli/active-goal-args.ts
+- src/cli/active-goal-store.ts
+- src/cli/active-goal-lock.ts
+- src/cli/runtime.ts
 - src/cli/runner.ts
-- src/cli/command-types.ts
-- src/cli/command-tree.ts
 - test/core.test.js
 
 ## Files

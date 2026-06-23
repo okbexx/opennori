@@ -13,7 +13,7 @@ Use a small project-local write lock around active-goal mutating CLI commands so
 
 ## Candidates Checked
 
-- Current project: src/cli/command-tree.ts already centralizes command execution policy, and src/cli/runtime.ts already owns active-goal loading and saving; the lock belongs at this CLI runtime boundary.
+- Current project: src/cli/registry.ts and src/cli/runner.ts centralize command policy and execution; src/cli/active-goal-store.ts owns active-goal loading and saving; src/cli/active-goal-lock.ts owns the single-writer lock. src/cli/runtime.ts remains only a compatibility barrel.
 - Standard library: Node fs.mkdirSync provides atomic directory creation that works as a local filesystem lock for this single-host project-state use case.
 - Official SDK: No official SDK applies to OpenNori local state consistency.
 - Open source: proper-lockfile and lockfile-style libraries were considered, but this need is a narrow local single-writer guard around one project-state directory; adding a dependency would increase product surface without improving the acceptance loop.

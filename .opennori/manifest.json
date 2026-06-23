@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T02:47:16.734Z",
+  "updated_at": "2026-06-23T03:01:35.436Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -565,6 +565,17 @@
         "summary": "Split the CLI command layer into registry, policy, resolver, runner, and compatibility barrel modules while keeping citty as the command framework.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-cli-command-layer-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-cli-runtime-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Split the CLI runtime boundary into executor, active-goal args, active-goal store, active-goal lock, and a compatibility runtime barrel while preserving deterministic .opennori state semantics.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-cli-runtime-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

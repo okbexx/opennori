@@ -3,7 +3,8 @@ import { agentNextForDoctor } from "../agent-next.ts";
 import { fail, ok } from "../core.ts";
 import { doctor } from "../lifecycle.ts";
 import type { JsonObject } from "../types.ts";
-import { activeGoalRuntime, isActiveGoalLoadError, withActiveGoalWriteLock } from "./runtime.ts";
+import { withActiveGoalWriteLock } from "./active-goal-lock.ts";
+import { activeGoalRuntime, isActiveGoalLoadError } from "./active-goal-store.ts";
 import { CLI_NAME } from "./registry.ts";
 import type { ResolvedCliCommand } from "./command-types.ts";
 

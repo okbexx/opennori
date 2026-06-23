@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 5,
-  "latest_evidence_summary": "OpenNori CLI command infrastructure is now separated into registry, policies, resolver/help, runner/recovery, command types, and a compatibility command-tree barrel. The implementation still uses citty for defineCommand/subCommands/runCommand, while OpenNori-specific active-goal policy, write locking, no-current-goal recovery, and human/json output routing remain deterministic CLI concerns.",
-  "updated_at": "2026-06-23T02:47:16.624Z"
+  "evidence_count": 6,
+  "latest_evidence_summary": "OpenNori CLI runtime infrastructure is now separated into executor, active-goal args, active-goal store, active-goal lock, and a compatibility runtime barrel. runner.ts consumes lock/store directly, while command modules can continue importing the runtime barrel during migration. The split keeps objective .opennori state loading, dossier writes, stale-evidence pruning, citty command execution, and single-writer locking in deterministic code, without adding subjective AC or architecture-quality validators.",
+  "updated_at": "2026-06-23T03:01:35.327Z"
 }

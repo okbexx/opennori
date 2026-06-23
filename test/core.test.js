@@ -34,6 +34,10 @@ test("CLI entrypoint delegates command dispatch to the citty command tree", { ta
   const registrySource = fs.readFileSync(path.join(ROOT, "src", "cli", "registry.ts"), "utf8");
   const runnerSource = fs.readFileSync(path.join(ROOT, "src", "cli", "runner.ts"), "utf8");
   const resolverSource = fs.readFileSync(path.join(ROOT, "src", "cli", "resolver.ts"), "utf8");
+  const runtimeSource = fs.readFileSync(path.join(ROOT, "src", "cli", "runtime.ts"), "utf8");
+  const executorSource = fs.readFileSync(path.join(ROOT, "src", "cli", "executor.ts"), "utf8");
+  const activeGoalStoreSource = fs.readFileSync(path.join(ROOT, "src", "cli", "active-goal-store.ts"), "utf8");
+  const activeGoalLockSource = fs.readFileSync(path.join(ROOT, "src", "cli", "active-goal-lock.ts"), "utf8");
 
   assert.equal(packageJson.dependencies.citty.startsWith("^"), true);
   assert.equal(fs.existsSync(path.join(ROOT, "src", "cli", "routes.ts")), false);
@@ -45,4 +49,12 @@ test("CLI entrypoint delegates command dispatch to the citty command tree", { ta
   assert.match(registrySource, /defineCommand/);
   assert.match(runnerSource, /runCommand/);
   assert.match(resolverSource, /subCommands/);
+  assert.match(runtimeSource, /active-goal-store\.ts/);
+  assert.match(runtimeSource, /active-goal-lock\.ts/);
+  assert.match(runtimeSource, /executor\.ts/);
+  assert.match(executorSource, /runCommand/);
+  assert.match(activeGoalStoreSource, /loadPair/);
+  assert.match(activeGoalStoreSource, /writeGoalDossierFromPaths/);
+  assert.match(activeGoalLockSource, /active-goal\.write\.lock/);
+  assert.doesNotMatch(activeGoalLockSource, /readGoalPayload/);
 });

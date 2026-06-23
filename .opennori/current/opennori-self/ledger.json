@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T02:47:16.624Z",
+  "updated_at": "2026-06-23T03:01:35.327Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -4787,6 +4787,81 @@
           "limitations": "This verifies the CLI command layer boundary and behavior. It does not claim every command module is fully domain-thin; later slices should audit lifecycle/setup and individual command modules.",
           "gate": "accepted",
           "created_at": "2026-06-23T02:47:16.618Z"
+        },
+        {
+          "kind": "architecture-refactor-verification",
+          "basis": "tool-observation",
+          "summary": "OpenNori CLI runtime infrastructure is now separated into executor, active-goal args, active-goal store, active-goal lock, and a compatibility runtime barrel. runner.ts consumes lock/store directly, while command modules can continue importing the runtime barrel during migration. The split keeps objective .opennori state loading, dossier writes, stale-evidence pruning, citty command execution, and single-writer locking in deterministic code, without adding subjective AC or architecture-quality validators.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-cli-runtime-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-cli-runtime-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:core",
+              "command": "npm run test:core"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:cli",
+              "command": "npm run test:cli"
+            },
+            {
+              "type": "command",
+              "label": "git diff --check",
+              "command": "git diff --check"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/executor.ts",
+              "path": "src/cli/executor.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/active-goal-args.ts",
+              "path": "src/cli/active-goal-args.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/active-goal-store.ts",
+              "path": "src/cli/active-goal-store.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/active-goal-lock.ts",
+              "path": "src/cli/active-goal-lock.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/runtime.ts",
+              "path": "src/cli/runtime.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/runner.ts",
+              "path": "src/cli/runner.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/core.test.js",
+              "path": "test/core.test.js"
+            }
+          ],
+          "reviewability": "Inspect the listed CLI runtime files: executor.ts should only wrap citty runCommand, active-goal-args.ts should only define shared CLI args, active-goal-store.ts should own load/save/prune/dossier state, active-goal-lock.ts should own the local write lock and should not read goal payloads, runtime.ts should only re-export. Rerun the listed commands.",
+          "limitations": "This verifies the CLI runtime infrastructure boundary and current behavior. It does not yet split every individual command module or lifecycle/setup orchestration module.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T03:01:35.324Z"
         }
       ]
     },
