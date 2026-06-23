@@ -1,0 +1,70 @@
+{
+  "kind": "architecture-slice-verification",
+  "basis": "tool-observation",
+  "summary": "OpenNori now exposes a read-only MCP context server using the official @modelcontextprotocol/sdk, keeps MCP resources over existing context/snapshot/doctor projections, registers no write tools, updates the Architecture Baseline and Skill/documentation boundaries, and verifies the slice with TypeScript, MCP tests, CLI metadata, baseline inspection, and npm audit.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-a-8-mcp-readonly-context",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-a-8-mcp-readonly-context.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/mcp.test.ts",
+      "command": "npx vitest run test/mcp.test.ts"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js mcp --root . --json",
+      "command": "node ./bin/opennori.js mcp --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js architecture show --root . --json | jq '.data.architecture.baseline.technical_baseline_summary, .data.architecture.baseline.profile'",
+      "command": "node ./bin/opennori.js architecture show --root . --json | jq '.data.architecture.baseline.technical_baseline_summary, .data.architecture.baseline.profile'"
+    },
+    {
+      "type": "command",
+      "label": "npm audit --omit=dev",
+      "command": "npm audit --omit=dev"
+    },
+    {
+      "type": "artifact",
+      "label": "src/mcp/resources.ts",
+      "path": "src/mcp/resources.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/mcp/server.ts",
+      "path": "src/mcp/server.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli.ts",
+      "path": "src/cli.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/mcp.test.ts",
+      "path": "test/mcp.test.ts"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/baseline.json",
+      "path": ".opennori/architecture/baseline.json"
+    }
+  ],
+  "reviewability": "Run the listed commands and inspect the source paths to verify MCP remains read-only, uses SDK stdio resources, and does not write snapshot state.",
+  "limitations": "This evidence covers the read-only stdio MCP skeleton only; it intentionally does not claim MCP write tools, HTTP transport, OAuth, dashboard integration, or external MCP client dogfood.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T06:29:14.452Z"
+}

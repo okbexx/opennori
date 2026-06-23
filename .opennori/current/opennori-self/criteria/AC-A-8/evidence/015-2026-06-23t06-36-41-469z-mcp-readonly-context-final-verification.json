@@ -1,0 +1,115 @@
+{
+  "kind": "mcp-readonly-context-final-verification",
+  "basis": "tool-observation",
+  "summary": "MCP read-only context slice verified after lint/typecheck/build/test cleanup. Official MCP TypeScript SDK documentation confirms registerResource and StdioServerTransport as the right implementation path; OpenNori registers only context, snapshot, and doctor resources, exposes no MCP tools, keeps CLI/core/.opennori as the source of truth, and leaves subjective acceptance or completion decisions to Skills and users.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-a-8-mcp-readonly-context",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-a-8-mcp-readonly-context.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck:dashboard",
+      "command": "npm run typecheck:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/mcp.test.ts",
+      "command": "npx vitest run test/mcp.test.ts"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:quick",
+      "command": "npm run test:quick"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:architecture",
+      "command": "npm run test:architecture"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:lifecycle",
+      "command": "npm run test:lifecycle"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js mcp --root . --json",
+      "command": "node ./bin/opennori.js mcp --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js doctor --root . --json",
+      "command": "node ./bin/opennori.js doctor --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js check --root . --json",
+      "command": "node ./bin/opennori.js check --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "npm audit --omit=dev",
+      "command": "npm audit --omit=dev"
+    },
+    {
+      "type": "command",
+      "label": "git diff --check",
+      "command": "git diff --check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/mcp/resources.ts",
+      "path": "src/mcp/resources.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/mcp/server.ts",
+      "path": "src/mcp/server.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/mcp.ts",
+      "path": "src/cli/commands/mcp.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli.ts",
+      "path": "src/cli.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/mcp.test.ts",
+      "path": "test/mcp.test.ts"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/mcp-readonly-context-server-baseline.md",
+      "path": ".opennori/architecture/decisions/mcp-readonly-context-server-baseline.md"
+    }
+  ],
+  "reviewability": "Inspect the listed MCP source files and run the listed commands. MCP metadata should show tools: [] and resources for opennori://project/context, snapshot, and doctor. Snapshot resource tests assert it does not write .opennori/snapshots/current.json.",
+  "limitations": "This verifies a read-only stdio MCP context skeleton only. It intentionally does not add MCP write tools, dashboard write integration, HTTP transport, OAuth, or external MCP-client dogfood.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T06:36:41.469Z"
+}

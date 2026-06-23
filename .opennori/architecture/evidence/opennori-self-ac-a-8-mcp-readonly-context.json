@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-ac-a-8-mcp-readonly-context",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "MCP read-only context server uses the official @modelcontextprotocol/sdk stdio transport and registers only context, snapshot, and doctor resources over existing OpenNori projections.",
+  "fit": "Fits the confirmed TypeScript Agent State CLI baseline by keeping CLI/core/lifecycle as source-of-truth and adding MCP only as a read-only contract surface.",
+  "implementation_focus": "Expose OpenNori current context, dashboard snapshot projection, and doctor health to MCP clients without adding write tools or a second state layer.",
+  "evidence": "src/mcp/resources.ts, src/mcp/server.ts, src/cli.ts, test/mcp.test.ts, package.json, README.md, .opennori/protocol.md",
+  "limitations": "This slice intentionally does not add MCP write tools, HTTP transport, OAuth, or dashboard integration.",
+  "created_at": "2026-06-23T06:27:36.626Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

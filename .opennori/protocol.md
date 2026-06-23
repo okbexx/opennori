@@ -214,6 +214,21 @@ exists, activity must not bind to drafts. If multiple current goals exist,
 activity publishing must fail closed and route to doctor because current state
 is broken.
 
+`opennori mcp --root <project>` starts a stdio MCP server for agent and review
+clients. It exposes read-only JSON resources only:
+
+- `opennori://project/context`: current Nori Contract, AC state, evidence
+  health, Project Profile, architecture, report paths, and `agent_next`.
+- `opennori://project/snapshot`: dashboard-aligned projection built in memory
+  without writing `.opennori/snapshots/current.json`.
+- `opennori://project/doctor`: project health and recovery actions.
+
+MCP is not a second state layer, dashboard runtime, completion authority, or
+confirmation surface. It must not approve AC, record evidence, confirm
+Architecture Baselines, waive risks, accept reports, or write `.opennori`
+state. Future MCP tools, if added, must be explicit, controlled, and delegate
+to existing CLI/core semantics with the same dry-run/confirm boundaries.
+
 `opennori install --dry-run` returns an install plan. The plan uses deterministic action semantics:
 
 - `create`: missing OpenNori asset would be created
@@ -251,6 +266,7 @@ command flags; the root `nori` Skill routes natural-language requests to focused
 - `nori-build-vs-buy`: record dependency/library/self-build decisions before infrastructure work
 - `nori-project-health`: install, upgrade, uninstall, doctor, manifest, Plugin health, and project recoverability
 - `nori-reporting`: status, report, current gap, user intervention, changes, and context export
+- MCP read-only resources are a client interoperability surface; they do not replace these Skills or add write authority.
 
 Each packaged Skill states its mission, starting state reads, natural-language mapping, allowed
 state writes, handoff rules, user-facing reply shape, and misuse guards. This lets agents use
@@ -635,6 +651,7 @@ Useful commands:
 - `opennori doctor --root <repo>`: inspect project OpenNori health and recovery actions.
 - `opennori check --root <repo>`: validate current contract structure, surface Architecture Baseline health for the current goal, and report evidence health.
 - `opennori dashboard --root <repo>`: start a local visual dashboard over OpenNori state.
+- `opennori mcp --root <repo>`: start the read-only stdio MCP context server for `context`, `snapshot`, and `doctor` resources.
 - `opennori activity start|heartbeat|finish --root <repo>`: publish live agent activity for the dashboard; this is not evidence. Goal/gap may be inferred only when unique.
 - `opennori resume --root <repo>`: recover the current goal, current gap, completion answer, and intervention state.
 - `opennori status --root <repo>`: answer whether the goal is complete and whether the user needs to act.

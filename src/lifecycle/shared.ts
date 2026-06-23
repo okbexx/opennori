@@ -25,6 +25,7 @@ export const NORI_CAPABILITIES = [
   "doctor",
   "upgrade",
   "context-export",
+  "mcp-readonly-context",
   "architecture-baseline",
   "architecture-challenge",
   "architecture-agent-surface",

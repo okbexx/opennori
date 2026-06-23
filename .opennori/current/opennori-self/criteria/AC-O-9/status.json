@@ -6,5 +6,5 @@
   "risk": "high",
   "evidence_count": 1,
   "latest_evidence_summary": "OpenNori autogoal is implemented as a packaged Skill-driven convergence mode that outputs the standard Nori Contract Draft. The root and acceptance Skills route rough-idea/autogoal requests to nori-autogoal, the new Skill instructs agents to preserve the full idea and avoid MVP/phase/task-list downgrades, draft --brief renders assumptions and open questions in ordinary acceptance markdown, and README plus the public site explain the user-facing behavior.",
-  "updated_at": "2026-06-22T01:08:33.734Z"
+  "updated_at": "2026-06-23T06:36:41.471Z"
 }

@@ -6,5 +6,5 @@
   "risk": "medium",
   "evidence_count": 1,
   "latest_evidence_summary": "OpenNori exposes package-local Codex Plugin Skills for agent discovery: the marketplace points to plugins/opennori, plugin.json points to ./skills, package Skills describe natural-language routing, and doctor reports Plugin manifest, marketplace, Skills, and manifest state as healthy.",
-  "updated_at": "2026-06-22T01:08:33.734Z"
+  "updated_at": "2026-06-23T06:36:41.471Z"
 }

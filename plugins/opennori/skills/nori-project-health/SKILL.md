@@ -1,6 +1,6 @@
 ---
 name: nori-project-health
-description: "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, needs safe lifecycle actions with preview and explicit confirmation, or sees healthy state but broad UI/CRUD/dashboard AC still need acceptance review."
+description: "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, read-only MCP context, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, needs safe lifecycle actions with preview and explicit confirmation, asks about MCP readiness, or sees healthy state but broad UI/CRUD/dashboard AC still need acceptance review."
 ---
 
 ## Mission
@@ -10,6 +10,12 @@ Keep OpenNori project state usable and recoverable without making lifecycle comm
 Health work protects `.opennori/` integrity, manifest freshness, packaged Plugin Skill visibility, and current-goal recoverability. It should not decide subjective product acceptance.
 
 Treat OpenNori readiness as bundle readiness. Plugin discovery, packaged Skills, CLI access, and `.opennori` state are coupled product parts; if one is missing, recover it instead of telling the user to use the remaining pieces as a separate workflow.
+
+MCP readiness is read-only context readiness. `opennori mcp --root <repo>` may
+be used by MCP clients to read `context`, `snapshot`, and `doctor` resources,
+but health work must not add MCP write tools or treat MCP as a recovery path
+for state mutation. State writes remain CLI operations with the existing
+preview/confirm boundaries.
 
 Health commands protect state integrity, not AC meaning. When a recovered,
 upgraded, or checked project contains broad visible Product AC such as "project
@@ -56,6 +62,7 @@ Useful state commands:
 - `opennori uninstall --root <repo> --include-state --confirm --json`
 - `opennori doctor --root <repo> --json`
 - `opennori check --root <repo> --json`
+- `opennori mcp --root <repo> --json` (metadata summary only; without `--json` it starts the stdio MCP server)
 - `opennori activity start|heartbeat|finish --root <repo> --skill nori-project-health --state working --summary "..." --json` (required dashboard signal when the dashboard is observed and a current goal/gap exists; do not bind setup/init previews or drafts)
 
 ## Natural-Language Mapping
@@ -70,6 +77,7 @@ Useful state commands:
 - "Remove OpenNori" -> uninstall dry run; preserve `.opennori` state unless the user explicitly asks to delete it.
 - "State is broken" -> doctor, identify hard integrity failures, and propose recovery actions.
 - "Doctor/check shows review risks" -> route evidence, profile, architecture, or build-vs-buy review to the responsible Skill; route subjective AC wording concerns to `nori-acceptance` based on agent judgment.
+- "Is MCP available", "MCP context is missing", or "connect OpenNori to an MCP client" -> report that `opennori mcp --root <repo>` starts the read-only stdio server; verify `opennori mcp --root <repo> --json` if metadata is enough. Do not promise MCP writes.
 - "Doctor is ready but AC says CRUD/dashboard/settings broadly" -> say the
   OpenNori bundle is healthy, but the Product AC needs Acceptance Surface
   Modeling; hand off to `nori-acceptance` instead of treating health as

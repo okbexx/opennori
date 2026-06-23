@@ -17,29 +17,33 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-boundary-verification - OpenNori lifecycle setup and plugin-sync no longer parse Codex/npm stdout inside orchestration modules. Codex Plugin and npm global probes now live under src/lifecycle/adapters, focused adapter tests cover the parser boundary, Markdown parsing is documented as non-authoritative review recovery only, and MCP is recorded as a future read-only context integration that must reuse the official MCP TypeScript SDK instead of creating a second state layer.
+Latest: mcp-readonly-context-final-verification - MCP read-only context slice verified after lint/typecheck/build/test cleanup. Official MCP TypeScript SDK documentation confirms registerResource and StdioServerTransport as the right implementation path; OpenNori registers only context, snapshot, and doctor resources, exposes no MCP tools, keeps CLI/core/.opennori as the source of truth, and leaves subjective acceptance or completion decisions to Skills and users.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed lifecycle adapter modules, setup/plugin-sync imports, lifecycle-adapters tests, and architecture decisions. Rerun the listed commands to verify type safety, lifecycle behavior, architecture health, lint, doctor/status, and whitespace checks.
-Limitations: This verifies the lifecycle external command adapter boundary, MCP baseline decision, and Markdown parser boundary. It does not implement MCP yet, does not change user-facing setup behavior, and deliberately leaves a broader repo-wide types import migration for a separate architecture slice.
+Reviewability: Inspect the listed MCP source files and run the listed commands. MCP metadata should show tools: [] and resources for opennori://project/context, snapshot, and doctor. Snapshot resource tests assert it does not write .opennori/snapshots/current.json.
+Limitations: This verifies a read-only stdio MCP context skeleton only. It intentionally does not add MCP write tools, dashboard write integration, HTTP transport, OAuth, or external MCP-client dogfood.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-lifecycle-adapters-mcp-boundary.json
-- npx tsc --noEmit --pretty false
-- npm run test:lifecycle
-- npm run test:architecture
+- .opennori/architecture/evidence/opennori-self-ac-a-8-mcp-readonly-context.json
 - npm run lint
+- npx tsc --noEmit --pretty false
+- npm run typecheck:dashboard
+- npx vitest run test/mcp.test.ts
+- npm run test:quick
+- npm run test:architecture
+- npm run test:lifecycle
+- node ./bin/opennori.js mcp --root . --json
 - node ./bin/opennori.js doctor --root . --json
 - node ./bin/opennori.js status --root . --json
+- node ./bin/opennori.js check --root . --json
+- npm audit --omit=dev
 - git diff --check
-- src/lifecycle/adapters/codex-plugin.ts
-- src/lifecycle/adapters/npm-global.ts
-- src/lifecycle/setup.ts
-- src/lifecycle/plugin-sync.ts
-- test/lifecycle-adapters.test.ts
-- .opennori/architecture/decisions/lifecycle-external-command-adapters.json
-- .opennori/architecture/decisions/mcp-readonly-context-server-baseline.json
-- .opennori/architecture/decisions/editable-markdown-parsing-keep-json-authoritative-and-revisit-micromark.json
+- src/mcp/resources.ts
+- src/mcp/server.ts
+- src/cli/commands/mcp.ts
+- src/cli.ts
+- test/mcp.test.ts
+- .opennori/architecture/decisions/mcp-readonly-context-server-baseline.md
 
 ## Files
 

@@ -1,6 +1,6 @@
 ---
 name: nori
-description: "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, says profile or architecture profile content is in the wrong language, asks for project health, wants architecture decided first, says UI/CRUD/dashboard/list/form/settings/admin AC are too broad or missing operation paths, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, and .opennori state as coupled parts of one product."
+description: "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, says profile or architecture profile content is in the wrong language, asks for project health, wants architecture decided first, asks about MCP context, says UI/CRUD/dashboard/list/form/settings/admin AC are too broad or missing operation paths, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, MCP read-only context, and .opennori state as coupled parts of one product."
 ---
 
 ## Mission
@@ -16,6 +16,7 @@ OpenNori is one capability bundle:
 - `opennori` is the deterministic state layer.
 - `.opennori/` stores the project contract, evidence, profile, architecture, health, and report state.
 - `opennori dashboard` is an optional local observation surface over that state, not an agent runtime or confirmation/control surface.
+- `opennori mcp` is an optional read-only stdio context surface for MCP clients, not a write path or completion authority.
 
 Do not present those pieces as optional standalone product paths.
 
@@ -110,6 +111,7 @@ routing begin until final approval happens after every AC is confirmed.
 - "Before self-building this parser/installer/schema/storage/UI primitive" -> hand off to `nori-build-vs-buy`.
 - "Install", "upgrade", "uninstall", "doctor", "state is broken", "sync local OpenNori plugin", or "Codex Plugin cache is stale" -> hand off to `nori-project-health`.
 - "Show me the dashboard", "watch OpenNori run", "I want live status" -> run or suggest `opennori dashboard --root <repo>` and keep completion judgment plus user confirmations in conversation and status/report.
+- "Expose OpenNori through MCP", "MCP context", "review tool needs OpenNori state", or "agent client wants OpenNori resources" -> use or suggest `opennori mcp --root <repo>` as a read-only context server. Do not add write tools or use MCP to approve AC, record evidence, confirm architecture, waive risks, or accept reports.
 - A complete goal with `agent_next.state: ready_for_next_loop` and a user asking to continue -> infer or ask for the next human-facing outcome, then hand off to `nori-acceptance` to prepare a standard NoriBrief. Do not expect the CLI to invent product candidate goals.
 
 ## State Writes

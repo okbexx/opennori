@@ -106,6 +106,11 @@ export const BUILTIN_ARCHITECTURE_PROFILES: Record<string, ArchitectureProfile> 
           name: "dashboard-observation-layer",
           decision: "The dashboard kernel only reads state, events, activity, and snapshots and streams observation data to the local dashboard.",
           reason: "The dashboard must not become an agent runtime, confirmation surface, or Product AC evidence source."
+        },
+        {
+          name: "mcp-context-layer",
+          decision: "The MCP server exposes read-only context, snapshot, and doctor resources over stdio by reusing existing CLI/core/lifecycle projections.",
+          reason: "MCP helps agent clients inspect OpenNori state without adding a second write path or replacing Skills and CLI."
         }
       ],
       source_of_truth: [
@@ -152,6 +157,11 @@ export const BUILTIN_ARCHITECTURE_PROFILES: Record<string, ArchitectureProfile> 
           reason: "Live observation must not be confused with workflow authority or evidence."
         },
         {
+          name: "src/mcp",
+          decision: "MCP modules own read-only server/resource registration and resource payload projection only.",
+          reason: "MCP must be an integration surface over existing OpenNori state, not an independent runtime, persistence layer, or approval tool."
+        },
+        {
           name: "plugins/opennori/skills",
           decision: "Packaged Skills own agent behavior protocols, natural-language routing, subjective AC/evidence/architecture judgment, and misuse guards.",
           reason: "OpenNori is Skill-driven; users should not learn CLI internals."
@@ -177,6 +187,11 @@ export const BUILTIN_ARCHITECTURE_PROFILES: Record<string, ArchitectureProfile> 
           name: "plugin-skill-assets",
           decision: "Codex Plugin metadata points to directory-based Skills; lifecycle commands do not copy OpenNori Skills into user projects.",
           reason: "Plugin-first distribution keeps OpenNori as one capability bundle."
+        },
+        {
+          name: "mcp-readonly-resources",
+          decision: "MCP exposes opennori://project/context, opennori://project/snapshot, and opennori://project/doctor as read-only JSON resources.",
+          reason: "Agent clients can inspect goal, AC, evidence, profile, architecture, dashboard projection, and recovery state without gaining write authority."
         }
       ],
       data_flows: [
@@ -218,6 +233,15 @@ export const BUILTIN_ARCHITECTURE_PROFILES: Record<string, ArchitectureProfile> 
             "Dashboard renders current goal, gap, agent activity, architecture decision, and completion decision.",
             "Any user decision is routed back to the agent conversation and recorded through CLI state commands."
           ]
+        },
+        {
+          name: "mcp-readonly-context",
+          steps: [
+            "An MCP client starts opennori mcp over stdio for a project root.",
+            "The MCP server registers read-only resources using the official Model Context Protocol SDK.",
+            "Resource handlers call existing context export, snapshot build, and doctor functions.",
+            "The client receives context and recovery state but cannot approve AC, record evidence, confirm architecture, or write .opennori state through MCP."
+          ]
         }
       ],
       dependency_decisions: [
@@ -250,6 +274,11 @@ export const BUILTIN_ARCHITECTURE_PROFILES: Record<string, ArchitectureProfile> 
           name: "React-dashboard",
           decision: "Use React, Vite, Tailwind, Radix primitives, Motion, and lucide-react for the dashboard UI.",
           reason: "The dashboard needs responsive live visual state, accessible primitives, animation, and icons without becoming a control plane."
+        },
+        {
+          name: "Model-Context-Protocol-SDK",
+          decision: "Use @modelcontextprotocol/sdk for the MCP stdio server and resource registration.",
+          reason: "MCP framing, capability negotiation, and transport behavior are protocol infrastructure that should not be hand-written."
         }
       ],
       reference_mappings: [
@@ -277,6 +306,11 @@ export const BUILTIN_ARCHITECTURE_PROFILES: Record<string, ArchitectureProfile> 
           name: "CodeGraph/GitNexus",
           decision: "Borrow context/status/search/doctor discipline, not a full symbol graph platform.",
           reason: "OpenNori needs completion context and evidence health without becoming code intelligence infrastructure."
+        },
+        {
+          name: "Model Context Protocol TypeScript SDK",
+          decision: "Reuse the official MCP TypeScript SDK for read-only agent/client interoperability.",
+          reason: "OpenNori should own acceptance state semantics while delegating MCP server and transport infrastructure."
         }
       ],
       verification: [

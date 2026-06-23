@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 13,
-  "latest_evidence_summary": "OpenNori lifecycle setup and plugin-sync no longer parse Codex/npm stdout inside orchestration modules. Codex Plugin and npm global probes now live under src/lifecycle/adapters, focused adapter tests cover the parser boundary, Markdown parsing is documented as non-authoritative review recovery only, and MCP is recorded as a future read-only context integration that must reuse the official MCP TypeScript SDK instead of creating a second state layer.",
-  "updated_at": "2026-06-23T06:02:23.539Z"
+  "evidence_count": 15,
+  "latest_evidence_summary": "MCP read-only context slice verified after lint/typecheck/build/test cleanup. Official MCP TypeScript SDK documentation confirms registerResource and StdioServerTransport as the right implementation path; OpenNori registers only context, snapshot, and doctor resources, exposes no MCP tools, keeps CLI/core/.opennori as the source of truth, and leaves subjective acceptance or completion decisions to Skills and users.",
+  "updated_at": "2026-06-23T06:36:41.471Z"
 }

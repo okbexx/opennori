@@ -12,6 +12,7 @@ import { doctorCommand } from "./commands/doctor.ts";
 import { evidenceAddCommand, evidencePruneCommand } from "./commands/evidence.ts";
 import { installCommand } from "./commands/install.ts";
 import { listCommand } from "./commands/list.ts";
+import { mcpCommand } from "./commands/mcp.ts";
 import { pluginSyncCommand } from "./commands/plugin.ts";
 import { profileAddCommand, profileCheckCommand, profileEvidenceCommand, profileShowCommand } from "./commands/profile.ts";
 import { archiveCommand, reportCommand } from "./commands/reporting.ts";
@@ -87,6 +88,7 @@ export const rootCommand = defineCommand({
     uninstall: withPolicy(asCommand(uninstallCommand), { commandResult: true }),
     upgrade: withPolicy(asCommand(upgradeCommand), { commandResult: true }),
     dashboard: withPolicy(asCommand(dashboardCommand), { commandResult: true }),
+    mcp: asCommand(mcpCommand),
     plugin: pluginCommand,
     brainstorm: asCommand(brainstormCommand),
     discover: asCommand(discoverCommand),

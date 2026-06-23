@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T06:02:23.649Z",
+  "updated_at": "2026-06-23T06:36:41.569Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -23,6 +23,7 @@
     "doctor",
     "upgrade",
     "context-export",
+    "mcp-readonly-context",
     "architecture-baseline",
     "architecture-challenge",
     "architecture-agent-surface",
@@ -226,7 +227,7 @@
     "skills": [
       {
         "name": "nori",
-        "description": "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, says profile or architecture profile content is in the wrong language, asks for project health, wants architecture decided first, says UI/CRUD/dashboard/list/form/settings/admin AC are too broad or missing operation paths, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, and .opennori state as coupled parts of one product.",
+        "description": "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, says profile or architecture profile content is in the wrong language, asks for project health, wants architecture decided first, asks about MCP context, says UI/CRUD/dashboard/list/form/settings/admin AC are too broad or missing operation paths, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, MCP read-only context, and .opennori state as coupled parts of one product.",
         "path": "plugins/opennori/skills/nori/SKILL.md",
         "source": "package"
       },
@@ -280,13 +281,13 @@
       },
       {
         "name": "nori-project-health",
-        "description": "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, needs safe lifecycle actions with preview and explicit confirmation, or sees healthy state but broad UI/CRUD/dashboard AC still need acceptance review.",
+        "description": "Diagnose, initialize, upgrade, uninstall, and recover the complete OpenNori capability bundle: Plugin discovery, packaged Skill health, opennori CLI access, read-only MCP context, project-local .opennori state, manifest, and current-goal integrity. Use when the user asks whether OpenNori is ready, wants setup, sees broken `.opennori` state, needs safe lifecycle actions with preview and explicit confirmation, asks about MCP readiness, or sees healthy state but broad UI/CRUD/dashboard AC still need acceptance review.",
         "path": "plugins/opennori/skills/nori-project-health/SKILL.md",
         "source": "package"
       },
       {
         "name": "nori-reporting",
-        "description": "Explain OpenNori status, current gaps, completion decisions, user intervention, reports, changes, and context export in human terms. Use when the user asks whether work is complete, what remains, what changed, what they need to do, how to continue after a completed goal, or whether broad UI/CRUD/dashboard/list/form/settings/admin AC can be confidently accepted from evidence and operation paths.",
+        "description": "Explain OpenNori status, current gaps, completion decisions, user intervention, reports, changes, context export, and read-only MCP context in human terms. Use when the user asks whether work is complete, what remains, what changed, what they need to do, how to continue after a completed goal, how a review/MCP client can inspect OpenNori state, or whether broad UI/CRUD/dashboard/list/form/settings/admin AC can be confidently accepted from evidence and operation paths.",
         "path": "plugins/opennori/skills/nori-reporting/SKILL.md",
         "source": "package"
       }
@@ -312,16 +313,16 @@
       "profile_title": "TypeScript Agent State CLI",
       "goal_id": "opennori-self",
       "technical_baseline_summary": {
-        "runtime_topology_count": 4,
-        "module_boundary_count": 6,
-        "contract_surface_count": 4,
-        "data_flow_count": 4,
-        "dependency_decision_count": 6,
-        "reference_mapping_count": 5
+        "runtime_topology_count": 5,
+        "module_boundary_count": 7,
+        "contract_surface_count": 5,
+        "data_flow_count": 5,
+        "dependency_decision_count": 7,
+        "reference_mapping_count": 6
       },
       "sticky": true,
       "requires_challenge_to_change": true,
-      "accepted_at": "2026-06-18T09:43:44.184Z"
+      "accepted_at": "2026-06-23T06:28:29.131Z"
     },
     "issues": [],
     "open_challenges": [],
@@ -444,6 +445,17 @@
         "summary": "CLI boundary audit kept subjective product semantics in Skills and narrowed hard validation to objective contract, ledger, evidence, architecture, lifecycle, and schema integrity.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-ac-a-12-aligned.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-ac-a-8-mcp-readonly-context",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "MCP read-only context server uses the official @modelcontextprotocol/sdk stdio transport and registers only context, snapshot, and doctor resources over existing OpenNori projections.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-a-8-mcp-readonly-context.json",
         "schema_valid": true,
         "schema_errors": []
       },
@@ -900,11 +912,11 @@
         "need": "Define how OpenNori may expose goal, acceptance, profile, architecture, evidence, report, and dashboard context to agent clients through MCP without creating a second state layer or duplicating the CLI.",
         "recommendation": "reuse",
         "status": "active",
-        "summary": "When OpenNori adds MCP, use the official Model Context Protocol TypeScript SDK with read-only resources first and a tiny set of controlled tools that delegate to CLI/core state functions.",
+        "summary": "Use the official Model Context Protocol TypeScript SDK with read-only resources first. The current implementation registers only context, snapshot, and doctor resources over stdio; no MCP write tools are registered.",
         "current_project": "OpenNori already exposes deterministic state through CLI commands, .opennori JSON files, context export, dashboard snapshots, and packaged Skills. MCP is currently an integration surface, not a replacement runtime.",
         "standard_library": "Node stdio and HTTP primitives can transport bytes, but they do not implement MCP capability negotiation, tool/resource schemas, transports, or client expectations.",
-        "official_sdk": "Context7 on 2026-06-23 identified /modelcontextprotocol/typescript-sdk as the high-reputation SDK. The v2 API uses McpServer with registerResource and registerTool plus transports such as StdioServerTransport and Streamable HTTP.",
-        "open_source": "@modelcontextprotocol/typescript-sdk is the mature protocol implementation to reuse. Hono remains the dashboard kernel HTTP framework, but dashboard transport is not MCP and must not become an agent write authority.",
+        "official_sdk": "Context7 on 2026-06-23 identified /modelcontextprotocol/typescript-sdk as the high-reputation SDK. The available npm package is @modelcontextprotocol/sdk 1.29.0; its exported server API includes McpServer.registerResource(...) and StdioServerTransport.",
+        "open_source": "@modelcontextprotocol/sdk is the protocol implementation to reuse. It carries transitive HTTP/OAuth/server dependencies even though OpenNori currently uses only stdio resources; this is accepted because protocol negotiation and transport framing should not be handwritten. Hono remains the dashboard kernel HTTP framework, but dashboard transport is not MCP and must not become an agent write authority.",
         "self_build_reason": "",
         "superseded_by": "",
         "superseded_reason": "",

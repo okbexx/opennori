@@ -43,6 +43,15 @@ full deterministic payload for agents and automation.
 
 `opennori dashboard` is a local visual observation surface over the acceptance loop. It must not become an agent runtime, process log, chat log, completion authority, or confirmation surface. Do not add dashboard controls that approve AC, confirm Architecture Baselines, waive risks, accept reports, or write Product AC/evidence/profile/architecture/report state. When user input is needed, the dashboard may show what decision is needed and should direct the user back to the agent conversation; the agent records the decision through OpenNori Skills and CLI. `opennori activity` only publishes live agent state for the dashboard; it is not Product AC evidence. When the dashboard is observed and a current goal/gap exists, Skills that draft, change, implement, verify, or record OpenNori state must publish activity: start before work, heartbeat only during longer work, and finish when the turn ends. Skills should prefer `data.agent_next.dashboard_activity` command templates when present, otherwise use low-parameter activity commands and let the CLI infer the unique current goal/gap. If no current goal/gap exists, do not bind activity to drafts or setup/init previews. If `.opennori/current` contains multiple goals, treat that as broken state and route to doctor/project-health instead of guessing.
 
+`opennori mcp` is a read-only MCP context server over stdio. It exposes
+`opennori://project/context`, `opennori://project/snapshot`, and
+`opennori://project/doctor` resources for agent/review clients. It must not
+become a second state layer, dashboard runtime, completion authority, or write
+tool surface. Do not add MCP tools that approve AC, record evidence, confirm
+architecture, waive risks, accept reports, or write `.opennori` state unless a
+future user-approved architecture challenge explicitly expands the boundary and
+preserves CLI dry-run/confirm semantics.
+
 Before implementing, first inspect OpenNori status and Architecture Requirement:
 
 - `.opennori/current/<goal>/README.md`

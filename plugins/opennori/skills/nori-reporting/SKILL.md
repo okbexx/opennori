@@ -1,6 +1,6 @@
 ---
 name: nori-reporting
-description: Explain OpenNori status, current gaps, completion decisions, user intervention, reports, changes, and context export in human terms. Use when the user asks whether work is complete, what remains, what changed, what they need to do, how to continue after a completed goal, or whether broad UI/CRUD/dashboard/list/form/settings/admin AC can be confidently accepted from evidence and operation paths.
+description: Explain OpenNori status, current gaps, completion decisions, user intervention, reports, changes, context export, and read-only MCP context in human terms. Use when the user asks whether work is complete, what remains, what changed, what they need to do, how to continue after a completed goal, how a review/MCP client can inspect OpenNori state, or whether broad UI/CRUD/dashboard/list/form/settings/admin AC can be confidently accepted from evidence and operation paths.
 ---
 
 ## Mission
@@ -30,7 +30,7 @@ report the missing AC text as the review risk and route to `nori-acceptance`.
 ## Start Here
 
 1. Run the narrowest status command that answers the user.
-2. Prefer resume/status for current state, report for a durable human report, changes for diff grouping, and context export when another tool needs review context.
+2. Prefer resume/status for current state, report for a durable human report, changes for diff grouping, context export when another file-based tool needs review context, and `opennori mcp --root <repo>` when an MCP client needs read-only resources.
 3. Read completion, current_gap, evidence_health, profile_review, architecture requirement, architecture decision, build_vs_buy health, agent_next, and next_recommendation. Read `acceptance_review` when present, but remember that subjective AC quality is primarily a Skill/user review responsibility.
 4. If the user asked to continue, follow `agent_next` routing. For `ready_for_next_loop`, hand off to `nori-acceptance` so the next human-facing goal becomes a Skill-prepared NoriBrief, not a CLI-generated candidate.
 5. If the AC wording is vague from the user perspective, do not present this as normal completion acceptance even when CLI state is objectively complete. Say the evidence may be complete but the AC needs user review, state the ambiguity in human terms, and hand off to `nori-acceptance`.
@@ -54,6 +54,7 @@ Useful state commands:
 - `opennori changes --root <repo> --json`
 - `opennori list --root <repo> --json`
 - `opennori context export --root <repo> --json`
+- `opennori mcp --root <repo> --json` (metadata summary) or `opennori mcp --root <repo>` (stdio MCP server)
 - `opennori dashboard --root <repo>`
 
 ## Natural-Language Mapping
@@ -65,6 +66,7 @@ Useful state commands:
 - "Generate report" -> create/read the OpenNori report and summarize the decision.
 - "Continue" after a complete goal -> use the completed context and user's intent to identify the next human-facing outcome, then hand off to `nori-acceptance` to draft it through a Skill-prepared NoriBrief.
 - "Export for review" -> use context export and state what the reviewer can inspect.
+- "Use MCP", "MCP client needs OpenNori state", or "what MCP resources exist" -> explain the read-only resources: `opennori://project/context`, `opennori://project/snapshot`, and `opennori://project/doctor`. Make clear that MCP registers no write tools and cannot approve AC, record evidence, confirm architecture, waive risks, or accept reports.
 - "Open dashboard" or "watch it run" -> start the local dashboard and explain that it observes activity, current gap, architecture, user-intervention needs, and completion judgment without certifying completion or hosting confirmation controls.
 - AC quality or acceptance meaning is unclear -> lead with "objectively evidenced, not confidently acceptable yet" only when evidence is complete; then route to AC revision instead of asking for a blind risk acceptance.
 - "CRUD works", "manage projects/items", "settings are editable", "dashboard shows state", or similar broad visible-product AC appears in status/report -> say the missing Acceptance Surface Model is the review risk, name the missing user operation path pieces, and hand off to `nori-acceptance`.
@@ -76,6 +78,9 @@ Useful state commands:
 May generate reports, changes output, or context exports. Do not mutate Product AC, evidence, profile, architecture, or lifecycle state.
 
 May start the local dashboard as an observation surface. Do not write Product AC or evidence from dashboard state. Do not tell the user to confirm, reject, waive, approve AC, accept reports, or confirm Architecture Baselines inside the dashboard; collect those decisions in the agent conversation and record them through OpenNori CLI.
+
+May explain or start the read-only MCP context server. Do not treat MCP
+resources as evidence, confirmation, or state writes.
 
 ## Handoffs
 
@@ -118,3 +123,4 @@ Then add short evidence or risk bullets only when they affect acceptance.
   persistence, destructive boundary, or evidence shape was verified.
 - Do not treat dashboard activity, events, or snapshots as completion evidence.
 - Do not treat dashboard as a control surface. It can show "Need user"; the user decision is still made in conversation and written by CLI.
+- Do not treat MCP resources as a control surface or second state layer.
