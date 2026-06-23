@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T10:12:12.939Z",
+  "updated_at": "2026-06-23T10:27:26.811Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -522,6 +522,17 @@
         "summary": "Acceptance Surface Modeling stays in packaged Skills, protocol, README, AGENTS, and asset tests while CLI remains deterministic state storage rather than a subjective AC validator.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-ac-o-18-aligned.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-ac-o-8-profile-skill-source-adapter",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-O-8",
+        "status": "aligned",
+        "summary": "Project Profile Skill checks now inspect package Skills, Codex Plugin cache Skills, and user-local Skills through a narrow lifecycle adapter.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-ac-o-8-profile-skill-source-adapter.json",
         "schema_valid": true,
         "schema_errors": []
       },
@@ -1194,6 +1205,24 @@
         "path": ".opennori/architecture/decisions/plugin-skills-package-assets.json"
       },
       {
+        "id": "profile-skill-capability-source-adapter",
+        "schema_valid": true,
+        "schema_errors": [],
+        "area": "profile-skill-capability",
+        "need": "Check Project Profile Skill requirements against Codex Plugin packaged Skills, Codex Plugin cache, and local user Skills without turning profile checks into a second Skill discovery system.",
+        "recommendation": "self-build",
+        "status": "active",
+        "summary": "Use a narrow filesystem adapter for installed Skill asset discovery. It searches package-local OpenNori skills, Codex Plugin cache skills, and user-local Skill directories, then profile checks consume only the adapter result.",
+        "current_project": "OpenNori already treats Codex Plugin packaged Skills as the primary distribution path, exposes package skills through src/skills.ts, and uses Project Profile checks as deterministic completion-risk evidence. Existing profile-checks.ts only probes ~/.agents/skills and ~/.codex/skills, which misses the current Plugin cache source used by Codex.",
+        "standard_library": "Node fs/path are sufficient for local Skill asset existence checks and recursive cache traversal. No parser is needed because profile check only needs SKILL.md presence as objective evidence.",
+        "official_sdk": "No stable in-process Codex Plugin Skill discovery SDK is available in this project boundary; Codex discovers Skills from installed Plugin cache, but OpenNori should not shell out to Codex for every profile check.",
+        "open_source": "Generic glob libraries could scan files, but Node recursive traversal is enough for a bounded local cache adapter. Reusing OpenNori package Skill metadata covers package-local assets.",
+        "self_build_reason": "Self-build is limited to capability-source probing and source reporting. It does not implement Codex Skill selection, Plugin installation, agent routing, or subjective profile compliance; those remain Codex/Skills and user review responsibilities.",
+        "superseded_by": "",
+        "superseded_reason": "",
+        "path": ".opennori/architecture/decisions/profile-skill-capability-source-adapter.json"
+      },
+      {
         "id": "protocol-state-validation-ajv-runtime-public-json-schema",
         "schema_valid": true,
         "schema_errors": [],
@@ -1251,8 +1280,8 @@
     "build_vs_buy": {
       "status": "clear",
       "summary": "Every recorded build-vs-buy decision includes reviewable reuse candidates and any self-build reason.",
-      "decision_count": 16,
-      "total_decision_count": 17,
+      "decision_count": 17,
+      "total_decision_count": 18,
       "superseded_decision_count": 1,
       "findings": []
     },

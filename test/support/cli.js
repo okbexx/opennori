@@ -12,7 +12,8 @@ export const PACKAGE_VERSION = JSON.parse(fs.readFileSync(path.join(ROOT, "packa
 export function run(args, options = {}) {
   const result = spawnSync(process.execPath, [options.cli || CLI, ...args], {
     cwd: options.cwd || ROOT,
-    encoding: "utf8"
+    encoding: "utf8",
+    env: { ...process.env, ...(options.env || {}) }
   });
   if (result.status !== (options.status ?? 0)) {
     throw new Error(result.stderr || result.stdout);

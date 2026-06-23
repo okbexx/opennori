@@ -2,17 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { addProfileEvidence, readJson } from "../core.ts";
 import type { JsonObject } from "../types/common.ts";
+import type { EvidenceSource } from "../types/evidence.ts";
 import type { EvidenceLedger } from "../types/evidence.ts";
 import type { AutoProfileCheck } from "../types/lifecycle.ts";
 import type { CapabilityProfile, ProfileEvidenceResult } from "../types/profile.ts";
-
-function skillSearchPaths(name: string): string[] {
-  const home = process.env.HOME || "";
-  return [
-    path.join(home, ".agents", "skills", name, "SKILL.md"),
-    path.join(home, ".codex", "skills", name, "SKILL.md")
-  ].filter(Boolean);
-}
+import { inspectSkillCapability } from "./adapters/skill-capability.ts";
 
 function stackIsPresent(root: string, name: string): boolean | null {
   const packageJsonPath = path.join(root, "package.json");
@@ -34,20 +28,25 @@ function stackIsPresent(root: string, name: string): boolean | null {
 export function autoProfileChecks(root: string, profile: CapabilityProfile): AutoProfileCheck[] {
   return (profile.items || []).map((item) => {
     if (item.type === "skill") {
-      const paths = skillSearchPaths(item.name);
-      const foundPath = paths.find((candidate) => fs.existsSync(candidate));
-      const result = foundPath ? (item.strength === "avoid" ? "violated" : "satisfied") : (item.strength === "avoid" ? "satisfied" : "unknown");
+      const inspection = inspectSkillCapability(item.name);
+      const result = inspection.found ? (item.strength === "avoid" ? "violated" : "satisfied") : (item.strength === "avoid" ? "satisfied" : "unknown");
       return {
         item_id: item.id,
         type: item.type,
         name: item.name,
         strength: item.strength,
         result,
-        basis: "local-skill-path",
-        summary: foundPath
-          ? `Skill ${item.name} is available at ${foundPath}.`
-          : `Skill ${item.name} was not found in the standard local Skill paths.`,
-        sources: paths.map((candidate) => ({ type: "artifact", label: candidate, path: candidate, exists: fs.existsSync(candidate) })),
+        basis: "skill-capability-source",
+        summary: inspection.found
+          ? `Skill ${item.name} is available from ${inspection.source_kind} at ${inspection.path}.`
+          : `Skill ${item.name} was not found in OpenNori package assets, Codex Plugin cache, or user-local Skill paths.`,
+        sources: inspection.sources.map((candidate) => ({
+          type: "artifact",
+          label: candidate.label,
+          path: candidate.path,
+          exists: candidate.exists,
+          source_kind: candidate.kind
+        })),
         can_auto_record: result !== "unknown"
       };
     }
@@ -110,13 +109,13 @@ export function autoProfileChecks(root: string, profile: CapabilityProfile): Aut
 export function recordAutoProfileChecks(profile: CapabilityProfile, ledger: EvidenceLedger, checks: AutoProfileCheck[]): EvidenceLedger {
   for (const check of checks.filter((entry) => entry.can_auto_record)) {
     if (!["satisfied", "violated", "waived"].includes(check.result)) continue;
-    const item = profile.items.find((entry) => entry.id === check.item_id);
     const latest = ledger.profile_evidence?.filter((entry) => entry.item_id === check.item_id).at(-1);
     if (latest?.result === check.result && latest?.summary === check.summary) continue;
+    const sourcePath = check.sources?.find((source: EvidenceSource) => source.exists === true)?.path;
     addProfileEvidence(profile, ledger, check.item_id, {
       result: check.result as ProfileEvidenceResult,
       summary: check.summary,
-      path: check.sources?.[0]?.path
+      path: sourcePath
     });
   }
   return ledger;

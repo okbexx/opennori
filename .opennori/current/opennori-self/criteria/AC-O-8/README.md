@@ -17,21 +17,23 @@ Passing threshold: 用户不需要记住 CLI；Project Profile 保存在 .openno
 
 ## Evidence
 
-Latest: project-profile-source-directory-verification - OpenNori initializes .opennori/profile/profile.json as the project-level Project Profile source and .opennori/profile/README.md as a generated review surface; goal ledgers store only profile_evidence compliance records.
+Latest: profile-skill-source-adapter-verification - Project Profile automatic Skill checks now resolve Skills from OpenNori package assets, Codex Plugin cache, and user-local Skill directories while preserving Project Profile as project-level state and current-goal ledger profile evidence only.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect .opennori/profile/profile.json and README.md, lifecycle install actions, manifest managed files, and profile tests. Confirm profile.json is source data, README is generated from it, and current goal ledgers contain only compliance evidence.
-Limitations: This verifies project-state initialization and scope boundaries. It does not add Project Profile preferences to this repository; the current Project Profile remains empty until a user or agent records preferences.
+Reviewability: Inspect the new skill-capability adapter and profile checks. Confirm profile checks report basis=skill-capability-source, include source_kind for package/plugin-cache/user Skill sources, record the found path for automatic evidence, and do not implement Codex Skill selection or subjective Skill compliance. Rerun the focused profile/lifecycle adapter tests plus typecheck and lint.
+Limitations: This verifies SKILL.md source availability and deterministic Profile compliance routing. It does not prove a future agent actually loaded or followed a Skill; that remains Codex Skill discovery, agent behavior, evidence, and user review.
 
 Sources:
-- node ./bin/opennori.js init --root . --confirm --json
-- npm run test:profile
-- src/core/profile.ts
-- src/lifecycle/install.ts
-- src/lifecycle/manifest.ts
-- test/cli-lifecycle.test.js
-- .opennori/profile/profile.json
-- .opennori/profile/README.md
+- .opennori/architecture/evidence/opennori-self-ac-o-8-profile-skill-source-adapter.json
+- npx vitest run test/profile.test.js test/lifecycle-adapters.test.ts
+- npx tsc --noEmit --pretty false
+- npm run lint
+- src/lifecycle/adapters/skill-capability.ts
+- src/lifecycle/profile-checks.ts
+- test/lifecycle-adapters.test.ts
+- test/profile.test.js
+- test/support/cli.js
+- .opennori/architecture/decisions/profile-skill-capability-source-adapter.json
 
 ## Files
 

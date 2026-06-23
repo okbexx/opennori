@@ -1,0 +1,65 @@
+{
+  "kind": "profile-skill-source-adapter-verification",
+  "basis": "tool-observation",
+  "summary": "Project Profile automatic Skill checks now resolve Skills from OpenNori package assets, Codex Plugin cache, and user-local Skill directories while preserving Project Profile as project-level state and current-goal ledger profile evidence only.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-ac-o-8-profile-skill-source-adapter",
+      "path": ".opennori/architecture/evidence/opennori-self-ac-o-8-profile-skill-source-adapter.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/profile.test.js test/lifecycle-adapters.test.ts",
+      "command": "npx vitest run test/profile.test.js test/lifecycle-adapters.test.ts"
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/adapters/skill-capability.ts",
+      "path": "src/lifecycle/adapters/skill-capability.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/lifecycle/profile-checks.ts",
+      "path": "src/lifecycle/profile-checks.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/lifecycle-adapters.test.ts",
+      "path": "test/lifecycle-adapters.test.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/profile.test.js",
+      "path": "test/profile.test.js"
+    },
+    {
+      "type": "artifact",
+      "label": "test/support/cli.js",
+      "path": "test/support/cli.js"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/architecture/decisions/profile-skill-capability-source-adapter.json",
+      "path": ".opennori/architecture/decisions/profile-skill-capability-source-adapter.json"
+    }
+  ],
+  "reviewability": "Inspect the new skill-capability adapter and profile checks. Confirm profile checks report basis=skill-capability-source, include source_kind for package/plugin-cache/user Skill sources, record the found path for automatic evidence, and do not implement Codex Skill selection or subjective Skill compliance. Rerun the focused profile/lifecycle adapter tests plus typecheck and lint.",
+  "limitations": "This verifies SKILL.md source availability and deterministic Profile compliance routing. It does not prove a future agent actually loaded or followed a Skill; that remains Codex Skill discovery, agent behavior, evidence, and user review.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T10:27:26.672Z"
+}

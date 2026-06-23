@@ -128,6 +128,10 @@ test("preferred profile items create review risk without blocking objective comp
 
 test("profile check automatically checks local Skills and package stacks without forcing adapters", { tags: ["profile"] }, () => {
   const root = tempRoot();
+  const home = path.join(root, "home");
+  const cachedSkill = path.join(home, ".codex", "plugins", "cache", "example", "example", "0.1.0", "skills", "cached-review", "SKILL.md");
+  fs.mkdirSync(path.dirname(cachedSkill), { recursive: true });
+  fs.writeFileSync(cachedSkill, "# cached review skill\n");
   fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({
     dependencies: {
       "radix-ui": "1.0.0",
@@ -144,9 +148,9 @@ test("profile check automatically checks local Skills and package stacks without
     "profile", "add",
     "--root", root,
     "--type", "skill",
-    "--name", "design-taste-frontend",
+    "--name", "cached-review",
     "--strength", "must",
-    "--purpose", "Use the design Skill.",
+    "--purpose", "Use the cached review Skill.",
     "--install-policy", "existing_only",
     "--json"
   ]);
@@ -169,18 +173,22 @@ test("profile check automatically checks local Skills and package stacks without
     "--json"
   ]);
 
-  const checked = run(["profile", "check", "--root", root, "--json"]);
+  const checked = run(["profile", "check", "--root", root, "--json"], { env: { HOME: home } });
   assert.equal(checked.data.recorded, false);
-  assert.equal(checked.data.checks.some((item) => item.item_id === "skill-design-taste-frontend" && item.result === "satisfied"), true);
+  const skillCheck = checked.data.checks.find((item) => item.item_id === "skill-cached-review");
+  assert.equal(skillCheck?.result, "satisfied");
+  assert.equal(skillCheck?.basis, "skill-capability-source");
+  assert.equal(skillCheck?.sources.some((source) => source.source_kind === "codex-plugin-cache" && source.path === cachedSkill && source.exists === true), true);
   assert.equal(checked.data.checks.some((item) => item.item_id === "stack-radix-ui" && item.result === "satisfied"), true);
   assert.equal(checked.data.checks.some((item) => item.item_id === "stack-forbidden-lib" && item.result === "violated"), true);
   let payload = readGoalPayloadFromPaths(init.data.acceptance_path, init.data.evidence_path);
   assert.equal((payload.ledger.profile_evidence || []).length, 0);
 
-  const recorded = run(["profile", "check", "--root", root, "--record", "--json"]);
+  const recorded = run(["profile", "check", "--root", root, "--record", "--json"], { env: { HOME: home } });
   assert.equal(recorded.data.recorded, true);
   assert.equal(recorded.data.compliance.statuses.some((item) => item.id === "stack-forbidden-lib" && item.status === "violated"), true);
   assert.equal(recorded.data.workflow_status, "blocked");
   payload = readGoalPayloadFromPaths(init.data.acceptance_path, init.data.evidence_path);
   assert.equal(payload.ledger.profile_evidence.length, 3);
+  assert.equal(payload.ledger.profile_evidence.some((entry) => entry.item_id === "skill-cached-review" && entry.path === cachedSkill), true);
 });

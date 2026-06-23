@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 2,
-  "latest_evidence_summary": "OpenNori initializes .opennori/profile/profile.json as the project-level Project Profile source and .opennori/profile/README.md as a generated review surface; goal ledgers store only profile_evidence compliance records.",
-  "updated_at": "2026-06-23T07:08:15.419Z"
+  "evidence_count": 3,
+  "latest_evidence_summary": "Project Profile automatic Skill checks now resolve Skills from OpenNori package assets, Codex Plugin cache, and user-local Skill directories while preserving Project Profile as project-level state and current-goal ledger profile evidence only.",
+  "updated_at": "2026-06-23T10:27:26.672Z"
 }

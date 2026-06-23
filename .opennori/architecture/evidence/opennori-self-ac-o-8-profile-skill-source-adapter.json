@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-ac-o-8-profile-skill-source-adapter",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-O-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Project Profile Skill checks now inspect package Skills, Codex Plugin cache Skills, and user-local Skills through a narrow lifecycle adapter.",
+  "fit": "The implementation keeps Project Profile as project-level completion-risk evidence, preserves Plugin-first Skill distribution, and avoids building a second Codex Skill runtime.",
+  "implementation_focus": "Replace inline local Skill path probing with a lifecycle adapter consumed by profile checks, plus objective tests for package, plugin cache, and user Skill sources.",
+  "evidence": "src/lifecycle/adapters/skill-capability.ts, src/lifecycle/profile-checks.ts, test/lifecycle-adapters.test.ts, test/profile.test.js, and focused validation commands.",
+  "limitations": "The adapter proves local SKILL.md assets are present; it does not prove Codex selected a Skill or that the agent subjectively followed the Skill during work.",
+  "created_at": "2026-06-23T10:27:13.544Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}
