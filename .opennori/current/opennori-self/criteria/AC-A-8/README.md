@@ -17,28 +17,24 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: evidence-state-boundary-verification - Product evidence state boundaries were split so evidence.ts is a compatibility export; source normalization/path reviewability, context-only risk gate, evidence recording, workflow status/current gap, evidence view, stale pruning, and evidence health now live in separate core modules. Existing behavior is preserved across evidence/reporting/CLI/dashboard tests, typecheck, and doctor.
+Latest: agent-next-boundary-verification - AgentNext route-surface boundaries were split: src/agent-next.ts keeps the exported routing functions; src/agent-next-builder.ts builds the standard AgentNext payload; src/agent-next-activity.ts builds optional dashboard activity command templates; src/agent-next-doctor.ts filters recoverable active goals. Typecheck, focused CLI tests, reporting tests, doctor/status, and diff checks passed, and status still returns agent_next ready_for_next_loop.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed core evidence modules to confirm each owns a distinct objective responsibility and evidence.ts remains a stable barrel. Rerun the listed focused verification commands.
-Limitations: This proves the evidence state module boundary and behavior preservation for the current slice. It intentionally does not add subjective AC-quality validators or a fixed evidence adapter taxonomy.
+Reviewability: Inspect the listed AgentNext modules to confirm routing prose, payload construction, dashboard activity templates, and doctor active-goal helpers are separated while public route functions remain stable. Rerun the listed focused verification commands.
+Limitations: This proves the AgentNext module boundary and output behavior for the current route surface. It does not redesign route wording, add new states, or change Skill behavior.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-evidence-state-boundary.json
+- .opennori/architecture/evidence/opennori-self-agent-next-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:evidence
+- npm run test:cli -- --run test/cli-lifecycle.test.js test/cli-acceptance.test.js test/cli-architecture.test.js test/cli-reporting.test.js
 - npm run test:reporting
-- npm run test:cli -- --run test/cli-evidence.test.js test/cli-reporting.test.js test/cli-acceptance.test.js
-- npm run test:dashboard
 - node ./bin/opennori.js doctor --root . --json
-- src/core/evidence.ts
-- src/core/evidence-source.ts
-- src/core/evidence-risk.ts
-- src/core/evidence-record.ts
-- src/core/evidence-workflow.ts
-- src/core/evidence-view.ts
-- src/core/evidence-prune.ts
-- src/core/evidence-health.ts
+- node ./bin/opennori.js status --root . --json
+- git diff --check
+- src/agent-next.ts
+- src/agent-next-builder.ts
+- src/agent-next-activity.ts
+- src/agent-next-doctor.ts
 
 ## Files
 

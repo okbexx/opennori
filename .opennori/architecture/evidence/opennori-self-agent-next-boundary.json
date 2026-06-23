@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-agent-next-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Split AgentNext construction, dashboard activity command templates, and doctor active-goal helpers while preserving agent-next routing functions.",
+  "fit": "This follows the confirmed TypeScript Agent State CLI baseline: AgentNext remains deterministic agent routing state, dashboard activity remains an optional observation signal, and doctor goal filtering is separated from routing prose.",
+  "implementation_focus": "AgentNext route-surface boundary refactor for AC-A-8.",
+  "evidence": "Inspect src/agent-next.ts, src/agent-next-builder.ts, src/agent-next-activity.ts, and src/agent-next-doctor.ts; rerun typecheck, focused CLI/reporting tests, doctor/status, and diff checks.",
+  "limitations": "This verifies the AgentNext construction boundary and output behavior for current routes. It does not redesign route prose or add new agent workflow states.",
+  "created_at": "2026-06-23T03:45:46.699Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

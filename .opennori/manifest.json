@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T03:41:39.620Z",
+  "updated_at": "2026-06-23T03:45:59.828Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -554,6 +554,17 @@
         "summary": "Goal and criterion dossier state follows the confirmed TypeScript agent-state CLI baseline: structured JSON remains authoritative, generated README files are review surfaces, and CLI/domain modules keep deterministic .opennori writes.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-ac-p-16-goal-dossiers.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-agent-next-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Split AgentNext construction, dashboard activity command templates, and doctor active-goal helpers while preserving agent-next routing functions.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-agent-next-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T03:41:39.518Z",
+  "updated_at": "2026-06-23T03:45:59.733Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -5167,6 +5167,76 @@
           "limitations": "This proves the evidence state module boundary and behavior preservation for the current slice. It intentionally does not add subjective AC-quality validators or a fixed evidence adapter taxonomy.",
           "gate": "accepted",
           "created_at": "2026-06-23T03:41:39.516Z"
+        },
+        {
+          "kind": "agent-next-boundary-verification",
+          "basis": "tool-observation",
+          "summary": "AgentNext route-surface boundaries were split: src/agent-next.ts keeps the exported routing functions; src/agent-next-builder.ts builds the standard AgentNext payload; src/agent-next-activity.ts builds optional dashboard activity command templates; src/agent-next-doctor.ts filters recoverable active goals. Typecheck, focused CLI tests, reporting tests, doctor/status, and diff checks passed, and status still returns agent_next ready_for_next_loop.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-agent-next-boundary",
+              "path": ".opennori/architecture/evidence/opennori-self-agent-next-boundary.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:cli -- --run test/cli-lifecycle.test.js test/cli-acceptance.test.js test/cli-architecture.test.js test/cli-reporting.test.js",
+              "command": "npm run test:cli -- --run test/cli-lifecycle.test.js test/cli-acceptance.test.js test/cli-architecture.test.js test/cli-reporting.test.js"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:reporting",
+              "command": "npm run test:reporting"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js doctor --root . --json",
+              "command": "node ./bin/opennori.js doctor --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js status --root . --json",
+              "command": "node ./bin/opennori.js status --root . --json"
+            },
+            {
+              "type": "command",
+              "label": "git diff --check",
+              "command": "git diff --check"
+            },
+            {
+              "type": "artifact",
+              "label": "src/agent-next.ts",
+              "path": "src/agent-next.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/agent-next-builder.ts",
+              "path": "src/agent-next-builder.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/agent-next-activity.ts",
+              "path": "src/agent-next-activity.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/agent-next-doctor.ts",
+              "path": "src/agent-next-doctor.ts"
+            }
+          ],
+          "reviewability": "Inspect the listed AgentNext modules to confirm routing prose, payload construction, dashboard activity templates, and doctor active-goal helpers are separated while public route functions remain stable. Rerun the listed focused verification commands.",
+          "limitations": "This proves the AgentNext module boundary and output behavior for the current route surface. It does not redesign route wording, add new states, or change Skill behavior.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T03:45:59.731Z"
         }
       ]
     },
