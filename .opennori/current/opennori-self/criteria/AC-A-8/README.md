@@ -17,24 +17,26 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-refactor-verification - OpenNori report/completion core boundary was split so src/core/completion.ts owns deterministic completion, intervention, and next-recommendation decisions; src/core/report-render.ts owns human-readable Markdown report rendering; src/core/report.ts remains a compatibility export. Reporting/core tests, typecheck, doctor/status, and diff checks passed after the split.
+Latest: architecture-profile-boundary-verification - Architecture Profile boundaries were split so src/architecture/profile.ts only resolves, lists, and writes profiles; builtin profile content lives in src/architecture/builtin-profiles.ts; objective descriptor, normalization, and validation live in src/architecture/profile-model.ts; shared technical baseline shape helpers live in src/architecture/technical-baseline.ts and are reused by baseline validation. Architecture profiles, doctor/status, focused CLI tests, architecture tests, typecheck, and diff checks passed.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect src/core/completion.ts for completion/intervention/recommendation decisions, src/core/report-render.ts for Markdown output, and src/core/report.ts for the compatibility export. Rerun the listed commands.
-Limitations: This proves the report/completion module boundary and behavior-preserving verification for the current slice. It does not redesign report content, evidence semantics, or future subjective AC review behavior.
+Reviewability: Inspect the listed architecture files to confirm content, model validation, shared technical baseline helpers, and storage facade are separate. Rerun the listed focused verification commands.
+Limitations: This proves the Architecture Profile boundary split and objective validation reuse for this slice. It does not prove subjective architecture quality for every future project profile; that remains packaged Skill and user review.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-report-completion-render-boundary.json
-- npm run test:reporting
-- npm run test:core
+- .opennori/architecture/evidence/opennori-self-architecture-profile-boundary.json
 - npx tsc --noEmit --pretty false
+- npm run test:architecture
+- npm run test:cli -- --run test/cli-architecture.test.js test/cli-core.test.js
+- node ./bin/opennori.js architecture profiles --root . --json
 - node ./bin/opennori.js doctor --root . --json
 - node ./bin/opennori.js status --root . --json
 - git diff --check
-- src/core/completion.ts
-- src/core/report-render.ts
-- src/core/report.ts
-- .opennori/architecture/evidence/opennori-self-report-completion-render-boundary.json
+- src/architecture/profile.ts
+- src/architecture/builtin-profiles.ts
+- src/architecture/profile-model.ts
+- src/architecture/technical-baseline.ts
+- src/architecture/baseline.ts
 
 ## Files
 

@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T03:23:37.453Z",
+  "updated_at": "2026-06-23T03:35:04.689Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -554,6 +554,17 @@
         "summary": "Goal and criterion dossier state follows the confirmed TypeScript agent-state CLI baseline: structured JSON remains authoritative, generated README files are review surfaces, and CLI/domain modules keep deterministic .opennori writes.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-ac-p-16-goal-dossiers.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-architecture-profile-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Split Architecture Profile content, model validation, and storage facade boundaries while keeping subjective architecture quality in Skills and user review.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-architecture-profile-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

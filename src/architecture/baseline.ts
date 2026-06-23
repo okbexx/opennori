@@ -13,6 +13,7 @@ import type {
 import { validateSchema } from "../validation.ts";
 import { resolveArchitectureProfile } from "./profile.ts";
 import { ARCHITECTURE_BASELINE_SCHEMA_VERSION, architectureBaselinePaths } from "./shared.ts";
+import { normalizeTechnicalBaseline, technicalBaselineIsComplete } from "./technical-baseline.ts";
 
 export function buildArchitectureBaseline(root: string, {
   profileId = "typescript-agent-state-cli",
@@ -89,16 +90,7 @@ export function validateArchitectureBaseline(baseline: ArchitectureBaseline | Js
   if (!Array.isArray(baseline.checks) || baseline.checks.length === 0) {
     issues.push({ path: "checks", message: "Architecture Baseline must include architecture checks." });
   }
-  const technicalBaseline = normalizeTechnicalBaseline(baseline.technical_baseline as Partial<TechnicalArchitectureBaseline> | undefined);
-  if (
-    technicalBaseline.runtime_topology.length === 0
-    || technicalBaseline.source_of_truth.length === 0
-    || technicalBaseline.module_boundaries.length === 0
-    || technicalBaseline.contract_surfaces.length === 0
-    || technicalBaseline.data_flows.length === 0
-    || technicalBaseline.dependency_decisions.length === 0
-    || technicalBaseline.reference_mappings.length === 0
-  ) {
+  if (!technicalBaselineIsComplete(baseline.technical_baseline as Partial<TechnicalArchitectureBaseline> | undefined)) {
     issues.push({
       path: "technical_baseline",
       message: "Architecture Baseline must include concrete technical_baseline runtime, state, module, contract, flow, dependency, and reference mapping sections."
@@ -201,23 +193,6 @@ function renderArchitectureBaselineMarkdown(baseline: ArchitectureBaseline): str
     ""
   );
   return `${lines.join("\n").trimEnd()}\n`;
-}
-
-function asArray<T>(value: unknown): T[] {
-  return Array.isArray(value) ? value as T[] : [];
-}
-
-function normalizeTechnicalBaseline(input: Partial<TechnicalArchitectureBaseline> | undefined): TechnicalArchitectureBaseline {
-  return {
-    runtime_topology: asArray<TechnicalArchitectureItem>(input?.runtime_topology),
-    source_of_truth: asArray<TechnicalArchitectureItem>(input?.source_of_truth),
-    module_boundaries: asArray<TechnicalArchitectureItem>(input?.module_boundaries),
-    contract_surfaces: asArray<TechnicalArchitectureItem>(input?.contract_surfaces),
-    data_flows: asArray<TechnicalArchitectureFlow>(input?.data_flows),
-    dependency_decisions: asArray<TechnicalArchitectureItem>(input?.dependency_decisions),
-    reference_mappings: asArray<TechnicalArchitectureItem>(input?.reference_mappings),
-    verification: asArray<string>(input?.verification)
-  };
 }
 
 function renderTechnicalItems(items: TechnicalArchitectureItem[]): string[] {

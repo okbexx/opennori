@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 8,
-  "latest_evidence_summary": "OpenNori report/completion core boundary was split so src/core/completion.ts owns deterministic completion, intervention, and next-recommendation decisions; src/core/report-render.ts owns human-readable Markdown report rendering; src/core/report.ts remains a compatibility export. Reporting/core tests, typecheck, doctor/status, and diff checks passed after the split.",
-  "updated_at": "2026-06-23T03:23:37.341Z"
+  "evidence_count": 9,
+  "latest_evidence_summary": "Architecture Profile boundaries were split so src/architecture/profile.ts only resolves, lists, and writes profiles; builtin profile content lives in src/architecture/builtin-profiles.ts; objective descriptor, normalization, and validation live in src/architecture/profile-model.ts; shared technical baseline shape helpers live in src/architecture/technical-baseline.ts and are reused by baseline validation. Architecture profiles, doctor/status, focused CLI tests, architecture tests, typecheck, and diff checks passed.",
+  "updated_at": "2026-06-23T03:35:04.575Z"
 }

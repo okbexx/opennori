@@ -1,0 +1,80 @@
+{
+  "kind": "architecture-profile-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "Architecture Profile boundaries were split so src/architecture/profile.ts only resolves, lists, and writes profiles; builtin profile content lives in src/architecture/builtin-profiles.ts; objective descriptor, normalization, and validation live in src/architecture/profile-model.ts; shared technical baseline shape helpers live in src/architecture/technical-baseline.ts and are reused by baseline validation. Architecture profiles, doctor/status, focused CLI tests, architecture tests, typecheck, and diff checks passed.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-architecture-profile-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-architecture-profile-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:architecture",
+      "command": "npm run test:architecture"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli -- --run test/cli-architecture.test.js test/cli-core.test.js",
+      "command": "npm run test:cli -- --run test/cli-architecture.test.js test/cli-core.test.js"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js architecture profiles --root . --json",
+      "command": "node ./bin/opennori.js architecture profiles --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js doctor --root . --json",
+      "command": "node ./bin/opennori.js doctor --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js status --root . --json",
+      "command": "node ./bin/opennori.js status --root . --json"
+    },
+    {
+      "type": "command",
+      "label": "git diff --check",
+      "command": "git diff --check"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/profile.ts",
+      "path": "src/architecture/profile.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/builtin-profiles.ts",
+      "path": "src/architecture/builtin-profiles.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/profile-model.ts",
+      "path": "src/architecture/profile-model.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/technical-baseline.ts",
+      "path": "src/architecture/technical-baseline.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/architecture/baseline.ts",
+      "path": "src/architecture/baseline.ts"
+    }
+  ],
+  "reviewability": "Inspect the listed architecture files to confirm content, model validation, shared technical baseline helpers, and storage facade are separate. Rerun the listed focused verification commands.",
+  "limitations": "This proves the Architecture Profile boundary split and objective validation reuse for this slice. It does not prove subjective architecture quality for every future project profile; that remains packaged Skill and user review.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T03:35:04.572Z"
+}
