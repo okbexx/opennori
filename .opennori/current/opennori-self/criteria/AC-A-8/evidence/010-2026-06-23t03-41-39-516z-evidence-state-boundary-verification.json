@@ -1,0 +1,90 @@
+{
+  "kind": "evidence-state-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "Product evidence state boundaries were split so evidence.ts is a compatibility export; source normalization/path reviewability, context-only risk gate, evidence recording, workflow status/current gap, evidence view, stale pruning, and evidence health now live in separate core modules. Existing behavior is preserved across evidence/reporting/CLI/dashboard tests, typecheck, and doctor.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-evidence-state-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-evidence-state-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:evidence",
+      "command": "npm run test:evidence"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:reporting",
+      "command": "npm run test:reporting"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:cli -- --run test/cli-evidence.test.js test/cli-reporting.test.js test/cli-acceptance.test.js",
+      "command": "npm run test:cli -- --run test/cli-evidence.test.js test/cli-reporting.test.js test/cli-acceptance.test.js"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js doctor --root . --json",
+      "command": "node ./bin/opennori.js doctor --root . --json"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence.ts",
+      "path": "src/core/evidence.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence-source.ts",
+      "path": "src/core/evidence-source.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence-risk.ts",
+      "path": "src/core/evidence-risk.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence-record.ts",
+      "path": "src/core/evidence-record.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence-workflow.ts",
+      "path": "src/core/evidence-workflow.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence-view.ts",
+      "path": "src/core/evidence-view.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence-prune.ts",
+      "path": "src/core/evidence-prune.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/evidence-health.ts",
+      "path": "src/core/evidence-health.ts"
+    }
+  ],
+  "reviewability": "Inspect the listed core evidence modules to confirm each owns a distinct objective responsibility and evidence.ts remains a stable barrel. Rerun the listed focused verification commands.",
+  "limitations": "This proves the evidence state module boundary and behavior preservation for the current slice. It intentionally does not add subjective AC-quality validators or a fixed evidence adapter taxonomy.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T03:41:39.516Z"
+}

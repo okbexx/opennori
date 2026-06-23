@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-evidence-state-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-18T09:43:44.184Z"
+  },
+  "summary": "Split the Product evidence state boundary into source normalization, risk gate, workflow status, evidence view, pruning, health, and recording modules while keeping evidence.ts as a compatibility export.",
+  "fit": "This follows the confirmed TypeScript Agent State CLI baseline by keeping objective evidence state semantics in domain modules and preserving CLI/report/dashboard imports through a stable barrel. Subjective AC quality and evidence sufficiency remain Skill and user-review responsibilities.",
+  "implementation_focus": "Evidence state boundary refactor for AC-A-8.",
+  "evidence": "Inspect src/core/evidence.ts, evidence-source.ts, evidence-risk.ts, evidence-record.ts, evidence-workflow.ts, evidence-view.ts, evidence-prune.ts, and evidence-health.ts; rerun typecheck, evidence/reporting/domain CLI/dashboard tests, doctor, status, and diff checks.",
+  "limitations": "This verifies module boundaries for existing evidence behavior. It does not add a new evidence adapter taxonomy or judge subjective AC quality.",
+  "created_at": "2026-06-23T03:41:25.520Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

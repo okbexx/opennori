@@ -17,26 +17,28 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: architecture-profile-boundary-verification - Architecture Profile boundaries were split so src/architecture/profile.ts only resolves, lists, and writes profiles; builtin profile content lives in src/architecture/builtin-profiles.ts; objective descriptor, normalization, and validation live in src/architecture/profile-model.ts; shared technical baseline shape helpers live in src/architecture/technical-baseline.ts and are reused by baseline validation. Architecture profiles, doctor/status, focused CLI tests, architecture tests, typecheck, and diff checks passed.
+Latest: evidence-state-boundary-verification - Product evidence state boundaries were split so evidence.ts is a compatibility export; source normalization/path reviewability, context-only risk gate, evidence recording, workflow status/current gap, evidence view, stale pruning, and evidence health now live in separate core modules. Existing behavior is preserved across evidence/reporting/CLI/dashboard tests, typecheck, and doctor.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed architecture files to confirm content, model validation, shared technical baseline helpers, and storage facade are separate. Rerun the listed focused verification commands.
-Limitations: This proves the Architecture Profile boundary split and objective validation reuse for this slice. It does not prove subjective architecture quality for every future project profile; that remains packaged Skill and user review.
+Reviewability: Inspect the listed core evidence modules to confirm each owns a distinct objective responsibility and evidence.ts remains a stable barrel. Rerun the listed focused verification commands.
+Limitations: This proves the evidence state module boundary and behavior preservation for the current slice. It intentionally does not add subjective AC-quality validators or a fixed evidence adapter taxonomy.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-architecture-profile-boundary.json
+- .opennori/architecture/evidence/opennori-self-evidence-state-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:architecture
-- npm run test:cli -- --run test/cli-architecture.test.js test/cli-core.test.js
-- node ./bin/opennori.js architecture profiles --root . --json
+- npm run test:evidence
+- npm run test:reporting
+- npm run test:cli -- --run test/cli-evidence.test.js test/cli-reporting.test.js test/cli-acceptance.test.js
+- npm run test:dashboard
 - node ./bin/opennori.js doctor --root . --json
-- node ./bin/opennori.js status --root . --json
-- git diff --check
-- src/architecture/profile.ts
-- src/architecture/builtin-profiles.ts
-- src/architecture/profile-model.ts
-- src/architecture/technical-baseline.ts
-- src/architecture/baseline.ts
+- src/core/evidence.ts
+- src/core/evidence-source.ts
+- src/core/evidence-risk.ts
+- src/core/evidence-record.ts
+- src/core/evidence-workflow.ts
+- src/core/evidence-view.ts
+- src/core/evidence-prune.ts
+- src/core/evidence-health.ts
 
 ## Files
 
