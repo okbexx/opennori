@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
+import { buildAcceptanceRadarModel, getNodeColor, getNodePulseClass, getRadarLinkStyle } from "../src/dashboard/src/radar-model.ts";
 import { gapIdFromFocusEvent, profileNodeFromSnapshot, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "../src/dashboard/src/selection.ts";
 import type { NoriSnapshot } from "../src/dashboard/src/types.ts";
 
@@ -81,6 +82,61 @@ test("dashboard selection maps passed AC focus to the rendered Passed aggregate"
   assert.equal((node?.rawData as { focused_id?: string }).focused_id, "AC-2");
   const rawData = node?.rawData as { criteria: Array<{ dossier?: { readme_path?: string } }> };
   assert.equal(rawData.criteria.at(0)?.dossier?.readme_path, ".opennori/current/dashboard-goal/criteria/AC-2/README.md");
+});
+
+test("dashboard radar model projects goal passed aggregate current gap and evidence nodes", { tags: ["dashboard", "quick", "unit"] }, () => {
+  const snapshot = snapshotWithCriteria([
+    {
+      id: "AC-1",
+      user_story: "As a user, I can inspect a completed criterion.",
+      measurement: "Open the dashboard and inspect the passed aggregate.",
+      threshold: "The completed criterion is grouped into Passed.",
+      status: "passing",
+      confidence: "verified",
+      evidence: []
+    },
+    {
+      id: "AC-3",
+      user_story: "As a user, I can inspect the current gap.",
+      measurement: "Open the dashboard and inspect AC-3 and its evidence.",
+      threshold: "AC-3 remains visible as the current gap with reviewable evidence.",
+      status: "needs_evidence",
+      confidence: "review-required",
+      evidence: [
+        {
+          kind: "command",
+          result: "failing",
+          summary: "The evidence is intentionally not passing."
+        }
+      ]
+    }
+  ]);
+
+  const model = buildAcceptanceRadarModel(snapshot, { width: 1000, height: 800 });
+
+  assert.equal(model.goalId, "dashboard-goal");
+  assert.equal(model.currentGapNodeId, "ac-AC-3");
+  assert.equal(model.isAgentActive, true);
+  assert.equal(model.grid.circles.length, 5);
+  assert.equal(model.grid.spokes.length, 8);
+
+  const goal = model.nodes.find((node) => node.id === "dashboard-goal");
+  const passed = model.nodes.find((node) => node.id === "passed-group");
+  const currentGap = model.nodes.find((node) => node.id === "ac-AC-3");
+  const evidence = model.nodes.find((node) => node.id === "ev-AC-3-0");
+  assert.equal(goal?.type, "goal");
+  assert.equal(passed?.subLabel, "1");
+  assert.equal(currentGap?.status, "needs_evidence");
+  assert.equal(evidence?.type, "evidence");
+
+  const currentGapLink = model.links.find((link) => link.targetId === "ac-AC-3");
+  const evidenceLink = model.links.find((link) => link.targetId === "ev-AC-3-0");
+  assert.ok(currentGapLink);
+  assert.equal(currentGapLink?.isMoving, true);
+  assert.equal(evidenceLink?.isMoving, true);
+  assert.equal(getRadarLinkStyle(currentGapLink, model.goalId).strokeWidth, 2.5);
+  assert.equal(getNodeColor("needs_evidence", "ac"), "#fbbf24");
+  assert.equal(getNodePulseClass("needs_evidence", "ac", model.isAgentActive), "pulse-warning");
 });
 
 test("dashboard selection follows visual state when a focused aggregate AC becomes unpassed", { tags: ["dashboard", "quick"] }, () => {

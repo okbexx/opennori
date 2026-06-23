@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 22,
-  "latest_evidence_summary": "Completion answer, user intervention, review risk, and next recommendation routing were split into focused modules while keeping public reporting/status imports stable.",
-  "updated_at": "2026-06-23T07:39:36.885Z"
+  "evidence_count": 23,
+  "latest_evidence_summary": "Dashboard radar projection was split into a dedicated model boundary while preserving the readonly observation surface and existing visual behavior.",
+  "updated_at": "2026-06-23T07:52:00.523Z"
 }

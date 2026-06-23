@@ -1,0 +1,55 @@
+{
+  "kind": "architecture-refactor",
+  "basis": "tool-observation",
+  "summary": "Dashboard radar projection was split into a dedicated model boundary while preserving the readonly observation surface and existing visual behavior.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-dashboard-radar-model-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-dashboard-radar-model-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck:dashboard",
+      "command": "npm run typecheck:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/radar-model.ts",
+      "path": "src/dashboard/src/radar-model.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/AcceptanceRadarNet.tsx",
+      "path": "src/dashboard/src/components/AcceptanceRadarNet.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "test/dashboard-selection.test.ts",
+      "path": "test/dashboard-selection.test.ts"
+    }
+  ],
+  "reviewability": "Inspect radar-model.ts to verify node/link/grid projection is separate from the React/SVG component; inspect AcceptanceRadarNet.tsx to verify it only observes dimensions and renders the model; run the listed typecheck, dashboard test, and lint commands.",
+  "limitations": "This is an internal dashboard architecture boundary refactor. It does not change dashboard user-facing content, add write controls, or prove subjective UX quality beyond preserving the existing radar projection behavior.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T07:52:00.523Z"
+}

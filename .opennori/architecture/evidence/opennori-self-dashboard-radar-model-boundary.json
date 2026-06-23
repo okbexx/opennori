@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "opennori-self-dashboard-radar-model-boundary",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-A-8",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Dashboard radar projection now has a dedicated model boundary; React renders readonly nodes, links, grid, and styles from that model instead of owning projection logic.",
+  "fit": "Keeps the dashboard as a readonly observation surface while separating projection/state semantics from React/SVG rendering under the confirmed TypeScript agent-state CLI baseline.",
+  "implementation_focus": "Added src/dashboard/src/radar-model.ts for node/link/grid projection and style helpers; AcceptanceRadarNet now observes dimensions and renders the model; dashboard tests cover passed aggregate, current gap, and evidence node projection.",
+  "evidence": "npm run lint",
+  "limitations": "",
+  "created_at": "2026-06-23T07:51:32.662Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

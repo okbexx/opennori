@@ -17,27 +17,21 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: completion-routing-boundary-verification - Completion answer, user intervention, review risk, and next recommendation routing were split into focused modules while keeping public reporting/status imports stable.
+Latest: architecture-refactor - Dashboard radar projection was split into a dedicated model boundary while preserving the readonly observation surface and existing visual behavior.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the new completion modules. Confirm completion-answer only computes completion/confidence/review risks, intervention only identifies user input needs, next-recommendation owns routing guidance, and completion.ts remains a compatibility export for existing status/report/check call sites.
-Limitations: This is an internal boundary refactor. It does not change OpenNori subjective review policy, add new recommendation states, or alter Skill behavior.
+Reviewability: Inspect radar-model.ts to verify node/link/grid projection is separate from the React/SVG component; inspect AcceptanceRadarNet.tsx to verify it only observes dimensions and renders the model; run the listed typecheck, dashboard test, and lint commands.
+Limitations: This is an internal dashboard architecture boundary refactor. It does not change dashboard user-facing content, add write controls, or prove subjective UX quality beyond preserving the existing radar projection behavior.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-completion-routing-boundary.json
+- .opennori/architecture/evidence/opennori-self-dashboard-radar-model-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:reporting
-- npm run test:profile
-- npm run test:architecture
+- npm run typecheck:dashboard
+- npm run test:dashboard
 - npm run lint
-- src/core/completion.ts
-- src/core/acceptance-basis.ts
-- src/core/intervention.ts
-- src/core/completion-risks.ts
-- src/core/completion-answer.ts
-- src/core/next-recommendation.ts
-- src/core/report-render.ts
-- src/agent-next.ts
+- src/dashboard/src/radar-model.ts
+- src/dashboard/src/components/AcceptanceRadarNet.tsx
+- test/dashboard-selection.test.ts
 
 ## Files
 

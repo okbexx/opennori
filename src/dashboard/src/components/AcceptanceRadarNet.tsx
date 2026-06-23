@@ -1,63 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { EvidenceRecord, NoriSnapshot, RadarNode } from "../types";
-
-type RadarLink = {
-  id: string;
-  sourceId: string;
-  targetId: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  isMoving: boolean;
-};
+import {
+  buildAcceptanceRadarModel,
+  getNodeColor,
+  getNodePulseClass,
+  getRadarLinkStyle
+} from "../radar-model";
+import type { NoriSnapshot, RadarNode } from "../types";
 
 type AcceptanceRadarNetProps = {
   snapshot: NoriSnapshot | null;
   onSelectNode: (node: RadarNode) => void;
   selectedNodeId: string | null;
 };
-
-/* 简体中文：判断状态是否为成功已通过 */
-function isPassed(status: string): boolean {
-  const clean = String(status || "").toLowerCase();
-  return ["passing", "waived"].includes(clean);
-}
-
-/* 简体中文：根据只读状态获取对应的边框颜色 */
-function getNodeColor(status: string, type: RadarNode["type"]): string {
-  if (type === "goal") return "#00f0ff"; /* 冰蓝色 */
-  if (type === "ac" && status === "passed_group") return "#34d399"; /* 极光绿 */
-
-  const cleanStatus = String(status || "").toLowerCase();
-  if (isPassed(cleanStatus)) {
-    return "#34d399"; /* 极光绿 */
-  }
-  if (["failing", "broken", "invalid", "blocked", "challenged"].includes(cleanStatus)) {
-    return "#f87171"; /* 警示红 */
-  }
-  if (["pending", "review", "draft", "waiting_user", "needs_evidence"].includes(cleanStatus)) {
-    return "#fbbf24"; /* 霓虹黄 */
-  }
-  return "#94a3b8"; /* 哑光灰 */
-}
-
-/* 简体中文：根据状态获取发光 className */
-function getNodePulseClass(status: string, type: RadarNode["type"], animate: boolean): string {
-  if (!animate) return "";
-  if (type === "goal") return "pulse-cyan";
-  if (type === "ac" && status === "passed_group") return "pulse-success";
-
-  const cleanStatus = String(status || "").toLowerCase();
-  if (isPassed(cleanStatus)) {
-    return "pulse-success";
-  }
-  if (["pending", "review", "draft", "waiting_user", "needs_evidence"].includes(cleanStatus)) {
-    return "pulse-warning";
-  }
-  return "";
-}
 
 export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: AcceptanceRadarNetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,190 +34,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
     return () => resizeObserver.disconnect();
   }, []);
 
-  const { width, height } = dimensions;
-  const centerX = width / 2;
-  const centerY = height / 2;
-
-  // 简体中文：雷达辅助网的基准尺寸，取宽高的最小值
-  const baseSize = Math.min(width, height);
-  const sweepSize = baseSize * 0.92;
-
-  const nodes: RadarNode[] = [];
-  const links: RadarLink[] = [];
-
-  const hasGoal = !!(snapshot && snapshot.status === "active" && snapshot.goal);
-  const isAgentActive = !!(snapshot && ["thinking", "working", "verifying"].includes(snapshot.agent.state));
-  const goal = hasGoal ? snapshot?.goal : null;
-
-  // 1. 简体中文：生成核心 Goal 节点，放置在画布正中心
-  const goalId = goal?.id || "no-current-goal";
-  const goalLabel = hasGoal ? "Goal" : "Ready";
-  nodes.push({
-    id: goalId,
-    type: "goal",
-    label: goalLabel,
-    x: centerX,
-    y: centerY,
-    status: goal?.workflow_status || "idle",
-    rawData: goal || {
-      empty_state: true,
-      idle_summary: snapshot?.idle_summary,
-      message: snapshot?.idle_summary?.message || "No current Nori Contract is being observed."
-    }
-  });
-
-  // 2. 简体中文：如果有活跃目标且存在 criteria 列表，执行智能精简重构（Smart Focus View）
-  if (hasGoal && snapshot.criteria) {
-    const acList = snapshot.criteria;
-
-    // 简体中文：过滤分类
-    const passedAc = acList.filter((ac) => isPassed(ac.status));
-    const unpassedAc = acList.filter((ac) => !isPassed(ac.status));
-    const unpassedCount = unpassedAc.length;
-    const hasPassedGroup = passedAc.length > 0;
-
-    // 依据未通过节点数动态缩放 AC 圆圈大小，防节点多时拥挤
-    const acRadius = unpassedCount > 8 ? 26 : 34;
-
-    // A. 简体中文：在左侧渲染单一大型 Passed 成功聚合节点，合并所有成功用例
-    if (hasPassedGroup) {
-      const passedNodeId = "passed-group";
-      const passedR = baseSize * 0.30; // 聚合球置于中轨，拉开间距
-      const passedX = centerX - passedR; // 固定在正左侧 (angle = Math.PI)
-      const passedY = centerY;
-
-      nodes.push({
-        id: passedNodeId,
-        type: "ac",
-        label: "Passed",
-        subLabel: String(passedAc.length),
-        x: passedX,
-        y: passedY,
-        status: "passed_group",
-        radius: 40,
-        rawData: {
-          title: "Passed Acceptance Criteria List",
-          description: "All criteria that have already satisfied the acceptance conditions.",
-          total_completed: passedAc.length,
-          criteria: passedAc.map((ac) => ({
-            id: ac.id,
-            user_story: ac.user_story,
-            measurement: ac.measurement,
-            threshold: ac.threshold,
-            status: ac.status,
-            confidence: ac.confidence,
-            dossier: ac.dossier
-          }))
-        }
-      });
-
-      // 连结 Goal 到 Passed 聚合节点
-      links.push({
-        id: `${goalId}-${passedNodeId}`,
-        sourceId: goalId,
-        targetId: passedNodeId,
-        x1: centerX,
-        y1: centerY,
-        x2: passedX,
-        y2: passedY,
-        isMoving: false // 已全部成功通过，无流光动作
-      });
-    }
-
-    // B. 简体中文：在右侧大弧形扇区（若无Passed则全环）舒展交错排布未通过 AC 节点
-    if (unpassedCount > 0) {
-      unpassedAc.forEach((ac, acIdx) => {
-        let theta = 0;
-        if (hasPassedGroup) {
-          // 245度超宽弧形扇区：自 -Math.PI * 0.68 至 Math.PI * 0.68，彻底扩展侧边可用空间
-          const sectorStart = -Math.PI * 0.68;
-          const sectorEnd = Math.PI * 0.68;
-          const sectorRange = sectorEnd - sectorStart;
-          theta = unpassedCount > 1
-            ? sectorStart + (sectorRange * acIdx) / (unpassedCount - 1)
-            : 0;
-        } else {
-          // 空载（无Passed）时，360度全环平铺
-          theta = (acIdx / unpassedCount) * Math.PI * 2;
-        }
-
-        // 双轨交错：奇数项分配到外轨道，偶数项分配到内轨道，相邻节点错落在不同半径线上
-        const isOuter = acIdx % 2 === 1;
-        const currentAcR = isOuter ? baseSize * 0.35 : baseSize * 0.24;
-
-        const acX = centerX + currentAcR * Math.cos(theta);
-        const acY = centerY + currentAcR * Math.sin(theta);
-        const acNodeId = `ac-${ac.id}`;
-
-        nodes.push({
-          id: acNodeId,
-          type: "ac",
-          label: ac.id,
-          x: acX,
-          y: acY,
-          status: ac.status,
-          radius: acRadius,
-          rawData: ac
-        });
-
-        // 连结 Goal 到未通过 AC
-        links.push({
-          id: `${goalId}-${acNodeId}`,
-          sourceId: goalId,
-          targetId: acNodeId,
-          x1: centerX,
-          y1: centerY,
-          x2: acX,
-          y2: acY,
-          isMoving: isAgentActive
-        });
-
-        // 计算该未通过 AC 下挂载的只读 Evidence 节点
-        const evList = ac.evidence || [];
-        const evCount = evList.length;
-        if (evCount > 0) {
-          const evSectorWidth = 0.35; // 限制在外侧的小扇区内，防线交叉
-          evList.forEach((ev: EvidenceRecord, evIdx) => {
-            let phi = theta;
-            if (evCount > 1) {
-              const fraction = evIdx / (evCount - 1);
-              phi = theta - evSectorWidth / 2 + fraction * evSectorWidth;
-            }
-
-            // Evidence 节点半径也交错外推，与 AC 的层级保持呼应，彻底拉开空间
-            const evR = isOuter ? baseSize * 0.46 : baseSize * 0.40;
-
-            const evX = centerX + evR * Math.cos(phi);
-            const evY = centerY + evR * Math.sin(phi);
-            const evNodeId = `ev-${ac.id}-${evIdx}`;
-
-            nodes.push({
-              id: evNodeId,
-              type: "evidence",
-              label: `E-${evIdx + 1}`,
-              x: evX,
-              y: evY,
-              status: ev.result || "unknown",
-              radius: 18, // 更加精致紧凑的小卡点
-              rawData: ev
-            });
-
-            // 连结未通过 AC 到其 Evidence 节点
-            links.push({
-              id: `${acNodeId}-${evNodeId}`,
-              sourceId: acNodeId,
-              targetId: evNodeId,
-              x1: acX,
-              y1: acY,
-              x2: evX,
-              y2: evY,
-              isMoving: isAgentActive && ev.result !== "passing"
-            });
-          });
-        }
-      });
-    }
-  }
+  const model = buildAcceptanceRadarModel(snapshot, dimensions);
 
   return (
     <div
@@ -271,19 +43,19 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
     >
       <div
         className="radar-sweep-plane"
-        data-active={isAgentActive ? "true" : "false"}
+        data-active={model.isAgentActive ? "true" : "false"}
         style={{
-          width: sweepSize,
-          height: sweepSize,
-          left: centerX - sweepSize / 2,
-          top: centerY - sweepSize / 2
+          width: model.sweepSize,
+          height: model.sweepSize,
+          left: model.centerX - model.sweepSize / 2,
+          top: model.centerY - model.sweepSize / 2
         }}
       />
 
 
       <svg
         className="loop-board relative z-10 select-none h-full w-full max-h-full max-w-full"
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={`0 0 ${model.width} ${model.height}`}
         role="img"
         aria-label="OpenNori acceptance radial radar network"
       >
@@ -309,45 +81,34 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
 
         {/* 简体中文：绘制雷达网格只读辅助背景网（同心圆与 8 方向发散经纬定位线） */}
         <g style={{ pointerEvents: "none" }}>
-          {/* 5 圈自适应辅助圆轨道 */}
-          {[0.1, 0.2, 0.3, 0.4, 0.46].map((scale, i) => (
+          {model.grid.circles.map((circle) => (
             <circle
-              key={`grid-circle-${scale}`}
-              cx={centerX}
-              cy={centerY}
-              r={baseSize * scale}
+              key={circle.id}
+              cx={circle.x}
+              cy={circle.y}
+              r={circle.radius}
               fill="none"
               stroke="rgba(0, 240, 255, 0.12)" /* 简体中文：调亮虚线网格以凸显雷达扫描背景质感 */
-              strokeWidth={i === 4 ? "1.5" : "1"}
-              strokeDasharray={i === 4 ? "none" : "4 6"} /* 最外圈实线封边 */
+              strokeWidth={circle.isOuter ? "1.5" : "1"}
+              strokeDasharray={circle.isOuter ? "none" : "4 6"} /* 最外圈实线封边 */
             />
           ))}
-          {/* 8 个发散方向的辅助经纬线 */}
-          {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => {
-            const rad = (angle * Math.PI) / 180;
-            const rMax = baseSize * 0.46;
-            const spokeX = centerX + rMax * Math.cos(rad);
-            const spokeY = centerY + rMax * Math.sin(rad);
-            return (
-              <line
-                key={`grid-spoke-${angle}`}
-                x1={centerX}
-                y1={centerY}
-                x2={spokeX}
-                y2={spokeY}
-                stroke="rgba(0, 240, 255, 0.05)" /* 简体中文：调亮定位线 */
-                strokeWidth="1"
-              />
-            );
-          })}
+          {model.grid.spokes.map((spoke) => (
+            <line
+              key={spoke.id}
+              x1={spoke.x1}
+              y1={spoke.y1}
+              x2={spoke.x2}
+              y2={spoke.y2}
+              stroke="rgba(0, 240, 255, 0.05)" /* 简体中文：调亮定位线 */
+              strokeWidth="1"
+            />
+          ))}
         </g>
 
         {/* 3. 绘制放射连线轨道 */}
-        {links.map((link) => {
-          const isToPassed = link.targetId === "passed-group";
-          const strokeColor = isToPassed ? "url(#neon-cyan-green)" : "url(#neon-cyan-violet)";
-          // 简体中文：Passed 主干连线加粗至 4.5px 极强发光，普通未通过通道使用 2.5px，Evidence 引线为 1.5px
-          const strokeWidth = isToPassed ? 4.5 : link.sourceId === goalId ? 2.5 : 1.5;
+        {model.links.map((link) => {
+          const linkStyle = getRadarLinkStyle(link, model.goalId);
 
           return (
             <g key={link.id}>
@@ -357,37 +118,36 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
                 y1={link.y1}
                 x2={link.x2}
                 y2={link.y2}
-                stroke={isToPassed ? "rgba(52, 211, 153, 0.08)" : "rgba(189, 147, 249, 0.08)"}
-                strokeWidth={strokeWidth * 1.6}
+                stroke={linkStyle.baseStroke}
+                strokeWidth={linkStyle.strokeWidth * 1.6}
               />
               <motion.line
                 x1={link.x1}
                 y1={link.y1}
                 x2={link.x2}
                 y2={link.y2}
-                stroke={strokeColor}
-                strokeWidth={strokeWidth}
+                stroke={linkStyle.strokeColor}
+                strokeWidth={linkStyle.strokeWidth}
                 filter="url(#neon-glow)"
                 strokeDasharray={link.isMoving ? "6 8" : "none"}
                 animate={link.isMoving ? { strokeDashoffset: [-14, 0] } : {}}
                 transition={link.isMoving ? { duration: 1.2, repeat: Number.POSITIVE_INFINITY, ease: "linear" } : {}}
-                opacity={isToPassed ? 0.95 : link.isMoving ? 0.85 : 0.5}
+                opacity={linkStyle.opacity}
               />
             </g>
           );
         })}
 
         {/* 4. 绘制放射节点 */}
-        {nodes.map((node) => {
+        {model.nodes.map((node) => {
           const isSelected = selectedNodeId === node.id;
           const isPassedGroup = node.id === "passed-group";
-          const currentGapId = snapshot?.current_gap?.id || null;
-          const isCurrentGap = node.type === "ac" && currentGapId && node.id === `ac-${currentGapId}`;
+          const isCurrentGap = node.type === "ac" && model.currentGapNodeId && node.id === model.currentGapNodeId;
 
           // 简体中文：优先取节点中预设的自适应 radius，若无则使用默认半径
           const radius = node.radius || (node.type === "goal" ? 46 : isPassedGroup ? 40 : node.type === "ac" ? 34 : 24);
           const nodeColor = getNodeColor(node.status, node.type);
-          const pulseClass = getNodePulseClass(node.status, node.type, isAgentActive);
+          const pulseClass = getNodePulseClass(node.status, node.type, model.isAgentActive);
 
           return (
             /* biome-ignore lint/a11y/useSemanticElements: SVG nodes need to stay inside the radar graph; keyboard handling is provided. */
@@ -466,7 +226,7 @@ export function AcceptanceRadarNet({ snapshot, onSelectNode, selectedNodeId }: A
                   <text
                     textAnchor="middle"
                     y="-4"
-                    className={`select-none font-bold ${isAgentActive ? "animate-pulse" : ""}`}
+                    className={`select-none font-bold ${model.isAgentActive ? "animate-pulse" : ""}`}
                     style={{
                       fill: isSelected ? "#ffffff" : "#94a3b8",
                       fontSize: "10px"

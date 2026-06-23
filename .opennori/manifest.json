@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T07:39:37.009Z",
+  "updated_at": "2026-06-23T07:52:00.659Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -654,6 +654,17 @@
         "summary": "Split dashboard inspect rendering into node-type read-only panels while keeping the dashboard as an observation surface over projected OpenNori state.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-dashboard-inspect-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-dashboard-radar-model-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Dashboard radar projection now has a dedicated model boundary; React renders readonly nodes, links, grid, and styles from that model instead of owning projection logic.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-dashboard-radar-model-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },
