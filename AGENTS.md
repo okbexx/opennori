@@ -41,6 +41,16 @@ OpenNori CLI output must distinguish humans from agents: TTY usage without
 dashboard, and plugin sync commands; `--json` and non-interactive use keep the
 full deterministic payload for agents and automation.
 
+CLI command modules are thin adapters over domain modules. When adding or
+touching command code, prefer narrow imports such as `core/<domain>.ts`,
+`lifecycle/<domain>.ts`, and `kernel/<domain>.ts` instead of broad
+`src/core.ts` or `src/lifecycle.ts` barrels. Treat those wide barrels as
+migration compatibility surfaces, not as the target architecture. If a command
+area is especially easy to regress into broad authority, add a
+`test/module-boundaries.test.js` guard that checks import direction or authority
+boundaries. This is an objective architecture guard; do not use module-boundary
+tests to assert subjective AC quality or agent judgment.
+
 `opennori dashboard` is a local visual observation surface over the acceptance loop. It must not become an agent runtime, process log, chat log, completion authority, or confirmation surface. Do not add dashboard controls that approve AC, confirm Architecture Baselines, waive risks, accept reports, or write Product AC/evidence/profile/architecture/report state. When user input is needed, the dashboard may show what decision is needed and should direct the user back to the agent conversation; the agent records the decision through OpenNori Skills and CLI. `opennori activity` only publishes live agent state for the dashboard; it is not Product AC evidence. When the dashboard is observed and a current goal/gap exists, Skills that draft, change, implement, verify, or record OpenNori state must publish activity: start before work, heartbeat only during longer work, and finish when the turn ends. Skills should prefer `data.agent_next.dashboard_activity` command templates when present, otherwise use low-parameter activity commands and let the CLI infer the unique current goal/gap. If no current goal/gap exists, do not bind activity to drafts or setup/init previews. If `.opennori/current` contains multiple goals, treat that as broken state and route to doctor/project-health instead of guessing.
 
 `opennori mcp` is a read-only MCP context server over stdio. It exposes

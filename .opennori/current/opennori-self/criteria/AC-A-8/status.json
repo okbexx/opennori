@@ -4,7 +4,7 @@
   "confidence": "high",
   "required": true,
   "risk": "high",
-  "evidence_count": 43,
-  "latest_evidence_summary": "Evidence command boundary refactor is reviewable: evidence add/prune now use narrow imports, module-boundary test prevents wide core/lifecycle barrel regression, evidence/domain tests pass, and TypeScript compilation passes.",
-  "updated_at": "2026-06-23T11:21:31.612Z"
+  "evidence_count": 44,
+  "latest_evidence_summary": "Command-boundary guidance is now persistent for future OpenNori development: AGENTS, testing strategy, CLI build-vs-buy decision, and local nori-product-development Skill all state that command modules should stay thin and prefer narrow imports, while module-boundary tests remain objective architecture guards.",
+  "updated_at": "2026-06-23T11:26:13.594Z"
 }

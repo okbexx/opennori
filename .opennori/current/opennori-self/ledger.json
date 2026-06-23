@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T11:21:31.618Z",
+  "updated_at": "2026-06-23T11:26:13.599Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -7696,9 +7696,64 @@
           "limitations": "This proves the evidence command boundary only; remaining CLI command groups still require separate boundary slices.",
           "gate": "accepted",
           "created_at": "2026-06-23T11:21:31.612Z"
+        },
+        {
+          "kind": "docs",
+          "basis": "artifact-review",
+          "summary": "Command-boundary guidance is now persistent for future OpenNori development: AGENTS, testing strategy, CLI build-vs-buy decision, and local nori-product-development Skill all state that command modules should stay thin and prefer narrow imports, while module-boundary tests remain objective architecture guards.",
+          "result": "passing",
+          "confidence": "high",
+          "sources": [
+            {
+              "type": "architecture-apply",
+              "label": "opennori-self-command-boundary-doc-sync",
+              "path": ".opennori/architecture/evidence/opennori-self-command-boundary-doc-sync.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/docs-schema.test.js test/module-boundaries.test.js",
+              "command": "npx vitest run test/docs-schema.test.js test/module-boundaries.test.js"
+            },
+            {
+              "type": "command",
+              "label": "npx tsc --noEmit --pretty false",
+              "command": "npx tsc --noEmit --pretty false"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js check --root . --json",
+              "command": "node ./bin/opennori.js check --root . --json"
+            },
+            {
+              "type": "artifact",
+              "label": "AGENTS.md",
+              "path": "AGENTS.md"
+            },
+            {
+              "type": "artifact",
+              "label": "docs/testing.md",
+              "path": "docs/testing.md"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.md",
+              "path": ".opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.md"
+            },
+            {
+              "type": "artifact",
+              "label": "/Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md",
+              "path": "/Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md"
+            }
+          ],
+          "reviewability": "Open the referenced guidance files and rerun the focused docs/module-boundary tests, typecheck, and OpenNori check.",
+          "limitations": "This records guidance for future agent behavior and command work; it does not itself remove all remaining wide imports.",
+          "gate": "accepted",
+          "created_at": "2026-06-23T11:26:13.594Z"
         }
       ],
-      "updated_at": "2026-06-23T11:21:31.612Z"
+      "updated_at": "2026-06-23T11:26:13.594Z"
     },
     "AC-A-9": {
       "status": "passing",

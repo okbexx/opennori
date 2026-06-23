@@ -17,19 +17,21 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: test - Evidence command boundary refactor is reviewable: evidence add/prune now use narrow imports, module-boundary test prevents wide core/lifecycle barrel regression, evidence/domain tests pass, and TypeScript compilation passes.
+Latest: docs - Command-boundary guidance is now persistent for future OpenNori development: AGENTS, testing strategy, CLI build-vs-buy decision, and local nori-product-development Skill all state that command modules should stay thin and prefer narrow imports, while module-boundary tests remain objective architecture guards.
 Result: passing
-Basis: command-output
-Reviewability: Open the referenced source files and rerun the two commands to verify the evidence CLI stays on narrow deterministic state modules.
-Limitations: This proves the evidence command boundary only; remaining CLI command groups still require separate boundary slices.
+Basis: artifact-review
+Reviewability: Open the referenced guidance files and rerun the focused docs/module-boundary tests, typecheck, and OpenNori check.
+Limitations: This records guidance for future agent behavior and command work; it does not itself remove all remaining wide imports.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-evidence-command-import-boundary.json
-- npx vitest run test/cli-evidence.test.js test/evidence.test.js test/module-boundaries.test.js
+- .opennori/architecture/evidence/opennori-self-command-boundary-doc-sync.json
+- npx vitest run test/docs-schema.test.js test/module-boundaries.test.js
 - npx tsc --noEmit --pretty false
-- src/cli/commands/evidence/add.ts
-- src/cli/commands/evidence/prune.ts
-- test/module-boundaries.test.js
+- node ./bin/opennori.js check --root . --json
+- AGENTS.md
+- docs/testing.md
+- .opennori/architecture/decisions/cli-command-layer-adopt-citty-for-long-term-typescript-cli.md
+- /Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md
 
 ## Files
 
