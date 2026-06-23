@@ -17,24 +17,27 @@ Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些
 
 ## Evidence
 
-Latest: snapshot-projection-boundary-verification - Kernel snapshot projection was split so dashboard and MCP share the same read-only builder while snapshot.ts remains the narrow persistence/export boundary.
+Latest: completion-routing-boundary-verification - Completion answer, user intervention, review risk, and next recommendation routing were split into focused modules while keeping public reporting/status imports stable.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the snapshot modules and verify that buildSnapshot constructs read-only projections, snapshot.ts only exports and persists current.json, dashboard HTTP refresh and MCP snapshot resource both consume the same builder, and no dashboard or MCP write authority was added.
-Limitations: This is an internal architecture boundary refactor. It does not add new dashboard UI behavior, new MCP resources, or browser screenshot coverage.
+Reviewability: Inspect the new completion modules. Confirm completion-answer only computes completion/confidence/review risks, intervention only identifies user input needs, next-recommendation owns routing guidance, and completion.ts remains a compatibility export for existing status/report/check call sites.
+Limitations: This is an internal boundary refactor. It does not change OpenNori subjective review policy, add new recommendation states, or alter Skill behavior.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-snapshot-projection-boundary.json
+- .opennori/architecture/evidence/opennori-self-completion-routing-boundary.json
 - npx tsc --noEmit --pretty false
-- npm run test:dashboard
-- npx vitest run test/mcp.test.ts
+- npm run test:reporting
+- npm run test:profile
+- npm run test:architecture
 - npm run lint
-- src/kernel/snapshot.ts
-- src/kernel/snapshot-builder.ts
-- src/kernel/snapshot-outcome.ts
-- src/kernel/snapshot-paths.ts
-- src/kernel/http/app.ts
-- src/mcp/resources.ts
+- src/core/completion.ts
+- src/core/acceptance-basis.ts
+- src/core/intervention.ts
+- src/core/completion-risks.ts
+- src/core/completion-answer.ts
+- src/core/next-recommendation.ts
+- src/core/report-render.ts
+- src/agent-next.ts
 
 ## Files
 

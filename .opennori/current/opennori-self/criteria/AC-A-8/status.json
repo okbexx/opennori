@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 21,
-  "latest_evidence_summary": "Kernel snapshot projection was split so dashboard and MCP share the same read-only builder while snapshot.ts remains the narrow persistence/export boundary.",
-  "updated_at": "2026-06-23T07:33:24.582Z"
+  "evidence_count": 22,
+  "latest_evidence_summary": "Completion answer, user intervention, review risk, and next recommendation routing were split into focused modules while keeping public reporting/status imports stable.",
+  "updated_at": "2026-06-23T07:39:36.885Z"
 }

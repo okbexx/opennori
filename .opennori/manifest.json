@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.10",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-23T07:33:24.723Z",
+  "updated_at": "2026-06-23T07:39:37.009Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -610,6 +610,17 @@
         "summary": "Split the CLI runtime boundary into executor, active-goal args, active-goal store, active-goal lock, and a compatibility runtime barrel while preserving deterministic .opennori state semantics.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/opennori-self-cli-runtime-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "opennori-self-completion-routing-boundary",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-A-8",
+        "status": "aligned",
+        "summary": "Completion logic now separates acceptance basis view, intervention, review risks, completion answer, and next recommendation routing behind a compatibility export.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/opennori-self-completion-routing-boundary.json",
         "schema_valid": true,
         "schema_errors": []
       },

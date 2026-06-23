@@ -1,0 +1,85 @@
+{
+  "kind": "completion-routing-boundary-verification",
+  "basis": "tool-observation",
+  "summary": "Completion answer, user intervention, review risk, and next recommendation routing were split into focused modules while keeping public reporting/status imports stable.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "opennori-self-completion-routing-boundary",
+      "path": ".opennori/architecture/evidence/opennori-self-completion-routing-boundary.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npx tsc --noEmit --pretty false",
+      "command": "npx tsc --noEmit --pretty false"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:reporting",
+      "command": "npm run test:reporting"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:profile",
+      "command": "npm run test:profile"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:architecture",
+      "command": "npm run test:architecture"
+    },
+    {
+      "type": "command",
+      "label": "npm run lint",
+      "command": "npm run lint"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/completion.ts",
+      "path": "src/core/completion.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/acceptance-basis.ts",
+      "path": "src/core/acceptance-basis.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/intervention.ts",
+      "path": "src/core/intervention.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/completion-risks.ts",
+      "path": "src/core/completion-risks.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/completion-answer.ts",
+      "path": "src/core/completion-answer.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/next-recommendation.ts",
+      "path": "src/core/next-recommendation.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/core/report-render.ts",
+      "path": "src/core/report-render.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/agent-next.ts",
+      "path": "src/agent-next.ts"
+    }
+  ],
+  "reviewability": "Inspect the new completion modules. Confirm completion-answer only computes completion/confidence/review risks, intervention only identifies user input needs, next-recommendation owns routing guidance, and completion.ts remains a compatibility export for existing status/report/check call sites.",
+  "limitations": "This is an internal boundary refactor. It does not change OpenNori subjective review policy, add new recommendation states, or alter Skill behavior.",
+  "gate": "accepted",
+  "created_at": "2026-06-23T07:39:36.885Z"
+}
