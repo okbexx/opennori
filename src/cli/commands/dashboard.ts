@@ -29,9 +29,9 @@ export const dashboardCommand = defineCommand({
       description: "Port to listen on.",
       default: "8765"
     },
-    noOpen: {
+    open: {
       type: "boolean",
-      description: "Do not open the dashboard in a browser.",
+      description: "Open the dashboard in the default browser after the local kernel starts.",
       default: false
     },
     once: {
@@ -52,7 +52,7 @@ export const dashboardCommand = defineCommand({
       goalId: args.goal ? String(args.goal) : undefined,
       host: String(args.host || "127.0.0.1"),
       port: Number(args.port || 8765),
-      open: !args.noOpen && !args.once
+      open: !!args.open && !args.once
     });
     if (args.once) {
       await new Promise<void>((resolve) => handle.server.close(() => resolve()));

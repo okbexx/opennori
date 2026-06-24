@@ -252,6 +252,7 @@ function printDashboard(stdout: NodeJS.WriteStream, data: JsonObject): void {
   line(stdout, "OpenNori dashboard running.");
   line(stdout, `URL: ${data.url || "unknown"}`);
   line(stdout, `Project: ${data.root || "."}`);
+  line(stdout, "Browser: not opened automatically; open the URL yourself or rerun with --open.");
 }
 
 function printActivity(stdout: NodeJS.WriteStream, data: JsonObject, subcommand?: string): void {

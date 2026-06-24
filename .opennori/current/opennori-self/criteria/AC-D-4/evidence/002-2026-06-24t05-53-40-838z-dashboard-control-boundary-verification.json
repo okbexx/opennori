@@ -1,0 +1,68 @@
+{
+  "kind": "dashboard-control-boundary-verification",
+  "basis": "command-output",
+  "summary": "opennori dashboard now starts the local kernel and prints the URL without opening a browser by default; --open is the only explicit browser-opening path. The dashboard remains observation-only and the user-facing output tells users to open the URL themselves or rerun with --open.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js dashboard --help",
+      "command": "node ./bin/opennori.js dashboard --help"
+    },
+    {
+      "type": "command",
+      "label": "node ./bin/opennori.js dashboard --root . --port 0 --once",
+      "command": "node ./bin/opennori.js dashboard --root . --port 0 --once"
+    },
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npx vitest run test/cli-human-output.test.js --tagsFilter=quick",
+      "command": "npx vitest run test/cli-human-output.test.js --tagsFilter=quick"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/commands/dashboard.ts",
+      "path": "src/cli/commands/dashboard.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/kernel/server.ts",
+      "path": "src/kernel/server.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "src/cli/human-output.ts",
+      "path": "src/cli/human-output.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+      "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+    }
+  ],
+  "reviewability": "Inspect the dashboard command help and human output. Confirm there is no --no-open option, --open is explicit, and normal dashboard startup prints the URL without opening a browser.",
+  "limitations": "This verifies CLI/kernel open behavior and documentation. It does not prevent users from manually opening the printed URL or explicitly using --open.",
+  "gate": "accepted",
+  "created_at": "2026-06-24T05:53:40.838Z"
+}

@@ -1,7 +1,6 @@
-import { Check, Compass, Copy, ListChecks } from "lucide-react";
+import { Activity, Check, Compass, Copy, ListChecks, Route } from "lucide-react";
 import {
   architectureDecisionClass,
-  dashboardOutcomeRows,
   formatSignal,
   outcomeDecisionClass,
   profileImpactClass
@@ -27,14 +26,11 @@ export function OutcomeHud({
   const outcomeSummary = snapshot.outcome_summary;
   const idleSummary = snapshot.idle_summary;
   const hasCurrentGoal = snapshot.status === "active" && !!snapshot.goal;
-  const rows = dashboardOutcomeRows(snapshot);
-  const rowToneClass = {
-    green: "border-[#34d399]/18 bg-[#34d399]/6 text-[#34d399]",
-    amber: "border-[#fbbf24]/20 bg-[#fbbf24]/7 text-[#fbbf24]",
-    rose: "border-rose-400/20 bg-rose-500/7 text-rose-300",
-    cyan: "border-[#00f0ff]/18 bg-[#00f0ff]/7 text-[#00f0ff]",
-    purple: "border-[#bd93f9]/18 bg-[#bd93f9]/7 text-[#bd93f9]"
-  };
+  const decisionState = outcomeSummary?.decision.state || snapshot.decision;
+  const decisionLabel = outcomeSummary?.decision.label || "No current goal";
+  const decisionDetail = outcomeSummary?.decision.detail || idleSummary?.message || "No current Nori Contract is being observed.";
+  const completedCount = (snapshot.criteria || []).filter((criterion) => ["passing", "passed", "waived"].includes(String(criterion.status).toLowerCase())).length;
+  const totalCount = snapshot.criteria?.length || 0;
 
   return (
     <div className="absolute left-4 top-4 bottom-4 z-20 w-[min(340px,calc(100vw-2rem))] overflow-y-auto scrollbar-hover-visible flex flex-col gap-3 pointer-events-auto pr-1">
@@ -42,26 +38,24 @@ export function OutcomeHud({
         <div className="mb-2 flex items-center justify-between gap-2">
           <span className="inline-flex items-center gap-1.5 rounded bg-[#00f0ff]/10 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-[#00f0ff]">
             <Compass size={11} />
-            Outcome Overview
+            Completion answer
           </span>
-          <span className={`shrink-0 rounded border px-2 py-0.5 text-[8.5px] font-mono font-bold uppercase tracking-wider ${outcomeDecisionClass(outcomeSummary?.decision.state || snapshot.decision)}`}>
-            {formatSignal(outcomeSummary?.decision.state || snapshot.decision)}
+          <span className={`shrink-0 rounded border px-2 py-0.5 text-[8.5px] font-mono font-bold uppercase tracking-wider ${outcomeDecisionClass(decisionState)}`}>
+            {formatSignal(decisionState)}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-1.5">
-          {rows.map((row) => (
-            <div key={row.label} className={`rounded border p-2 ${rowToneClass[row.tone]}`}>
-              <div className="mb-0.5 flex items-center justify-between gap-2">
-                <span className="text-[8px] font-mono font-black uppercase tracking-wider opacity-80">{row.label}</span>
-              </div>
-              <p className="text-[10.5px] font-bold leading-snug text-slate-100 break-words">{row.value}</p>
-              <p className="mt-0.5 text-[9.5px] leading-snug text-slate-400 break-words">{row.detail}</p>
-            </div>
-          ))}
+        <div className="rounded border border-slate-800/80 bg-black/25 p-2.5">
+          <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-slate-500">Can the user accept this now?</span>
+          <p className="mt-0.5 text-[14px] font-black leading-snug text-slate-100 break-words">
+            {decisionLabel}
+          </p>
+          <p className="mt-1 text-[10.5px] leading-relaxed text-slate-400 break-words">
+            {decisionDetail}
+          </p>
         </div>
 
-        <div className="space-y-2">
+        <div className="mt-2 space-y-2">
           {snapshot.goal ? (
             <div>
               <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-slate-500">Goal</span>
@@ -75,19 +69,21 @@ export function OutcomeHud({
                 <span className={`rounded px-1.5 py-0.5 text-[8px] font-mono font-bold ${snapshot.goal.workflow_status === "complete" ? "bg-[#34d399]/10 text-[#34d399]" : "bg-[#fbbf24]/10 text-[#fbbf24]"}`}>
                   {formatSignal(snapshot.goal.workflow_status)}
                 </span>
+                {totalCount > 0 ? (
+                  <span className="rounded bg-slate-900/80 px-1.5 py-0.5 text-[8px] font-mono font-bold text-slate-300">
+                    {completedCount}/{totalCount} AC REVIEWABLE
+                  </span>
+                ) : null}
               </div>
             </div>
           ) : null}
 
-          <div className="rounded border border-slate-800/80 bg-black/25 p-2">
-            <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-slate-500">Decision</span>
-            <p className="mt-0.5 text-[11px] font-bold leading-relaxed text-slate-100">
-              {outcomeSummary?.decision.label || "No current goal"}
-            </p>
-            <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
-              {outcomeSummary?.decision.detail || idleSummary?.message || "No current Nori Contract is being observed."}
-            </p>
-          </div>
+          {!snapshot.goal && idleSummary ? (
+            <div className="rounded border border-[#bd93f9]/18 bg-[#bd93f9]/7 p-2 text-[#bd93f9]">
+              <span className="text-[8px] font-mono font-black uppercase tracking-wider opacity-80">Next</span>
+              <p className="mt-0.5 text-[10.5px] font-bold leading-snug text-slate-100 break-words">{idleSummary.next}</p>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -104,13 +100,14 @@ export function OutcomeHud({
           <div className="rounded-lg border-l-[3.5px] border-l-[#fbbf24] border border-[rgba(251,191,36,0.14)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
             <div className="mb-1.5 flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-1.5 rounded bg-[#fbbf24]/10 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-[#fbbf24]">
+                <Route size={11} />
                 {outcomeSummary.next.label}
               </span>
               <span className={`rounded border px-1.5 py-0.5 text-[8px] font-mono font-bold uppercase tracking-wider ${outcomeSummary.need_user.required ? "border-[#fbbf24]/30 bg-[#fbbf24]/10 text-[#fbbf24]" : "border-[#34d399]/25 bg-[#34d399]/10 text-[#34d399]"}`}>
                 {outcomeSummary.need_user.required ? "need user" : "agent can continue"}
               </span>
             </div>
-            <p className="text-[10px] leading-relaxed text-slate-300">
+            <p className="text-[11px] font-semibold leading-relaxed text-slate-200">
               {outcomeSummary.next.action}
             </p>
             {outcomeSummary.need_user.required ? (
@@ -157,7 +154,8 @@ export function OutcomeHud({
       <div className="rounded-lg border-l-[3.5px] border-l-[#34d399] border border-[rgba(52,211,153,0.12)] bg-[rgba(8,9,20,0.85)] p-3 shadow-2xl backdrop-blur-md text-left">
         <div className="flex items-center justify-between mb-1.5">
           <span className="inline-flex items-center gap-1 rounded bg-[#34d399]/10 px-2 py-0.5 text-[9px] font-mono font-bold text-[#34d399]">
-            AGENT ACTIVITY
+            <Activity size={11} />
+            AGENT NOW
           </span>
           <span className="inline-flex items-center gap-1.5 text-[8.5px] font-mono font-bold text-slate-400">
             <span className={`h-1.5 w-1.5 rounded-full ${

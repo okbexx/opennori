@@ -1,4 +1,4 @@
-import { Info, Terminal } from "lucide-react";
+import { Activity, Info } from "lucide-react";
 import { relativeTime } from "../dashboard-view";
 import type { NoriEvent } from "../types";
 
@@ -15,8 +15,8 @@ export function EventLogConsole({
     <footer className="grid gap-2 border-t border-[rgba(0,240,255,0.06)] pt-2">
       <div className="rounded-lg border border-slate-800 bg-black/30 p-3 shadow-inner">
         <div className="flex items-center gap-2 border-b border-slate-800/80 pb-1.5 mb-1.5">
-          <Terminal size={13} className="text-[#00f0ff]" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Scrolling Event log console</span>
+          <Activity size={13} className="text-[#00f0ff]" />
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Recent OpenNori activity</span>
           <span className="inline-flex min-h-6 items-center gap-1.5 rounded-full border border-[#00f0ff]/35 bg-[#00f0ff]/10 px-2.5 text-xs font-semibold text-[#c7d2fe]">
             <span className={`h-1.5 w-1.5 rounded-full bg-[#00f0ff] ${agentRunning ? "animate-pulse" : ""}`} />
             live
@@ -36,7 +36,7 @@ export function EventLogConsole({
               </div>
             ))
           ) : (
-            <p className="text-slate-500 italic">No events recorded yet. Waiting for OpenNori activity.</p>
+            <p className="text-slate-500 italic">No activity signal yet. The completion answer above is still the primary status.</p>
           )}
         </div>
       </div>

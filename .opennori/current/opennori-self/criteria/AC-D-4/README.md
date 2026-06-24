@@ -17,24 +17,24 @@ Passing threshold: 页面清楚显示 dashboard 是 observation surface / reply 
 
 ## Evidence
 
-Latest: dashboard-observation-boundary - Dashboard now presents user intervention as an agent-conversation reply boundary, not an in-dashboard confirmation flow. The built React app shows Agent reply / Control boundary / reply in agent chat, packaged Skills and docs forbid dashboard confirmation controls, and dashboard HTTP rejects confirmation-style POST control paths with method_not_allowed.
+Latest: dashboard-control-boundary-verification - opennori dashboard now starts the local kernel and prints the URL without opening a browser by default; --open is the only explicit browser-opening path. The dashboard remains observation-only and the user-facing output tells users to open the URL themselves or rerun with --open.
 Result: passing
-Basis: tool-observation
-Reviewability: Run npm run check, inspect the dashboard bundle/source for Agent reply and reply in agent chat, and rerun the dashboard control-write tests to confirm POST confirmation endpoints are rejected.
-Limitations: This verifies the current local dashboard and package assets. It does not add a browser screenshot for a forced need_user fixture, and future UI work must keep the same observation-only boundary.
+Basis: command-output
+Reviewability: Inspect the dashboard command help and human output. Confirm there is no --no-open option, --open is explicit, and normal dashboard startup prints the URL without opening a browser.
+Limitations: This verifies CLI/kernel open behavior and documentation. It does not prevent users from manually opening the printed URL or explicitly using --open.
 
 Sources:
-- npm run typecheck:dashboard && npm run build:dashboard && npx vitest run test/cli-commands.test.js -t "dashboard rejects non-GET|dashboard exposes observation only|dashboard serves the built React app|dashboard command can start|dashboard SSE emits"
-- npm run check
-- src/dashboard/src/App.tsx
-- src/dashboard/src/components/AcceptanceLoop.tsx
-- src/kernel/http/app.ts
+- node ./bin/opennori.js dashboard --help
+- node ./bin/opennori.js dashboard --root . --port 0 --once
+- npm run test:dashboard
+- npx vitest run test/cli-human-output.test.js --tagsFilter=quick
+- src/cli/commands/dashboard.ts
+- src/kernel/server.ts
+- src/cli/human-output.ts
 - README.md
-- AGENTS.md
+- .opennori/protocol.md
 - plugins/opennori/skills/nori/SKILL.md
 - plugins/opennori/skills/nori-reporting/SKILL.md
-- plugins/opennori/skills/nori-project-health/SKILL.md
-- plugins/opennori/.codex-plugin/plugin.json
 
 ## Files
 

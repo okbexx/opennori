@@ -201,8 +201,10 @@ evidence. They help users observe the acceptance loop while it runs. The source
 of truth for completion remains the current Nori Contract, evidence ledger,
 Project Profile compliance evidence, Architecture Baseline, and report state.
 
-`opennori dashboard --root <project>` starts a local loopback HTTP/SSE kernel
-and serves a static visual dashboard. `opennori activity ...` lets an agent
+`opennori dashboard --root <project>` starts a local loopback HTTP/SSE kernel,
+prints the dashboard URL, and does not open a browser automatically. Use
+`opennori dashboard --root <project> --open` only when you explicitly want the
+CLI to open the default browser. `opennori activity ...` lets an agent
 publish whether it is thinking, working, verifying, waiting for the user, or
 blocked. Activity can explain what the agent is doing, but it cannot mark an AC
 passing.
@@ -671,7 +673,7 @@ Useful commands:
 - `opennori upgrade --root <repo>`: preview and refresh project-local OpenNori assets without rewriting current/draft/history contracts or evidence.
 - `opennori doctor --root <repo>`: inspect project OpenNori health and recovery actions.
 - `opennori check --root <repo>`: validate current contract structure, surface Architecture Baseline health for the current goal, and report evidence health.
-- `opennori dashboard --root <repo>`: start a local visual dashboard over OpenNori state.
+- `opennori dashboard --root <repo>`: start a local visual dashboard over OpenNori state and print the URL without opening a browser.
 - `opennori mcp --root <repo>`: start the read-only stdio MCP context server for `context`, `snapshot`, and `doctor` resources.
 - `opennori activity start|heartbeat|finish --root <repo>`: publish live agent activity for the dashboard; this is not evidence. Goal/gap may be inferred only when unique.
 - `opennori resume --root <repo>`: recover the current goal, current gap, completion answer, and intervention state.

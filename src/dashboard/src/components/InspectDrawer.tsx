@@ -30,7 +30,7 @@ export function InspectDrawer({
             <div className="flex items-center justify-between gap-4">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[#bd93f9]">
-                  Inspected Node
+                  Supporting detail
                 </span>
                 <h3 className="text-base font-semibold text-[#e2e8f0]">
                   {inspectedNodeTitle(selectedNode)}
@@ -56,7 +56,7 @@ export function InspectDrawer({
                     : "text-slate-400 hover:text-slate-200"
                 }`}
               >
-                UI Panel
+                Summary
               </button>
               <button
                 type="button"
@@ -67,7 +67,7 @@ export function InspectDrawer({
                     : "text-slate-400 hover:text-slate-200"
                 }`}
               >
-                Raw JSON
+                Developer data
               </button>
             </div>
           </div>
@@ -77,7 +77,7 @@ export function InspectDrawer({
               <InspectNodePanel node={selectedNode} />
             ) : (
               <>
-                <span className="block text-xs font-semibold text-slate-400 mb-2">Readonly Data (JSON)</span>
+                <span className="block text-xs font-semibold text-slate-400 mb-2">Readonly developer data</span>
                 <pre className="flex-1 overflow-auto whitespace-pre-wrap break-all scrollbar-hover-visible rounded border border-slate-800/80 bg-black/40 p-3 text-[11px] leading-relaxed text-[#bd93f9] select-text">
                   {JSON.stringify(selectedNode.rawData, null, 2)}
                 </pre>

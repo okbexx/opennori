@@ -72,6 +72,10 @@ export function sortedRecentEvents(snapshot: NoriSnapshot | null): NoriEvent[] {
   return [...(snapshot?.events || [])].sort((left, right) => Number(right.seq || 0) - Number(left.seq || 0));
 }
 
+export function visibleRecentEvents(snapshot: NoriSnapshot | null): NoriEvent[] {
+  return sortedRecentEvents(snapshot).filter((event) => event.type !== "dashboard.started");
+}
+
 export function findLatestAgentEvent(events: NoriEvent[]): NoriEvent | undefined {
   return events.find((event) => event.actor.kind === "agent");
 }

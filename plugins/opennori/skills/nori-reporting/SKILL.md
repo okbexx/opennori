@@ -43,7 +43,7 @@ report the missing AC text as the review risk and route to `nori-acceptance`.
    architecture notes, or a draft coverage summary, say the AC text itself is
    not yet reviewable. Completion remains "not confidently acceptable yet"
    until `nori-acceptance` revises the criterion.
-8. If the user wants a visual live view, use `opennori dashboard --root <repo>` as an observation surface, but keep the completion answer based on status/report data.
+8. If the user wants a visual live view, use `opennori dashboard --root <repo>` as an observation surface and give the user the printed URL. Do not auto-open a browser unless the user explicitly asked for that; keep the completion answer based on status/report data.
 
 Useful state commands:
 
@@ -55,7 +55,7 @@ Useful state commands:
 - `opennori list --root <repo> --json`
 - `opennori context export --root <repo> --json`
 - `opennori mcp --root <repo> --json` (metadata summary) or `opennori mcp --root <repo>` (stdio MCP server)
-- `opennori dashboard --root <repo>`
+- `opennori dashboard --root <repo>` (prints the local URL; add `--open` only when the user explicitly wants the CLI to open a browser)
 
 ## Natural-Language Mapping
 

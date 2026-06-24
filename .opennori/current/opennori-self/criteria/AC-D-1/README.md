@@ -17,21 +17,21 @@ Passing threshold: 页面以视觉化 acceptance loop 和少量状态面板展�
 
 ## Evidence
 
-Latest: dashboard-outcome-hud-verification - Dashboard first screen now leads with Outcome Overview, Decision, Current gap, Next, and Project Profile impact. The kernel snapshot exposes outcome_summary so the UI does not force users to infer completion from radar nodes, event logs, or the Project Profile drawer.
+Latest: dashboard-ux-verification - Dashboard now leads with a user-facing completion answer, goal, current gap, next action, and Project Profile impact. The radar remains a visual observation aid, supporting detail is secondary, and dashboard.started system events are hidden from the recent activity list so agent activity stays meaningful.
 Result: passing
 Basis: tool-observation
-Reviewability: Run opennori dashboard --root . and inspect the left HUD. It should show Outcome Overview, Decision, Current gap, Next, and Project Profile impact before agent activity or event logs. Check /api/snapshot for outcome_summary and rerun dashboard tests.
-Limitations: This evidence verifies the current OpenNori self dashboard on localhost and keeps the screenshot in ignored local output. It does not test every possible external project profile combination visually.
+Reviewability: Run opennori dashboard --root . and open the printed URL in Chrome. Confirm the first screen leads with Goal Outcome Monitor, Completion answer, Current gap, Next, Project Profile impact, and recent agent activity rather than dashboard start noise.
+Limitations: Chrome visual review was performed locally through the Codex Chrome plugin. This evidence does not add pixel regression snapshots or change dashboard state authority.
 
 Sources:
-- npx tsc --noEmit --pretty false
 - npm run test:dashboard
-- src/kernel/snapshot.ts
-- src/dashboard/src/App.tsx
-- src/dashboard/src/types.ts
-- test/cli-dashboard.test.js
+- npm run typecheck:dashboard
+- src/dashboard/src/components/OutcomeHud.tsx
+- src/dashboard/src/components/DashboardHeader.tsx
+- src/dashboard/src/components/EventLogConsole.tsx
+- src/dashboard/src/dashboard-view.ts
+- test/dashboard-selection.test.ts
 - dashboard/index.html
-- output/playwright/dashboard-outcome-hud.png
 
 ## Files
 

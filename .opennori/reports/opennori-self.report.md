@@ -18,7 +18,7 @@ Workflow status: complete
 ## Acceptance Basis
 
 Status: approved
-Summary: Refresh completion judgment evidence to Project Profile terminology.
+Summary: Update continue-next-loop acceptance to Loop Engineer behavior.
 
 ## Project Profile Compliance
 
@@ -48,7 +48,7 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 | AC-O-5 | operator | passing | verified | review-result: Blocked criteria and violated required profile items produce intervention.requir… | tool-observation |
 | AC-O-6 | operator | passing | verified | review-result: criterion update rewrites the user-facing AC, clears stale criterion evidence, p… | tool-observation |
 | AC-O-7 | operator | passing | verified | review-result: brainstorm produces selectable acceptance directions with user value, observable… | tool-observation |
-| AC-O-8 | operator | passing | verified | project-profile-source-directory-verification: OpenNori initializes .opennori/profile/profile.j… | tool-observation |
+| AC-O-8 | operator | passing | verified | profile-skill-source-adapter-verification: Project Profile automatic Skill checks now resolve S… | tool-observation |
 | AC-Z-1 | productization | passing | verified | review-result: OpenNori exposes package-local Codex Plugin Skills for agent discovery: the mark… | tool-observation |
 | AC-Z-2 | productization | passing | verified | review-result: Install preview only manages OpenNori project state: .opennori directories, prot… | tool-observation |
 | AC-Z-3 | productization | passing | verified | review-result: changes groups .opennori/examples acceptance artifacts separately from implement… | tool-observation |
@@ -60,9 +60,9 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 | AC-Z-9 | productization | passing | verified | review-result: install dry-run reports create/exists/skip/update/overwrite actions with will_wr… | tool-observation |
 | AC-Z-10 | productization | passing | verified | review-result: destructive install/overwrite flows require a dry-run preview and explicit --con… | tool-observation |
 | AC-Z-11 | productization | passing | verified | review-result: uninstall previews removals, preserves .opennori state by default, and requires… | tool-observation |
-| AC-Z-12 | productization | passing | verified | review-result: OpenNori report and context export now include data.agent_next alongside next_re… | tool-observation |
+| AC-Z-12 | productization | passing | verified | review-result: Loop Engineer is now part of the packaged OpenNori Skill Pack and Codex Plugin d… | protocol-check |
 | AC-Z-13 | productization | passing | high | verification: Doctor/check/report now expose invalid architecture evidence files with a concret… | tool-observation |
-| AC-Z-14 | productization | passing | verified | review-result: agent_next now carries candidate_goals for ready_for_next_loop, including draft_… | tool-observation |
+| AC-Z-14 | productization | passing | verified | review-result: OpenNori continuation is now routed through nori-loop-engineer: the root router… | protocol-check |
 | AC-Z-15 | productization | passing | verified | review-result: evidence add accepts source, source-command, source-path, and source-url flags s… | tool-observation |
 | AC-Z-16 | productization | passing | high | local-global-bin-link-fix: Dogfood found npm link created a global opennori command pointing at… | tool-observation |
 | AC-Z-17 | productization | passing | verified | review-result: README and website quickstart lead with short commands: try once with npx openno… | tool-observation |
@@ -73,16 +73,16 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 | AC-A-5 | architecture | passing | verified | review-result: Status, report, and context export now pass ArchitectureState into completionAns… | tool-observation |
 | AC-A-6 | architecture | passing | verified | review-result: opennori check/report/context export are clean for opennori-self after architect… | tool-observation |
 | AC-A-7 | architecture | passing | verified | review-result: Unhealthy build-vs-buy decisions now appear as build_vs_buy review risks in comp… | tool-observation |
-| AC-A-8 | architecture | passing | verified | write-command-review-routing-boundary-refactor: State-mutating CLI commands now route post-writ… | tool-observation |
+| AC-A-8 | architecture | passing | reviewed | protocol-check: Markdown dossier authority boundary was tightened: opennori help now exposes --… | tool-observation |
 | AC-A-9 | architecture | passing | verified | artifact-review: README, protocol, package Skills, and website describe OpenNori as Product AC… | tool-observation |
 | AC-A-10 | architecture | passing | verified | dogfood-result: OpenNori was dogfooded in the separate opennori-site repo under the current Plu… | tool-observation |
 | AC-Z-18 | productization | passing | verified | artifact-review: README now explains that agent_next.candidate_goals is the Skill routing surfa… | tool-observation |
 | AC-Z-19 | productization | passing | verified | confirmed-init-routing-smoke: Confirmed opennori init on a fresh project creates .opennori stat… | tool-observation |
 | AC-Z-20 | productization | passing | verified | behavior-test: Draft Nori Contracts now keep workflow status as draft until user approval; temp… | protocol-check |
-| AC-D-1 | acceptance | passing | verified | dashboard-outcome-hud-verification: Dashboard first screen now leads with Outcome Overview, Dec… | tool-observation |
+| AC-D-1 | acceptance | passing | verified | dashboard-ux-verification: Dashboard now leads with a user-facing completion answer, goal, curr… | tool-observation |
 | AC-D-2 | acceptance | passing | verified | dashboard-activity-workflow: OpenNori now gives Skills a dashboard_activity routing surface, le… | tool-observation |
 | AC-D-3 | acceptance | passing | verified | dashboard-execution-presence-review: Dashboard event focus now follows execution-relevant OpenN… | tool-observation |
-| AC-D-4 | acceptance | passing | verified | dashboard-observation-boundary: Dashboard now presents user intervention as an agent-conversati… | tool-observation |
+| AC-D-4 | acceptance | passing | verified | dashboard-control-boundary-verification: opennori dashboard now starts the local kernel and pri… | command-output |
 | AC-Z-21 | productization | passing | verified | project-profile-language-boundary-review: OpenNori preserves language preference across user-re… | tool-observation |
 | AC-O-9 | operator | passing | verified | review-result: OpenNori autogoal is implemented as a packaged Skill-driven convergence mode tha… | tool-observation |
 | AC-O-10 | operator | passing | verified | review-result: OpenNori now supports adopting an in-progress AC discussion as a standard draft… | tool-observation |
@@ -96,9 +96,9 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 | AC-O-16 | operator | passing | high | review-result: Enhanced autogoal now leaves a user-visible confirmation surface: Skill replies… | tool-observation |
 | AC-O-17 | operator | passing | verified | draft-revision-boundary-verification: Draft criterion revision remains goal-dossier state while… | tool-observation |
 | AC-O-18 | operator | passing | high | review-result: Acceptance Surface Modeling now covers all OpenNori packaged Skill bodies and fr… | tool-observation |
-| AC-D-5 | acceptance | passing | verified | dashboard-project-profile-verification: Dashboard now exposes Project Profile as a readonly pro… | tool-observation |
+| AC-D-5 | acceptance | passing | verified | dashboard-profile-impact-verification: The Project Profile drawer now explains completion impac… | tool-observation |
 | AC-P-14 | protocol | passing | verified | report-rendering-test: OpenNori report rendering now keeps the Acceptance Status table compact… | tool-observation |
-| AC-P-15 | protocol | passing | verified | test-system-refactor-review: OpenNori test coverage has been reorganized around objective proto… | tool-observation |
+| AC-P-15 | protocol | passing | high | test: Test strategy now protects packaged Skill routing metadata and one-AC review reply skelet… | command-output |
 | AC-P-16 | protocol | passing | verified | protocol-dashboard-review: Dashboard status projection now uses the goal dossier model directly… | tool-observation |
 
 ## Acceptance Details
@@ -678,29 +678,36 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 - Passing threshold: 用户不需要记住 CLI；Project Profile 保存在 .opennori/profile/，不被复制进 Nori Contract 或写成 Product AC；current goal 的
   ledger 只记录 profile_evidence；must 或 avoid 的违反会阻止 complete，prefer 作为 review risk 展示；没有 current goal
   时可查看/编辑 Project Profile 但不评价合规。
-- Evidence: project-profile-source-directory-verification: OpenNori initializes .opennori/profile/profile.json
-  as the project-level Project Profile source and .opennori/profile/README.md as a generated review
-  surface; goal ledgers store only profile_evidence compliance records.
+- Evidence: profile-skill-source-adapter-verification: Project Profile automatic Skill checks now resolve Skills
+  from OpenNori package assets, Codex Plugin cache, and user-local Skill directories while preserving
+  Project Profile as project-level state and current-goal ledger profile evidence only.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-21T13:40:42.523Z
+- Evidence recorded: 2026-06-23T10:27:26.672Z
 - Sources:
-  - type=command, label=node ./bin/opennori.js init --root . --confirm --json, command=node ./bin/opennori.js init
-    --root . --confirm --json
-  - type=command, label=npm run test:profile, command=npm run test:profile
-  - type=artifact, label=src/core/profile.ts, path=src/core/profile.ts
-  - type=artifact, label=src/lifecycle/install.ts, path=src/lifecycle/install.ts
-  - type=artifact, label=src/lifecycle/manifest.ts, path=src/lifecycle/manifest.ts
-  - type=artifact, label=test/cli-lifecycle.test.js, path=test/cli-lifecycle.test.js
-  - type=artifact, label=.opennori/profile/profile.json, path=.opennori/profile/profile.json
-  - type=artifact, label=.opennori/profile/README.md, path=.opennori/profile/README.md
-- Reviewability: Inspect .opennori/profile/profile.json and README.md, lifecycle install actions, manifest managed
-  files, and profile tests. Confirm profile.json is source data, README is generated from it, and
-  current goal ledgers contain only compliance evidence.
-- Limitations: This verifies project-state initialization and scope boundaries. It does not add Project Profile
-  preferences to this repository; the current Project Profile remains empty until a user or agent
-  records preferences.
+  - type=architecture-apply, label=opennori-self-ac-o-8-profile-skill-source-adapter,
+    path=.opennori/architecture/evidence/opennori-self-ac-o-8-profile-skill-source-adapter.json,
+    summary=Architecture Baseline alignment context. This is not Product AC evidence by itself., role=context
+  - type=command, label=npx vitest run test/profile.test.js test/lifecycle-adapters.test.ts, command=npx vitest run
+    test/profile.test.js test/lifecycle-adapters.test.ts
+  - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
+  - type=command, label=npm run lint, command=npm run lint
+  - type=artifact, label=src/lifecycle/adapters/skill-capability.ts, path=src/lifecycle/adapters/skill-capability.ts
+  - type=artifact, label=src/lifecycle/profile-checks.ts, path=src/lifecycle/profile-checks.ts
+  - type=artifact, label=test/lifecycle-adapters.test.ts, path=test/lifecycle-adapters.test.ts
+  - type=artifact, label=test/profile.test.js, path=test/profile.test.js
+  - type=artifact, label=test/support/cli.js, path=test/support/cli.js
+  - type=artifact, label=.opennori/architecture/decisions/profile-skill-capability-source-adapter.json,
+    path=.opennori/architecture/decisions/profile-skill-capability-source-adapter.json
+- Reviewability: Inspect the new skill-capability adapter and profile checks. Confirm profile checks report
+  basis=skill-capability-source, include source_kind for package/plugin-cache/user Skill sources,
+  record the found path for automatic evidence, and do not implement Codex Skill selection or
+  subjective Skill compliance. Rerun the focused profile/lifecycle adapter tests plus typecheck and
+  lint.
+- Limitations: This verifies SKILL.md source availability and deterministic Profile compliance routing. It does not
+  prove a future agent actually loaded or followed a Skill; that remains Codex Skill discovery, agent
+  behavior, evidence, and user review.
 
 ### AC-Z-1
 
@@ -1008,28 +1015,29 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
   Skills，把自然语言请求稳定映射到验收发现、架构基线、证据、能力偏好、项目健康、报告和下一轮候选目标，而不需要我记住 Skill 名或 CLI 参数。
 - Measurement: 查看 .codex-plugin/plugin.json、plugins/opennori/skills/nori*/SKILL.md、opennori doctor、opennori
   status/report/context export，以及典型自然语言场景下的 Skill 路由说明。
-- Passing threshold: Skill Pack 不只是命令清单：每个 Skill 都包含触发语义、agent 应先读取的状态、用户回复形态、状态写入边界、handoff 到其他 Skill
-  的条件和误用防护；总入口能处理继续、完成判断、记录证据、能力偏好、架构优先、项目健康和 candidate_goals；所有 Skill 都保持 Plugin-first，不要求项目内 Skill
-  copy/sync，不把 architecture/profile/build-vs-buy/candidate_goals 写成 Product AC 或过程计划。
-- Evidence: review-result: OpenNori report and context export now include data.agent_next alongside
-  next_recommendation, so Skills and review tools can use the same deterministic routing surface
-  instead of inferring next actions from report context.
-- Basis: tool-observation
+- Passing threshold: OpenNori Plugin 包含总入口和 acceptance、autogoal、evidence、capability-profile、architecture、project-health、r
+  eporting、loop-engineer 子 Skill；install 不把 Skills 复制进用户项目；manifest 记录 plugin；doctor 能报告 packaged
+  Skills 是否可用。
+- Evidence: review-result: Loop Engineer is now part of the packaged OpenNori Skill Pack and Codex Plugin
+  discovery surface.
+- Basis: protocol-check
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-15T12:22:55.433Z
+- Evidence recorded: 2026-06-24T03:36:23.373Z
 - Sources:
-  - type=command, label=npm run typecheck, command=npm run typecheck
-  - type=command, label=npm test -- --run test/cli-commands.test.js test/core.test.js, command=npm test -- --run
-    test/cli-commands.test.js test/core.test.js
-  - type=artifact, label=src/cli/commands/reporting.ts, path=src/cli/commands/reporting.ts
-  - type=artifact, label=src/lifecycle/context-export.ts, path=src/lifecycle/context-export.ts
-  - type=artifact, label=src/types.ts, path=src/types.ts
-  - type=artifact, label=test/core.test.js, path=test/core.test.js
-- Reviewability: Rerun the listed checks, then inspect opennori report --json and context export --json for
-  data.agent_next matching the current completion route.
-- Limitations: This aligns JSON routing surfaces; external tools must still decide how to display or use agent_next
-  without taking over Codex.
+  - type=architecture-apply, label=ac-z-12-loop-engineer-skill-pack,
+    path=.opennori/architecture/evidence/ac-z-12-loop-engineer-skill-pack.json, summary=Architecture Baseline
+    alignment context. This is not Product AC evidence by itself., role=context
+  - type=command, label=npm run test:docs, command=npm run test:docs
+  - type=artifact, label=plugins/opennori/skills/nori-loop-engineer/SKILL.md,
+    path=plugins/opennori/skills/nori-loop-engineer/SKILL.md
+  - type=artifact, label=plugins/opennori/skills/nori/SKILL.md, path=plugins/opennori/skills/nori/SKILL.md
+  - type=artifact, label=plugins/opennori/.codex-plugin/plugin.json, path=plugins/opennori/.codex-plugin/plugin.json
+  - type=artifact, label=test/docs-schema.test.js, path=test/docs-schema.test.js
+- Reviewability: Inspect the referenced Skill and Plugin files, rerun npm run test:docs, and verify the docs-schema
+  expected Skill list includes nori-loop-engineer.
+- Limitations: This verifies package assets and discovery metadata in the source checkout; Codex must refresh the
+  Plugin cache and start a new session before the new Skill is loaded locally.
 
 ### AC-Z-13
 
@@ -1063,35 +1071,39 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 - Layer: productization
 - Status: passing
 - Confidence: verified
-- User acceptance criterion: 作为用户，我让 agent 继续一个已经完成的 OpenNori goal 时，不需要每轮都追问下一步是什么；agent 能看到少量可开启下一份 Nori Contract 的人类目标候选。
-- Measurement: 运行 opennori resume、opennori status、opennori next、opennori report 和 context export，查看 complete goal 的
-  next_recommendation。
-- Passing threshold: 已完成且无 review risk 的 goal 输出 ready-for-next-loop，并包含 candidate_goals；每个候选包含
-  goal、user_value、acceptance_directions 和 risks，帮助 agent 进入下一轮 AC discovery，但不呈现为 phase、plan 或 task
-  list。
-- Evidence: review-result: agent_next now carries candidate_goals for ready_for_next_loop, including draft_args,
-  draft_command, and draft_rule, so Skills can continue from the deterministic routing surface without
-  reconstructing flags or treating candidates as approved AC.
-- Basis: tool-observation
+- User acceptance criterion: 作为用户，我让 agent 继续 OpenNori 工作时，不需要每轮都追问下一步是什么；agent 能作为 Loop Engineer 读取当前状态并推进下一轮验收动作。
+- Measurement: 阅读 nori-loop-engineer packaged Skill、nori 根路由、Plugin prompt、README、protocol、AGENTS 和 status/resume 的
+  agent_next 输出，并用未完成、阻塞和已完成 goal 检查路由。
+- Passing threshold: Loop Engineer 以 packaged Skill 形式存在，不是 CLI 命令、plan mode 或任务 runner；它读取 agent_next，按当前缺口路由到
+  acceptance、architecture、implementation、evidence、profile、reporting、health 或 next-contract 子
+  Skill，只推进一轮 acceptance loop，并用 Goal / Current gap / Loop type / Action taken / Evidence / Decision /
+  Need user / Next 汇报；遇到 AC approval、architecture confirmation、waiver、install confirmation 或 report
+  acceptance 必须停下来让用户决策。
+- Evidence: review-result: OpenNori continuation is now routed through nori-loop-engineer: the root router maps
+  keep-going requests to a one-loop coordinator that reads agent_next, invokes focused Skills, and
+  stops at user decision boundaries.
+- Basis: protocol-check
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-15T12:14:59.454Z
+- Evidence recorded: 2026-06-24T03:36:35.416Z
 - Sources:
-  - type=command, label=npm run typecheck, command=npm run typecheck
-  - type=command, label=npm test -- --run test/cli-commands.test.js test/core.test.js, command=npm test -- --run
-    test/cli-commands.test.js test/core.test.js
-  - type=artifact, label=src/agent-next.ts, path=src/agent-next.ts
-  - type=artifact, label=src/types.ts, path=src/types.ts
-  - type=artifact, label=test/core.test.js, path=test/core.test.js
+  - type=architecture-apply, label=ac-z-14-loop-engineer-continuation,
+    path=.opennori/architecture/evidence/ac-z-14-loop-engineer-continuation.json, summary=Architecture Baseline
+    alignment context. This is not Product AC evidence by itself., role=context
+  - type=command, label=npm run test:docs, command=npm run test:docs
+  - type=artifact, label=plugins/opennori/skills/nori-loop-engineer/SKILL.md,
+    path=plugins/opennori/skills/nori-loop-engineer/SKILL.md
   - type=artifact, label=plugins/opennori/skills/nori/SKILL.md, path=plugins/opennori/skills/nori/SKILL.md
-  - type=artifact, label=plugins/opennori/skills/nori-acceptance/SKILL.md,
-    path=plugins/opennori/skills/nori-acceptance/SKILL.md
-  - type=artifact, label=plugins/opennori/skills/nori-reporting/SKILL.md,
-    path=plugins/opennori/skills/nori-reporting/SKILL.md
-- Reviewability: Rerun the listed checks and inspect resume/status JSON for data.agent_next.state=ready_for_next_loop
-  with candidate_goals and draft metadata.
-- Limitations: This exposes deterministic routing data for Skills; selecting, refining, and approving the next
-  draft remains an agent/user judgment and candidates are not completion evidence.
+  - type=artifact, label=README.md, path=README.md
+  - type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md
+  - type=artifact, label=AGENTS.md, path=AGENTS.md
+  - type=artifact, label=test/docs-schema.test.js, path=test/docs-schema.test.js
+- Reviewability: Inspect nori-loop-engineer/SKILL.md for the reply shape and misuse guards, inspect nori/SKILL.md for
+  natural-language routing, inspect README/protocol/AGENTS for user-visible boundaries, and rerun npm
+  run test:docs.
+- Limitations: This proves Loop Engineer behavior is encoded in packaged Skills and docs; actual live continuation
+  still depends on the user agent loading the updated Plugin cache and applying the Skill in a fresh
+  session.
 
 ### AC-Z-15
 
@@ -1197,7 +1209,6 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
   - type=command, label=npm run check, command=npm run check
   - type=artifact, label=src/core/report.ts, path=src/core/report.ts
   - type=artifact, label=src/agent-next.ts, path=src/agent-next.ts
-  - type=artifact, label=src/types.ts, path=src/types.ts
   - type=artifact, label=test/core.test.js, path=test/core.test.js
   - type=artifact, label=plugins/opennori/skills/nori/SKILL.md, path=plugins/opennori/skills/nori/SKILL.md
 - Reviewability: Run the targeted tests and inspect status/resume JSON for agent_next.state architecture_needs_review
@@ -1387,50 +1398,37 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 
 - Layer: architecture
 - Status: passing
-- Confidence: verified
+- Confidence: reviewed
 - User acceptance criterion: 作为用户，我查看 OpenNori 自身 dogfood 状态时，能知道 Architecture Baseline 已建立，但后续架构修复是否真的完成不能被最小可运行结果误报。
 - Measurement: 查看 OpenNori 自身 status/report、Architecture Baseline、build-vs-buy decision、代码结构审查和后续架构修复证据。
 - Passing threshold: 报告能清楚显示 baseline 已建立、当前仍有哪些架构风险或未完成缺口；如果核心结构仍未完成修复，目标不能显示 complete。
-- Evidence: write-command-review-routing-boundary-refactor: State-mutating CLI commands now route post-write
-  current_gap, next_recommendation, and agent_next through goalReviewState instead of assembling
-  routing responses with ad hoc currentGap/nextRecommendation calls. Evidence, profile, acceptance
-  approval/evaluate/criterion, and architecture requirement/baseline command responses now use the
-  shared read model after deterministic writes.
+- Evidence: protocol-check: Markdown dossier authority boundary was tightened: opennori help now exposes
+  --dossier as the explicit Nori Contract dossier locator, legacy --acceptance is described as README
+  locator only, status reads structured JSON even when README content is forged, and protocol marker
+  text matches generated README output.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-23T09:24:46.993Z
+- Evidence recorded: 2026-06-23T11:58:37.583Z
 - Sources:
-  - type=architecture-apply, label=opennori-self-write-command-review-routing-boundary,
-    path=.opennori/architecture/evidence/opennori-self-write-command-review-routing-boundary.json,
-    summary=Architecture Baseline alignment context. This is not Product AC evidence by itself., role=context
+  - type=architecture-apply, label=opennori-self-markdown-dossier-authority-boundary,
+    path=/Users/jarl/code/jarlone/opennori/.opennori/architecture/evidence/opennori-self-markdown-dossier-authority-
+    boundary.json, summary=Architecture Baseline alignment context. This is not Product AC evidence by itself.,
+    role=context
+  - type=command, label=npx vitest run test/acceptance.test.js test/module-boundaries.test.js, command=npx vitest
+    run test/acceptance.test.js test/module-boundaries.test.js
   - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
-  - type=command, label=npm run test:cli, command=npm run test:cli
-  - type=command, label=npm run test:evidence, command=npm run test:evidence
-  - type=command, label=npm run test:profile, command=npm run test:profile
-  - type=command, label=npm run test:architecture, command=npm run test:architecture
-  - type=command, label=npm run lint, command=npm run lint
-  - type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root .
-    --json
-  - type=command, label=node ./bin/opennori.js status --root . --json, command=node ./bin/opennori.js status --root
-    . --json
-  - type=artifact, label=src/cli/commands/evidence/add.ts, path=src/cli/commands/evidence/add.ts
-  - type=artifact, label=src/cli/commands/evidence/prune.ts, path=src/cli/commands/evidence/prune.ts
-  - type=artifact, label=src/cli/commands/profile/add.ts, path=src/cli/commands/profile/add.ts
-  - type=artifact, label=src/cli/commands/profile/check.ts, path=src/cli/commands/profile/check.ts
-  - type=artifact, label=src/cli/commands/profile/evidence.ts, path=src/cli/commands/profile/evidence.ts
-  - type=artifact, label=src/cli/commands/acceptance/approval.ts, path=src/cli/commands/acceptance/approval.ts
-  - type=artifact, label=src/cli/commands/acceptance/criterion.ts, path=src/cli/commands/acceptance/criterion.ts
-  - type=artifact, label=src/cli/commands/acceptance/runtime-status.ts,
-    path=src/cli/commands/acceptance/runtime-status.ts
-  - type=artifact, label=src/cli/commands/architecture/requirement.ts,
-    path=src/cli/commands/architecture/requirement.ts
-  - type=artifact, label=src/cli/commands/architecture/baseline.ts, path=src/cli/commands/architecture/baseline.ts
-- Reviewability: Inspect the listed command files and confirm state writes remain command-local while response
-  routing fields come from goalReviewState. Rerun the listed validation commands.
-- Limitations: This only centralizes response routing after deterministic writes. Inventory/probe surfaces such as
-  manifest, doctor, list, changes, activity-target, and draft creation may still compute lightweight
-  current_gap summaries because they are not completion routing authorities.
+  - type=command, label=node ./bin/opennori.js evidence add --help, command=node ./bin/opennori.js evidence add
+    --help
+  - type=artifact, label=src/cli/active-goal-store.ts, path=src/cli/active-goal-store.ts
+  - type=artifact, label=src/cli/active-goal-args.ts, path=src/cli/active-goal-args.ts
+  - type=artifact, label=test/acceptance.test.js, path=test/acceptance.test.js
+  - type=artifact, label=test/module-boundaries.test.js, path=test/module-boundaries.test.js
+  - type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md
+- Reviewability: Run the two test commands and inspect evidence add --help plus the listed source files; the
+  acceptance test explicitly forges README content and verifies status still reads criterion JSON.
+- Limitations: This keeps legacy --acceptance/--evidence option names for compatibility while steering new explicit
+  path usage to --dossier.
 
 ### AC-A-9
 
@@ -1623,30 +1621,31 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 - Passing threshold: 页面以视觉化 acceptance loop 和少量状态面板展示 agent activity、goal、current gap、need user、architecture
   decision、completion decision 和 latest event；有活动动效但不呈现聊天记录、过程任务列表、证据账本或完成权威入口；状态变化来自 /api/snapshot 与
   /api/events。
-- Evidence: dashboard-outcome-hud-verification: Dashboard first screen now leads with Outcome Overview,
-  Decision, Current gap, Next, and Project Profile impact. The kernel snapshot exposes outcome_summary
-  so the UI does not force users to infer completion from radar nodes, event logs, or the Project
-  Profile drawer.
+- Evidence: dashboard-ux-verification: Dashboard now leads with a user-facing completion answer, goal, current
+  gap, next action, and Project Profile impact. The radar remains a visual observation aid, supporting
+  detail is secondary, and dashboard.started system events are hidden from the recent activity list so
+  agent activity stays meaningful.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-22T01:08:33.731Z
+- Evidence recorded: 2026-06-24T05:53:40.372Z
 - Sources:
-  - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
   - type=command, label=npm run test:dashboard, command=npm run test:dashboard
-  - type=artifact, label=src/kernel/snapshot.ts, path=src/kernel/snapshot.ts
-  - type=artifact, label=src/dashboard/src/App.tsx, path=src/dashboard/src/App.tsx
-  - type=artifact, label=src/dashboard/src/types.ts, path=src/dashboard/src/types.ts
-  - type=artifact, label=src/types.ts, path=src/types.ts
-  - type=artifact, label=test/cli-dashboard.test.js, path=test/cli-dashboard.test.js
+  - type=command, label=npm run typecheck:dashboard, command=npm run typecheck:dashboard
+  - type=artifact, label=src/dashboard/src/components/OutcomeHud.tsx,
+    path=src/dashboard/src/components/OutcomeHud.tsx
+  - type=artifact, label=src/dashboard/src/components/DashboardHeader.tsx,
+    path=src/dashboard/src/components/DashboardHeader.tsx
+  - type=artifact, label=src/dashboard/src/components/EventLogConsole.tsx,
+    path=src/dashboard/src/components/EventLogConsole.tsx
+  - type=artifact, label=src/dashboard/src/dashboard-view.ts, path=src/dashboard/src/dashboard-view.ts
+  - type=artifact, label=test/dashboard-selection.test.ts, path=test/dashboard-selection.test.ts
   - type=artifact, label=dashboard/index.html, path=dashboard/index.html
-  - type=artifact, label=output/playwright/dashboard-outcome-hud.png,
-    path=output/playwright/dashboard-outcome-hud.png
-- Reviewability: Run opennori dashboard --root . and inspect the left HUD. It should show Outcome Overview, Decision,
-  Current gap, Next, and Project Profile impact before agent activity or event logs. Check
-  /api/snapshot for outcome_summary and rerun dashboard tests.
-- Limitations: This evidence verifies the current OpenNori self dashboard on localhost and keeps the screenshot in
-  ignored local output. It does not test every possible external project profile combination visually.
+- Reviewability: Run opennori dashboard --root . and open the printed URL in Chrome. Confirm the first screen leads
+  with Goal Outcome Monitor, Completion answer, Current gap, Next, Project Profile impact, and recent
+  agent activity rather than dashboard start noise.
+- Limitations: Chrome visual review was performed locally through the Codex Chrome plugin. This evidence does not
+  add pixel regression snapshots or change dashboard state authority.
 
 ### AC-D-2
 
@@ -1735,37 +1734,33 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 - Passing threshold: 页面清楚显示 dashboard 是 observation surface / reply in agent chat；可见控件只用于刷新或查看快照；POST
   /api/confirm、/api/approve、/api/waive、/api/evidence、/api/activity 等控制型请求返回 method_not_allowed；Product
   AC、evidence、profile、architecture 和 report 状态只能由 agent 对话中的 OpenNori Skill/CLI 路径写入。
-- Evidence: dashboard-observation-boundary: Dashboard now presents user intervention as an agent-conversation
-  reply boundary, not an in-dashboard confirmation flow. The built React app shows Agent reply /
-  Control boundary / reply in agent chat, packaged Skills and docs forbid dashboard confirmation
-  controls, and dashboard HTTP rejects confirmation-style POST control paths with method_not_allowed.
-- Basis: tool-observation
+- Evidence: dashboard-control-boundary-verification: opennori dashboard now starts the local kernel and prints
+  the URL without opening a browser by default; --open is the only explicit browser-opening path. The
+  dashboard remains observation-only and the user-facing output tells users to open the URL themselves
+  or rerun with --open.
+- Basis: command-output
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-16T10:12:26.488Z
+- Evidence recorded: 2026-06-24T05:53:40.838Z
 - Sources:
-  - type=command, label=npm run typecheck:dashboard && npm run build:dashboard && npx vitest run
-    test/cli-commands.test.js -t "dashboard rejects non-GET|dashboard exposes observation only|dashboard serves the
-    built React app|dashboard command can start|dashboard SSE emits", command=npm run typecheck:dashboard && npm run
-    build:dashboard && npx vitest run test/cli-commands.test.js -t "dashboard rejects non-GET|dashboard exposes
-    observation only|dashboard serves the built React app|dashboard command can start|dashboard SSE emits"
-  - type=command, label=npm run check, command=npm run check
-  - type=artifact, label=src/dashboard/src/App.tsx, path=src/dashboard/src/App.tsx
-  - type=artifact, label=src/dashboard/src/components/AcceptanceLoop.tsx,
-    path=src/dashboard/src/components/AcceptanceLoop.tsx
-  - type=artifact, label=src/kernel/http/app.ts, path=src/kernel/http/app.ts
+  - type=command, label=node ./bin/opennori.js dashboard --help, command=node ./bin/opennori.js dashboard --help
+  - type=command, label=node ./bin/opennori.js dashboard --root . --port 0 --once, command=node ./bin/opennori.js
+    dashboard --root . --port 0 --once
+  - type=command, label=npm run test:dashboard, command=npm run test:dashboard
+  - type=command, label=npx vitest run test/cli-human-output.test.js --tagsFilter=quick, command=npx vitest run
+    test/cli-human-output.test.js --tagsFilter=quick
+  - type=artifact, label=src/cli/commands/dashboard.ts, path=src/cli/commands/dashboard.ts
+  - type=artifact, label=src/kernel/server.ts, path=src/kernel/server.ts
+  - type=artifact, label=src/cli/human-output.ts, path=src/cli/human-output.ts
   - type=artifact, label=README.md, path=README.md
-  - type=artifact, label=AGENTS.md, path=AGENTS.md
+  - type=artifact, label=.opennori/protocol.md, path=.opennori/protocol.md
   - type=artifact, label=plugins/opennori/skills/nori/SKILL.md, path=plugins/opennori/skills/nori/SKILL.md
   - type=artifact, label=plugins/opennori/skills/nori-reporting/SKILL.md,
     path=plugins/opennori/skills/nori-reporting/SKILL.md
-  - type=artifact, label=plugins/opennori/skills/nori-project-health/SKILL.md,
-    path=plugins/opennori/skills/nori-project-health/SKILL.md
-  - type=artifact, label=plugins/opennori/.codex-plugin/plugin.json, path=plugins/opennori/.codex-plugin/plugin.json
-- Reviewability: Run npm run check, inspect the dashboard bundle/source for Agent reply and reply in agent chat, and
-  rerun the dashboard control-write tests to confirm POST confirmation endpoints are rejected.
-- Limitations: This verifies the current local dashboard and package assets. It does not add a browser screenshot
-  for a forced need_user fixture, and future UI work must keep the same observation-only boundary.
+- Reviewability: Inspect the dashboard command help and human output. Confirm there is no --no-open option, --open is
+  explicit, and normal dashboard startup prints the URL without opening a browser.
+- Limitations: This verifies CLI/kernel open behavior and documentation. It does not prevent users from manually
+  opening the printed URL or explicitly using --open.
 
 ### AC-Z-21
 
@@ -2381,41 +2376,25 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
   compliance evidence；没有 current goal 时显示 Project Profile 已加载但合规未评价，而不是显示完成；没有 profile 时显示空态；浮窗只读，不提供
   add/check/evidence/waive/confirm 等写状态按钮；Profile 不被渲染为 Product AC 节点；打开或关闭浮窗前后，radar/main
   区域不重新分配布局宽度。
-- Evidence: dashboard-project-profile-verification: Dashboard now exposes Project Profile as a readonly
-  project-level overlay and evaluates compliance only when a current goal exists. The header button is
-  labeled Inspect Project Profile, the profile node raw data distinguishes project_only from
-  current_goal_compliance, no-current-goal snapshots still include Project Profile but mark compliance
-  not evaluated, and the overlay stays read-only without add/check/evidence/waive/confirm controls.
+- Evidence: dashboard-profile-impact-verification: The Project Profile drawer now explains completion impact
+  directly: no current goal means not evaluated, blocking items block completion until
+  evidence/revision/waiver, review items require user review, and clear profile does not block the
+  current completion decision.
 - Basis: tool-observation
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-21T13:27:41.043Z
+- Evidence recorded: 2026-06-24T05:53:40.603Z
 - Sources:
-  - type=architecture-apply, label=opennori-self-ac-d-5-project-profile-dashboard,
-    path=.opennori/architecture/evidence/opennori-self-ac-d-5-project-profile-dashboard.json, summary=Architecture
-    Baseline alignment context. This is not Product AC evidence by itself., role=context
   - type=command, label=npm run test:dashboard, command=npm run test:dashboard
-  - type=command, label=npm run test:profile, command=npm run test:profile
-  - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
-  - type=command, label=node ./bin/opennori.js check --root . --json, command=node ./bin/opennori.js check --root .
-    --json
-  - type=artifact, label=src/kernel/snapshot.ts, path=src/kernel/snapshot.ts
-  - type=artifact, label=src/dashboard/src/App.tsx, path=src/dashboard/src/App.tsx
-  - type=artifact, label=src/dashboard/src/selection.ts, path=src/dashboard/src/selection.ts
-  - type=artifact, label=src/dashboard/src/components/InspectNodePanel.tsx,
-    path=src/dashboard/src/components/InspectNodePanel.tsx
-  - type=artifact, label=src/dashboard/src/types.ts, path=src/dashboard/src/types.ts
-  - type=artifact, label=test/cli-dashboard.test.js, path=test/cli-dashboard.test.js
-  - type=artifact, label=test/dashboard-selection.test.ts, path=test/dashboard-selection.test.ts
-  - type=artifact, label=dashboard/index.html, path=dashboard/index.html
-- Reviewability: Inspect the listed dashboard and kernel files. Confirm the header icon label is Inspect Project
-  Profile, profile rawData scope is project_only when there is no current goal and
-  current_goal_compliance when active, no-current snapshots include Project Profile without marking
-  compliance complete, and the panel exposes no write actions. Rerun dashboard/profile tests and
-  typecheck.
-- Limitations: This verifies the dashboard state model, built assets, and test coverage. It does not include a
-  fresh browser screenshot in this evidence record; visual inspection can still be done by running
-  opennori dashboard locally.
+  - type=command, label=npm run typecheck:dashboard, command=npm run typecheck:dashboard
+  - type=artifact, label=src/dashboard/src/components/inspect/ProfileInspectPanel.tsx,
+    path=src/dashboard/src/components/inspect/ProfileInspectPanel.tsx
+  - type=artifact, label=src/dashboard/src/components/OutcomeHud.tsx,
+    path=src/dashboard/src/components/OutcomeHud.tsx
+- Reviewability: Open the Project Profile drawer from the dashboard header or Project Profile impact card and confirm
+  it explains whether project-level preferences affect the current completion decision.
+- Limitations: This verifies the read-only profile impact explanation. It does not add dashboard write actions for
+  profile evidence or waivers.
 
 ### AC-P-14
 
@@ -2461,7 +2440,7 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 
 - Layer: protocol
 - Status: passing
-- Confidence: verified
+- Confidence: high
 - User acceptance criterion: 作为 OpenNori 维护者或用户，我查看测试体系时，能清楚区分自动化测试只保护客观协议、状态、CLI、schema、report 和资产结构，而 AC 质量、UI/CRUD/Dashboard
   操作路径挖掘、Enhanced Discovery 和 Skill 判断效果留给 Skills、dogfood、eval prompts 与用户复核。
 - Measurement: 打开 docs/testing.md、AGENTS.md、test/ 目录、package.json 测试脚本和本机 nori-product-development Skill；再运行 quick
@@ -2469,63 +2448,26 @@ Summary: Refresh completion judgment evidence to Project Profile terminology.
 - Passing threshold: test/core.test.js 只保留窄核心不变量；原 cli-commands 巨型测试被拆成
   test/cli-*.test.js；acceptance/evidence/reporting/profile/lifecycle/architecture/docs-schema
   等领域测试各自覆盖客观状态；文档和 Skill 明确禁止用自然语言词表或固定 prompt 断言来证明 agent 主观能力；npm run test:quick 和领域脚本可单独运行并通过。
-- Evidence: test-system-refactor-review: OpenNori test coverage has been reorganized around objective protocol
-  boundaries instead of one giant core/CLI suite. core.test.js now contains only narrow core
-  invariants; the former CLI mega-suite is split into focused cli-domain files; acceptance, evidence,
-  reporting, profile, lifecycle, architecture, docs-schema, and dashboard tests own their domains.
-  docs/testing.md, AGENTS.md, and the local nori-product-development Skill state that automated tests
-  must not prove subjective AC quality, UI/CRUD/Dashboard discovery quality, enhanced autogoal
-  judgment, or exact prompt wording; those belong to Skills, dogfood, eval prompts, and user review.
-- Basis: tool-observation
+- Evidence: test: Test strategy now protects packaged Skill routing metadata and one-AC review reply skeletons
+  as objective assets, while docs explicitly keep generated AC quality and operation-path sufficiency
+  in Skill dogfood and user review rather than automated natural-language tests.
+- Basis: command-output
 - Evidence result: passing
 - Evidence gate: accepted
-- Evidence recorded: 2026-06-21T02:51:17.013Z
+- Evidence recorded: 2026-06-23T11:29:56.262Z
 - Sources:
-  - type=architecture-apply, label=opennori-self-ac-p-15-test-system-boundary,
-    path=.opennori/architecture/evidence/opennori-self-ac-p-15-test-system-boundary.json, summary=Architecture
+  - type=architecture-apply, label=opennori-self-skill-asset-protocol-guards,
+    path=.opennori/architecture/evidence/opennori-self-skill-asset-protocol-guards.json, summary=Architecture
     Baseline alignment context. This is not Product AC evidence by itself., role=context
+  - type=command, label=npx vitest run test/docs-schema.test.js, command=npx vitest run test/docs-schema.test.js
   - type=command, label=npm run lint, command=npm run lint
-  - type=command, label=npm run typecheck, command=npm run typecheck
-  - type=command, label=npm run test:quick, command=npm run test:quick
-  - type=command, label=npm run test:docs, command=npm run test:docs
-  - type=command, label=npm run test:schema, command=npm run test:schema
-  - type=command, label=npm run test:reporting, command=npm run test:reporting
-  - type=command, label=npm run test:cli, command=npm run test:cli
-  - type=command, label=rg -n 'cli-commands\.test|test/cli-commands' AGENTS.md docs test package.json
-    /Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md, command=rg -n
-    'cli-commands\.test|test/cli-commands' AGENTS.md docs test package.json
-    /Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md
-  - type=artifact, label=docs/testing.md, path=docs/testing.md
-  - type=artifact, label=AGENTS.md, path=AGENTS.md
-  - type=artifact, label=/Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md,
-    path=/Users/jarl/code/jarlone/.agents/skills/nori-product-development/SKILL.md
-  - type=artifact, label=test/core.test.js, path=test/core.test.js
-  - type=artifact, label=test/acceptance.test.js, path=test/acceptance.test.js
-  - type=artifact, label=test/evidence.test.js, path=test/evidence.test.js
-  - type=artifact, label=test/reporting.test.js, path=test/reporting.test.js
-  - type=artifact, label=test/profile.test.js, path=test/profile.test.js
-  - type=artifact, label=test/lifecycle.test.js, path=test/lifecycle.test.js
-  - type=artifact, label=test/architecture.test.js, path=test/architecture.test.js
+  - type=command, label=npx tsc --noEmit --pretty false, command=npx tsc --noEmit --pretty false
   - type=artifact, label=test/docs-schema.test.js, path=test/docs-schema.test.js
-  - type=artifact, label=test/cli-core.test.js, path=test/cli-core.test.js
-  - type=artifact, label=test/cli-lifecycle.test.js, path=test/cli-lifecycle.test.js
-  - type=artifact, label=test/cli-human-output.test.js, path=test/cli-human-output.test.js
-  - type=artifact, label=test/cli-acceptance.test.js, path=test/cli-acceptance.test.js
-  - type=artifact, label=test/cli-reporting.test.js, path=test/cli-reporting.test.js
-  - type=artifact, label=test/cli-architecture.test.js, path=test/cli-architecture.test.js
-  - type=artifact, label=test/cli-profile.test.js, path=test/cli-profile.test.js
-  - type=artifact, label=test/cli-dashboard.test.js, path=test/cli-dashboard.test.js
-  - type=artifact, label=test/cli-evidence.test.js, path=test/cli-evidence.test.js
-  - type=artifact, label=test/support/cli.js, path=test/support/cli.js
-  - type=artifact, label=test/support/command-fixtures.js, path=test/support/command-fixtures.js
-  - type=artifact, label=package.json, path=package.json
-- Reviewability: Open docs/testing.md, AGENTS.md, package.json scripts, and the listed test files. Confirm
-  core.test.js is narrow, there is no remaining test/cli-commands reference, the CLI suite is split by
-  command domain, and the docs/Skill explicitly keep subjective agent ability out of automated tests.
-  Rerun the listed lint/typecheck/domain commands.
-- Limitations: This proves the repository test architecture and current focused verification. It does not prove
-  future Skills will always produce ideal ACs; that remains an agent Skill, dogfood, eval, and human
-  review responsibility.
+  - type=artifact, label=docs/testing.md, path=docs/testing.md
+- Reviewability: Open test/docs-schema.test.js and docs/testing.md, then rerun the focused docs test, lint, and
+  typecheck.
+- Limitations: This proves the objective Skill asset guardrails only. Real AC quality still requires Skill evals,
+  dogfood, and user confirmation.
 
 ### AC-P-16
 
@@ -2588,9 +2530,9 @@ Requirement: required - OpenNori self-goal changes architecture requirement rout
 Baseline: typescript-agent-state-cli (active)
 Technical baseline: 5 runtime, 7 module, 5 contract, 5 flow, 7 dependency, 6 reference items
 Challenge: none
-Architecture apply records: 55
+Architecture apply records: 71
 Architecture evidence health: clear
-Build-vs-buy: clear (17 decisions)
+Build-vs-buy: clear (19 decisions)
 Agent guide: installed
 
 Paths:
@@ -2608,7 +2550,10 @@ Architecture apply records:
 - AC-O-14: aligned (typescript-agent-state-cli) - AC-O-14 keeps draft approval semantics in packaged Skills and documentation while CLI only routes agents toward the one-AC-at-a-time review loop.
 - AC-O-9: aligned (typescript-agent-state-cli) - Autogoal was implemented as packaged Skill-driven convergence into the existing Nori Contract Draft path, without adding a separate Autogoal Contract or MVP workflow.
 - AC-P-4: aligned (typescript-agent-state-cli) - High-risk evidence handling now preserves objective evidence results while surfacing confidence and evidence_health review risks; the CLI does not use fixed strong/weak natural-language evidence lists to rewrite subjective sufficiency.
+- AC-Z-12: aligned (typescript-agent-state-cli) - Loop Engineer is added as a packaged Skill inside the confirmed Plugin-first, Skill-driven, CLI-state-backed architecture.
+- AC-Z-14: aligned (typescript-agent-state-cli) - Loop Engineer continuation stays inside the accepted OpenNori architecture by using agent_next as the deterministic route surface and focused Skills as behavior handlers.
 - AC-A-12: aligned (typescript-agent-state-cli) - CLI boundary audit kept subjective product semantics in Skills and narrowed hard validation to objective contract, ledger, evidence, architecture, lifecycle, and schema integrity.
+- AC-A-8: aligned (typescript-agent-state-cli) - MCP read-only context server now exposes a typed capability model for resources, transport, state authority, tool policy, and no-write boundary.
 - AC-A-8: aligned (typescript-agent-state-cli) - MCP read-only context server uses the official @modelcontextprotocol/sdk stdio transport and registers only context, snapshot, and doctor resources over existing OpenNori projections.
 - AC-D-1: aligned (typescript-agent-state-cli) - Dashboard Outcome HUD keeps the React/Vite/Tailwind dashboard as a readonly observation surface while surfacing completion decision, current gap, user intervention, next action, and Project Profile impact from kernel snapshot projection.
 - AC-D-5: aligned (typescript-agent-state-cli) - Dashboard Profile drawer follows the confirmed dashboard web architecture: React/Vite/Tailwind/Motion renders a readonly overlay, kernel snapshot exposes capability_profile and capability_compliance, and .opennori remains the source of truth.
@@ -2616,8 +2561,10 @@ Architecture apply records:
 - AC-O-10: aligned (typescript-agent-state-cli) - Conversation-to-contract adoption is implemented as Skill-driven nori-acceptance behavior backed by the existing standard draft path, without adding a new CLI workflow or autogoal artifact.
 - AC-O-17: aligned (typescript-agent-state-cli) - Draft criterion revision semantics remain goal-scoped while Project Profile stays project-scoped.
 - AC-O-18: aligned (typescript-agent-state-cli) - Acceptance Surface Modeling stays in packaged Skills, protocol, README, AGENTS, and asset tests while CLI remains deterministic state storage rather than a subjective AC validator.
+- AC-O-8: aligned (typescript-agent-state-cli) - Project Profile Skill checks now inspect package Skills, Codex Plugin cache Skills, and user-local Skills through a narrow lifecycle adapter.
 - AC-O-8: aligned (typescript-agent-state-cli) - Project Profile scope is now project-level while current goal ledgers store only profile_evidence compliance records.
 - AC-P-14: aligned (typescript-agent-state-cli) - Report readability work stays inside the confirmed TypeScript agent-state CLI baseline: src/core/report.ts owns human report rendering, tests stay in reporting/domain suites, and .opennori remains the evidence source of truth.
+- AC-P-15: aligned (typescript-agent-state-cli) - Test-system boundary now keeps core tests narrow, moves CLI source-boundary checks into module-boundaries, and prevents Skill description tests from becoming subjective behavior snapshots.
 - AC-P-15: aligned (typescript-agent-state-cli) - The test-system refactor follows the confirmed TypeScript agent-state CLI baseline by preserving domain modules and deterministic test surfaces while moving subjective agent judgment out of hard-coded tests.
 - AC-P-16: aligned (typescript-agent-state-cli) - Goal and criterion dossier state follows the confirmed TypeScript agent-state CLI baseline: structured JSON remains authoritative, generated README files are review surfaces, and CLI/domain modules keep deterministic .opennori writes.
 - AC-A-8: aligned (typescript-agent-state-cli) - Acceptance module responsibilities are split into Skill-prepared input normalization, subjective-review surface, and discovery/brainstorm Markdown rendering while keeping src/acceptance.ts as the stable export.
@@ -2626,8 +2573,11 @@ Architecture apply records:
 - AC-A-8: aligned (typescript-agent-state-cli) - Split AgentNext construction, dashboard activity command templates, and doctor active-goal helpers while preserving agent-next routing functions.
 - AC-A-8: aligned (typescript-agent-state-cli) - AgentNext routing is split into lifecycle readiness, recommendation routing, and architecture-apply handoff modules while keeping src/agent-next.ts as the compatibility export.
 - AC-A-8: aligned (typescript-agent-state-cli) - Split Architecture Profile content, model validation, and storage facade boundaries while keeping subjective architecture quality in Skills and user review.
+- AC-A-8: aligned (typescript-agent-state-cli) - Internal source modules now import domain type modules instead of the public src/types.ts barrel, and boundary tests guard MCP read-only resources, generated Markdown review-only authority, and lifecycle external command adapters.
+- AC-A-8: aligned (typescript-agent-state-cli) - Removed the central src/types.ts barrel so OpenNori source and tests import owned domain type modules directly.
 - AC-A-8: aligned (typescript-agent-state-cli) - Split the CLI command layer into registry, policy, resolver, runner, and compatibility barrel modules while keeping citty as the command framework.
 - AC-A-8: aligned (typescript-agent-state-cli) - Split the CLI runtime boundary into executor, active-goal args, active-goal store, active-goal lock, and a compatibility runtime barrel while preserving deterministic .opennori state semantics.
+- AC-A-8: aligned (typescript-agent-state-cli) - OpenNori repository routing, testing strategy, CLI build-vs-buy decision, and local product-development Skill now document the thin-command and narrow-import boundary for future command work.
 - AC-A-8: aligned (typescript-agent-state-cli) - Completion logic now separates acceptance basis view, intervention, review risks, completion answer, and next recommendation routing behind a compatibility export.
 - AC-A-8: aligned (typescript-agent-state-cli) - Context export will be split into read-only state collection, review payload assembly, and explicit artifact writing so external review tools can inspect OpenNori context without becoming a second runtime or report authority.
 - AC-A-8: aligned (typescript-agent-state-cli) - Report rendering and lifecycle status should consume the same core review projection instead of each path recomputing current gap, completion, evidence health, profile compliance, intervention, and recommendation.
@@ -2637,18 +2587,26 @@ Architecture apply records:
 - AC-A-8: aligned (typescript-agent-state-cli) - Dashboard radar model will separate OpenNori read-only node semantics from geometric layout and visual style helpers.
 - AC-A-8: aligned (typescript-agent-state-cli) - Dashboard radar projection now has a dedicated model boundary; React renders readonly nodes, links, grid, and styles from that model instead of owning projection logic.
 - AC-A-8: aligned (typescript-agent-state-cli) - Dashboard App shell now owns subscription and selection state while header, outcome HUD, inspect drawer, event console, and view helpers live in focused read-only modules.
+- AC-A-8: aligned (typescript-agent-state-cli) - Evidence add/prune commands now import narrow core, lifecycle, and kernel modules instead of wide core/lifecycle barrels, keeping evidence CLI behavior on deterministic state writes and review projection boundaries.
 - AC-A-8: aligned (typescript-agent-state-cli) - Split the Product evidence state boundary into source normalization, risk gate, workflow status, evidence view, pruning, health, and recording modules while keeping evidence.ts as a compatibility export.
-- AC-A-8: aligned (typescript-agent-state-cli) - Generated acceptance Markdown is now an explicit review-surface-only helper rather than a contract state or import layer.
+- AC-A-8: aligned (typescript-agent-state-cli) - External command execution moved from lifecycle action modeling into a dedicated lifecycle adapter, while setup and plugin-sync continue to orchestrate plans and consume runner abstractions.
+- AC-A-8: aligned (typescript-agent-state-cli) - Goal dossier Markdown is now a generated review surface only; the old generated acceptance Markdown parser/helper was removed and core.ts no longer exports Markdown parsing as a state API.
 - AC-A-8: aligned (typescript-agent-state-cli) - Goal review outcome assembly will be centralized as a read-only lifecycle projection so status, resume, report, check, and context export do not each assemble completion, current gap, evidence health, architecture, profile, and agent_next independently.
 - AC-A-8: aligned (typescript-agent-state-cli) - Kernel activity responsibilities will be split into target resolution, activity storage, and event projection so dashboard live activity remains a projection over current OpenNori state rather than a second workflow state layer.
 - AC-A-8: aligned (typescript-agent-state-cli) - Kernel snapshot building will be split into active/no-goal read models, criteria projection, agent activity summary, and history summary so dashboard/MCP observe a clear outcome model instead of a mixed builder.
 - AC-A-8: aligned (typescript-agent-state-cli) - Lifecycle external command stdout parsing stays inside narrow adapters instead of setup or plugin-sync orchestration.
 - AC-A-8: aligned (typescript-agent-state-cli) - Lifecycle command probes moved behind adapters; MCP is documented as a future read-only context surface; Markdown parsing remains a non-authoritative recovery helper.
 - AC-A-8: aligned (typescript-agent-state-cli) - Extracted shared lifecycle external-command action infrastructure used by setup and plugin sync while preserving setup/plugin-sync preview and confirm semantics.
+- AC-A-8: aligned (typescript-agent-state-cli) - Lifecycle setup/plugin-sync orchestration now imports only narrow result helpers and module-boundary tests keep Codex/npm stdout parsing plus process execution inside lifecycle adapters.
+- AC-A-8: aligned (typescript-agent-state-cli) - Lifecycle type definitions are split into domain modules for result, paths, plugin state, manifest, lifecycle plans, doctor, bootstrap, profile checks, and context export; src/types/lifecycle.ts remains only as a compatibility re-export.
+- AC-A-8: aligned (typescript-agent-state-cli) - Goal dossier Markdown remains a generated review surface while CLI active goal loading now supports explicit dossier directories and keeps README content out of state authority.
+- AC-A-8: aligned (typescript-agent-state-cli) - MCP stdio startup now routes through the shared citty command registry and an explicit stdioServer policy; src/cli.ts no longer owns a parallel mcp parser or direct server startup path.
+- AC-A-8: aligned (typescript-agent-state-cli) - MCP baseline remains read-only: the command now imports only the narrow core/io result helper, and module-boundary tests prevent MCP source from registering tools or directly writing .opennori state.
 - AC-A-8: aligned (typescript-agent-state-cli) - MCP resource payload types are separated from read-only resource construction.
 - AC-A-8: aligned (typescript-agent-state-cli) - Plugin sync lifecycle responsibilities will be split into type definitions, action builders, plan construction, and execution orchestration while preserving preview-first Codex Plugin cache refresh semantics.
 - AC-A-8: aligned (typescript-agent-state-cli) - Split OpenNori completion/routing decisions from Markdown report rendering while preserving src/core/report.ts as the public compatibility export.
 - AC-A-8: aligned (typescript-agent-state-cli) - Setup lifecycle responsibilities will be split into setup type definitions, action builders, plan construction, and execution orchestration while preserving preview-first bundle setup semantics.
+- AC-P-15: aligned (typescript-agent-state-cli) - Docs/schema tests now protect critical packaged Skill routing metadata and one-AC review reply skeletons while keeping subjective AC quality out of automated tests.
 - AC-A-8: aligned (typescript-agent-state-cli) - Dashboard active snapshot will consume the shared GoalReviewState outcome projection so status, report, context export, and dashboard do not grow separate completion authorities.
 - AC-A-8: aligned (typescript-agent-state-cli) - Snapshot projection now separates builder, outcome, path, and persistence boundaries while keeping MCP and dashboard on the same read-only projection.
 - AC-A-8: aligned (typescript-agent-state-cli) - Split the OpenNori protocol type surface into domain modules while preserving src/types.ts as the compatibility barrel.

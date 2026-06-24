@@ -303,6 +303,9 @@ shows what to reply in the agent conversation. It does not provide confirm,
 reject, waive, or accept buttons, and it does not write Product AC, evidence,
 profile, architecture, or report state. It observes `.opennori/` state; it is
 not an agent runtime, process log, or replacement for `status` and `report`.
+The command prints a local URL and does not open a browser automatically. Use
+`opennori dashboard --root . --open` only when you want the CLI to open the
+default browser.
 
 When the dashboard is being watched and a current goal/gap exists, OpenNori
 Skills publish live activity while working. Users do not need to memorize this
@@ -1061,6 +1064,7 @@ opennori dashboard --root .
 ```
 
 Dashboard 展示当前 agent 活动、目标、验收缺口、是否需要用户介入、架构判断和完成判断。需要用户介入时，它只提示用户应该回到 agent 对话里回复什么；不提供确认、拒绝、豁免或接受报告按钮，也不写入 Product AC、证据、profile、architecture 或 report 状态。它只是 `.opennori/` 状态上的观察面，不是 agent runtime、过程日志，也不能替代 `status` 和 `report`。
+命令只打印本地 URL，不会自动打开浏览器；只有明确需要 CLI 自动打开默认浏览器时，才使用 `opennori dashboard --root . --open`。
 
 OpenNori Skills 可以在工作时发布实时活动信号。用户不需要记住这条命令；当项目只有唯一当前目标/缺口时，CLI 会自动推断 goal/gap。draft contract 不会被观察；如果出现多个 current contract，这是需要 doctor 恢复的损坏状态，不是正常选择题：
 
@@ -1348,7 +1352,7 @@ opennori brainstorm --idea "探索当前业务目标下的架构偏离" --candid
 opennori draft --brief <skill-prepared-brief.json> --root .           # 保存 Skill 准备的标准 Nori 契约草稿
 opennori approve --root . --summary "用户人工同意了当前验收标准"       # 授权同意进入开发阶段
 opennori status --root .                                              # 查看当前活动目标的验收差距与审查状态
-opennori dashboard --root .                                           # 启动本地视觉观察面
+opennori dashboard --root .                                           # 启动本地视觉观察面并打印 URL，不自动打开浏览器
 opennori mcp --root .                                                 # 启动只读 MCP 上下文资源服务
 opennori evidence add --root . --criterion AC-1 --kind review-result --summary "..." --result passing  # 为指定 AC 关联通过证据
 opennori evidence prune --root . --criterion AC-1 --reason "证据过期"  # 修剪已经不再适用当前 AC 的证据项

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
-import { dashboardOutcomeRows } from "../src/dashboard/src/dashboard-view.ts";
+import { dashboardOutcomeRows, visibleRecentEvents } from "../src/dashboard/src/dashboard-view.ts";
 import { buildAcceptanceRadarModel, getNodeColor, getNodePulseClass, getRadarLinkStyle } from "../src/dashboard/src/radar-model.ts";
 import { gapIdFromFocusEvent, profileNodeFromSnapshot, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "../src/dashboard/src/selection.ts";
 import type { NoriSnapshot } from "../src/dashboard/src/types.ts";
@@ -191,6 +191,37 @@ test("dashboard focus events include evidence and architecture changes", { tags:
     summary: "Architecture alignment changed.",
     created_at: "2026-06-20T00:00:01.000Z"
   }), "AC-4");
+});
+
+test("dashboard visible event list hides dashboard start noise", { tags: ["dashboard", "quick"] }, () => {
+  const snapshot = snapshotWithCriteria([]);
+  snapshot.events = [
+    {
+      schema_version: "opennori/event-v1",
+      id: "evt_1",
+      seq: 1,
+      type: "dashboard.started",
+      actor: { kind: "system", name: "OpenNori" },
+      summary: "OpenNori dashboard started.",
+      created_at: "2026-06-20T00:00:00.000Z"
+    },
+    {
+      schema_version: "opennori/event-v1",
+      id: "evt_2",
+      seq: 2,
+      type: "evidence.added",
+      goal_id: "dashboard-goal",
+      gap_id: "AC-3",
+      actor: { kind: "agent", name: "Codex", skill: "nori-evidence" },
+      summary: "Evidence was added.",
+      created_at: "2026-06-20T00:00:01.000Z"
+    }
+  ];
+
+  const events = visibleRecentEvents(snapshot);
+
+  assert.equal(events.length, 1);
+  assert.equal(events[0]?.type, "evidence.added");
 });
 
 test("dashboard profile node syncs Project Profile compliance from snapshots", { tags: ["dashboard", "quick"] }, () => {

@@ -1,0 +1,33 @@
+{
+  "kind": "dashboard-profile-impact-verification",
+  "basis": "tool-observation",
+  "summary": "The Project Profile drawer now explains completion impact directly: no current goal means not evaluated, blocking items block completion until evidence/revision/waiver, review items require user review, and clear profile does not block the current completion decision.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck:dashboard",
+      "command": "npm run typecheck:dashboard"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/inspect/ProfileInspectPanel.tsx",
+      "path": "src/dashboard/src/components/inspect/ProfileInspectPanel.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/OutcomeHud.tsx",
+      "path": "src/dashboard/src/components/OutcomeHud.tsx"
+    }
+  ],
+  "reviewability": "Open the Project Profile drawer from the dashboard header or Project Profile impact card and confirm it explains whether project-level preferences affect the current completion decision.",
+  "limitations": "This verifies the read-only profile impact explanation. It does not add dashboard write actions for profile evidence or waivers.",
+  "gate": "accepted",
+  "created_at": "2026-06-24T05:53:40.603Z"
+}

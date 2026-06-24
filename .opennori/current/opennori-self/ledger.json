@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-24T03:36:35.421Z",
+  "updated_at": "2026-06-24T05:53:40.842Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -8416,9 +8416,62 @@
           "limitations": "This evidence verifies the current OpenNori self dashboard on localhost and keeps the screenshot in ignored local output. It does not test every possible external project profile combination visually.",
           "gate": "accepted",
           "created_at": "2026-06-22T01:08:33.731Z"
+        },
+        {
+          "kind": "dashboard-ux-verification",
+          "basis": "tool-observation",
+          "summary": "Dashboard now leads with a user-facing completion answer, goal, current gap, next action, and Project Profile impact. The radar remains a visual observation aid, supporting detail is secondary, and dashboard.started system events are hidden from the recent activity list so agent activity stays meaningful.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run typecheck:dashboard",
+              "command": "npm run typecheck:dashboard"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/OutcomeHud.tsx",
+              "path": "src/dashboard/src/components/OutcomeHud.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/DashboardHeader.tsx",
+              "path": "src/dashboard/src/components/DashboardHeader.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/EventLogConsole.tsx",
+              "path": "src/dashboard/src/components/EventLogConsole.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/dashboard-view.ts",
+              "path": "src/dashboard/src/dashboard-view.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "test/dashboard-selection.test.ts",
+              "path": "test/dashboard-selection.test.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "dashboard/index.html",
+              "path": "dashboard/index.html"
+            }
+          ],
+          "reviewability": "Run opennori dashboard --root . and open the printed URL in Chrome. Confirm the first screen leads with Goal Outcome Monitor, Completion answer, Current gap, Next, Project Profile impact, and recent agent activity rather than dashboard start noise.",
+          "limitations": "Chrome visual review was performed locally through the Codex Chrome plugin. This evidence does not add pixel regression snapshots or change dashboard state authority.",
+          "gate": "accepted",
+          "created_at": "2026-06-24T05:53:40.372Z"
         }
       ],
-      "updated_at": "2026-06-23T10:40:21.945Z"
+      "updated_at": "2026-06-24T05:53:40.372Z"
     },
     "AC-D-2": {
       "status": "passing",
@@ -8658,8 +8711,77 @@
           "limitations": "This verifies the current local dashboard and package assets. It does not add a browser screenshot for a forced need_user fixture, and future UI work must keep the same observation-only boundary.",
           "gate": "accepted",
           "created_at": "2026-06-16T10:12:26.488Z"
+        },
+        {
+          "kind": "dashboard-control-boundary-verification",
+          "basis": "command-output",
+          "summary": "opennori dashboard now starts the local kernel and prints the URL without opening a browser by default; --open is the only explicit browser-opening path. The dashboard remains observation-only and the user-facing output tells users to open the URL themselves or rerun with --open.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js dashboard --help",
+              "command": "node ./bin/opennori.js dashboard --help"
+            },
+            {
+              "type": "command",
+              "label": "node ./bin/opennori.js dashboard --root . --port 0 --once",
+              "command": "node ./bin/opennori.js dashboard --root . --port 0 --once"
+            },
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npx vitest run test/cli-human-output.test.js --tagsFilter=quick",
+              "command": "npx vitest run test/cli-human-output.test.js --tagsFilter=quick"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/commands/dashboard.ts",
+              "path": "src/cli/commands/dashboard.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/kernel/server.ts",
+              "path": "src/kernel/server.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "src/cli/human-output.ts",
+              "path": "src/cli/human-output.ts"
+            },
+            {
+              "type": "artifact",
+              "label": "README.md",
+              "path": "README.md"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/protocol.md",
+              "path": ".opennori/protocol.md"
+            },
+            {
+              "type": "artifact",
+              "label": "plugins/opennori/skills/nori/SKILL.md",
+              "path": "plugins/opennori/skills/nori/SKILL.md"
+            },
+            {
+              "type": "artifact",
+              "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
+              "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+            }
+          ],
+          "reviewability": "Inspect the dashboard command help and human output. Confirm there is no --no-open option, --open is explicit, and normal dashboard startup prints the URL without opening a browser.",
+          "limitations": "This verifies CLI/kernel open behavior and documentation. It does not prevent users from manually opening the printed URL or explicitly using --open.",
+          "gate": "accepted",
+          "created_at": "2026-06-24T05:53:40.838Z"
         }
-      ]
+      ],
+      "updated_at": "2026-06-24T05:53:40.838Z"
     },
     "AC-Z-21": {
       "status": "passing",
@@ -10134,8 +10256,42 @@
           "limitations": "This verifies the dashboard state model, built assets, and test coverage. It does not include a fresh browser screenshot in this evidence record; visual inspection can still be done by running opennori dashboard locally.",
           "gate": "accepted",
           "created_at": "2026-06-21T13:27:41.043Z"
+        },
+        {
+          "kind": "dashboard-profile-impact-verification",
+          "basis": "tool-observation",
+          "summary": "The Project Profile drawer now explains completion impact directly: no current goal means not evaluated, blocking items block completion until evidence/revision/waiver, review items require user review, and clear profile does not block the current completion decision.",
+          "result": "passing",
+          "confidence": "verified",
+          "sources": [
+            {
+              "type": "command",
+              "label": "npm run test:dashboard",
+              "command": "npm run test:dashboard"
+            },
+            {
+              "type": "command",
+              "label": "npm run typecheck:dashboard",
+              "command": "npm run typecheck:dashboard"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/inspect/ProfileInspectPanel.tsx",
+              "path": "src/dashboard/src/components/inspect/ProfileInspectPanel.tsx"
+            },
+            {
+              "type": "artifact",
+              "label": "src/dashboard/src/components/OutcomeHud.tsx",
+              "path": "src/dashboard/src/components/OutcomeHud.tsx"
+            }
+          ],
+          "reviewability": "Open the Project Profile drawer from the dashboard header or Project Profile impact card and confirm it explains whether project-level preferences affect the current completion decision.",
+          "limitations": "This verifies the read-only profile impact explanation. It does not add dashboard write actions for profile evidence or waivers.",
+          "gate": "accepted",
+          "created_at": "2026-06-24T05:53:40.603Z"
         }
-      ]
+      ],
+      "updated_at": "2026-06-24T05:53:40.603Z"
     },
     "AC-P-14": {
       "status": "passing",

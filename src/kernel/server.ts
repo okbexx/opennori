@@ -63,6 +63,6 @@ export async function startDashboardServer(options: DashboardServerOptions): Pro
     summary: `OpenNori dashboard started at ${url}`,
     data: { url }
   });
-  if (options.open !== false) openBrowser(url);
+  if (options.open === true) openBrowser(url);
   return { url, server };
 }

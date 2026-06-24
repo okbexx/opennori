@@ -1,0 +1,53 @@
+{
+  "kind": "dashboard-ux-verification",
+  "basis": "tool-observation",
+  "summary": "Dashboard now leads with a user-facing completion answer, goal, current gap, next action, and Project Profile impact. The radar remains a visual observation aid, supporting detail is secondary, and dashboard.started system events are hidden from the recent activity list so agent activity stays meaningful.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "command",
+      "label": "npm run test:dashboard",
+      "command": "npm run test:dashboard"
+    },
+    {
+      "type": "command",
+      "label": "npm run typecheck:dashboard",
+      "command": "npm run typecheck:dashboard"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/OutcomeHud.tsx",
+      "path": "src/dashboard/src/components/OutcomeHud.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/DashboardHeader.tsx",
+      "path": "src/dashboard/src/components/DashboardHeader.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/components/EventLogConsole.tsx",
+      "path": "src/dashboard/src/components/EventLogConsole.tsx"
+    },
+    {
+      "type": "artifact",
+      "label": "src/dashboard/src/dashboard-view.ts",
+      "path": "src/dashboard/src/dashboard-view.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "test/dashboard-selection.test.ts",
+      "path": "test/dashboard-selection.test.ts"
+    },
+    {
+      "type": "artifact",
+      "label": "dashboard/index.html",
+      "path": "dashboard/index.html"
+    }
+  ],
+  "reviewability": "Run opennori dashboard --root . and open the printed URL in Chrome. Confirm the first screen leads with Goal Outcome Monitor, Completion answer, Current gap, Next, Project Profile impact, and recent agent activity rather than dashboard start noise.",
+  "limitations": "Chrome visual review was performed locally through the Codex Chrome plugin. This evidence does not add pixel regression snapshots or change dashboard state authority.",
+  "gate": "accepted",
+  "created_at": "2026-06-24T05:53:40.372Z"
+}

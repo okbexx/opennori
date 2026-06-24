@@ -265,7 +265,7 @@ test("dashboard snapshot ignores drafts and follows the unique current goal", { 
 
 test("dashboard command can start the local kernel without opening a browser", { tags: ["cli", "dashboard"] }, async () => {
   const root = tempRoot();
-  const dashboard = await runDashboardCommand(["--root", root, "--port", "0", "--no-open", "--once", "--json"]);
+  const dashboard = await runDashboardCommand(["--root", root, "--port", "0", "--once", "--json"]);
 
   assert.equal(dashboard.ok, true);
   assert.match(dashboard.data.url, /^http:\/\/127\.0\.0\.1:\d+\//);
@@ -334,7 +334,7 @@ test("dashboard serves the built React app and assets", { tags: ["cli", "dashboa
 
   assert.equal(script.status, 200);
   assert.match(script.headers.get("content-type") || "", /text\/javascript/);
-  assert.match(scriptText, /Observation only|Acceptance Radar Net/);
+  assert.match(scriptText, /Observation only|Goal Outcome Monitor/);
   assert.match(scriptText, /reply in agent chat|Agent reply/);
   assert.doesNotMatch(scriptText, /Confirm/);
   assert.doesNotMatch(scriptText, /Waive/);

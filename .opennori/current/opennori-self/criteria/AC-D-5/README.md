@@ -17,26 +17,17 @@ Passing threshold: 右侧 overlay 浮窗展示 Project Profile item 总数、mus
 
 ## Evidence
 
-Latest: dashboard-project-profile-verification - Dashboard now exposes Project Profile as a readonly project-level overlay and evaluates compliance only when a current goal exists. The header button is labeled Inspect Project Profile, the profile node raw data distinguishes project_only from current_goal_compliance, no-current-goal snapshots still include Project Profile but mark compliance not evaluated, and the overlay stays read-only without add/check/evidence/waive/confirm controls.
+Latest: dashboard-profile-impact-verification - The Project Profile drawer now explains completion impact directly: no current goal means not evaluated, blocking items block completion until evidence/revision/waiver, review items require user review, and clear profile does not block the current completion decision.
 Result: passing
 Basis: tool-observation
-Reviewability: Inspect the listed dashboard and kernel files. Confirm the header icon label is Inspect Project Profile, profile rawData scope is project_only when there is no current goal and current_goal_compliance when active, no-current snapshots include Project Profile without marking compliance complete, and the panel exposes no write actions. Rerun dashboard/profile tests and typecheck.
-Limitations: This verifies the dashboard state model, built assets, and test coverage. It does not include a fresh browser screenshot in this evidence record; visual inspection can still be done by running opennori dashboard locally.
+Reviewability: Open the Project Profile drawer from the dashboard header or Project Profile impact card and confirm it explains whether project-level preferences affect the current completion decision.
+Limitations: This verifies the read-only profile impact explanation. It does not add dashboard write actions for profile evidence or waivers.
 
 Sources:
-- .opennori/architecture/evidence/opennori-self-ac-d-5-project-profile-dashboard.json
 - npm run test:dashboard
-- npm run test:profile
-- npx tsc --noEmit --pretty false
-- node ./bin/opennori.js check --root . --json
-- src/kernel/snapshot.ts
-- src/dashboard/src/App.tsx
-- src/dashboard/src/selection.ts
-- src/dashboard/src/components/InspectNodePanel.tsx
-- src/dashboard/src/types.ts
-- test/cli-dashboard.test.js
-- test/dashboard-selection.test.ts
-- dashboard/index.html
+- npm run typecheck:dashboard
+- src/dashboard/src/components/inspect/ProfileInspectPanel.tsx
+- src/dashboard/src/components/OutcomeHud.tsx
 
 ## Files
 

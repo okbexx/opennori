@@ -12,7 +12,7 @@ import {
   findLatestAgentEvent,
   isAgentRunning,
   snapshotRenderKey,
-  sortedRecentEvents
+  visibleRecentEvents
 } from "./dashboard-view";
 import type { RadarNode } from "./types";
 import { gapIdFromFocusEvent, profileNodeFromSnapshot, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "./selection";
@@ -82,7 +82,7 @@ export default function App() {
   }, [snapshot]);
 
   const recentEvents = useMemo(() => {
-    return sortedRecentEvents(snapshot);
+    return visibleRecentEvents(snapshot);
   }, [snapshot]);
   const latestAgentEvent = useMemo(() => {
     return findLatestAgentEvent(recentEvents);

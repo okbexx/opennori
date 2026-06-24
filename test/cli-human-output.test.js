@@ -76,6 +76,7 @@ test("human output summarizes doctor check status report and dashboard", { tags:
   const dashboardText = renderHuman(dashboard, ["dashboard"]);
   assert.match(dashboardText, /OpenNori dashboard running/);
   assert.match(dashboardText, /URL:/);
+  assert.match(dashboardText, /not opened automatically/);
 
   const activity = await runActivityStartCommand([
     "--root", root,

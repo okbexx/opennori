@@ -49,6 +49,13 @@ export function ProfileInspectPanel({ node }: { node: RadarNode }) {
   const statusById = new Map(compliance.statuses.map((row) => [row.id, row]));
   const panelColor = !hasCurrentGoal ? "#94a3b8" : compliance.complete ? "#34d399" : "#fbbf24";
   const complianceLabel = !hasCurrentGoal ? "NOT EVALUATED" : compliance.complete ? "COMPLETE" : "NEEDS REVIEW";
+  const completionImpact = !hasCurrentGoal
+    ? "Project Profile is loaded, but there is no current Nori Contract to evaluate yet."
+    : compliance.blocking.length > 0
+      ? "Project Profile is blocking completion until the agent records satisfaction evidence, revises the work, or the user waives the violation in the agent conversation."
+      : compliance.review.length > 0
+        ? "Project Profile does not hard-block completion yet, but the user should review the listed preference risks before accepting the goal."
+        : "Project Profile does not block the current completion decision.";
 
   return (
     <div className="flex h-full max-h-full min-h-0 select-text flex-col gap-3 overflow-hidden text-left">
@@ -85,10 +92,10 @@ export function ProfileInspectPanel({ node }: { node: RadarNode }) {
         </div>
         <div className="mt-2 rounded border border-slate-900/80 bg-black/20 p-2">
           <span className="block text-[8px] font-mono font-bold uppercase tracking-wider text-slate-500">
-            Scope model
+            Completion impact
           </span>
           <p className="mt-0.5 text-[11px] leading-relaxed text-slate-300">
-            Project Profile is stored once for the project. This panel only evaluates compliance against the current Nori Contract when one exists.
+            {completionImpact}
           </p>
         </div>
       </div>

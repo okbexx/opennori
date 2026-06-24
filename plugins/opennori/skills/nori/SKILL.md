@@ -110,7 +110,7 @@ routing begin until final approval happens after every AC is confirmed.
 - `agent_next.state: architecture_requirement_needs_decision` -> decide whether the current goal is simple enough to record `not_required`, non-trivial enough to record `required`, or explicitly waived by the user. Record the decision with a reason before implementation.
 - "Before self-building this parser/installer/schema/storage/UI primitive" -> hand off to `nori-build-vs-buy`.
 - "Install", "upgrade", "uninstall", "doctor", "state is broken", "sync local OpenNori plugin", or "Codex Plugin cache is stale" -> hand off to `nori-project-health`.
-- "Show me the dashboard", "watch OpenNori run", "I want live status" -> run or suggest `opennori dashboard --root <repo>` and keep completion judgment plus user confirmations in conversation and status/report.
+- "Show me the dashboard", "watch OpenNori run", "I want live status" -> run or suggest `opennori dashboard --root <repo>`, give the user the printed URL, and keep completion judgment plus user confirmations in conversation and status/report. Add `--open` only if the user explicitly wants the CLI to open a browser.
 - "Expose OpenNori through MCP", "MCP context", "review tool needs OpenNori state", or "agent client wants OpenNori resources" -> use or suggest `opennori mcp --root <repo>` as a read-only context server. Do not add write tools or use MCP to approve AC, record evidence, confirm architecture, waive risks, or accept reports.
 - A complete goal with `agent_next.state: ready_for_next_loop` and a user asking to continue -> infer or ask for the next human-facing outcome, then hand off to `nori-acceptance` to prepare a standard NoriBrief. Do not expect the CLI to invent product candidate goals.
 

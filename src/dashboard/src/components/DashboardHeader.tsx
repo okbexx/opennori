@@ -26,10 +26,10 @@ export function DashboardHeader({
           <div className="flex items-center gap-2">
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">OpenNori Dashboard</p>
             <span className={`inline-block h-1.5 w-1.5 rounded-full bg-[#34d399] ${agentRunning ? "animate-ping" : ""}`} />
-            <span className="text-[8px] font-mono text-slate-500 tracking-wider">OBS.NODE_CONNECTED</span>
+            <span className="text-[8px] font-mono text-slate-500 tracking-wider">READONLY LOCAL VIEW</span>
           </div>
           <h1 className="text-xl font-black tracking-wide bg-gradient-to-r from-[#00f0ff] to-[#bd93f9] bg-clip-text text-transparent filter drop-shadow-[0_0_8px_rgba(0,240,255,0.15)] sm:text-2xl">
-            Acceptance Radar Net
+            Goal Outcome Monitor
           </h1>
         </div>
       </div>
