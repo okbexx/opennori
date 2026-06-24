@@ -17,6 +17,7 @@ const EXPECTED_SKILL_NAMES = [
   "nori-build-vs-buy",
   "nori-capability-profile",
   "nori-evidence",
+  "nori-loop-engineer",
   "nori-project-health",
   "nori-reporting"
 ];
@@ -61,6 +62,7 @@ test("Codex Plugin manifest exposes OpenNori Skills for agent discovery", { tags
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /autogoal/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /AC we just discussed/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /acceptance criteria/.test(prompt)), true);
+  assert.equal(plugin.interface.defaultPrompt.some((prompt) => /Loop Engineer/i.test(prompt)), true);
   assert.equal(plugin.interface.defaultPrompt.some((prompt) => /dashboard.*live agent activity/i.test(prompt)), true);
   assert.equal(marketplace.name, "opennori");
   assert.equal(marketplace.interface.displayName, "OpenNori");
@@ -126,7 +128,14 @@ test("critical OpenNori Skill routing surfaces remain discoverable from metadata
       /autogoal/i,
       /MCP context/i,
       /UI\/CRUD\/dashboard\/list\/form\/settings\/admin/,
-      /operation paths/i
+      /operation paths/i,
+      /Loop Engineer/i
+    ],
+    "nori-loop-engineer": [
+      /acceptance loop/i,
+      /what is next/i,
+      /run to completion/i,
+      /agent_next/i
     ],
     "nori-acceptance": [
       /human-centered OpenNori acceptance criteria/i,

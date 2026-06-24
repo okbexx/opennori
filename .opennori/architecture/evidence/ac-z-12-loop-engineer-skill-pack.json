@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "ac-z-12-loop-engineer-skill-pack",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-Z-12",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Loop Engineer is added as a packaged Skill inside the confirmed Plugin-first, Skill-driven, CLI-state-backed architecture.",
+  "fit": "The new nori-loop-engineer Skill lives under plugins/opennori/skills, is exposed through the Codex Plugin manifest, and coordinates existing Skills through agent_next instead of adding a second state layer or CLI command.",
+  "implementation_focus": "Packaged Skill Pack routing and discovery for continuation behavior.",
+  "evidence": "plugins/opennori/skills/nori-loop-engineer/SKILL.md; plugins/opennori/skills/nori/SKILL.md; plugins/opennori/.codex-plugin/plugin.json; test/docs-schema.test.js; npm run test:docs",
+  "limitations": "This alignment proves package asset structure and behavior protocol text; real user effectiveness still depends on Codex loading the updated Plugin Skills in a new session.",
+  "created_at": "2026-06-24T03:36:01.942Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

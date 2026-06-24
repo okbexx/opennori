@@ -1,0 +1,45 @@
+{
+  "kind": "review-result",
+  "basis": "protocol-check",
+  "summary": "Loop Engineer is now part of the packaged OpenNori Skill Pack and Codex Plugin discovery surface.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "ac-z-12-loop-engineer-skill-pack",
+      "path": ".opennori/architecture/evidence/ac-z-12-loop-engineer-skill-pack.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run test:docs",
+      "command": "npm run test:docs"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-loop-engineer/SKILL.md",
+      "path": "plugins/opennori/skills/nori-loop-engineer/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/.codex-plugin/plugin.json",
+      "path": "plugins/opennori/.codex-plugin/plugin.json"
+    },
+    {
+      "type": "artifact",
+      "label": "test/docs-schema.test.js",
+      "path": "test/docs-schema.test.js"
+    }
+  ],
+  "reviewability": "Inspect the referenced Skill and Plugin files, rerun npm run test:docs, and verify the docs-schema expected Skill list includes nori-loop-engineer.",
+  "limitations": "This verifies package assets and discovery metadata in the source checkout; Codex must refresh the Plugin cache and start a new session before the new Skill is loaded locally.",
+  "gate": "accepted",
+  "created_at": "2026-06-24T03:36:23.373Z"
+}

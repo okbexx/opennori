@@ -1,0 +1,19 @@
+{
+  "schema_version": "opennori/architecture-apply-v1",
+  "id": "ac-z-14-loop-engineer-continuation",
+  "goal_id": "opennori-self",
+  "criterion_id": "AC-Z-14",
+  "status": "aligned",
+  "baseline": {
+    "profile": "typescript-agent-state-cli",
+    "profile_title": "TypeScript Agent State CLI",
+    "accepted_at": "2026-06-23T06:28:29.131Z"
+  },
+  "summary": "Loop Engineer continuation stays inside the accepted OpenNori architecture by using agent_next as the deterministic route surface and focused Skills as behavior handlers.",
+  "fit": "The capability adds a packaged Skill protocol, not a new CLI command, plan mode, dashboard write surface, MCP writer, or state authority. It routes one acceptance loop and stops at user decision boundaries.",
+  "implementation_focus": "Continuation behavior for current gaps and ready-for-next-loop states.",
+  "evidence": "plugins/opennori/skills/nori-loop-engineer/SKILL.md; plugins/opennori/skills/nori/SKILL.md; README.md; .opennori/protocol.md; AGENTS.md; npm run test:docs",
+  "limitations": "This alignment proves the intended packaged Skill boundary and documentation; it does not guarantee every future agent will make perfect product judgments without user review.",
+  "created_at": "2026-06-24T03:36:02.036Z",
+  "next": "Use this apply record as architecture context when recording Product AC evidence."
+}

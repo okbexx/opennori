@@ -1,0 +1,55 @@
+{
+  "kind": "review-result",
+  "basis": "protocol-check",
+  "summary": "OpenNori continuation is now routed through nori-loop-engineer: the root router maps keep-going requests to a one-loop coordinator that reads agent_next, invokes focused Skills, and stops at user decision boundaries.",
+  "result": "passing",
+  "confidence": "verified",
+  "sources": [
+    {
+      "type": "architecture-apply",
+      "label": "ac-z-14-loop-engineer-continuation",
+      "path": ".opennori/architecture/evidence/ac-z-14-loop-engineer-continuation.json",
+      "role": "context",
+      "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
+    },
+    {
+      "type": "command",
+      "label": "npm run test:docs",
+      "command": "npm run test:docs"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori-loop-engineer/SKILL.md",
+      "path": "plugins/opennori/skills/nori-loop-engineer/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "plugins/opennori/skills/nori/SKILL.md",
+      "path": "plugins/opennori/skills/nori/SKILL.md"
+    },
+    {
+      "type": "artifact",
+      "label": "README.md",
+      "path": "README.md"
+    },
+    {
+      "type": "artifact",
+      "label": ".opennori/protocol.md",
+      "path": ".opennori/protocol.md"
+    },
+    {
+      "type": "artifact",
+      "label": "AGENTS.md",
+      "path": "AGENTS.md"
+    },
+    {
+      "type": "artifact",
+      "label": "test/docs-schema.test.js",
+      "path": "test/docs-schema.test.js"
+    }
+  ],
+  "reviewability": "Inspect nori-loop-engineer/SKILL.md for the reply shape and misuse guards, inspect nori/SKILL.md for natural-language routing, inspect README/protocol/AGENTS for user-visible boundaries, and rerun npm run test:docs.",
+  "limitations": "This proves Loop Engineer behavior is encoded in packaged Skills and docs; actual live continuation still depends on the user agent loading the updated Plugin cache and applying the Skill in a fresh session.",
+  "gate": "accepted",
+  "created_at": "2026-06-24T03:36:35.416Z"
+}

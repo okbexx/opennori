@@ -36,6 +36,15 @@ Skill description.
 
 For agent routing, prefer CLI JSON `data.agent_next` over project-local prose files. `.opennori/agent-guide.md` may summarize project state, but it is not OpenNori's discovery mechanism and must not carry critical Skill behavior.
 
+When the user says "continue OpenNori", "keep going", "what is next",
+"不要让我每次问下一步", or asks for Loop Engineer behavior, route through
+`nori-loop-engineer`. It reads `opennori resume/status`, follows
+`data.agent_next`, invokes the correct focused Skill, advances one acceptance
+loop, and replies with Goal, Current gap, Loop type, Action taken, Evidence,
+Decision, Need user, and Next. It is not a plan mode, task runner, CLI command,
+or completion bypass. It must stop at AC approval, architecture confirmation,
+waiver, install confirmation, report acceptance, or any user decision boundary.
+
 OpenNori CLI output must distinguish humans from agents: TTY usage without
 `--json` should show short summaries for lifecycle, health, status, report,
 dashboard, and plugin sync commands; `--json` and non-interactive use keep the

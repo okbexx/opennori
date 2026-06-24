@@ -1,6 +1,6 @@
 ---
 name: nori
-description: "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, says profile or architecture profile content is in the wrong language, asks for project health, wants architecture decided first, asks about MCP context, says UI/CRUD/dashboard/list/form/settings/admin AC are too broad or missing operation paths, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, MCP read-only context, and .opennori state as coupled parts of one product."
+description: "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, says profile or architecture profile content is in the wrong language, asks for project health, wants architecture decided first, asks about MCP context, says UI/CRUD/dashboard/list/form/settings/admin AC are too broad or missing operation paths, asks the agent to keep going without asking 下一步, wants Loop Engineer behavior, or expects OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, MCP read-only context, and .opennori state as coupled parts of one product."
 ---
 
 ## Mission
@@ -78,7 +78,7 @@ routing begin until final approval happens after every AC is confirmed.
    - `architecture_needs_review` -> follow `recommended_skill` (`nori-architecture-brainstorm`, `nori-architecture-challenge`, or `nori-build-vs-buy`) before non-trivial implementation continues.
    - `work_on_current_gap` -> work only on the current acceptance gap and hand off to `nori-evidence` after verification.
    - `completion_needs_review`, `evidence_needs_review`, or `acceptance_needs_user` -> use reporting/evidence/acceptance as directed and involve the user when `needs_user` is true.
-   - `ready_for_next_loop` -> if the user asked to continue, hand off to `nori-acceptance` so the Skill can prepare the next human-facing NoriBrief from context and user intent.
+   - `ready_for_next_loop` -> if the user asked to continue, hand off to `nori-loop-engineer`; it will prepare the next human-facing NoriBrief through `nori-acceptance` from context and user intent.
 4. If the project is already initialized but the command did not expose `agent_next`, run `opennori list --root <repo> --json`, then `opennori resume --root <repo> --json` or `opennori status --root <repo> --json`.
 5. If `.opennori/current` contains multiple goals, treat it as broken state and route to `nori-project-health`; do not ask the user to choose among multiple current goals.
 6. If doctor reports missing Plugin discovery, packaged Skills, CLI access, manifest, or project state, route to `nori-project-health`.
@@ -102,7 +102,7 @@ routing begin until final approval happens after every AC is confirmed.
 - "profile 为什么是英文", "Profile 内容应该中文", "architecture profile language is wrong", or a Chinese prompt produced English profile content -> route to `nori-capability-profile` for Project Profile items or `nori-architecture-brainstorm` for project Architecture Profiles. The CLI should not auto-translate old assets; the agent should revise or recreate the user-readable profile content in the current `presentation.language` or explicit user language.
 - "把现有契约改成中文/英文" -> hand off to `nori-acceptance`; changing an approved/current Contract language requires explicit user approval and must not happen as an automatic status/report side effect.
 - If the user already stated the goal before initialization, do not ask them to repeat it after `opennori init`; continue acceptance discovery for that stated goal.
-- "Continue OpenNori", "what is next", "what is the current gap" -> run resume/status, then hand off to `nori-reporting` unless the next action clearly requires another child Skill.
+- "Continue OpenNori", "keep going", "what is next", "what is the current gap", "不要让我每次问下一步", "继续推进", or "Loop Engineer" -> hand off to `nori-loop-engineer`; it reads resume/status, classifies the current gap, invokes the correct focused Skill, advances one acceptance loop, and returns Goal / Current gap / Loop type / Action taken / Evidence / Decision / Need user / Next.
 - "Is it complete", "can I accept this", "what do I need to do" -> use `nori-reporting` and answer from required AC, evidence, profile, architecture, and review risks.
 - "Record this verification", "use this screenshot/report/test as evidence", "that evidence is stale", "waive this" -> hand off to `nori-evidence`.
 - "Must use this Skill", "prefer Radix UI", "avoid this tool", "ask before installing" -> hand off to `nori-capability-profile`.
@@ -165,7 +165,8 @@ Then include only the minimum context needed for the user to approve, revise, pr
 - Do not silently translate current or approved contracts; language changes to existing contracts require explicit revision and approval.
 - Do not split OpenNori into separate Plugin, Skill, and CLI user paths; they are one capability bundle.
 - Do not continue a half-installed mode when Plugin discovery, packaged Skills, CLI access, or `.opennori` state is missing; route to project health and recover the missing piece.
-- Do not expect OpenNori CLI to generate candidate product goals. Next-loop goal selection is a Skill/user judgment that becomes a standard draft through `opennori draft --brief`.
+- Do not expect OpenNori CLI to generate candidate product goals. Next-loop goal selection is a Skill/user judgment that `nori-loop-engineer` routes through `nori-acceptance` and stores as a standard draft through `opennori draft --brief`.
+- Do not let Loop Engineer become a plan mode, task runner, or completion bypass. It advances one OpenNori acceptance loop from `agent_next`, then reports the current decision and next user-visible action.
 - Do not answer confidently complete while required AC evidence, blocking profile items, architecture challenges, evidence health, or acceptance review risks remain unresolved or unaccepted.
 - Do not outsource AC quality judgment to CLI heuristics. The agent must inspect AC wording and ask the user the missing acceptance questions when the human judgment surface is vague.
 - Do not ask for blind approval of a draft. The agent must run the one-AC-at-a-time AC Review Loop and revise any mismatch before approval.

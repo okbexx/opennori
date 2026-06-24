@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "OpenNori",
     "shortDescription": "Agent capability bundle for acceptance contracts and evidence.",
-    "longDescription": "OpenNori is a single agent capability bundle: npx opennori setup installs Plugin discovery, packaged Skills, the global opennori CLI, project .opennori state, and doctor checks with preview and confirmation. The Codex Plugin distributes packaged Skills, the Skills turn natural-language goals into human-centered acceptance contracts, require Acceptance Surface Modeling for visible UI/CRUD/dashboard/list/form/settings/admin workflows, require AC Interpretation Review before draft approval, produce architecture baselines, evidence, health checks, and reports, and the opennori CLI acts as the deterministic state layer for .opennori. The dashboard is observation-only: it may show live activity and needed user replies, but confirmations stay in the agent conversation and are recorded through CLI state. Do not treat Plugin, Skills, and CLI as separate user paths.",
+    "longDescription": "OpenNori is a single agent capability bundle: npx opennori setup installs Plugin discovery, packaged Skills, the global opennori CLI, project .opennori state, and doctor checks with preview and confirmation. The Codex Plugin distributes packaged Skills, the Skills turn natural-language goals into human-centered acceptance contracts, require Acceptance Surface Modeling for visible UI/CRUD/dashboard/list/form/settings/admin workflows, require AC Interpretation Review before draft approval, coordinate Loop Engineer continuation from agent_next, produce architecture baselines, evidence, health checks, and reports, and the opennori CLI acts as the deterministic state layer for .opennori. The dashboard is observation-only: it may show live activity and needed user replies, but confirmations stay in the agent conversation and are recorded through CLI state. Do not treat Plugin, Skills, and CLI as separate user paths.",
     "developerName": "okbexx",
     "category": "Productivity",
     "capabilities": [
@@ -38,6 +38,7 @@
       "Use OpenNori to take over the AC we just discussed.",
       "Use OpenNori to turn this goal into acceptance criteria.",
       "Continue the current OpenNori goal.",
+      "Use OpenNori Loop Engineer to keep advancing the current gap without asking me what is next.",
       "Is this OpenNori goal complete yet?",
       "Open the OpenNori dashboard and show live agent activity."
     ],

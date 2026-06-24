@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 7,
-  "latest_evidence_summary": "OpenNori report and context export now include data.agent_next alongside next_recommendation, so Skills and review tools can use the same deterministic routing surface instead of inferring next actions from report context.",
-  "updated_at": "2026-06-23T10:40:21.942Z"
+  "evidence_count": 1,
+  "latest_evidence_summary": "Loop Engineer is now part of the packaged OpenNori Skill Pack and Codex Plugin discovery surface.",
+  "updated_at": "2026-06-24T03:36:23.373Z"
 }

@@ -2,7 +2,7 @@
   "protocol_version": "opennori/v1",
   "goal_id": "opennori-self",
   "status": "complete",
-  "updated_at": "2026-06-23T11:58:37.589Z",
+  "updated_at": "2026-06-24T03:36:35.421Z",
   "criteria": {
     "AC-P-1": {
       "status": "passing",
@@ -2707,29 +2707,31 @@
         {
           "kind": "review-result",
           "basis": "protocol-check",
-          "summary": "OpenNori packaged Skills were redesigned from command lists into agent behavior protocols. All 10 Skill files now include trigger-oriented descriptions plus Mission, Start Here, Natural-Language Mapping, State Writes, Handoffs, User Reply Shape, and Misuse Guards; README, protocol, plugin metadata, website copy, and tests now describe and enforce this boundary.",
+          "summary": "Loop Engineer is now part of the packaged OpenNori Skill Pack and Codex Plugin discovery surface.",
           "result": "passing",
-          "confidence": "high",
+          "confidence": "verified",
           "sources": [
             {
-              "type": "command",
-              "label": "npm run check",
-              "command": "npm run check"
+              "type": "architecture-apply",
+              "label": "ac-z-12-loop-engineer-skill-pack",
+              "path": ".opennori/architecture/evidence/ac-z-12-loop-engineer-skill-pack.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
             },
             {
               "type": "command",
-              "label": "node ./bin/opennori.js doctor --root . --json",
-              "command": "node ./bin/opennori.js doctor --root . --json"
-            },
-            {
-              "type": "command",
-              "label": "rg -c '^## (Mission|Start Here|Natural-Language Mapping|State Writes|Handoffs|User Reply Shape|Misuse Guards)$' plugins/opennori/skills/*/SKILL.md",
-              "command": "rg -c '^## (Mission|Start Here|Natural-Language Mapping|State Writes|Handoffs|User Reply Shape|Misuse Guards)$' plugins/opennori/skills/*/SKILL.md"
+              "label": "npm run test:docs",
+              "command": "npm run test:docs"
             },
             {
               "type": "artifact",
-              "label": "plugins/opennori/skills",
-              "path": "plugins/opennori/skills"
+              "label": "plugins/opennori/skills/nori-loop-engineer/SKILL.md",
+              "path": "plugins/opennori/skills/nori-loop-engineer/SKILL.md"
+            },
+            {
+              "type": "artifact",
+              "label": "plugins/opennori/skills/nori/SKILL.md",
+              "path": "plugins/opennori/skills/nori/SKILL.md"
             },
             {
               "type": "artifact",
@@ -2738,300 +2740,17 @@
             },
             {
               "type": "artifact",
-              "label": "test/core.test.js",
-              "path": "test/core.test.js"
-            },
-            {
-              "type": "artifact",
-              "label": "README.md",
-              "path": "README.md"
-            },
-            {
-              "type": "artifact",
-              "label": ".opennori/protocol.md",
-              "path": ".opennori/protocol.md"
-            },
-            {
-              "type": "artifact",
-              "label": "../opennori-site/src/pages/index.astro",
-              "path": "../opennori-site/src/pages/index.astro"
+              "label": "test/docs-schema.test.js",
+              "path": "test/docs-schema.test.js"
             }
           ],
-          "reviewability": "Inspect the packaged Skill files to verify the behavior-protocol sections and natural-language routing; inspect test/core.test.js for regression assertions; rerun npm run check, doctor, and the rg section-count command to confirm packaged Plugin Skill health.",
-          "limitations": "This validates packaged Skill content, local package health, and website/README copy. A newly opened Codex session is still the correct way to observe live plugin-trigger behavior after installation.",
+          "reviewability": "Inspect the referenced Skill and Plugin files, rerun npm run test:docs, and verify the docs-schema expected Skill list includes nori-loop-engineer.",
+          "limitations": "This verifies package assets and discovery metadata in the source checkout; Codex must refresh the Plugin cache and start a new session before the new Skill is loaded locally.",
           "gate": "accepted",
-          "created_at": "2026-06-14T07:50:48.355Z"
-        },
-        {
-          "kind": "agent-routing-contract",
-          "basis": "tool-observation",
-          "summary": "OpenNori CLI now exposes data.agent_next for init/bootstrap/doctor/check/next/resume/status so packaged Skills route from deterministic state instead of guessing from .opennori/agent-guide.md. Package nori, nori-project-health, and nori-acceptance Skills now prefer agent_next and treat fresh initialized empty state as no active Nori Contract, not broken state.",
-          "result": "passing",
-          "confidence": "verified",
-          "sources": [
-            {
-              "type": "command",
-              "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
-              "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
-            },
-            {
-              "type": "command",
-              "label": "node ./bin/opennori.js init --root <temp> --confirm --json && node ./bin/opennori.js doctor --root <temp> --json",
-              "command": "node ./bin/opennori.js init --root <temp> --confirm --json && node ./bin/opennori.js doctor --root <temp> --json"
-            },
-            {
-              "type": "artifact",
-              "label": "src/agent-next.ts",
-              "path": "src/agent-next.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "src/lifecycle/bootstrap.ts",
-              "path": "src/lifecycle/bootstrap.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "src/lifecycle/doctor.ts",
-              "path": "src/lifecycle/doctor.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "src/cli/commands/acceptance/runtime-status.ts",
-              "path": "src/cli/commands/acceptance/runtime-status.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "src/cli/commands/check.ts",
-              "path": "src/cli/commands/check.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori/SKILL.md",
-              "path": "plugins/opennori/skills/nori/SKILL.md"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
-              "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
-              "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
-            }
-          ],
-          "reviewability": "Inspect agent_next payloads in the listed CLI outputs and Skill routing language; rerun the Vitest command and temporary-project init/doctor smoke.",
-          "limitations": "This verifies CLI-to-Skill routing in source and local CLI output; published package users need a new release/plugin install to receive the updated Skills.",
-          "gate": "accepted",
-          "created_at": "2026-06-15T06:40:09.040Z"
-        },
-        {
-          "kind": "skill-routing-review",
-          "basis": "tool-observation",
-          "summary": "The project-health Skill now consumes agent_next.safe_next_command for fresh projects, runs the safe preview before asking for confirmation, and forbids pasting raw doctor/setup/init JSON or repeated recovery_actions to users. This keeps natural-language OpenNori use routed through Skills while CLI JSON remains the agent state layer.",
-          "result": "passing",
-          "confidence": "verified",
-          "sources": [
-            {
-              "type": "command",
-              "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
-              "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
-            },
-            {
-              "type": "command",
-              "label": "npm run check",
-              "command": "npm run check"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori-project-health/SKILL.md",
-              "path": "plugins/opennori/skills/nori-project-health/SKILL.md"
-            },
-            {
-              "type": "artifact",
-              "label": "src/agent-next.ts",
-              "path": "src/agent-next.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "test/core.test.js",
-              "path": "test/core.test.js"
-            }
-          ],
-          "reviewability": "Inspect the Skill reply-shape and misuse guards, then rerun the targeted tests checking safe_next_command and package Skill asset text.",
-          "limitations": "This covers project-health handoff behavior; broader AC discovery remains the next dogfood step.",
-          "gate": "accepted",
-          "created_at": "2026-06-15T07:50:36.655Z"
-        },
-        {
-          "kind": "post-init-routing-review",
-          "basis": "tool-observation",
-          "summary": "After confirmed initialization in a fresh project, agent_next now routes initialized_no_active_contract to nori-acceptance with instructions to reuse the user's already stated goal when present, ask only if the goal is missing, and run acceptance discovery before implementation. Packaged nori and nori-acceptance Skills carry the same behavior so users are not asked to repeat a goal they already provided.",
-          "result": "passing",
-          "confidence": "verified",
-          "sources": [
-            {
-              "type": "command",
-              "label": "tmp=$(mktemp -d /tmp/opennori-step2-fix-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json",
-              "command": "tmp=$(mktemp -d /tmp/opennori-step2-fix-XXXXXX); node ./bin/opennori.js init --root \"$tmp\" --confirm --json; node ./bin/opennori.js doctor --root \"$tmp\" --json"
-            },
-            {
-              "type": "command",
-              "label": "npx vitest run test/cli-commands.test.js test/core.test.js",
-              "command": "npx vitest run test/cli-commands.test.js test/core.test.js"
-            },
-            {
-              "type": "command",
-              "label": "npm run check",
-              "command": "npm run check"
-            },
-            {
-              "type": "artifact",
-              "label": "src/agent-next.ts",
-              "path": "src/agent-next.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori/SKILL.md",
-              "path": "plugins/opennori/skills/nori/SKILL.md"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
-              "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
-            },
-            {
-              "type": "artifact",
-              "label": "test/core.test.js",
-              "path": "test/core.test.js"
-            }
-          ],
-          "reviewability": "Rerun the temporary-project init/doctor smoke and inspect agent_next.instruction plus packaged Skill text for the already-stated-goal rule.",
-          "limitations": "This proves routing semantics after project initialization; the next dogfood step should evaluate the actual acceptance discovery questions and draft quality.",
-          "gate": "accepted",
-          "created_at": "2026-06-15T08:02:36.902Z"
-        },
-        {
-          "kind": "review-result",
-          "basis": "tool-observation",
-          "summary": "OpenNori acceptance Skill now has a deterministic discovery-answers path: the agent can turn user answers into a gap-id keyed answers file, run draft --from-discovery, and produce concrete user-facing Product AC without asking the user to memorize CLI parameters or approving generic draft criteria.",
-          "result": "passing",
-          "confidence": "verified",
-          "sources": [
-            {
-              "type": "command",
-              "label": "npx vitest run test/core.test.js test/cli-commands.test.js",
-              "command": "npx vitest run test/core.test.js test/cli-commands.test.js"
-            },
-            {
-              "type": "command",
-              "label": "npm run check",
-              "command": "npm run check"
-            },
-            {
-              "type": "command",
-              "label": "discover -> answers -> draft --from-discovery -> check smoke",
-              "command": "discover -> answers -> draft --from-discovery -> check smoke"
-            },
-            {
-              "type": "artifact",
-              "label": "src/acceptance.ts",
-              "path": "src/acceptance.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "src/cli/commands/acceptance/draft.ts",
-              "path": "src/cli/commands/acceptance/draft.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
-              "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
-            },
-            {
-              "type": "artifact",
-              "label": "test/core.test.js",
-              "path": "test/core.test.js"
-            }
-          ],
-          "reviewability": "Run the listed tests and smoke path; check acceptance_review is clear while acceptance_basis remains draft until user approval.",
-          "limitations": "The conversion is a focused OpenNori acceptance-domain mapper for common discovery gaps, not a general natural-language form engine.",
-          "gate": "accepted",
-          "created_at": "2026-06-15T09:15:21.817Z"
-        },
-        {
-          "kind": "review-result",
-          "basis": "tool-observation",
-          "summary": "OpenNori approve now returns next_recommendation and agent_next immediately after user AC approval. In the real settings-page smoke, approved concrete Product AC routed to architecture_needs_review with nori-architecture-brainstorm before implementation/evidence work, so the agent does not need an extra resume step or guess the next phase.",
-          "result": "passing",
-          "confidence": "verified",
-          "sources": [
-            {
-              "type": "command",
-              "label": "npx vitest run test/cli-commands.test.js -t 'approve command module'",
-              "command": "npx vitest run test/cli-commands.test.js -t 'approve command module'"
-            },
-            {
-              "type": "command",
-              "label": "approve smoke: discover -> draft --from-discovery -> approve returns architecture_needs_review",
-              "command": "approve smoke: discover -> draft --from-discovery -> approve returns architecture_needs_review"
-            },
-            {
-              "type": "artifact",
-              "label": "src/cli/commands/acceptance/approval.ts",
-              "path": "src/cli/commands/acceptance/approval.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
-              "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
-            }
-          ],
-          "reviewability": "Run the targeted approve tests and the smoke flow; inspect approve JSON for data.agent_next.state=architecture_needs_review.",
-          "limitations": "This verifies immediate post-approval routing; actual baseline quality is handled by nori-architecture-brainstorm and user confirmation.",
-          "gate": "accepted",
-          "created_at": "2026-06-15T09:25:18.332Z"
-        },
-        {
-          "kind": "review-result",
-          "basis": "tool-observation",
-          "summary": "OpenNori report and context export now include data.agent_next alongside next_recommendation, so Skills and review tools can use the same deterministic routing surface instead of inferring next actions from report context.",
-          "result": "passing",
-          "confidence": "verified",
-          "sources": [
-            {
-              "type": "command",
-              "label": "npm run typecheck",
-              "command": "npm run typecheck"
-            },
-            {
-              "type": "command",
-              "label": "npm test -- --run test/cli-commands.test.js test/core.test.js",
-              "command": "npm test -- --run test/cli-commands.test.js test/core.test.js"
-            },
-            {
-              "type": "artifact",
-              "label": "src/cli/commands/reporting.ts",
-              "path": "src/cli/commands/reporting.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "src/lifecycle/context-export.ts",
-              "path": "src/lifecycle/context-export.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "test/core.test.js",
-              "path": "test/core.test.js"
-            }
-          ],
-          "reviewability": "Rerun the listed checks, then inspect opennori report --json and context export --json for data.agent_next matching the current completion route.",
-          "limitations": "This aligns JSON routing surfaces; external tools must still decide how to display or use agent_next without taking over Codex.",
-          "gate": "accepted",
-          "created_at": "2026-06-15T12:22:55.433Z"
+          "created_at": "2026-06-24T03:36:23.373Z"
         }
       ],
-      "updated_at": "2026-06-23T10:40:21.942Z"
+      "updated_at": "2026-06-24T03:36:23.373Z"
     },
     "AC-Z-13": {
       "status": "passing",
@@ -3125,40 +2844,27 @@
       "evidence": [
         {
           "kind": "review-result",
-          "basis": "tool-observation",
-          "summary": "Complete OpenNori goals now expose next_recommendation.candidate_goals in resume/status/next/report/context export. Candidate goals include goal, user_value, acceptance_directions, risks, and source; reports render them as starts for the next Nori Contract, not phases, task lists, approved AC, or evidence.",
+          "basis": "protocol-check",
+          "summary": "OpenNori continuation is now routed through nori-loop-engineer: the root router maps keep-going requests to a one-loop coordinator that reads agent_next, invokes focused Skills, and stops at user decision boundaries.",
           "result": "passing",
           "confidence": "verified",
           "sources": [
             {
-              "type": "command",
-              "label": "npm run check",
-              "command": "npm run check"
+              "type": "architecture-apply",
+              "label": "ac-z-14-loop-engineer-continuation",
+              "path": ".opennori/architecture/evidence/ac-z-14-loop-engineer-continuation.json",
+              "role": "context",
+              "summary": "Architecture Baseline alignment context. This is not Product AC evidence by itself."
             },
             {
               "type": "command",
-              "label": "npx vitest run test/cli-commands.test.js -t 'next command module returns|next-loop candidates'",
-              "command": "npx vitest run test/cli-commands.test.js -t 'next command module returns|next-loop candidates'"
-            },
-            {
-              "type": "command",
-              "label": "node ./bin/opennori.js resume --root . --goal opennori-self --json",
-              "command": "node ./bin/opennori.js resume --root . --goal opennori-self --json"
+              "label": "npm run test:docs",
+              "command": "npm run test:docs"
             },
             {
               "type": "artifact",
-              "label": "src/core/report.ts",
-              "path": "src/core/report.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "src/cli/commands/acceptance/runtime-status.ts",
-              "path": "src/cli/commands/acceptance/runtime-status.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "test/core.test.js",
-              "path": "test/core.test.js"
+              "label": "plugins/opennori/skills/nori-loop-engineer/SKILL.md",
+              "path": "plugins/opennori/skills/nori-loop-engineer/SKILL.md"
             },
             {
               "type": "artifact",
@@ -3167,156 +2873,32 @@
             },
             {
               "type": "artifact",
-              "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
-              "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
+              "label": "README.md",
+              "path": "README.md"
+            },
+            {
+              "type": "artifact",
+              "label": ".opennori/protocol.md",
+              "path": ".opennori/protocol.md"
+            },
+            {
+              "type": "artifact",
+              "label": "AGENTS.md",
+              "path": "AGENTS.md"
+            },
+            {
+              "type": "artifact",
+              "label": "test/docs-schema.test.js",
+              "path": "test/docs-schema.test.js"
             }
           ],
-          "reviewability": "Run npm run check, then run resume/status/next/report/context export on a complete goal and inspect next_recommendation.candidate_goals plus the Candidate Next Goals report section.",
-          "limitations": "Candidates are heuristic suggestions for the next Nori Contract; the agent or user must still choose or refine one and run acceptance discovery or draft before it becomes an approved contract.",
+          "reviewability": "Inspect nori-loop-engineer/SKILL.md for the reply shape and misuse guards, inspect nori/SKILL.md for natural-language routing, inspect README/protocol/AGENTS for user-visible boundaries, and rerun npm run test:docs.",
+          "limitations": "This proves Loop Engineer behavior is encoded in packaged Skills and docs; actual live continuation still depends on the user agent loading the updated Plugin cache and applying the Skill in a fresh session.",
           "gate": "accepted",
-          "created_at": "2026-06-14T02:01:34.843Z"
-        },
-        {
-          "kind": "review-result",
-          "basis": "tool-observation",
-          "summary": "Completed-goal candidate goals are now actionable draft sources: opennori draft --from-next-candidate converts a selected candidate into a draft Nori Contract with ACCEPTANCE-BASIS as the current gap, preserves source goal/candidate/user value/risks in acceptance_basis, and refuses sources that are not ready-for-next-loop.",
-          "result": "passing",
-          "confidence": "verified",
-          "sources": [
-            {
-              "type": "command",
-              "label": "npm test -- --run test/cli-commands.test.js test/core.test.js",
-              "command": "npm test -- --run test/cli-commands.test.js test/core.test.js"
-            },
-            {
-              "type": "command",
-              "label": "npm run check",
-              "command": "npm run check"
-            },
-            {
-              "type": "command",
-              "label": "node ./bin/opennori.js draft --from-next-candidate next-loop-usability --source-goal opennori-self --goal-id next-loop-usability-contract --root . --json",
-              "command": "node ./bin/opennori.js draft --from-next-candidate next-loop-usability --source-goal opennori-self --goal-id next-loop-usability-contract --root . --json"
-            },
-            {
-              "type": "artifact",
-              "label": "src/acceptance.ts",
-              "path": "src/acceptance.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "src/cli/commands/acceptance/draft.ts",
-              "path": "src/cli/commands/acceptance/draft.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "test/core.test.js",
-              "path": "test/core.test.js"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
-              "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
-            }
-          ],
-          "reviewability": "Rerun the listed tests and run the draft command against the completed opennori-self goal; inspect the generated draft acceptance basis and current_gap.",
-          "limitations": "This proves candidate-to-draft behavior for completed goals in the current repository; the generated draft still requires user approval before implementation or evidence can complete the next loop.",
-          "gate": "accepted",
-          "created_at": "2026-06-15T11:54:21.193Z"
-        },
-        {
-          "kind": "review-result",
-          "basis": "tool-observation",
-          "summary": "Candidate next goals now carry agent-usable draft metadata: each candidate includes draft_args, draft_command, and draft_rule so Skills can create the next draft Nori Contract without reconstructing CLI flags, while the rule keeps candidates separate from approved AC, phases, task lists, and evidence.",
-          "result": "passing",
-          "confidence": "verified",
-          "sources": [
-            {
-              "type": "command",
-              "label": "npm test -- --run test/cli-commands.test.js test/core.test.js",
-              "command": "npm test -- --run test/cli-commands.test.js test/core.test.js"
-            },
-            {
-              "type": "command",
-              "label": "npm run check",
-              "command": "npm run check"
-            },
-            {
-              "type": "command",
-              "label": "node ./bin/opennori.js check --root . --json",
-              "command": "node ./bin/opennori.js check --root . --json"
-            },
-            {
-              "type": "artifact",
-              "label": "src/core/report.ts",
-              "path": "src/core/report.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "test/core.test.js",
-              "path": "test/core.test.js"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
-              "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
-            }
-          ],
-          "reviewability": "Rerun the listed checks and inspect resume/status/context export candidate_goals for draft_args, draft_command, and draft_rule.",
-          "limitations": "This improves agent routing metadata for generated candidates; the user or agent must still select or revise a candidate and approve the resulting draft before any next-loop implementation counts.",
-          "gate": "accepted",
-          "created_at": "2026-06-15T12:04:52.280Z"
-        },
-        {
-          "kind": "review-result",
-          "basis": "tool-observation",
-          "summary": "agent_next now carries candidate_goals for ready_for_next_loop, including draft_args, draft_command, and draft_rule, so Skills can continue from the deterministic routing surface without reconstructing flags or treating candidates as approved AC.",
-          "result": "passing",
-          "confidence": "verified",
-          "sources": [
-            {
-              "type": "command",
-              "label": "npm run typecheck",
-              "command": "npm run typecheck"
-            },
-            {
-              "type": "command",
-              "label": "npm test -- --run test/cli-commands.test.js test/core.test.js",
-              "command": "npm test -- --run test/cli-commands.test.js test/core.test.js"
-            },
-            {
-              "type": "artifact",
-              "label": "src/agent-next.ts",
-              "path": "src/agent-next.ts"
-            },
-            {
-              "type": "artifact",
-              "label": "test/core.test.js",
-              "path": "test/core.test.js"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori/SKILL.md",
-              "path": "plugins/opennori/skills/nori/SKILL.md"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori-acceptance/SKILL.md",
-              "path": "plugins/opennori/skills/nori-acceptance/SKILL.md"
-            },
-            {
-              "type": "artifact",
-              "label": "plugins/opennori/skills/nori-reporting/SKILL.md",
-              "path": "plugins/opennori/skills/nori-reporting/SKILL.md"
-            }
-          ],
-          "reviewability": "Rerun the listed checks and inspect resume/status JSON for data.agent_next.state=ready_for_next_loop with candidate_goals and draft metadata.",
-          "limitations": "This exposes deterministic routing data for Skills; selecting, refining, and approving the next draft remains an agent/user judgment and candidates are not completion evidence.",
-          "gate": "accepted",
-          "created_at": "2026-06-15T12:14:59.454Z"
+          "created_at": "2026-06-24T03:36:35.416Z"
         }
       ],
-      "updated_at": "2026-06-23T10:40:21.943Z"
+      "updated_at": "2026-06-24T03:36:35.416Z"
     },
     "AC-Z-15": {
       "status": "passing",

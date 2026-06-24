@@ -9,28 +9,29 @@ Risk: high
 
 ## Criterion
 
-User story: 作为用户，我让 agent 继续一个已经完成的 OpenNori goal 时，不需要每轮都追问下一步是什么；agent 能看到少量可开启下一份 Nori Contract 的人类目标候选。
+User story: 作为用户，我让 agent 继续 OpenNori 工作时，不需要每轮都追问下一步是什么；agent 能作为 Loop Engineer 读取当前状态并推进下一轮验收动作。
 
-Measurement: 运行 opennori resume、opennori status、opennori next、opennori report 和 context export，查看 complete goal 的 next_recommendation。
+Measurement: 阅读 nori-loop-engineer packaged Skill、nori 根路由、Plugin prompt、README、protocol、AGENTS 和 status/resume 的 agent_next 输出，并用未完成、阻塞和已完成 goal 检查路由。
 
-Passing threshold: 已完成且无 review risk 的 goal 输出 ready-for-next-loop，并包含 candidate_goals；每个候选包含 goal、user_value、acceptance_directions 和 risks，帮助 agent 进入下一轮 AC discovery，但不呈现为 phase、plan 或 task list。
+Passing threshold: Loop Engineer 以 packaged Skill 形式存在，不是 CLI 命令、plan mode 或任务 runner；它读取 agent_next，按当前缺口路由到 acceptance、architecture、implementation、evidence、profile、reporting、health 或 next-contract 子 Skill，只推进一轮 acceptance loop，并用 Goal / Current gap / Loop type / Action taken / Evidence / Decision / Need user / Next 汇报；遇到 AC approval、architecture confirmation、waiver、install confirmation 或 report acceptance 必须停下来让用户决策。
 
 ## Evidence
 
-Latest: review-result - agent_next now carries candidate_goals for ready_for_next_loop, including draft_args, draft_command, and draft_rule, so Skills can continue from the deterministic routing surface without reconstructing flags or treating candidates as approved AC.
+Latest: review-result - OpenNori continuation is now routed through nori-loop-engineer: the root router maps keep-going requests to a one-loop coordinator that reads agent_next, invokes focused Skills, and stops at user decision boundaries.
 Result: passing
-Basis: tool-observation
-Reviewability: Rerun the listed checks and inspect resume/status JSON for data.agent_next.state=ready_for_next_loop with candidate_goals and draft metadata.
-Limitations: This exposes deterministic routing data for Skills; selecting, refining, and approving the next draft remains an agent/user judgment and candidates are not completion evidence.
+Basis: protocol-check
+Reviewability: Inspect nori-loop-engineer/SKILL.md for the reply shape and misuse guards, inspect nori/SKILL.md for natural-language routing, inspect README/protocol/AGENTS for user-visible boundaries, and rerun npm run test:docs.
+Limitations: This proves Loop Engineer behavior is encoded in packaged Skills and docs; actual live continuation still depends on the user agent loading the updated Plugin cache and applying the Skill in a fresh session.
 
 Sources:
-- npm run typecheck
-- npm test -- --run test/cli-commands.test.js test/core.test.js
-- src/agent-next.ts
-- test/core.test.js
+- .opennori/architecture/evidence/ac-z-14-loop-engineer-continuation.json
+- npm run test:docs
+- plugins/opennori/skills/nori-loop-engineer/SKILL.md
 - plugins/opennori/skills/nori/SKILL.md
-- plugins/opennori/skills/nori-acceptance/SKILL.md
-- plugins/opennori/skills/nori-reporting/SKILL.md
+- README.md
+- .opennori/protocol.md
+- AGENTS.md
+- test/docs-schema.test.js
 
 ## Files
 

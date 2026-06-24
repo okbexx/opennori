@@ -1,9 +1,9 @@
 {
   "id": "AC-Z-14",
   "layer": "productization",
-  "user_story": "作为用户，我让 agent 继续一个已经完成的 OpenNori goal 时，不需要每轮都追问下一步是什么；agent 能看到少量可开启下一份 Nori Contract 的人类目标候选。",
-  "measurement": "运行 opennori resume、opennori status、opennori next、opennori report 和 context export，查看 complete goal 的 next_recommendation。",
-  "threshold": "已完成且无 review risk 的 goal 输出 ready-for-next-loop，并包含 candidate_goals；每个候选包含 goal、user_value、acceptance_directions 和 risks，帮助 agent 进入下一轮 AC discovery，但不呈现为 phase、plan 或 task list。",
+  "user_story": "作为用户，我让 agent 继续 OpenNori 工作时，不需要每轮都追问下一步是什么；agent 能作为 Loop Engineer 读取当前状态并推进下一轮验收动作。",
+  "measurement": "阅读 nori-loop-engineer packaged Skill、nori 根路由、Plugin prompt、README、protocol、AGENTS 和 status/resume 的 agent_next 输出，并用未完成、阻塞和已完成 goal 检查路由。",
+  "threshold": "Loop Engineer 以 packaged Skill 形式存在，不是 CLI 命令、plan mode 或任务 runner；它读取 agent_next，按当前缺口路由到 acceptance、architecture、implementation、evidence、profile、reporting、health 或 next-contract 子 Skill，只推进一轮 acceptance loop，并用 Goal / Current gap / Loop type / Action taken / Evidence / Decision / Need user / Next 汇报；遇到 AC approval、architecture confirmation、waiver、install confirmation 或 report acceptance 必须停下来让用户决策。",
   "required": true,
   "risk": "high",
   "order": 34

@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 4,
-  "latest_evidence_summary": "agent_next now carries candidate_goals for ready_for_next_loop, including draft_args, draft_command, and draft_rule, so Skills can continue from the deterministic routing surface without reconstructing flags or treating candidates as approved AC.",
-  "updated_at": "2026-06-23T10:40:21.943Z"
+  "evidence_count": 1,
+  "latest_evidence_summary": "OpenNori continuation is now routed through nori-loop-engineer: the root router maps keep-going requests to a one-loop coordinator that reads agent_next, invokes focused Skills, and stops at user decision boundaries.",
+  "updated_at": "2026-06-24T03:36:35.416Z"
 }

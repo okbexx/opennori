@@ -100,7 +100,7 @@ a durable workflow asset.
 | AC-Z-9 | CLI | Preview install with `opennori install --dry-run` | The user can judge what OpenNori would create, skip, update, or overwrite before writing to the project. | Install plan lists action, kind, managed status, write intent, destructive flag, and reason; dry-run reports zero actual writes. |
 | AC-Z-10 | CLI | Apply force install | The user must preview and explicitly confirm destructive install actions before files are overwritten. | Real `opennori install --force` fails without confirmation; dry-run previews destructive overwrites; confirmed force install may write. |
 | AC-Z-11 | CLI | Preview and apply uninstall | The user can uninstall OpenNori entry assets without losing acceptance state by default. | Uninstall plan shows removals and preserved state; real uninstall requires confirmation; `.opennori` state is deleted only with `--include-state --confirm`. |
-| AC-Z-12 | Codex Plugin / Codex Skills | Use OpenNori Plugin Skills | The agent gets focused OpenNori Skills for acceptance, evidence, Project Profile, architecture, project health, reporting, and next-loop handoff while the user keeps using natural language. | The npm package ships `.agents/plugins/marketplace.json`, `plugins/opennori/.codex-plugin/plugin.json`, and `plugins/opennori/skills/nori*/SKILL.md`; each Skill is an agent behavior protocol with trigger semantics, state reading, natural-language mapping, state write boundaries, handoffs, user reply shape, and misuse guards; install does not copy Skills into the project; manifest records `plugin`; doctor detects missing packaged Plugin Skills. |
+| AC-Z-12 | Codex Plugin / Codex Skills | Use OpenNori Plugin Skills | The agent gets focused OpenNori Skills for acceptance, evidence, Project Profile, architecture, project health, reporting, and Loop Engineer continuation while the user keeps using natural language. | The npm package ships `.agents/plugins/marketplace.json`, `plugins/opennori/.codex-plugin/plugin.json`, and `plugins/opennori/skills/nori*/SKILL.md`; each Skill is an agent behavior protocol with trigger semantics, state reading, natural-language mapping, state write boundaries, handoffs, user reply shape, and misuse guards; `nori-loop-engineer` advances one acceptance loop from `agent_next` without becoming plan mode; install does not copy Skills into the project; manifest records `plugin`; doctor detects missing packaged Plugin Skills. |
 | AC-Z-13 | CLI / project file browser | Establish an Architecture Baseline | The user can see what architecture the agent must follow while implementing Product AC. | `.opennori/architecture/baseline.json`, `.opennori/architecture/baseline.md`, and `.opennori/agent-guide.md` expose the baseline to agents and reviewers. |
 | AC-Z-14 | CLI / project file browser | Add a project Architecture Profile | The user can extend built-in profiles with a reviewed project profile without polluting architecture evidence. | `opennori architecture profile --from <profile.json>` writes `.opennori/architecture/profiles/<id>.json`; `architecture profiles` lists it before built-ins; `.opennori/architecture/evidence/` is not used for profile source or duplicate profile files. |
 | AC-Z-15 | CLI / report | Challenge a baseline | The user can review evidence before an agent changes architecture. | `opennori architecture challenge` records current baseline, conflict evidence, recommendation, and user confirmation requirement. |
@@ -274,6 +274,7 @@ command flags; the root `nori` Skill routes natural-language requests to focused
 - `nori-build-vs-buy`: record dependency/library/self-build decisions before infrastructure work
 - `nori-project-health`: install, upgrade, uninstall, doctor, manifest, Plugin health, and project recoverability
 - `nori-reporting`: status, report, current gap, user intervention, changes, and context export
+- `nori-loop-engineer`: read `agent_next`, classify the current gap, invoke the correct focused Skill, and advance one acceptance loop without making the user repeatedly ask what is next
 - MCP read-only resources are a client interoperability surface; they do not replace these Skills or add write authority.
 
 Each packaged Skill states its mission, starting state reads, natural-language mapping, allowed
@@ -637,6 +638,18 @@ user operation-path detail. Route those cases to `nori-acceptance`.
 23. Run `opennori evaluate`.
 24. Report acceptance state, profile compliance, and evidence, not implementation steps. If objective evidence exists but a visible product AC lacks Acceptance Surface Modeling, report it as objectively evidenced but not confidently acceptable yet and route back to `nori-acceptance`.
 25. If the goal is complete and the user asked to continue, infer or ask for the next human-facing outcome from the completed context and user intent, prepare a full NoriBrief, then run `opennori draft --brief <brief.json> --root <repo> --json`. Do not treat next-loop suggestions as approved AC, phases, task lists, or evidence.
+
+When the user says "continue OpenNori", "keep going", "what is next",
+"不要让我每次问下一步", or asks the agent to run as a Loop Engineer, use
+`nori-loop-engineer` first. That Skill reads `opennori resume/status`, follows
+`data.agent_next`, routes to exactly one focused Skill, advances one acceptance
+loop, and replies with Goal, Current gap, Loop type, Action taken, Evidence,
+Decision, Need user, and Next.
+
+Loop Engineer is not a plan mode or task runner. It must not approve draft AC,
+waive risks, confirm architecture, accept reports, invent next goals, or keep
+working past a user decision boundary. It exists so the agent can continue from
+the current gap without making the user repeatedly ask for the next step.
 
 Useful commands:
 

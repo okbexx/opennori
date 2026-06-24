@@ -3,7 +3,7 @@
   "protocol_version": "opennori/v1",
   "opennori_version": "0.1.11",
   "created_at": "2026-06-10T09:12:16.646Z",
-  "updated_at": "2026-06-24T02:14:57.417Z",
+  "updated_at": "2026-06-24T03:36:35.532Z",
   "capabilities": [
     "acceptance-contract",
     "evidence-ledger",
@@ -215,7 +215,7 @@
   "plugin": {
     "schema_version": "opennori/plugin-v1",
     "name": "opennori",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "manifest_path": "plugins/opennori/.codex-plugin/plugin.json",
     "marketplace_path": ".agents/plugins/marketplace.json",
     "marketplace_name": "opennori",
@@ -223,11 +223,11 @@
     "skills_path": "plugins/opennori/skills",
     "packaged": true,
     "marketplace_packaged": true,
-    "skill_count": 11,
+    "skill_count": 12,
     "skills": [
       {
         "name": "nori",
-        "description": "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, says profile or architecture profile content is in the wrong language, asks for project health, wants architecture decided first, asks about MCP context, says UI/CRUD/dashboard/list/form/settings/admin AC are too broad or missing operation paths, or expects the agent to use OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, MCP read-only context, and .opennori state as coupled parts of one product.",
+        "description": "Root OpenNori router for the complete agent capability bundle. Use when the user says to use or continue OpenNori, asks for autogoal, asks OpenNori to take over an existing AC discussion, asks whether a goal is complete, wants evidence recorded, states required Skills or stack preferences, says profile or architecture profile content is in the wrong language, asks for project health, wants architecture decided first, asks about MCP context, says UI/CRUD/dashboard/list/form/settings/admin AC are too broad or missing operation paths, asks the agent to keep going without asking 下一步, wants Loop Engineer behavior, or expects OpenNori without exposing CLI parameters. Treat Plugin discovery, packaged Skills, opennori CLI, MCP read-only context, and .opennori state as coupled parts of one product.",
         "path": "plugins/opennori/skills/nori/SKILL.md",
         "source": "package"
       },
@@ -289,6 +289,12 @@
         "name": "nori-reporting",
         "description": "Explain OpenNori status, current gaps, completion decisions, user intervention, reports, changes, context export, and read-only MCP context in human terms. Use when the user asks whether work is complete, what remains, what changed, what they need to do, how to continue after a completed goal, how a review/MCP client can inspect OpenNori state, or whether broad UI/CRUD/dashboard/list/form/settings/admin AC can be confidently accepted from evidence and operation paths.",
         "path": "plugins/opennori/skills/nori-reporting/SKILL.md",
+        "source": "package"
+      },
+      {
+        "name": "nori-loop-engineer",
+        "description": "Advance one OpenNori acceptance loop without making the user repeatedly ask what is next. Use when the user says continue OpenNori, keep going, 下一步, 不要每次问下一步, run to completion, work the current gap, Loop Engineer, or when agent_next indicates a current gap, blocker, completion review, or ready_for_next_loop that should be routed through the correct OpenNori Skill.",
+        "path": "plugins/opennori/skills/nori-loop-engineer/SKILL.md",
         "source": "package"
       }
     ]
@@ -434,6 +440,28 @@
         "summary": "High-risk evidence handling now preserves objective evidence results while surfacing confidence and evidence_health review risks; the CLI does not use fixed strong/weak natural-language evidence lists to rewrite subjective sufficiency.",
         "baseline_profile": "typescript-agent-state-cli",
         "path": ".opennori/architecture/evidence/ac-p-4-high-risk-review-risk-boundary.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "ac-z-12-loop-engineer-skill-pack",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-Z-12",
+        "status": "aligned",
+        "summary": "Loop Engineer is added as a packaged Skill inside the confirmed Plugin-first, Skill-driven, CLI-state-backed architecture.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/ac-z-12-loop-engineer-skill-pack.json",
+        "schema_valid": true,
+        "schema_errors": []
+      },
+      {
+        "id": "ac-z-14-loop-engineer-continuation",
+        "goal_id": "opennori-self",
+        "criterion_id": "AC-Z-14",
+        "status": "aligned",
+        "summary": "Loop Engineer continuation stays inside the accepted OpenNori architecture by using agent_next as the deterministic route surface and focused Skills as behavior handlers.",
+        "baseline_profile": "typescript-agent-state-cli",
+        "path": ".opennori/architecture/evidence/ac-z-14-loop-engineer-continuation.json",
         "schema_valid": true,
         "schema_errors": []
       },
