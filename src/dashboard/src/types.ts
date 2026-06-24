@@ -100,6 +100,9 @@ export type NoriSnapshot = {
   generated_at: string;
   root: string;
   status: "active" | "no_active_goal" | (string & {});
+  presentation?: {
+    language?: string;
+  };
   idle_summary?: {
     state: "no_current_goal";
     message: string;

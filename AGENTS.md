@@ -50,6 +50,25 @@ OpenNori CLI output must distinguish humans from agents: TTY usage without
 dashboard, and plugin sync commands; `--json` and non-interactive use keep the
 full deterministic payload for agents and automation.
 
+Keep public docs, runtime user output, agent protocol, and maintainer material
+separate:
+
+- Public user content such as the website, README first screen, npm copy, and
+  user quickstart explains the value, install path, project init, and how to
+  start talking to an agent. Do not require users to understand `agent_next`,
+  Skill routing, full CLI parameter sets, Plugin cache, schemas, or state file
+  internals.
+- Runtime user content such as agent replies, TTY output, dashboard, status, and
+  report should lead with Goal, Current gap, completed/missing state, Need user,
+  Decision, and Next. It must not leak agent-facing phrases like "show this to
+  the user".
+- Agent protocol content such as packaged Skills, `agent_next`, `--json`
+  payloads, MCP resources, and context export can be precise and command-like
+  because it exists to route agents and tools.
+- Developer material such as architecture docs, advanced README sections,
+  tests, AGENTS.md, and maintenance Skills may discuss Plugin cache, MCP,
+  schemas, module boundaries, and build-vs-buy decisions.
+
 CLI command modules are thin adapters over domain modules. When adding or
 touching command code, prefer narrow imports such as `core/<domain>.ts`,
 `lifecycle/<domain>.ts`, and `kernel/<domain>.ts` instead of broad

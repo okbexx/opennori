@@ -25,11 +25,11 @@ export function setup(
         status: "needs_confirm",
         confirmed,
         setup_plan: plan,
-        next: "Show this setup preview to the user and ask for confirmation before installing the OpenNori capability bundle."
+        next: "Review this setup preview. Confirm only if the listed bundle changes look correct."
       },
       [],
       plan.summary.unavailable > 0 ? [{ type: "setup", message: "Some setup commands are unavailable on this machine." }] : [],
-      ["Rerun npx opennori setup --confirm after the user approves this preview."]
+      ["Run npx opennori setup --confirm to apply this setup."]
     );
   }
 

@@ -5,6 +5,11 @@ import path from "node:path";
 import { test } from "vitest";
 import { ROOT, CLI, PACKAGE_VERSION, run, tempRoot, draftArgsFromGoal, draftAndApprove, recordArchitectureRequirement, runInteractiveSetup } from "./support/cli.js";
 
+const EXPECTED_PLUGIN_SKILL_COUNT = fs.readdirSync(path.join(ROOT, "plugins", "opennori", "skills"), { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .filter((entry) => fs.existsSync(path.join(ROOT, "plugins", "opennori", "skills", entry.name, "SKILL.md")))
+  .length;
+
 test("published package uses built dist bin while local source bin remains available", { tags: ["lifecycle", "package"] }, () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
   assert.equal(packageJson.bin.opennori, "bin/opennori.js");
@@ -37,7 +42,7 @@ test("built dist bin can report package-root Plugin Skill assets", { tags: ["lif
   assert.equal(payload.data.manifest.plugin.marketplace_plugin_path, "./plugins/opennori");
   assert.equal(payload.data.manifest.plugin.manifest_path, "plugins/opennori/.codex-plugin/plugin.json");
   assert.equal(payload.data.manifest.plugin.skills_path, "plugins/opennori/skills");
-  assert.equal(payload.data.manifest.plugin.skill_count, 11);
+  assert.equal(payload.data.manifest.plugin.skill_count, EXPECTED_PLUGIN_SKILL_COUNT);
   assert.equal(payload.data.manifest.plugin.skills.some((skill) => skill.name === "nori"), true);
   assert.equal(fs.existsSync(path.join(root, ".agents", "skills", "nori", "SKILL.md")), false);
 });
@@ -58,7 +63,8 @@ test("built dist bin runs when invoked through a package-manager symlink", { tag
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(result.stdout, /OpenNori/);
-  assert.match(result.stdout, /Usage: opennori/);
+  assert.match(result.stdout, /Common use:/);
+  assert.match(result.stdout, /Use opennori --help --advanced/);
   assert.doesNotMatch(result.stdout.trimStart(), /^\{/);
 
   const jsonResult = spawnSync(process.execPath, [linkedBin, "--help", "--json"], {
@@ -176,7 +182,7 @@ test("install creates project assets and skips existing user content by default"
   assert.equal(manifest.plugin.marketplace_plugin_path, "./plugins/opennori");
   assert.equal(manifest.plugin.manifest_path, "plugins/opennori/.codex-plugin/plugin.json");
   assert.equal(manifest.plugin.skills_path, "plugins/opennori/skills");
-  assert.equal(manifest.plugin.skill_count, 11);
+  assert.equal(manifest.plugin.skill_count, EXPECTED_PLUGIN_SKILL_COUNT);
   assert.equal(manifest.plugin.skills.some((skill) => skill.name === "nori-project-health"), true);
   assert.equal(manifest.managed_files.some((entry) => entry.path === ".opennori/protocol.md" && entry.exists), true);
   assert.equal(manifest.managed_files.some((entry) => entry.path.startsWith(".agents/skills")), false);
@@ -268,7 +274,7 @@ test("doctor reports ready, needs-action, and broken project health", { tags: ["
   assert.equal(ready.data.checks.every((check) => check.ok), true);
   assert.equal(ready.data.plugin.packaged, true);
   assert.equal(ready.data.plugin.marketplace_packaged, true);
-  assert.equal(ready.data.plugin.skill_count, 11);
+  assert.equal(ready.data.plugin.skill_count, EXPECTED_PLUGIN_SKILL_COUNT);
   assert.equal(ready.data.checks.find((check) => check.name === "plugin_manifest").ok, true);
   assert.equal(ready.data.checks.find((check) => check.name === "plugin_marketplace").ok, true);
   assert.equal(ready.data.checks.find((check) => check.name === "plugin_skills").ok, true);

@@ -110,7 +110,7 @@ export const architectureBaselineCommand = defineCommand({
       [],
       confirmed
         ? recommendation?.actions || ["Implement Product AC under this Architecture Baseline. Raise an Architecture Challenge if project evidence conflicts with it."]
-        : ["Show this Architecture Baseline to the user and rerun with --confirm only after they accept it."]
+        : ["Review this Architecture Baseline preview. Rerun with --confirm only after it is accepted."]
     );
   }
 });

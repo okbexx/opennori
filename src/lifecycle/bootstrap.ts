@@ -38,7 +38,7 @@ export function bootstrap(root: string, { confirmed = false } = {}): NoriResult<
     mergeAgentRoute: false
   });
   const next = needsConfirm
-    ? "Show this preview to the user and ask for confirmation before writing OpenNori project assets."
+    ? "Review this project init preview. Confirm only if the .opennori changes look correct."
     : "OpenNori project assets are installed. Continue with the user's goal.";
 
   const data = {

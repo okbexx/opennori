@@ -11,6 +11,9 @@ test("human output summarizes lifecycle commands instead of printing full JSON",
   const setupText = renderHuman(setup, ["setup"]);
   assert.match(setupText, /OpenNori setup preview/);
   assert.match(setupText, /Bundle: Codex Plugin, packaged Skills, global opennori CLI, project \.opennori state, doctor/);
+  assert.match(setupText, /Next: Review this setup preview/);
+  assert.equal((setupText.match(/^Next:/gm) || []).length, 1);
+  assert.doesNotMatch(setupText, /Show this setup preview to the user/);
   assert.doesNotMatch(setupText.trimStart(), /^\{/);
   assert.doesNotMatch(setupText, /"setup_plan"/);
 
@@ -19,6 +22,9 @@ test("human output summarizes lifecycle commands instead of printing full JSON",
   assert.match(initText, /OpenNori project init preview/);
   assert.match(initText, /Current Nori Contract: none/);
   assert.match(initText, /Empty \.opennori\/current is normal/);
+  assert.match(initText, /Next: Review this project init preview/);
+  assert.equal((initText.match(/^Next:/gm) || []).length, 1);
+  assert.doesNotMatch(initText, /Show this preview to the user/);
   assert.doesNotMatch(initText, /"install_plan"/);
 
   const bootstrap = await runBootstrapCommand(["--root", root, "--json"]);

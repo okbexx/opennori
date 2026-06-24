@@ -4,7 +4,7 @@
   "confidence": "verified",
   "required": true,
   "risk": "high",
-  "evidence_count": 1,
-  "latest_evidence_summary": "Loop Engineer is now part of the packaged OpenNori Skill Pack and Codex Plugin discovery surface.",
-  "updated_at": "2026-06-24T03:36:23.373Z"
+  "evidence_count": 2,
+  "latest_evidence_summary": "OpenNori public docs, runtime human output, agent protocol payloads, and maintainer guidance are now separated so users can start from setup/init and natural-language agent prompts without learning internal agent_next, Plugin cache, or full CLI parameter surfaces. Root help shows common user commands, --help --advanced exposes the full agent/automation command tree, setup/init TTY output removes agent-facing 'show this to the user' wording and deduplicates Next, dashboard suggested replies follow contract presentation language, README/site copy avoids exposing protocol internals in the first-screen user path, and AGENTS records the four-layer content boundary for maintainers.",
+  "updated_at": "2026-06-24T07:04:35.213Z"
 }

@@ -64,6 +64,47 @@ function printFailure(stdout: NodeJS.WriteStream, payload: NoriResult, title = "
   if (payload.error.fix) line(stdout, `Recovery: ${payload.error.fix}`);
 }
 
+function humanNext(value: unknown): string {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  const replacements: Array<[RegExp, string]> = [
+    [
+      /Show this setup preview to the user and ask for confirmation before installing the OpenNori capability bundle\.?/i,
+      "Review this setup preview. Confirm only if the listed bundle changes look correct."
+    ],
+    [
+      /Rerun npx opennori setup --confirm after the user approves this preview\.?/i,
+      "Run `npx opennori setup --confirm` to apply this setup."
+    ],
+    [
+      /Show this preview to the user and ask for confirmation before writing OpenNori project assets\.?/i,
+      "Review this project init preview. Confirm only if the .opennori changes look correct."
+    ],
+    [
+      /Show this plugin sync preview to the user and ask for confirmation before updating the Codex Plugin cache\.?/i,
+      "Review this plugin sync preview. Confirm only if the Codex Plugin cache changes look correct."
+    ],
+    [
+      /Rerun opennori plugin sync --confirm after the user approves this preview\.?/i,
+      "Run `opennori plugin sync --confirm` to apply this plugin cache sync."
+    ]
+  ];
+  for (const [pattern, replacement] of replacements) {
+    if (pattern.test(raw)) return replacement;
+  }
+  return raw;
+}
+
+function printNextLines(stdout: NodeJS.WriteStream, values: unknown[]): void {
+  const seen = new Set<string>();
+  for (const value of values) {
+    const next = humanNext(value);
+    if (!next || seen.has(next)) continue;
+    seen.add(next);
+    line(stdout, `Next: ${next}`);
+  }
+}
+
 function printPlanSummary(stdout: NodeJS.WriteStream, title: string, data: JsonObject, planKey: string): void {
   const plan = asObject(data[planKey]);
   const summary = asObject(plan.summary);
@@ -122,7 +163,6 @@ function printSetup(stdout: NodeJS.WriteStream, data: JsonObject): void {
   line(stdout, `Writes: ${summary.will_write ?? 0} now, ${summary.would_write ?? 0} planned`);
   if (Number(summary.unavailable || 0) > 0) line(stdout, `Unavailable: ${summary.unavailable}`);
   printExternalActionDetails(stdout, plan.actions, data.root || plan.root);
-  if (data.next) line(stdout, `Next: ${data.next}`);
 }
 
 function printProjectBootstrap(stdout: NodeJS.WriteStream, data: JsonObject, command: string): void {
@@ -145,7 +185,6 @@ function printProjectBootstrap(stdout: NodeJS.WriteStream, data: JsonObject, com
   }
   line(stdout, `Current Nori Contract: ${currentGoal ? asObject(currentGoal).goal_id || "present" : "none"}`);
   if (!currentGoal) line(stdout, "Empty .opennori/current is normal until a Nori Contract is approved.");
-  if (data.next) line(stdout, `Next: ${data.next}`);
 }
 
 function printPluginSync(stdout: NodeJS.WriteStream, data: JsonObject): void {
@@ -363,7 +402,10 @@ export function printHumanResult(payload: NoriResult, options: HumanOutputOption
   else return false;
 
   if (!["status", "resume", "next", "report"].includes(String(command))) {
-    for (const next of (payload.next_actions || []).slice(0, 2)) line(stdout, `Next: ${next}`);
+    const values = ["setup", "init", "bootstrap"].includes(String(command))
+      ? [data.next]
+      : [data.next, ...(payload.next_actions || [])].slice(0, 3);
+    printNextLines(stdout, values);
   }
   return true;
 }

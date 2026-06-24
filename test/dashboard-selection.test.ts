@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
-import { dashboardOutcomeRows, visibleRecentEvents } from "../src/dashboard/src/dashboard-view.ts";
+import { buildSuggestedAgentReply, dashboardOutcomeRows, visibleRecentEvents } from "../src/dashboard/src/dashboard-view.ts";
 import { buildAcceptanceRadarModel, getNodeColor, getNodePulseClass, getRadarLinkStyle } from "../src/dashboard/src/radar-model.ts";
 import { gapIdFromFocusEvent, profileNodeFromSnapshot, renderedCriterionNodeFromSnapshot, syncSelectedNodeWithSnapshot } from "../src/dashboard/src/selection.ts";
 import type { NoriSnapshot } from "../src/dashboard/src/types.ts";
@@ -222,6 +222,13 @@ test("dashboard visible event list hides dashboard start noise", { tags: ["dashb
 
   assert.equal(events.length, 1);
   assert.equal(events[0]?.type, "evidence.added");
+});
+
+test("dashboard suggested agent reply follows contract presentation language", { tags: ["dashboard", "quick"] }, () => {
+  const snapshot = snapshotWithCriteria([]);
+  snapshot.presentation = { language: "zh-CN" };
+
+  assert.equal(buildSuggestedAgentReply(snapshot), "使用 OpenNori 继续处理当前缺口，并记录可审查证据。");
 });
 
 test("dashboard profile node syncs Project Profile compliance from snapshots", { tags: ["dashboard", "quick"] }, () => {

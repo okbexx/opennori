@@ -83,6 +83,7 @@ export function buildActiveSnapshot(root: string, input: {
     generated_at: input.generatedAt,
     root,
     status: "active",
+    presentation: contract.presentation,
     agent: input.activity
       ? {
           name: input.activity.agent,

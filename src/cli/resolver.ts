@@ -126,6 +126,28 @@ export async function helpTextFor(rawArgs: string[]): Promise<string> {
   const subCommands = await subCommandsFor(command);
   const meta = await resolveValue(command.meta);
   const usage = await usageFor(rawArgs);
+  const advanced = rawArgs.includes("--advanced");
+  if (path.length === 0 && !advanced) {
+    return [
+      "OpenNori",
+      "Human-acceptable delivery contracts for coding agents.",
+      "",
+      "Common use:",
+      `  ${CLI_NAME} setup          Install the complete OpenNori capability bundle.`,
+      `  ${CLI_NAME} init           Initialize .opennori state in this project.`,
+      `  ${CLI_NAME} status         Show current goal, gap, and completion decision.`,
+      `  ${CLI_NAME} report         Generate a human-readable completion report.`,
+      `  ${CLI_NAME} doctor         Diagnose project state and recovery actions.`,
+      `  ${CLI_NAME} dashboard      Start the local observation dashboard.`,
+      "",
+      "Most users start in conversation after setup:",
+      "  Use OpenNori for this goal.",
+      "",
+      `Use ${CLI_NAME} <command> --help for command details.`,
+      `Use ${CLI_NAME} --help --advanced for the full agent/automation command list.`,
+      "Use --json for machine-readable output."
+    ].join("\n");
+  }
   const lines = [
     path.length === 0 ? "OpenNori" : [CLI_NAME, ...path].join(" "),
     meta?.description ? String(meta.description) : "OpenNori acceptance-driven agent state CLI.",
@@ -155,6 +177,7 @@ export async function helpTextFor(rawArgs: string[]): Promise<string> {
   }
 
   lines.push("", `Use ${CLI_NAME} <command> --help for command details.`);
+  if (path.length === 0) lines.push(`Use ${CLI_NAME} --help for the common user-facing command list.`);
   lines.push("Use --json for machine-readable output.");
   return lines.join("\n");
 }

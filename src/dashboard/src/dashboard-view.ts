@@ -59,13 +59,18 @@ export function relativeTime(value: string | undefined): string {
 
 export function buildSuggestedAgentReply(snapshot: NoriSnapshot | null): string {
   if (!snapshot) return "";
+  const useChinese = String(snapshot.presentation?.language || "").toLowerCase().startsWith("zh");
   if (snapshot.status === "no_active_goal") {
-    return "Use OpenNori for my next goal. Start by drafting a Nori Contract I can review.";
+    return useChinese
+      ? "使用 OpenNori 处理我的下一个目标。先生成一份我可以逐条确认的 Nori Contract 草案。"
+      : "Use OpenNori for my next goal. Start by drafting a Nori Contract I can review.";
   }
   if (snapshot.need_user) {
     return snapshot.user_action || "Please use OpenNori to record my decision in this agent conversation.";
   }
-  return "Use OpenNori to continue from the current gap and record reviewable evidence.";
+  return useChinese
+    ? "使用 OpenNori 继续处理当前缺口，并记录可审查证据。"
+    : "Use OpenNori to continue from the current gap and record reviewable evidence.";
 }
 
 export function sortedRecentEvents(snapshot: NoriSnapshot | null): NoriEvent[] {

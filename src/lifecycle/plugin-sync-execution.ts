@@ -22,11 +22,11 @@ export function syncPlugin({
         status: "needs_confirm",
         confirmed,
         plugin_sync_plan: plan,
-        next: "Show this plugin sync preview to the user and ask for confirmation before updating the Codex Plugin cache."
+        next: "Review this plugin sync preview. Confirm only if the Codex Plugin cache changes look correct."
       },
       [],
       plan.summary.unavailable > 0 ? [{ type: "plugin-sync", message: "Some plugin sync commands are unavailable on this machine." }] : [],
-      ["Rerun opennori plugin sync --confirm after the user approves this preview."]
+      ["Run opennori plugin sync --confirm to apply this plugin cache sync."]
     );
   }
 

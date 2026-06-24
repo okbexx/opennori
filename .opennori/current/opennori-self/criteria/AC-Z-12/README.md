@@ -17,19 +17,30 @@ Passing threshold: OpenNori Plugin 包含总入口和 acceptance、autogoal、ev
 
 ## Evidence
 
-Latest: review-result - Loop Engineer is now part of the packaged OpenNori Skill Pack and Codex Plugin discovery surface.
+Latest: user-content-layering-verification - OpenNori public docs, runtime human output, agent protocol payloads, and maintainer guidance are now separated so users can start from setup/init and natural-language agent prompts without learning internal agent_next, Plugin cache, or full CLI parameter surfaces. Root help shows common user commands, --help --advanced exposes the full agent/automation command tree, setup/init TTY output removes agent-facing 'show this to the user' wording and deduplicates Next, dashboard suggested replies follow contract presentation language, README/site copy avoids exposing protocol internals in the first-screen user path, and AGENTS records the four-layer content boundary for maintainers.
 Result: passing
-Basis: protocol-check
-Reviewability: Inspect the referenced Skill and Plugin files, rerun npm run test:docs, and verify the docs-schema expected Skill list includes nori-loop-engineer.
-Limitations: This verifies package assets and discovery metadata in the source checkout; Codex must refresh the Plugin cache and start a new session before the new Skill is loaded locally.
+Basis: tool-observation
+Reviewability: Run the listed commands, inspect root help and setup/init TTY output, then review README/site first-screen copy and AGENTS content-layer rules. Confirm that public user surfaces avoid agent protocol terms while --json and advanced docs retain deterministic agent/tool routing.
+Limitations: This verifies the local source checkout and staged website content. It does not publish npm or deploy the public site, and it does not prove every future agent reply will maintain the boundary without Skill/dogfood review.
 
 Sources:
-- .opennori/architecture/evidence/ac-z-12-loop-engineer-skill-pack.json
-- npm run test:docs
-- plugins/opennori/skills/nori-loop-engineer/SKILL.md
-- plugins/opennori/skills/nori/SKILL.md
-- plugins/opennori/.codex-plugin/plugin.json
-- test/docs-schema.test.js
+- npm run build
+- npx vitest run test/cli-human-output.test.js
+- npm run test:lifecycle
+- npm run test:dashboard
+- pnpm build (opennori-site)
+- script -q /dev/null node ./bin/opennori.js --help
+- script -q /dev/null node ./bin/opennori.js setup
+- README.md
+- AGENTS.md
+- src/cli/human-output.ts
+- src/cli/resolver.ts
+- src/dashboard/src/dashboard-view.ts
+- test/cli-human-output.test.js
+- test/lifecycle.test.js
+- test/dashboard-selection.test.ts
+- ../opennori-site/src/pages/index.astro
+- ../opennori-site/src/pages/skills.astro
 
 ## Files
 
