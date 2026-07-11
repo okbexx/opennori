@@ -1,0 +1,22 @@
+{
+  "name": "opennori",
+  "interface": {
+    "displayName": "OpenNori"
+  },
+  "plugins": [
+    {
+      "name": "opennori",
+      "source": {
+        "source": "npm",
+        "package": "opennori",
+        "version": "0.2.0-alpha.1",
+        "registry": "https://registry.npmjs.org"
+      },
+      "policy": {
+        "installation": "INSTALLED_BY_DEFAULT",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

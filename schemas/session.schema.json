@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opennori.dev/schemas/session.schema.json",
+  "title": "OpenNori Host Session Pointer",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "updated_at"],
+  "properties": {
+    "schema_version": { "const": "opennori/session-v1" },
+    "task_id": {
+      "type": "string",
+      "maxLength": 91,
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])-[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?Z$"
+    }
+  }
+}

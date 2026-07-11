@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+coverage/
+npm-debug.log*
+.codegraph/
+.adaw/active/*.local.*
+.adaw/evidence/**/local-*
+.opennori/
+output/dashboard-review/
+output/playwright/
+.playwright-cli/

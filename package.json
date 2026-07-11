@@ -1,0 +1,106 @@
+{
+  "name": "opennori",
+  "version": "0.2.0-alpha.1",
+  "description": "Repo-native engineering workflow for coding agents with outcome-driven completion.",
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    },
+    "./task": {
+      "types": "./dist/src/public/task.d.ts",
+      "import": "./dist/src/public/task.js",
+      "default": "./dist/src/public/task.js"
+    },
+    "./project": {
+      "types": "./dist/src/public/project.d.ts",
+      "import": "./dist/src/public/project.js",
+      "default": "./dist/src/public/project.js"
+    },
+    "./memory": {
+      "types": "./dist/src/public/memory.d.ts",
+      "import": "./dist/src/public/memory.js",
+      "default": "./dist/src/public/memory.js"
+    },
+    "./testing": {
+      "types": "./dist/src/public/testing.d.ts",
+      "import": "./dist/src/public/testing.js",
+      "default": "./dist/src/public/testing.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "opennori": "dist/bin/opennori.js"
+  },
+  "files": [
+    ".agents/plugins/",
+    ".codex-plugin/",
+    "dist/",
+    "hooks/",
+    "skills/",
+    "schemas/",
+    "templates/",
+    "docs/",
+    "README.md",
+    "README.zh-CN.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "SUPPORT.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.build.json && node -e \"fs.chmodSync('dist/bin/opennori.js', 0o755)\"",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "test": "npm run build && npm run test:integration",
+    "test:integration": "node --test --test-concurrency=1 test/*.test.mjs",
+    "check": "npm run lint && npm run typecheck && npm run build && npm run test:integration && npm pack --dry-run",
+    "release:check": "npm run check",
+    "prepublishOnly": "npm run check"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "citty": "^0.2.2",
+    "p-retry": "^7.1.1",
+    "proper-lockfile": "^4.1.2",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@types/node": "^22.19.20",
+    "@types/proper-lockfile": "^4.1.4",
+    "typescript": "^6.0.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/okbexx/opennori.git"
+  },
+  "keywords": [
+    "agent",
+    "workflow",
+    "outcomes",
+    "project-memory",
+    "spec-driven",
+    "codex"
+  ],
+  "author": "okbexx <okbexx@gmail.com>",
+  "license": "GPL-3.0-only",
+  "sideEffects": false,
+  "homepage": "https://opennori.dev",
+  "bugs": {
+    "url": "https://github.com/okbexx/opennori/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

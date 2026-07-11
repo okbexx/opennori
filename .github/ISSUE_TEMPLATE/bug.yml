@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a reproducible OpenNori product failure
+title: "bug: "
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: OpenNori version
+      placeholder: 0.2.0-alpha.1
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Agent platform
+      options: [Codex, Claude Code]
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide the smallest safe sequence, including the command or conversation entry.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Include the structured error code and sanitized Doctor output when relevant.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Sensitive data
+      options:
+        - label: I removed credentials, private source, host transcripts, absolute home paths, and runtime data.
+          required: true

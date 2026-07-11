@@ -1,0 +1,40 @@
+{
+  "name": "opennori",
+  "version": "0.2.0-alpha.1",
+  "description": "Repo-native Plan, Implement, Verify, and Finish workflow with outcome-driven completion.",
+  "author": {
+    "name": "okbexx",
+    "email": "okbexx@gmail.com",
+    "url": "https://github.com/okbexx"
+  },
+  "homepage": "https://opennori.dev",
+  "repository": "https://github.com/okbexx/opennori",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "agent",
+    "outcomes",
+    "workflow",
+    "project-memory",
+    "spec-driven",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "OpenNori",
+    "shortDescription": "Repo-native agent workflow with outcome-driven completion.",
+    "longDescription": "OpenNori gives Codex a durable, command-ready project workflow: approve a bounded Nori Contract and Git delivery plan, implement from curated context, independently prove Outcomes with shell-free command execution and typed Evidence, verify the delivered commit or pull request, then preserve learning and finalize a clean archived checkpoint. Compact status and selective context loading keep agent turns bounded, while preview-first upgrades, hooks, and read-only project history preserve continuity without becoming project truth.",
+    "developerName": "okbexx",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://opennori.dev/",
+    "defaultPrompt": [
+      "Use OpenNori for a new goal. Ask me for the goal before creating a Task.",
+      "Continue the current OpenNori task."
+    ],
+    "brandColor": "#19A974"
+  }
+}

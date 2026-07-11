@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opennori.dev/schemas/context.schema.json",
+  "title": "OpenNori Context Entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["file", "reason"],
+  "properties": {
+    "file": { "type": "string", "minLength": 1 },
+    "reason": { "type": "string", "minLength": 1 }
+  }
+}

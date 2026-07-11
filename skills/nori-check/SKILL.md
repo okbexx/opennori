@@ -1,0 +1,169 @@
+---
+name: nori-check
+description: Independently verify and deliver an OpenNori task. Use when the task is in Verify/review, the user asks to check the implementation, or Outcome Evidence and Git delivery must be recorded. Read the approved Contract and selective check context, inspect the actual diff, execute command checks through the shell-free CLI Evidence path, append typed Evidence, then verify the delivered commit or pull request without declaring completion.
+---
+
+# OpenNori Check
+
+Judge the implementation against the approved Nori Contract. Do not rely on the
+implementer's summary as evidence.
+
+## Preconditions
+
+1. Run `opennori status --summary --json`.
+2. Confirm the task is in Verify, then read its full canonical view with
+   `opennori task show <task> --json` and confirm the Contract is approved.
+3. Inspect `check.jsonl` with `opennori task context show <task> --mode check
+   --json`, then load each needed entry with `opennori task context load <task>
+   --mode check --file <file> --json`.
+4. Read the actual diff and relevant resulting files.
+5. When `task.package` is set, resolve its registered root from
+   `.opennori/config.yaml` and identify every changed path outside that root.
+
+Stop and report a state or context error rather than silently skipping a
+missing input.
+
+## Verify
+
+For each required Outcome:
+
+1. Identify the Outcome statement and verification method.
+2. Inspect the implementation path that can produce that outcome.
+3. Run the repository's relevant lint, type, build, test, or domain check.
+4. Exercise the real user entry and visible result when the Outcome depends
+   on interaction, layout, persistence, or feedback.
+5. Record one evidence result through the CLI.
+
+Evidence results mean:
+
+- `proven`: the observed result proves the Outcome
+- `failed`: the observed result contradicts the Outcome
+- `blocked`: the result cannot currently be established and the blocker is
+  explicit
+- `waived`: the user explicitly accepts that the Outcome need not be proven
+
+Evidence names what was observed and contains one or more typed sources:
+
+- `command`: exact command, integer `exit_code`, `stdout`, and `stderr`
+- `artifact`: project-relative `path`, exact `bytes`, and `sha256:<hex>`
+- `human`: `actor` and stable `host_confirmation_ref`
+- `url`: stable HTTPS `url` and a concise `summary` of what it proves
+
+The CLI verifies artifact size and hash against the current project file before
+append. Do not abbreviate or invent command output, artifact metadata, people,
+host references, or URL findings. A `proven` result cannot rely on its free-form
+summary alone. A `waived` result must include an explicit human source.
+
+For a command-only observation, let the CLI execute it without a shell and
+derive `proven` from exit 0 or `failed` from any other numeric exit code:
+
+```bash
+opennori task evidence run <task> --outcome <outcome-id> \
+  --summary <observed-result> -- <executable> [args...]
+```
+
+The executed argv, project-relative cwd, exit code, stdout, and stderr become
+durable Evidence. Do not run commands that print credentials or other secrets.
+Do not blanket-approve an `evidence run` command prefix; the child executable is
+project-controlled and runs with the current user's permissions.
+
+For artifact, human, URL, or mixed Evidence, use one project-relative input per
+Outcome. Store review inputs under the current task's
+`research/evidence-inputs/` directory. A command plus artifact example is:
+
+```json
+{
+  "outcome_id": "outcome-user-path",
+  "result": "proven",
+  "summary": "Observed the exact user-visible result.",
+  "sources": [
+    {
+      "type": "command",
+      "command": "npm run check",
+      "exit_code": 0,
+      "stdout": "exact captured stdout",
+      "stderr": ""
+    },
+    {
+      "type": "artifact",
+      "path": "project/relative/file",
+      "bytes": 123,
+      "sha256": "sha256:<64-lowercase-hex>"
+    }
+  ]
+}
+```
+
+Append it with:
+
+```bash
+opennori task evidence add <task> --input <evidence-input> --json
+```
+
+Use the same source fields documented above for human or URL observations. Use
+CLI help only when this shape is rejected; do not inspect OpenNori source or
+schemas during an ordinary check.
+
+## Independence
+
+- Use check context rather than copying implementation context wholesale.
+- Treat generated reports and previous claims as leads, not proof.
+- Treat the registered package as the primary repository scope. Cross-package
+  changes require an explicit Contract reason; unrelated package changes are a
+  verification failure, not incidental cleanup.
+- Do not lower a threshold to match the implementation.
+- Do not issue a waiver on the user's behalf.
+- Append evidence; do not rewrite history.
+- Treat Evidence from earlier implementation revisions as history, not proof of
+  the current implementation.
+- On Codex, when host-native review workers were used, inspect
+  `opennori task coordination list <task> --json` for stale-revision work. A
+  worker stop or summary is a lead, never Evidence; independently inspect its
+  claimed result and record only typed observations.
+- On platforms without coordination support, verify sequentially and do not
+  call the coordination commands.
+
+## Exit
+
+If required Evidence is failed or blocked, report the current gap, return the
+task to Implement, and load `nori-implement`:
+
+```bash
+opennori task start <task> --json
+```
+
+This transition starts a new implementation revision. When the task returns to
+Verify, independently verify every required Outcome again; do not reuse a
+previous revision's proven or waived result.
+
+If progress requires a human decision or unavailable external condition, tell
+the user that requirement after returning the task to Implement and record it:
+
+```bash
+opennori task block <task> --reason <blocker> --json
+```
+
+Do not leave a failed task in Verify and repeatedly rerun the same check.
+
+If every required Outcome is proven or explicitly waived, state that the
+Contract is verification-ready, then complete the planned delivery:
+
+1. Read `opennori task delivery show <task> --json`.
+2. Stage only reviewed task changes and create the implementation commit with the
+   host's Git tools. Do not absorb unrelated worktree changes.
+3. For pull request mode, push the planned branch and create the pull request
+   with the official provider CLI.
+4. Record and objectively verify delivery:
+
+   ```bash
+   opennori task delivery record <task> --commit HEAD --json
+   opennori task delivery record <task> --commit HEAD --pr <https-url> --json
+   ```
+
+The CLI rejects a commit that equals the planned base, leaves project changes
+uncommitted, comes from unrelated history, or does not match the pull request
+head and base. A previous implementation revision's delivery is stale.
+
+Load `nori-finish` only after status reports `delivery_ready: true` or the Plan
+contains a current explicit waiver. Verification itself does not archive the
+task or claim final completion.

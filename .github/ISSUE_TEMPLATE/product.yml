@@ -1,0 +1,32 @@
+name: Product request
+description: Propose one observable developer outcome
+title: "product: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: user
+    attributes:
+      label: User and context
+      description: Who encounters the problem and from which OpenNori entry?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Observable outcome
+      description: What should the developer be able to see, do, or decide?
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current failure or workaround
+    validations:
+      required: true
+  - type: textarea
+    id: proof
+    attributes:
+      label: Completion proof
+      description: What evidence would demonstrate that the request is complete?
+    validations:
+      required: true

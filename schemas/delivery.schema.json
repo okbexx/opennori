@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opennori.dev/schemas/delivery.schema.json",
+  "title": "OpenNori Git Delivery",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "mode",
+    "status",
+    "base_branch",
+    "base_commit",
+    "branch",
+    "commit",
+    "remote",
+    "pull_request_url",
+    "implementation_revision",
+    "waiver",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": { "const": "opennori/delivery-v1" },
+    "task_id": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])-[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "mode": { "enum": ["commit", "pull_request", "waived"] },
+    "status": { "enum": ["planned", "recorded", "waived"] },
+    "base_branch": { "type": ["string", "null"], "minLength": 1 },
+    "base_commit": { "type": ["string", "null"], "pattern": "^[a-f0-9]{40,64}$" },
+    "branch": { "type": ["string", "null"], "minLength": 1 },
+    "commit": { "type": ["string", "null"], "pattern": "^[a-f0-9]{40,64}$" },
+    "remote": { "type": ["string", "null"], "minLength": 1 },
+    "pull_request_url": { "type": ["string", "null"], "format": "uri", "pattern": "^https://" },
+    "implementation_revision": { "type": ["integer", "null"], "minimum": 1 },
+    "waiver": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actor", "host_confirmation_ref", "reason"],
+          "properties": {
+            "actor": { "type": "string", "minLength": 1 },
+            "host_confirmation_ref": { "type": "string", "minLength": 1 },
+            "reason": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}
