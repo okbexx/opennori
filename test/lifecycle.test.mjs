@@ -2,13 +2,21 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { initializeProject, prepareApprovedTask, runCli, temporaryProject } from "./support/fixture.mjs";
+import {
+  initializeProject,
+  materializePublished0130Project,
+  prepareApprovedTask,
+  published0130Package,
+  runCli,
+  temporaryProject
+} from "./support/fixture.mjs";
 
 const { doctorProject } = await import("../dist/src/doctor.js");
 const { contentHash } = await import("../dist/src/io.js");
 const {
   applyLifecyclePlan,
   initProject,
+  planInit,
   planManifestRepair,
   planUninstall,
   planUpdate,
@@ -30,6 +38,126 @@ function captureFailure(operation) {
 function assets(root) {
   return projectAssets(readProjectConfig(root));
 }
+
+function snapshotTree(directory) {
+  const snapshots = new Map();
+  const visit = (current) => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const filePath = path.join(current, entry.name);
+      if (entry.isDirectory()) visit(filePath);
+      else snapshots.set(path.relative(directory, filePath), {
+        content: fs.readFileSync(filePath),
+        mode: fs.statSync(filePath).mode & 0o777
+      });
+    }
+  };
+  visit(directory);
+  return snapshots;
+}
+
+test("the pinned published 0.1.30 project migrates offline with preview, rollback, retry, and Doctor recovery", (t) => {
+  const root = temporaryProject(t, "opennori-published-upgrade-");
+  const fixture = materializePublished0130Project(root);
+  assert.deepEqual(fixture.package, published0130Package);
+  const legacyRoot = path.join(root, ".opennori");
+  const legacySnapshot = snapshotTree(legacyRoot);
+  const agentsBefore = fs.readFileSync(path.join(root, "AGENTS.md"));
+  const hooksBefore = new Map(
+    fixture.generated_hooks.map((relativePath) => {
+      const filePath = path.join(root, relativePath);
+      return [relativePath, { content: fs.readFileSync(filePath), mode: fs.statSync(filePath).mode & 0o777 }];
+    })
+  );
+
+  const before = doctorProject(root);
+  assert.equal(before.status, "needs_action");
+  const migrationCheck = before.checks.find((check) => check.id === "project.foundation-migration");
+  assert.equal(migrationCheck.ok, false);
+  assert.match(migrationCheck.recovery, /opennori init --user <name> --dry-run/);
+  assert.equal(before.checks.some((check) => check.id === "project.manifest"), false);
+
+  const preview = planInit(root, "Probe", "0.2.0-test");
+  assert.deepEqual(snapshotTree(legacyRoot), legacySnapshot);
+  assert.equal(fs.readdirSync(root).some((name) => name.startsWith(".opennori.backup-")), false);
+  for (const hook of fixture.generated_hooks) {
+    const action = preview.actions.find((entry) => entry.path === hook);
+    assert.equal(action.type, "remove");
+    assert.equal(action.destructive, true);
+    assert.equal(fs.existsSync(path.join(root, hook)), true);
+  }
+
+  const config = { schema_version: "opennori/project-v1", developer: "Probe", platforms: ["codex"] };
+  const failTarget = path.join(root, ".opennori/workflow.md");
+  const originalRename = fs.renameSync;
+  let injected = false;
+  fs.renameSync = (source, target) => {
+    if (!injected && path.resolve(String(target)) === failTarget) {
+      injected = true;
+      throw new Error("injected published migration failure");
+    }
+    return originalRename(source, target);
+  };
+  try {
+    assert.throws(
+      () => applyLifecyclePlan(preview, projectAssets(config), { confirm: true, productVersion: "0.2.0-test" }),
+      /injected published migration failure/
+    );
+  } finally {
+    fs.renameSync = originalRename;
+  }
+  assert.equal(injected, true);
+  assert.deepEqual(snapshotTree(legacyRoot), legacySnapshot);
+  assert.deepEqual(fs.readFileSync(path.join(root, "AGENTS.md")), agentsBefore);
+  for (const hook of fixture.generated_hooks) {
+    const filePath = path.join(root, hook);
+    assert.deepEqual(fs.readFileSync(filePath), hooksBefore.get(hook).content);
+    assert.equal(fs.statSync(filePath).mode & 0o777, hooksBefore.get(hook).mode);
+  }
+  assert.equal(fs.readdirSync(root).some((name) => name.startsWith(".opennori.backup-")), false);
+
+  const migrated = initProject(root, { developer: "Probe", confirm: true, productVersion: "0.2.0-test" });
+  assert.equal(migrated.applied, true);
+  const backupName = fs.readdirSync(root).find((name) => name.startsWith(".opennori.backup-"));
+  assert.ok(backupName);
+  assert.deepEqual(snapshotTree(path.join(root, backupName)), legacySnapshot);
+  for (const relativePath of fixture.user_files) {
+    const legacyRelativePath = relativePath.replace(/^\.opennori\//, "");
+    assert.deepEqual(
+      fs.readFileSync(path.join(root, backupName, legacyRelativePath)),
+      legacySnapshot.get(legacyRelativePath).content
+    );
+  }
+  for (const hook of fixture.generated_hooks) assert.equal(fs.existsSync(path.join(root, hook)), false);
+  assert.match(fs.readFileSync(path.join(root, "AGENTS.md"), "utf8"), /^Project-owned agent guidance\.\n/);
+  assert.equal(fs.statSync(path.join(root, "AGENTS.md")).mode & 0o777, 0o600);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(root, ".opennori/manifest.json"), "utf8")).product_version, "0.2.0-test");
+
+  const recovered = doctorProject(root);
+  assert.equal(recovered.checks.some((check) => check.id === "project.foundation-migration"), false);
+  for (const id of ["project.config", "project.manifest", "layout.spec", "layout.tasks", "layout.workspace", "layout.runtime"]) {
+    assert.equal(recovered.checks.find((check) => check.id === id)?.ok, true, id);
+  }
+  const repeated = initProject(root, { developer: "Probe", confirm: true, productVersion: "0.2.0-test" });
+  assert.equal(repeated.plan.actions.every((entry) => entry.type === "skip"), true);
+  assert.deepEqual(snapshotTree(path.join(root, backupName)), legacySnapshot);
+});
+
+test("published migration blocks instead of deleting a locally changed legacy hook", (t) => {
+  const root = temporaryProject(t, "opennori-published-upgrade-conflict-");
+  materializePublished0130Project(root);
+  const hookPath = path.join(root, ".codex/hooks.json");
+  fs.appendFileSync(hookPath, "\nuser hook change\n");
+  const before = fs.readFileSync(hookPath);
+  const plan = planInit(root, "Probe", "0.2.0-test");
+  assert.match(plan.blockers.join(" "), /\.codex\/hooks\.json has local changes/);
+  assert.equal(plan.actions.find((entry) => entry.path === ".codex/hooks.json").type, "preserve");
+  assert.throws(
+    () => initProject(root, { developer: "Probe", confirm: true, productVersion: "0.2.0-test" }),
+    (error) => error.code === "lifecycle_blocked"
+  );
+  assert.deepEqual(fs.readFileSync(hookPath), before);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(root, ".opennori/manifest.json"), "utf8")).opennori_version, "0.1.30");
+});
 
 test("lifecycle happy paths are repeatable and preserve project-owned content", (t) => {
   const root = temporaryProject(t, "opennori-lifecycle-happy-");

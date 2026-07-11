@@ -139,8 +139,8 @@ test("the public CLI enforces Plan, Implement, Verify, and Finish", (t) => {
     { session }
   );
   assert.match(human, /Verified and archived: Approved task/);
-  assert.match(human, /outcome-workflow: proven - The workflow passed/);
-  assert.match(human, /Knowledge: none - No reusable project knowledge/);
+  assert.match(human, /The requested workflow completes: verified - The workflow passed/);
+  assert.match(human, /Project knowledge: none - No reusable project knowledge/);
   assert.doesNotMatch(human, /sha256|implementation_revision|\.opennori\/\.runtime/);
 });
 

@@ -42,7 +42,7 @@ opennori init --user <name> --platform claude
 
 1. **Plan**：agent 阅读项目、澄清最终结果、提出可审阅的结果清单，并规划 Git 交付。实现开始前，由你批准结果边界。
 2. **Implement**：agent 完成约定修改，但不会把“代码已经写完”当成目标完成。
-3. **Verify**：agent 独立检查真实 diff、项目检查和用户可见行为，并记录实际通过或失败的结果。
+3. **Verify**：在 Codex 上，新的检查 agent 会复核真实 diff、项目检查和用户可见行为，再由主 agent 记录实际通过或失败的结果。Claude Code 使用同一套独立检查上下文顺序验证。
 4. **Finish**：必需结果和 Git 交付没有验证完成时，OpenNori 拒绝结束。稳定项目知识与已完成任务会进入最终干净的 Git 状态。
 
 执行了多少命令、改了多少文件或 agent 有多自信，都不是完成证据。

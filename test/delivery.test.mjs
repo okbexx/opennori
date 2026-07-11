@@ -122,7 +122,7 @@ test("a delivery waiver needs explicit human provenance", (t) => {
   const archived = runCli(root, archiveArgs, { session });
   assert.equal(archived.data.summary.delivery.mode, "waived");
   const human = runCliHuman(root, archiveArgs, { session });
-  assert.match(human, /Completed without Git finalization/);
+  assert.match(human, /Completion is recorded; no additional Git verification is required/);
   assert.doesNotMatch(human, /delivery finalize/);
 });
 

@@ -6,11 +6,94 @@ import {
   prepareApprovedTask,
   recordTaskDeliveryCommit,
   runCli,
+  runCliHuman,
   runGit,
   taskInputPaths,
   temporaryProject,
   writeProjectJson
 } from "./support/fixture.mjs";
+
+const { renderDoctorResult } = await import("../dist/src/cli/project-commands.js");
+
+test("human status shows user decisions and next actions without internal state vocabulary", (t) => {
+  const root = temporaryProject(t, "opennori-human-status-");
+  const session = "human-status-session";
+  initializeProject(root);
+  const { taskId } = prepareApprovedTask(root, "human-status", session);
+  runCli(root, ["task", "start", taskId], { session });
+  runCli(root, ["task", "review", taskId], { session });
+
+  const output = runCliHuman(root, ["status"], { session });
+  assert.match(output, /Approved task/);
+  assert.match(output, /Stage: Verify/);
+  assert.match(output, /Result agreement: Confirmed/);
+  assert.match(output, /Git delivery: Planned as commit/);
+  assert.match(output, /Completion: Not ready/);
+  assert.match(output, /Current gap: The requested workflow completes - not yet verified/);
+  assert.match(output, /Next: Verify "The requested workflow completes"\./);
+  assert.doesNotMatch(output, /Contract|Evidence|revision|waiver|Finish ready|outcome-workflow|\(review\)/i);
+});
+
+test("human Doctor output leads with readiness and recovery instead of internal status values", () => {
+  assert.equal(
+    renderDoctorResult({ status: "ready", checks: [{ id: "project.config", ok: true, message: "ready" }] }),
+    "OpenNori is ready.\nNext: Continue the current goal or start a new one in an agent conversation."
+  );
+  const needsAction = renderDoctorResult({
+    status: "needs_action",
+    checks: [
+      {
+        id: "project.config",
+        ok: false,
+        message: "Project setup is incomplete.",
+        recovery: "Run opennori init --user <name>."
+      }
+    ]
+  });
+  assert.match(needsAction, /^OpenNori needs attention\./);
+  assert.match(needsAction, /Next: Run opennori init --user <name>\./);
+  assert.doesNotMatch(needsAction, /needs_action|DoctorCheck|schema|manifest/);
+});
+
+test("human Finish and archive output summarize results without internal completion vocabulary", (t) => {
+  const root = temporaryProject(t, "opennori-human-finish-");
+  const session = "human-finish-session";
+  initializeProject(root);
+  const { taskId, inputs } = prepareApprovedTask(root, "human-finish", session);
+  runCli(root, ["task", "start", taskId], { session });
+  runCli(root, ["task", "review", taskId], { session });
+  writeProjectJson(root, inputs.evidence, {
+    outcome_id: "outcome-workflow",
+    result: "proven",
+    summary: "The requested workflow passed",
+    sources: [{ type: "command", command: "npm test", exit_code: 0, stdout: "passed", stderr: "" }]
+  });
+  runCli(root, ["task", "evidence", "add", taskId, "--input", inputs.evidence], { session });
+  recordTaskDeliveryCommit(root, taskId, session);
+
+  const finished = runCliHuman(root, ["task", "finish", taskId], { session });
+  assert.match(finished, /Required results and Git delivery are verified/);
+  assert.doesNotMatch(finished, /Outcome|Evidence|revision|checkpoint|waiver/i);
+
+  const archived = runCliHuman(
+    root,
+    [
+      "task",
+      "archive",
+      taskId,
+      "--summary",
+      "The requested workflow is complete",
+      "--knowledge",
+      "none",
+      "--knowledge-summary",
+      "No reusable project knowledge was added"
+    ],
+    { session }
+  );
+  assert.match(archived, /Results:\n {2}The requested workflow completes: verified - The requested workflow passed/);
+  assert.match(archived, /Git delivery: commit - [0-9a-f]+/);
+  assert.doesNotMatch(archived, /Outcome|Evidence|revision|checkpoint|waiver/i);
+});
 
 test("summary status omits raw Evidence sources while preserving routing state", (t) => {
   const root = temporaryProject(t, "opennori-status-summary-");

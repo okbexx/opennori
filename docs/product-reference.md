@@ -46,7 +46,9 @@ OpenNori also accepts an explicit `--session` for supported host integrations.
 
 ## User Model
 
-Users need six concepts:
+Users can stay in the agent conversation and judge four things: the agreed
+result, the current stage, the current gap, and the verified Git delivery. For
+deeper review, the repository state uses these durable concepts:
 
 - **Spec**: stable project knowledge that should guide future tasks.
 - **Task**: one bounded engineering goal and its durable artifacts.
@@ -110,6 +112,17 @@ Verification starts from the approved Contract and independent check context,
 not from the implementation summary. The agent inspects the actual diff, runs
 the project's checks, exercises user-visible behavior when relevant, and
 records append-only Evidence for each Outcome.
+
+On Codex, the primary agent delegates the first review pass to one fresh
+host-native check subagent by default. The reviewer receives the task id,
+required Outcomes, package boundary, and curated check context. It may inspect
+and run non-destructive checks, but it cannot write Evidence, transition the
+Task, perform Git delivery, or delegate another reviewer. The primary agent
+waits for the report, treats it as an untrusted lead, reproduces the claimed
+observations, and records only CLI-validated typed Evidence. If Codex cannot
+start the reviewer, verification stops with an explicit host limitation instead
+of claiming same-agent independence. Claude Code uses the same check context in
+a sequential verification pass and does not call coordination commands.
 
 Proven Evidence names what was observed and where the user can review it.
 `task evidence run` executes command observations without a shell and preserves
@@ -302,6 +315,11 @@ OpenNori does not provide a queue, process supervisor, worker state machine, or
 message store. It records only bounded task-to-worker bindings and timestamps
 under ignored `.opennori/.runtime/coordination/`.
 
+Verify uses this host capability for one fresh `verify-reviewer` by default on
+Codex. An assignment marker prevents the delegated reviewer from recursively
+delegating. Its findings remain untrusted until the primary agent reproduces
+them through the deterministic Evidence path.
+
 `SubagentStart` records the worker, parent-session hash, role, current
 implementation revision, and start time. `SubagentStop` records a stop time.
 After a host-native action succeeds, the agent may attach a bounded assignment
@@ -375,6 +393,12 @@ opennori uninstall --dry-run
 opennori uninstall --confirm
 ```
 
+Human `status`, `doctor`, Finish, archive, and final delivery output lead with
+the agreed result, current stage, current gap, required decision, and next
+action. Canonical status values, implementation revisions, evidence ids, and
+ownership details remain available through `--json` or the deeper report and
+file review surfaces instead of appearing in the normal summary.
+
 Agents normally route with `opennori status --summary --json`, which keeps the
 current gap, Outcome summaries, readiness, and next action while omitting raw
 Evidence sources and command output. Verify and Finish use `task show <task>
@@ -434,6 +458,7 @@ state model. Further platform expansion is not part of the current product.
 | Automatic turn context | supported | unsupported |
 | Read-only host history | supported | unsupported |
 | Host-native worker observations | supported | unsupported |
+| Fresh host-native Verify reviewer | default | sequential fallback |
 
 An unsupported optional capability fails explicitly and never reads another
 platform's host state. The core sequential workflow remains available.

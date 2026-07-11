@@ -8,6 +8,12 @@ import { fileURLToPath } from "node:url";
 
 export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 export const cliPath = path.join(repositoryRoot, "dist/bin/opennori.js");
+export const published0130Package = Object.freeze({
+  name: "opennori",
+  version: "0.1.30",
+  shasum: "0dfe116aec3886cb4f981b473c884f6531d9eb76",
+  integrity: "sha512-O2tqCgAKORiK9iG0koDmBqA900Jjg2zfZ3W4lNGfN82bQ4kXwgRZJlpLMvyOY76IOc347nYI288F4n3ycvRxkg=="
+});
 const { initProject } = await import("../../dist/src/lifecycle.js");
 
 export function temporaryProject(t, prefix = "opennori-test-") {
@@ -21,6 +27,71 @@ export function writeProjectJson(root, relativePath, payload) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`);
   return relativePath;
+}
+
+function publishedContentHash(content) {
+  return crypto.createHash("sha256").update(content.replace(/\r\n/g, "\n"), "utf8").digest("hex");
+}
+
+/** Materialize a sanitized offline snapshot of the project shape emitted by the pinned published package. */
+export function materializePublished0130Project(root) {
+  const hooks = `${JSON.stringify({ hooks: { UserPromptSubmit: [{ hooks: [{ type: "command", command: "node .codex/hooks/opennori-activity.mjs", timeout: 5 }] }] } }, null, 2)}\n`;
+  const hookScript = "#!/usr/bin/env node\nprocess.exit(0);\n";
+  const managedFile = (relativePath, kind, content) => ({
+    path: relativePath,
+    kind,
+    required: true,
+    exists: true,
+    ownership: {
+      owner: "opennori",
+      scope: "file",
+      status: "current",
+      expected_hash: publishedContentHash(content),
+      current_hash: publishedContentHash(content),
+      last_written_hash: publishedContentHash(content)
+    }
+  });
+
+  fs.mkdirSync(path.join(root, ".opennori/current"), { recursive: true });
+  fs.mkdirSync(path.join(root, ".opennori/profile"), { recursive: true });
+  fs.mkdirSync(path.join(root, ".codex/hooks"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".codex/hooks.json"), hooks);
+  fs.writeFileSync(path.join(root, ".codex/hooks/opennori-activity.mjs"), hookScript, { mode: 0o755 });
+  fs.writeFileSync(path.join(root, ".opennori/profile/README.md"), "# Project preferences\n\nKeep this user-authored project guidance.\n");
+  fs.writeFileSync(path.join(root, ".opennori/profile/profile.json"), '{"schema_version":"opennori/project-profile-v1","items":[]}\n');
+  fs.writeFileSync(path.join(root, ".opennori/current/user-goal.md"), "# User goal\n\nKeep this historical project outcome.\n");
+  fs.writeFileSync(path.join(root, ".opennori/current/user-evidence.json"), '{"summary":"Keep this historical evidence."}\n');
+  writeProjectJson(root, ".opennori/manifest.json", {
+    schema_version: "opennori/manifest-v1",
+    protocol_version: "opennori/v1",
+    opennori_version: published0130Package.version,
+    created_at: "2026-07-09T09:55:39.172Z",
+    updated_at: "2026-07-09T09:55:39.172Z",
+    capabilities: [],
+    managed_files: [
+      managedFile(".codex/hooks.json", "codex-hooks", hooks),
+      managedFile(".codex/hooks/opennori-activity.mjs", "codex-hook-script", hookScript)
+    ],
+    current_goals: [],
+    current_goal: null,
+    draft_goals: [],
+    history_goals: [],
+    plugin: {},
+    architecture: {},
+    lifecycle: {}
+  });
+  fs.writeFileSync(path.join(root, "AGENTS.md"), "Project-owned agent guidance.\n", { mode: 0o600 });
+
+  return {
+    package: published0130Package,
+    user_files: [
+      ".opennori/profile/README.md",
+      ".opennori/profile/profile.json",
+      ".opennori/current/user-goal.md",
+      ".opennori/current/user-evidence.json"
+    ],
+    generated_hooks: [".codex/hooks.json", ".codex/hooks/opennori-activity.mjs"]
+  };
 }
 
 export function runCli(root, args, { ok = true, session = "integration-session", timeout = 15_000 } = {}) {

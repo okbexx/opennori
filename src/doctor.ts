@@ -13,6 +13,7 @@ import {
   PROJECT_DIR,
   assertDistinctProjectPackageDirectories,
   currentProductVersion,
+  inspectProjectInstallation,
   projectPackageDirectory,
   projectAssets,
   projectPaths,
@@ -516,6 +517,18 @@ export function doctor(root: string): DoctorResult {
   const projectRoot = path.resolve(root);
   const diagnosis: MutableDiagnosis = { checks: [], broken: false };
   diagnoseGlobalCli(projectRoot, diagnosis);
+  const installation = inspectProjectInstallation(projectRoot);
+  if (installation.state === "legacy") {
+    diagnosePlatformHost(projectRoot, "codex", diagnosis);
+    addCheck(diagnosis, {
+      id: "project.foundation-migration",
+      ok: false,
+      message: "This project uses the previous OpenNori foundation and needs a reviewed migration.",
+      recovery:
+        "Run opennori init --user <name> --dry-run, review the state backup and legacy hook cleanup, then rerun with --confirm and run opennori doctor."
+    });
+    return { status: "needs_action", checks: diagnosis.checks };
+  }
   const config = diagnoseConfig(projectRoot, diagnosis);
   const manifest = diagnoseManifest(projectRoot, config, diagnosis);
   for (const platform of config?.platforms ?? ["codex"]) diagnosePlatformHost(projectRoot, platform, diagnosis);

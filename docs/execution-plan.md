@@ -20,10 +20,11 @@ Then, in a new Codex conversation:
 Use OpenNori for this goal: <goal>
 ```
 
-User-facing language centers on Task, Spec, Stage, Contract, Outcome, Evidence,
-and the current gap. Context manifests, implementation revisions, session
-pointers, ownership, and hashes remain agent or operator concepts unless
-recovery requires them.
+User-facing language centers on the agreed result, current stage, current gap,
+required decision, and verified Git delivery. Task, Contract, Outcome, Evidence,
+context manifests, implementation revisions, session pointers, ownership, and
+hashes remain deeper review or agent/operator concepts unless recovery requires
+them.
 
 ## Execution Rules
 
@@ -357,6 +358,47 @@ Additional platform adapters, multi-person collaboration, rich UI, remote
 control planes, and provider execution remain outside the current program.
 
 ## Product Build-vs-Buy
+
+### Independent Verify Reviewer
+
+Need: make Verify independent by default on the primary host without creating a
+second lifecycle, Evidence authority, or worker runtime.
+
+Current project: the Plugin already injects curated check context on
+`SubagentStart`, observes `SubagentStart` and `SubagentStop`, binds workers to an
+implementation revision, and keeps all coordination state outside Task and
+Outcome authority.
+
+User references: Codex is the primary host; Claude Code remains the bounded
+second adapter with a sequential core workflow.
+
+TK references: established coding-agent workflows use a fresh reviewer with an
+explicit recursion guard and require it to inspect the actual code instead of
+trusting an implementer report.
+
+Official SDK / standard library: current Codex releases can delegate when a
+Skill requests subagents, surface the child thread, and let the host own spawn,
+wait, messaging, interruption, sandbox, and lifecycle behavior.
+
+Mature OSS: no external orchestration package is needed because orchestration
+is already supplied by the host and OpenNori already owns the narrower
+coordination observation boundary.
+
+Decision: reuse Codex host-native subagents and adapt the existing Skill, hook,
+check-context, and coordination surfaces.
+
+Reason: this produces a fresh review context while preserving `task.json`,
+`contract.json`, and `evidence.jsonl` as the only lifecycle, Outcome, and fact
+authorities. The reviewer cannot append Evidence or deliver Git; the primary
+agent reproduces its observations through the deterministic CLI path.
+
+Risk: skill instructions cannot manufacture host concurrency. If Codex cannot
+start a reviewer, Verify must expose that limitation rather than silently claim
+independence. Claude Code stays explicitly sequential.
+
+Verification: package-contract tests assert delegation, recursion, Evidence,
+and platform-fallback rules; real product acceptance must inspect the spawned
+review thread and confirm that only CLI-validated observations affect Finish.
 
 - Completion summary: reuse the current `TaskView`, report renderer, and CLI;
   no reporting framework or new persistence layer is needed.

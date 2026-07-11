@@ -20,6 +20,10 @@ public workflow or API contracts and must include a documented migration path.
   `opennori/testing` entrypoints, including a schema-checked integration test
   kit.
 - CI and provenance-bearing npm release automation.
+- A fresh Codex Verify reviewer by default, with a recursion guard and an
+  explicit sequential Claude Code path.
+- Offline release acceptance for projects created by the published
+  `opennori@0.1.30` foundation.
 
 ### Changed
 
@@ -27,6 +31,10 @@ public workflow or API contracts and must include a documented migration path.
 - Local checkout builds preserve the CLI executable bit for npm development installs.
 - Finish now requires current-revision Outcome Evidence and a verified delivery.
 - New tasks use state schema 2 and task schema `opennori/task-v2`.
+- Human status, Doctor, Finish, archive, and final delivery output now leads
+  with the agreed result, current gap, Git delivery, and next action.
+- The Citty CLI composition root is split into domain command modules without
+  changing command paths or JSON contracts.
 
 ### Migration
 
@@ -34,3 +42,7 @@ public workflow or API contracts and must include a documented migration path.
   apply the reviewed migration with `opennori update --confirm`.
 - Existing completed tasks remain readable without retroactive delivery data.
 - Existing active tasks require a delivery plan before implementation resumes.
+- Projects created by `opennori@0.1.30` must preview and confirm the normal
+  `opennori init` path. The old `.opennori` tree is preserved in a timestamped
+  backup, and locally modified legacy hooks block cleanup instead of being
+  overwritten.

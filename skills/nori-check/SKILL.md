@@ -1,12 +1,65 @@
 ---
 name: nori-check
-description: Independently verify and deliver an OpenNori task. Use when the task is in Verify/review, the user asks to check the implementation, or Outcome Evidence and Git delivery must be recorded. Read the approved Contract and selective check context, inspect the actual diff, execute command checks through the shell-free CLI Evidence path, append typed Evidence, then verify the delivered commit or pull request without declaring completion.
+description: Independently verify and deliver an OpenNori task. Use when the task is in Verify/review, the user asks to check the implementation, or Outcome Evidence and Git delivery must be recorded. On Codex, delegate the first review pass to one fresh host-native check subagent by default; on Claude Code, verify sequentially. Read the approved Contract and selective check context, inspect the actual diff, append typed Evidence through the CLI, then verify the delivered commit or pull request without declaring completion.
 ---
 
 # OpenNori Check
 
 Judge the implementation against the approved Nori Contract. Do not rely on the
 implementer's summary as evidence.
+
+## Independent Check Assignment
+
+Read `.opennori/config.yaml` before verification and use the first configured
+platform. Complete the Preconditions below before starting the reviewer so its
+assignment uses the approved current-revision task boundary.
+
+When the platform is `codex`, the primary agent delegates the first review pass
+for the current Verify attempt to exactly one fresh host-native subagent by
+default. Start its assignment with this exact marker so the delegated reviewer
+can recognize its role:
+
+```text
+OpenNori Verify reviewer
+```
+
+Give the reviewer the task id, required Outcome ids, package boundary, and this
+bounded responsibility:
+
+- load canonical task state and curated check context through the CLI
+- inspect the actual diff and resulting files instead of the implementer's
+  summary
+- run relevant non-destructive project and user-visible checks
+- return Outcome-by-Outcome findings, exact commands and observed output, file
+  references, blockers, and remaining uncertainty
+- do not edit project files or `.opennori/`, append Evidence, transition the
+  Task, stage or commit Git changes, record delivery, or claim completion
+
+After the reviewer starts, bind its host reference to the current implementation
+revision with role `verify-reviewer`, the required Outcome ids, and the reviewed
+paths:
+
+```bash
+opennori task coordination assign <task> --worker <host-ref> \
+  --role verify-reviewer --assignment <bounded-review-summary> \
+  --outcomes <ids> --paths <paths> --json
+```
+
+Wait for that reviewer before recording Evidence. A turn whose assignment
+contains the `OpenNori Verify reviewer` marker is already the delegated
+reviewer: it must perform the bounded review directly and must not spawn another
+reviewer or implementation worker. This is the recursion guard.
+
+The reviewer's report and its start/stop observation are untrusted leads. The
+primary agent must inspect each claimed result, reproduce command observations
+through `task evidence run` where applicable, and append only CLI-validated
+typed Evidence. A stopped reviewer, a clean report, or a successful assignment
+never proves an Outcome. If native delegation is unavailable, stop and report
+the host limitation instead of presenting a same-agent pass as independent.
+
+When the platform is `claude`, verify sequentially from the same independent
+check context. Do not call coordination commands and do not imply that a
+separate reviewer ran.
 
 ## Preconditions
 
@@ -116,12 +169,12 @@ schemas during an ordinary check.
 - Append evidence; do not rewrite history.
 - Treat Evidence from earlier implementation revisions as history, not proof of
   the current implementation.
-- On Codex, when host-native review workers were used, inspect
-  `opennori task coordination list <task> --json` for stale-revision work. A
-  worker stop or summary is a lead, never Evidence; independently inspect its
-  claimed result and record only typed observations.
-- On platforms without coordination support, verify sequentially and do not
-  call the coordination commands.
+- On the Codex primary agent, inspect `opennori task coordination list <task>
+  --json` for stale-revision work after the fresh review pass. A worker stop or
+  summary is a lead, never Evidence; independently inspect its claimed result
+  and record only typed observations.
+- On Claude Code, verify sequentially and do not call the coordination
+  commands.
 
 ## Exit
 

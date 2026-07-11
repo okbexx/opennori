@@ -38,7 +38,15 @@ context manifests under task research.
 
 Load the independent check context, inspect the resulting diff, run the project
 checks, and verify that package-scoped work did not drift into unrelated package
-roots. Append reviewable Evidence for each Outcome. Proven or waived
+roots. On Codex, the primary agent delegates the first review pass to one fresh
+host-native reviewer by default and waits for it; the delegated reviewer must
+not spawn another reviewer, write Evidence, change Task state, or perform Git
+delivery. Its report and lifecycle observations are untrusted leads. The primary
+agent reproduces claimed observations through the CLI before appending
+reviewable Evidence. If Codex cannot start the reviewer, report the host
+limitation instead of presenting a same-agent pass as independent. Claude Code
+performs the same check sequentially and does not use coordination commands.
+Proven or waived
 Outcomes can proceed to Finish. Failed or blocked Evidence returns the task to
 Implement with `opennori task start <task>`. The supported host supplies a
 stable session id automatically. That

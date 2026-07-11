@@ -23,7 +23,7 @@
   "interface": {
     "displayName": "OpenNori",
     "shortDescription": "Repo-native agent workflow with outcome-driven completion.",
-    "longDescription": "OpenNori gives Codex a durable, command-ready project workflow: approve a bounded Nori Contract and Git delivery plan, implement from curated context, independently prove Outcomes with shell-free command execution and typed Evidence, verify the delivered commit or pull request, then preserve learning and finalize a clean archived checkpoint. Compact status and selective context loading keep agent turns bounded, while preview-first upgrades, hooks, and read-only project history preserve continuity without becoming project truth.",
+    "longDescription": "OpenNori carries a coding goal from confirmed results to verified Git delivery. It plans before implementation, uses a fresh Codex reviewer by default, records what actually passed or failed, verifies the delivered commit or pull request, preserves reusable project knowledge, and refuses completion while a required result is still missing. Compact status, bounded context, safe upgrades, and project-scoped history keep later conversations useful without turning chat history into project truth.",
     "developerName": "okbexx",
     "category": "Productivity",
     "capabilities": [

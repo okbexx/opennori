@@ -97,23 +97,32 @@ export function renderCompletionSummary(summary: CompletionSummary): string {
     `${chinese ? "目标" : "Goal"}: ${summary.goal}`
   ];
   if (summary.package) lines.push(`${chinese ? "包" : "Package"}: ${summary.package}`);
-  lines.push(chinese ? "Outcome：" : "Outcomes:");
+  lines.push(chinese ? "结果：" : "Results:");
   for (const outcome of summary.outcomes) {
-    lines.push(`  ${outcome.id}: ${renderEvidenceResult(outcome.status, language)} - ${outcome.evidence_summary}`);
+    lines.push(
+      `  ${outcome.statement}: ${renderCompletionResult(outcome.status, language)} - ${outcome.evidence_summary}`
+    );
   }
   lines.push(
-    `${chinese ? "知识" : "Knowledge"}: ${renderKnowledgeDecision(summary.knowledge.decision, language)} - ${summary.knowledge.summary}`
+    `${chinese ? "项目知识" : "Project knowledge"}: ${renderKnowledgeDecision(summary.knowledge.decision, language)} - ${summary.knowledge.summary}`
   );
   if (summary.delivery?.mode === "waived") {
-    lines.push(`${chinese ? "交付" : "Delivery"}: ${chinese ? "已豁免" : "waived"} - ${summary.delivery.waiver_reason}`);
+    lines.push(
+      `${chinese ? "Git 交付" : "Git delivery"}: ${chinese ? "已确认例外" : "exception confirmed"} - ${summary.delivery.waiver_reason}`
+    );
   }
   else if (summary.delivery) {
-    lines.push(`${chinese ? "交付" : "Delivery"}: ${summary.delivery.mode} - ${summary.delivery.commit}`);
+    lines.push(`${chinese ? "Git 交付" : "Git delivery"}: ${summary.delivery.mode} - ${summary.delivery.commit}`);
     if (summary.delivery.pull_request_url) {
       lines.push(`${chinese ? "拉取请求" : "Pull request"}: ${summary.delivery.pull_request_url}`);
     }
   }
   return lines.join("\n");
+}
+
+function renderCompletionResult(result: "proven" | "waived", language: HumanLanguage): string {
+  if (language === "zh-CN") return result === "proven" ? "已验证" : "已确认例外";
+  return result === "proven" ? "verified" : "exception confirmed";
 }
 
 export function renderTaskReport(view: TaskView): string {

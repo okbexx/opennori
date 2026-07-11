@@ -50,8 +50,9 @@ Every goal follows four stages:
    boundary before implementation starts.
 2. **Implement**: the agent makes the agreed change without claiming the goal is
    complete.
-3. **Verify**: the agent independently checks the diff, project checks, and
-   user-visible behavior, then records what actually passed or failed.
+3. **Verify**: on Codex, a fresh check agent reviews the diff and user-visible
+   behavior before the primary agent records what actually passed or failed.
+   Claude Code uses the same separate check context sequentially.
 4. **Finish**: OpenNori refuses completion until the required results and Git
    delivery are verified. Stable project learning and the completed task are
    preserved in the final clean Git state.

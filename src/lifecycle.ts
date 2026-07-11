@@ -45,6 +45,24 @@ const MANIFEST_ASSET_ID = "core.install-manifest";
 const MANIFEST_BACKUP_ASSET_ID = "core.install-manifest-backup";
 const LEGACY_BACKUP_ASSET_ID = "core.legacy-backup";
 const LEGACY_STATE_ASSET_ID = "core.legacy-state";
+const LEGACY_EXTERNAL_ASSETS = [
+  { assetId: "core.legacy-codex-hooks", path: ".codex/hooks.json" },
+  { assetId: "core.legacy-codex-hook-script", path: ".codex/hooks/opennori-activity.mjs" }
+] as const;
+
+type LegacyManagedFile = {
+  path?: unknown;
+  ownership?: {
+    owner?: unknown;
+    scope?: unknown;
+    last_written_hash?: unknown;
+  };
+};
+
+type LegacyManifest = {
+  schema_version?: unknown;
+  managed_files?: unknown;
+};
 
 export type AssetInspectionStatus = "missing" | "current" | "stale" | "modified" | "unowned" | "invalid";
 
@@ -488,6 +506,56 @@ function treeHash(root: string, relativePath: string): string {
   return `sha256:${hash.digest("hex")}`;
 }
 
+function legacyOwnershipHash(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const normalized = value.startsWith("sha256:") ? value : `sha256:${value}`;
+  return /^sha256:[a-f0-9]{64}$/.test(normalized) ? normalized : null;
+}
+
+function legacyExternalAssetActions(root: string): {
+  actions: LifecycleAction[];
+  blockers: string[];
+  warnings: string[];
+} {
+  const manifest = readJson<LegacyManifest>(safeProjectPath(root, INSTALL_MANIFEST_PATH));
+  const managedFiles = Array.isArray(manifest.managed_files) ? (manifest.managed_files as LegacyManagedFile[]) : [];
+  const actions: LifecycleAction[] = [];
+  const blockers: string[] = [];
+  const warnings: string[] = [];
+
+  for (const candidate of LEGACY_EXTERNAL_ASSETS) {
+    const filePath = safeProjectPath(root, candidate.path);
+    if (!fs.existsSync(filePath)) continue;
+    const stat = fs.lstatSync(filePath);
+    const record = managedFiles.find((entry) => entry.path === candidate.path);
+    const ownedHash = legacyOwnershipHash(record?.ownership?.last_written_hash);
+    const ownershipMatches = record?.ownership?.owner === "opennori" && record.ownership.scope === "file";
+    const currentHash = stat.isFile() && !stat.isSymbolicLink() ? contentHash(readText(filePath)) : undefined;
+    const canRemove = ownershipMatches && ownedHash !== null && currentHash === ownedHash;
+
+    if (canRemove) {
+      actions.push(
+        action("init", candidate.assetId, "remove", candidate.path, "Unmodified legacy generated hook will be removed during foundation migration.", {
+          destructive: true,
+          expected_hash: currentHash
+        })
+      );
+      continue;
+    }
+
+    actions.push(
+      action("init", candidate.assetId, "preserve", candidate.path, "Legacy hook lacks matching ownership proof and will not be changed.", {
+        destructive: false,
+        expected_hash: currentHash
+      })
+    );
+    blockers.push(`${candidate.path} has local changes or lacks legacy ownership proof.`);
+    warnings.push(`Move or review ${candidate.path} before retrying initialization; OpenNori will not delete it.`);
+  }
+
+  return { actions, blockers, warnings };
+}
+
 function blockedPlan(operation: LifecyclePlan["operation"], root: string, error: unknown): LifecyclePlan {
   const failure = asOpenNoriError(error);
   return {
@@ -545,6 +613,7 @@ export function planInit(
       const backupPath = relativeBackupPath();
       const backupTarget = safeProjectPath(projectRoot, backupPath);
       const legacyHash = treeHash(projectRoot, PROJECT_DIR);
+      const legacyExternal = legacyExternalAssetActions(projectRoot);
       if (fs.existsSync(backupTarget)) blockers.push(`Backup target already exists: ${backupPath}`);
       actions.push(
         action("init", LEGACY_BACKUP_ASSET_ID, "create", backupPath, "Existing .opennori state will be copied before replacement.", {
@@ -555,9 +624,12 @@ export function planInit(
         action("init", LEGACY_STATE_ASSET_ID, "remove", PROJECT_DIR, "Legacy .opennori state will be replaced only after backup succeeds.", {
           destructive: true,
           expected_hash: legacyHash
-        })
+        }),
+        ...legacyExternal.actions
       );
+      blockers.push(...legacyExternal.blockers);
       warnings.push(`Existing state will be preserved at ${backupPath}.`);
+      warnings.push(...legacyExternal.warnings);
     }
 
     for (const asset of assets) {
@@ -1149,6 +1221,14 @@ function isControlledSpecialAction(plan: LifecyclePlan, entry: LifecycleAction):
       new RegExp(`^${INSTALL_MANIFEST_PATH.replaceAll(".", "\\.")}\\.backup-\\d{8}T\\d{6}Z$`).test(entry.path)
     );
   }
+  const legacyExternal = LEGACY_EXTERNAL_ASSETS.find((candidate) => candidate.assetId === entry.asset_id);
+  if (legacyExternal) {
+    return (
+      plan.operation === "init" &&
+      entry.path === legacyExternal.path &&
+      (entry.type === "remove" || entry.type === "preserve")
+    );
+  }
   if (plan.operation === "uninstall" && entry.type === "remove" && entry.asset_id.startsWith("core.runtime-session.")) {
     const sessionId = entry.asset_id.slice("core.runtime-session.".length);
     return /^[a-f0-9]{64}$/.test(sessionId) && entry.path === `${PROJECT_DIR}/.runtime/sessions/${sessionId}.json`;
@@ -1289,6 +1369,7 @@ function preflight(plan: LifecyclePlan, assets: readonly ManagedAsset[]): void {
 
   if (replacesLegacy) {
     const legacyHash = treeHash(plan.root, PROJECT_DIR);
+    const legacyExternal = legacyExternalAssetActions(plan.root);
     const backupAction = actualByAsset.get(LEGACY_BACKUP_ASSET_ID);
     if (!backupAction || !isControlledSpecialAction(plan, backupAction)) {
       throw new OpenNoriError("plan_invalid", "Legacy replacement needs one controlled backup action.");
@@ -1306,6 +1387,7 @@ function preflight(plan: LifecyclePlan, assets: readonly ManagedAsset[]): void {
         expected_hash: legacyHash
       })
     );
+    for (const entry of legacyExternal.actions) addExpected(entry);
   }
 
   const manifestExists = fs.existsSync(safeProjectPath(plan.root, INSTALL_MANIFEST_PATH));
@@ -1572,12 +1654,17 @@ function captureLifecycleFiles(plan: LifecyclePlan, assets: readonly ManagedAsse
   const snapshots: LifecycleFileSnapshot[] = [];
   const seen = new Set<string>();
   const assetsById = new Map(assets.map((asset) => [asset.assetId, asset]));
+  const replacesLegacy = plan.actions.some(
+    (entry) => entry.asset_id === LEGACY_STATE_ASSET_ID && entry.type === "remove" && entry.path === PROJECT_DIR
+  );
   for (const entry of plan.actions) {
     if (!["create", "update", "remove"].includes(entry.type) || entry.asset_id === LEGACY_STATE_ASSET_ID) continue;
     const filePath = safeProjectPath(plan.root, entry.path);
     if (seen.has(filePath)) continue;
     seen.add(filePath);
-    if (!fs.existsSync(filePath)) {
+    const replacesLegacyProjectPath =
+      replacesLegacy && entry.asset_id !== LEGACY_BACKUP_ASSET_ID && entry.path.startsWith(`${PROJECT_DIR}/`);
+    if (!fs.existsSync(filePath) || replacesLegacyProjectPath) {
       snapshots.push({
         path: filePath,
         content: null,
@@ -1607,46 +1694,10 @@ function rollbackLifecycleFiles(plan: LifecyclePlan, snapshots: readonly Lifecyc
   const legacyBackup = plan.actions.find((entry) => entry.asset_id === LEGACY_BACKUP_ASSET_ID && entry.type === "create");
   const errors: Array<{ path: string; cause: string }> = [];
   let preservedLegacyBackup: string | null = null;
-  if (legacyBackup) {
-    const backupPath = safeProjectPath(plan.root, legacyBackup.path);
-    const sourcePath = safeProjectPath(plan.root, PROJECT_DIR);
-    let sourceMatches = false;
-    let backupMatches = false;
-    let sourceInspectionError: string | null = null;
-    let backupInspectionError: string | null = null;
-    try {
-      sourceMatches = fs.existsSync(sourcePath) && treeHash(plan.root, PROJECT_DIR) === legacyBackup.result_hash;
-    } catch (error) {
-      sourceInspectionError = error instanceof Error ? error.message : String(error);
-    }
-    try {
-      backupMatches = fs.existsSync(backupPath) && treeHash(plan.root, legacyBackup.path) === legacyBackup.result_hash;
-    } catch (error) {
-      backupInspectionError = error instanceof Error ? error.message : String(error);
-    }
-    if (!sourceMatches && backupMatches && !fs.existsSync(sourcePath)) {
-      try {
-        fs.cpSync(backupPath, sourcePath, { recursive: true, force: false, errorOnExist: true });
-        if (treeHash(plan.root, PROJECT_DIR) !== legacyBackup.result_hash) {
-          throw new OpenNoriError("write_verification_failed", "Restored legacy state does not match its reviewed backup.");
-        }
-      } catch (error) {
-        preservedLegacyBackup = backupPath;
-        errors.push({ path: legacyBackup.path, cause: error instanceof Error ? error.message : String(error) });
-      }
-    } else if (!sourceMatches) {
-      preservedLegacyBackup = backupPath;
-      errors.push({
-        path: legacyBackup.path,
-        cause:
-          [sourceInspectionError, backupInspectionError].filter(Boolean).join("; ") ||
-          (fs.existsSync(backupPath) ? "Legacy backup hash no longer matches the reviewed plan." : "Legacy backup is missing.")
-      });
-    }
-  }
+  const legacyBackupPath = legacyBackup ? safeProjectPath(plan.root, legacyBackup.path) : null;
 
   for (const snapshot of [...snapshots].reverse()) {
-    if (snapshot.path === preservedLegacyBackup) continue;
+    if (snapshot.path === legacyBackupPath) continue;
     try {
       if (snapshot.content === null) {
         if (!fs.existsSync(snapshot.path)) continue;
@@ -1701,6 +1752,52 @@ function rollbackLifecycleFiles(plan: LifecyclePlan, snapshots: readonly Lifecyc
     }
   }
   removeEmptyProjectDirectories(plan.root);
+  if (legacyBackup && legacyBackupPath) {
+    const sourcePath = safeProjectPath(plan.root, PROJECT_DIR);
+    let sourceMatches = false;
+    let backupMatches = false;
+    let sourceInspectionError: string | null = null;
+    let backupInspectionError: string | null = null;
+    try {
+      sourceMatches = fs.existsSync(sourcePath) && treeHash(plan.root, PROJECT_DIR) === legacyBackup.result_hash;
+    } catch (error) {
+      sourceInspectionError = error instanceof Error ? error.message : String(error);
+    }
+    try {
+      backupMatches = fs.existsSync(legacyBackupPath) && treeHash(plan.root, legacyBackup.path) === legacyBackup.result_hash;
+    } catch (error) {
+      backupInspectionError = error instanceof Error ? error.message : String(error);
+    }
+    if (!sourceMatches && backupMatches && !fs.existsSync(sourcePath)) {
+      try {
+        fs.cpSync(legacyBackupPath, sourcePath, { recursive: true, force: false, errorOnExist: true });
+        if (treeHash(plan.root, PROJECT_DIR) !== legacyBackup.result_hash) {
+          throw new OpenNoriError("write_verification_failed", "Restored legacy state does not match its reviewed backup.");
+        }
+        fs.rmSync(legacyBackupPath, { recursive: true });
+      } catch (error) {
+        preservedLegacyBackup = legacyBackupPath;
+        errors.push({ path: legacyBackup.path, cause: error instanceof Error ? error.message : String(error) });
+      }
+    } else if (sourceMatches && backupMatches) {
+      try {
+        fs.rmSync(legacyBackupPath, { recursive: true });
+      } catch (error) {
+        preservedLegacyBackup = legacyBackupPath;
+        errors.push({ path: legacyBackup.path, cause: error instanceof Error ? error.message : String(error) });
+      }
+    } else {
+      preservedLegacyBackup = legacyBackupPath;
+      errors.push({
+        path: legacyBackup.path,
+        cause:
+          [sourceInspectionError, backupInspectionError].filter(Boolean).join("; ") ||
+          (!fs.existsSync(sourcePath)
+            ? "Legacy backup is missing or no longer matches the reviewed plan."
+            : "New project state could not be removed safely before legacy restoration.")
+      });
+    }
+  }
   if (errors.length > 0) {
     throw new OpenNoriError("lifecycle_rollback_incomplete", "One or more lifecycle paths could not be restored.", {
       context: { errors, preserved_legacy_backup: preservedLegacyBackup ? posixRelative(plan.root, preservedLegacyBackup) : null }
