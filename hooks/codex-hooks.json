@@ -1,0 +1,43 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$PLUGIN_ROOT/hooks/opennori-context.mjs\" codex",
+            "commandWindows": "node \"%PLUGIN_ROOT%\\hooks\\opennori-context.mjs\" codex",
+            "timeout": 10,
+            "statusMessage": "Loading OpenNori task context"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$PLUGIN_ROOT/hooks/opennori-context.mjs\" codex",
+            "commandWindows": "node \"%PLUGIN_ROOT%\\hooks\\opennori-context.mjs\" codex",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$PLUGIN_ROOT/hooks/opennori-context.mjs\" codex",
+            "commandWindows": "node \"%PLUGIN_ROOT%\\hooks\\opennori-context.mjs\" codex",
+            "timeout": 10,
+            "statusMessage": "Loading OpenNori subagent context"
+          }
+        ]
+      }
+    ]
+  }
+}

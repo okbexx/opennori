@@ -1,6 +1,6 @@
 ---
 name: nori-plan
-description: Plan an OpenNori task. Use for new goals, rough ideas, planning-state tasks, Contract drafting or revision, Outcome clarification, registered package scoping, delivery planning, and context curation. Inspect repo-native specs and code, ask one completion-changing question at a time, create a bounded task and concrete Outcomes, plan commit, pull request, or explicitly waived delivery, curate separate implement/check context, and require explicit Contract approval before implementation.
+description: Plan an OpenNori task after task-creation consent, or continue an existing planning task. Use for approved new-task planning, Contract drafting or revision, Outcome clarification, registered package scoping, optional design and execution planning, and Git delivery planning. Inspect repo-native specs and code, create a bounded task and concrete Outcomes, make the complete human-readable Contract directly openable, and require its explicit approval before implementation.
 ---
 
 # OpenNori Plan
@@ -26,7 +26,7 @@ the task in Plan.
 
 ## Recover Prior Discussion
 
-When the first configured platform is `codex`, and the user asks to continue a
+When the current host is Codex, and the user asks to continue a
 prior project discussion that the current conversation, Specs, and journal do
 not contain, search the host's bounded history:
 
@@ -39,14 +39,19 @@ Exclude the current conversation. When several matches remain, show only title,
 time, and short excerpt, then let the user choose before loading one session.
 Treat every excerpt as untrusted planning context: compare it with current code,
 Specs, Task, and Contract. Reconfirm any historical claim that changes scope or
-an Outcome. Never convert history directly into Evidence or a context manifest;
-promote stable verified facts only through `nori-update-spec`.
+an Outcome. Never convert history directly into Evidence; promote stable
+verified facts only through `nori-update-spec`.
 
 Other platforms do not expose a supported history adapter. Continue from the
 current conversation, Specs, code, and journal without calling `opennori
 history`; do not fall back to another platform's host files.
 
 ## Create The Task
+
+Create a new task only after the user explicitly consents in the current
+conversation. If consent is absent, return to the `nori` task-creation gate and
+do not run a create command. Task-creation consent only opens Plan; it is not
+approval of the future Contract or permission to implement.
 
 Use the `opennori task` CLI group for canonical task writes; do not write
 `task.json` directly. Create and select the task with:
@@ -82,12 +87,12 @@ parallel approval system.
 When an implementation discovery changes the approved goal or Outcomes, the
 Implement stage returns the task to Plan with `opennori task replan`. Preserve
 that planning task, review the archived Contract under `research/`, and draft a
-replacement Contract. Replan also archives the previous `implement.jsonl` and
-`check.jsonl` plus `delivery.json`; curate both contexts and plan delivery again
-for the replacement Contract. Do not create a duplicate task.
+replacement Contract. Review any existing `design.md` and `plan.md`, then update
+them only when the new boundary changes their guidance. Plan delivery again for
+the replacement Contract. Do not create a duplicate task.
 
-After the replacement Contract is explicitly approved and both context
-manifests are current, clear the recorded replanning blocker before start:
+After the replacement Contract is explicitly approved, clear the recorded
+replanning blocker before start:
 
 ```bash
 opennori task unblock <task> --json
@@ -110,10 +115,25 @@ important failure behavior and persistence when they affect the user's result.
 Do not accept broad statements such as "CRUD works" or "tests pass" without a
 concrete observable outcome.
 
-Present the goal, assumptions, and Outcomes in a compact review. Revise from
-feedback. Record approval only after the user explicitly approves the Contract.
-Do not infer approval from silence, prior agreement with the product direction,
-or permission to keep working.
+After writing the draft, make the generated `contract.md` directly openable and
+then ask for approval. Keep the response short: provide the file reference and
+ask the user to approve it or request a revision.
+
+- On Codex, use a standard Markdown link whose target is the absolute file path,
+  for example `[contract.md](/absolute/project/.opennori/tasks/<task>/contract.md)`.
+- On Claude Code, print the project-relative
+  `.opennori/tasks/<task>/contract.md` path so the terminal can open it.
+
+Do not paste the Contract body into the conversation by default, and do not
+replace the file with a summary. Inline the complete Contract verbatim only when
+the user asks to see it in chat or the current host cannot open the file.
+`contract.md` remains the only human approval surface for the task.
+
+Revise the Contract from feedback and provide the current file reference again.
+Record approval only after the user explicitly approves that Contract. Do not
+infer approval from silence, prior agreement with the product direction, or
+permission to keep working. Contract approval must be its own decision; do not
+combine it with a commit, pull request, or delivery-waiver decision.
 
 When approval is explicit:
 
@@ -126,7 +146,7 @@ When approval is explicit:
 The CLI records the approval provenance and approved content hash. It does not
 create human consent. Never invent an approver, confirmation reference, or note.
 
-## Canonical Inputs
+## Contract Input
 
 Write agent input files under ignored `.opennori/.runtime/` or another safe
 project-relative path. A Contract input has exactly this shape:
@@ -146,35 +166,46 @@ project-relative path. A Contract input has exactly this shape:
 }
 ```
 
-A context input is a JSON array:
-
-```json
-[
-  { "file": "project/relative/path", "reason": "Why this stage needs it" }
-]
-```
-
-Record Plan state in this order:
+Write the Contract first:
 
 ```bash
 opennori task contract write <task> --input <contract-input> --json
+```
+
+Return the host-native file reference and stop for the user's decision. Use
+`opennori task contract show <task>` only for the inline fallback described
+above. Only after explicit approval of that exact file content, record it:
+
+```bash
 opennori task contract approve <task> --approver <name> \
   --confirmation <host-reference> --json
-opennori task context write <task> --mode implement \
-  --input <implement-context> --json
-opennori task context write <task> --mode check \
-  --input <check-context> --json
-opennori task delivery plan <task> --mode commit --json
-opennori task start <task> --json
 ```
 
 Omit `--confirmation` only when the host exposes no stable reference. Use
 `opennori task <group> --help` only when the documented command is rejected;
 do not inspect OpenNori source or schemas during an ordinary user task.
 
+## Working Markdown
+
+Keep planning knowledge human-readable without creating more approval gates:
+
+- `contract.md` is required and is the only document the user approves.
+- Create `design.md` only when implementation has meaningful architecture,
+  interface, data, risk, or tradeoff decisions.
+- Create `plan.md` only for multi-step, cross-session, or high-risk work. Keep it
+  current as implementation and verification progress changes.
+- Keep task research under `research/` only when it will help implementation or
+  review.
+
+`design.md`, `plan.md`, and research are non-authoritative working documents.
+They may evolve without approval, are never parsed into canonical state, and
+must not redefine the approved Contract. Small tasks should have only
+`contract.md`.
+
 ## Plan Delivery
 
-Inspect the live Git worktree before implementation. OpenNori must be initialized
+After Contract approval, inspect the live Git worktree before implementation.
+OpenNori must be initialized
 at the Git worktree root, and project paths outside `.opennori` must have no
 pre-existing changes. Commit, stash, or remove those changes before planning the
 task delivery boundary; do not absorb them into the later implementation commit.
@@ -185,6 +216,9 @@ task delivery boundary; do not absorb them into the later implementation commit.
 - Use `--mode waived` only after explicit human confirmation that repository
   delivery does not apply. Record `--actor`, `--confirmation`, and `--reason`;
   never invent any of them.
+
+Ask for any delivery choice or waiver separately from Contract approval. A
+Contract approval never implies a delivery waiver.
 
 ```bash
 opennori task delivery plan <task> --mode commit --json
@@ -197,16 +231,35 @@ opennori task delivery plan <task> --mode waived --actor <name> \
 The CLI resolves and stores the base commit and checked-out branch. It does not
 create branches, commits, pushes, or pull requests during Plan.
 
-## Curate Context
+## Optional Context Manifests
 
-Before leaving Plan, create both manifests through the CLI:
+Create stage-specific context manifests only when they materially reduce later
+context loading:
 
 - `implement.jsonl`: specs, source, research, and design needed to implement
 - `check.jsonl`: Contract, specs, entry points, and verification references
-  needed for an independent check
+  needed for verification
 
 Each entry needs a project-relative file and a reason. Do not inject the whole
-repository. Do not make both manifests identical by default.
+repository or make both manifests identical by default. Context manifests are
+loading hints, not approval or lifecycle authority. Missing, empty, or stale
+manifests must not block `task start`; later stages fall back to the Contract,
+available working Markdown, Specs, and repository source.
+
+When useful, write either or both through the CLI:
+
+```json
+[
+  { "file": "project/relative/path", "reason": "Why this stage needs it" }
+]
+```
+
+```bash
+opennori task context write <task> --mode implement \
+  --input <implement-context> --json
+opennori task context write <task> --mode check \
+  --input <check-context> --json
+```
 
 ## Exit
 
@@ -214,9 +267,13 @@ Enter Implement only when:
 
 - the Contract is explicitly approved
 - required questions are resolved or recorded as assumptions
-- implementation context is loadable
-- verification context can independently judge the Contract
 - commit, pull request, or explicit waiver delivery is planned
+
+Then start the task:
+
+```bash
+opennori task start <task> --json
+```
 
 Tell the user what was approved and that implementation can begin. Do not claim
 progress beyond Plan.

@@ -1,6 +1,6 @@
 ---
 name: nori-check
-description: Independently verify and deliver an OpenNori task. Use when the task is in Verify/review, the user asks to check the implementation, or Outcome Evidence and Git delivery must be recorded. On Codex, delegate the first review pass to one fresh host-native check subagent by default; on Claude Code, verify sequentially. Read the approved Contract and selective check context, inspect the actual diff, append typed Evidence through the CLI, then verify the delivered commit or pull request without declaring completion.
+description: Verify and deliver an OpenNori task. Use when the task is in Verify/review, the user asks to check the implementation, or Outcome Evidence and Git delivery must be recorded. On Codex, attempt one fresh host-native reviewer first and fall back to an explicitly limited sequential check when unavailable; on Claude Code, verify sequentially. Read the approved Contract and available task documents, inspect the actual diff, append typed Evidence through the CLI, then verify the delivered commit or pull request without declaring completion.
 ---
 
 # OpenNori Check
@@ -8,11 +8,11 @@ description: Independently verify and deliver an OpenNori task. Use when the tas
 Judge the implementation against the approved Nori Contract. Do not rely on the
 implementer's summary as evidence.
 
-## Independent Check Assignment
+## Check Assignment
 
-Read `.opennori/config.yaml` before verification and use the first configured
-platform. Complete the Preconditions below before starting the reviewer so its
-assignment uses the approved current-revision task boundary.
+Use the current agent host. Complete the Preconditions below before starting
+the reviewer so its assignment uses the approved current-revision task
+boundary.
 
 When the platform is `codex`, the primary agent delegates the first review pass
 for the current Verify attempt to exactly one fresh host-native subagent by
@@ -23,10 +23,11 @@ can recognize its role:
 OpenNori Verify reviewer
 ```
 
-Give the reviewer the task id, required Outcome ids, package boundary, and this
+Give the reviewer the task id, complete `contract.md`, package boundary, and this
 bounded responsibility:
 
-- load canonical task state and curated check context through the CLI
+- load canonical task state, available task Markdown, and useful optional check
+  context through the CLI
 - inspect the actual diff and resulting files instead of the implementer's
   summary
 - run relevant non-destructive project and user-visible checks
@@ -35,46 +36,39 @@ bounded responsibility:
 - do not edit project files or `.opennori/`, append Evidence, transition the
   Task, stage or commit Git changes, record delivery, or claim completion
 
-After the reviewer starts, bind its host reference to the current implementation
-revision with role `verify-reviewer`, the required Outcome ids, and the reviewed
-paths:
-
-```bash
-opennori task coordination assign <task> --worker <host-ref> \
-  --role verify-reviewer --assignment <bounded-review-summary> \
-  --outcomes <ids> --paths <paths> --json
-```
-
 Wait for that reviewer before recording Evidence. A turn whose assignment
 contains the `OpenNori Verify reviewer` marker is already the delegated
 reviewer: it must perform the bounded review directly and must not spawn another
 reviewer or implementation worker. This is the recursion guard.
 
-The reviewer's report and its start/stop observation are untrusted leads. The
-primary agent must inspect each claimed result, reproduce command observations
-through `task evidence run` where applicable, and append only CLI-validated
-typed Evidence. A stopped reviewer, a clean report, or a successful assignment
-never proves an Outcome. If native delegation is unavailable, stop and report
-the host limitation instead of presenting a same-agent pass as independent.
+The reviewer's report is an untrusted lead. The primary agent must inspect each
+claimed result, reproduce command observations through `task evidence run`
+where applicable, and append only CLI-validated typed Evidence. A clean report
+or successful assignment never proves an Outcome.
 
-When the platform is `claude`, verify sequentially from the same independent
-check context. Do not call coordination commands and do not imply that a
+If native delegation is unavailable, continue with the primary agent's
+sequential verification. State clearly in the verification report that no fresh
+reviewer was available and that the check therefore lacks reviewer
+independence. Do not weaken any Outcome or Evidence requirement.
+
+When the platform is `claude`, verify sequentially and do not imply that a
 separate reviewer ran.
 
 ## Preconditions
 
 1. Run `opennori status --summary --json`.
 2. Confirm the task is in Verify, then read its full canonical view with
-   `opennori task show <task> --json` and confirm the Contract is approved.
-3. Inspect `check.jsonl` with `opennori task context show <task> --mode check
-   --json`, then load each needed entry with `opennori task context load <task>
-   --mode check --file <file> --json`.
-4. Read the actual diff and relevant resulting files.
-5. When `task.package` is set, resolve its registered root from
+   `opennori task show <task> --json`, confirm the Contract is approved, and
+   read the complete `contract.md`.
+3. Read available `design.md`, `plan.md`, and relevant research. If a check
+   context manifest exists, load its useful entries through `opennori task
+   context show` and `opennori task context load`.
+4. Treat a missing, empty, or stale context manifest as a loading hint failure:
+   inspect the Contract, Specs, task Markdown, diff, and repository source
+   directly. Stop only when canonical task or Contract state is corrupt.
+5. Read the actual diff and relevant resulting files.
+6. When `task.package` is set, resolve its registered root from
    `.opennori/config.yaml` and identify every changed path outside that root.
-
-Stop and report a state or context error rather than silently skipping a
-missing input.
 
 ## Verify
 
@@ -157,9 +151,10 @@ Use the same source fields documented above for human or URL observations. Use
 CLI help only when this shape is rejected; do not inspect OpenNori source or
 schemas during an ordinary check.
 
-## Independence
+## Verification Discipline
 
-- Use check context rather than copying implementation context wholesale.
+- Use optional check context when useful rather than copying implementation
+  context wholesale.
 - Treat generated reports and previous claims as leads, not proof.
 - Treat the registered package as the primary repository scope. Cross-package
   changes require an explicit Contract reason; unrelated package changes are a
@@ -169,12 +164,8 @@ schemas during an ordinary check.
 - Append evidence; do not rewrite history.
 - Treat Evidence from earlier implementation revisions as history, not proof of
   the current implementation.
-- On the Codex primary agent, inspect `opennori task coordination list <task>
-  --json` for stale-revision work after the fresh review pass. A worker stop or
-  summary is a lead, never Evidence; independently inspect its claimed result
-  and record only typed observations.
-- On Claude Code, verify sequentially and do not call the coordination
-  commands.
+- Treat any host worker report as a lead, never Evidence; inspect its claimed
+  result and record only typed observations.
 
 ## Exit
 
@@ -186,7 +177,7 @@ opennori task start <task> --json
 ```
 
 This transition starts a new implementation revision. When the task returns to
-Verify, independently verify every required Outcome again; do not reuse a
+Verify, verify every required Outcome again; do not reuse a
 previous revision's proven or waived result.
 
 If progress requires a human decision or unavailable external condition, tell

@@ -1,6 +1,6 @@
 import { defineCommand } from "citty";
 import { runCliAction } from "../cli-output.ts";
-import { approveContract, loadContract, writeContractDraft } from "../contract.ts";
+import { approveContract, loadContract, renderContractMarkdown, writeContractDraft } from "../contract.ts";
 import { loadTask, taskDirectory } from "../task.ts";
 import type { ContractInput } from "../types.ts";
 import { ROOT_ARGS, readProjectInput, readyProjectRoot, requireTaskLocation } from "./common.ts";
@@ -62,14 +62,7 @@ const contractShowCommand = defineCommand({
         const root = readyProjectRoot(args.root);
         return loadContract(requireTaskLocation(root, args.task).directory, args.task);
       },
-      (contract) =>
-        [
-          `${contract.task_id} Contract: ${contract.status}`,
-          ...(contract.approval
-            ? [`Approved by: ${contract.approval.approver}`, `Approved at: ${contract.approval.approved_at}`]
-            : []),
-          ...contract.outcomes.map((outcome) => `${outcome.id}  ${outcome.statement}`)
-        ].join("\n")
+      (contract) => renderContractMarkdown(contract).trimEnd()
     );
   }
 });

@@ -26,7 +26,8 @@ import {
   projectAssets,
   projectPaths,
   readInstallManifest,
-  readProjectConfig
+  readProjectConfig,
+  requireCurrentStateSchema
 } from "./project.ts";
 import { applyStateMigration, inferProjectStateSchema, planStateMigration } from "./migration.ts";
 import { knownPlatformSectionAsset } from "./platform.ts";
@@ -92,6 +93,11 @@ export type InitOptions = {
 };
 
 export type UpdateOptions = {
+  confirm?: boolean;
+  productVersion?: string;
+};
+
+export type PlatformAddOptions = {
   confirm?: boolean;
   productVersion?: string;
 };
@@ -375,7 +381,7 @@ export function validateManifestOwnership(
 }
 
 function planDesiredAsset(
-  operation: "init" | "update",
+  operation: "init" | "update" | "platform-add",
   root: string,
   asset: ManagedAsset,
   ownership: OwnershipRecord | undefined,
@@ -394,7 +400,7 @@ function planDesiredAsset(
       destructive: false
     });
   }
-  if (asset.policy === "seed" && operation === "update") {
+  if (asset.policy === "seed" && operation !== "init") {
     if (ownership && !ownershipMatchesAsset(ownership, asset)) {
       return action(operation, asset.assetId, "conflict", asset.path, "Manifest ownership does not match the seeded asset.", {
         destructive: false
@@ -475,6 +481,85 @@ function planDesiredAsset(
     expected_hash: state.managedHash,
     result_hash: desiredHash
   });
+}
+
+function planPlatformConfigAsset(
+  root: string,
+  asset: ManagedAsset,
+  ownership: OwnershipRecord | undefined
+): LifecycleAction {
+  const state = currentAssetState(root, asset);
+  const desiredHash = contentHash(desiredManagedContent(asset));
+  if (!state.valid || !state.exists || !state.managedHash) {
+    return action("platform-add", asset.assetId, "conflict", asset.path, "Project configuration must remain readable while adding a platform.", {
+      destructive: false
+    });
+  }
+  if (!ownership || !ownershipMatchesAsset(ownership, asset)) {
+    return action("platform-add", asset.assetId, "conflict", asset.path, "Install ownership does not match the project configuration.", {
+      destructive: false
+    });
+  }
+  if (state.managedHash === desiredHash) {
+    return action("platform-add", asset.assetId, "skip", asset.path, "The platform is already configured.", {
+      destructive: false,
+      expected_hash: state.managedHash,
+      result_hash: desiredHash
+    });
+  }
+  return action("platform-add", asset.assetId, "update", asset.path, "Add one platform without changing other project settings.", {
+    destructive: false,
+    expected_hash: state.managedHash,
+    result_hash: desiredHash
+  });
+}
+
+function platformSetKey(platforms: readonly PlatformId[]): string {
+  return [...platforms].sort().join(",");
+}
+
+function platformAddContext(
+  root: string,
+  assets: readonly ManagedAsset[]
+): { added: PlatformId | null; configAsset: ManagedAsset } {
+  const currentConfig = readProjectConfig(root);
+  const manifest = readInstallManifest(root);
+  if (platformSetKey(currentConfig.platforms) !== platformSetKey(manifest.platforms)) {
+    throw new OpenNoriError("platform_state_mismatch", "Project config and install manifest disagree on configured platforms.", {
+      recovery: "Restore the last verified platform configuration, then preview the platform addition again."
+    });
+  }
+
+  const targetPlatforms = [
+    ...new Set(assets.filter((asset) => asset.platform !== "core").map((asset) => asset.platform as PlatformId))
+  ];
+  const preservesCurrentOrder = currentConfig.platforms.every((platform, index) => targetPlatforms[index] === platform);
+  if (!preservesCurrentOrder || targetPlatforms.length < currentConfig.platforms.length || targetPlatforms.length > currentConfig.platforms.length + 1) {
+    throw new OpenNoriError("platform_plan_invalid", "A platform-add plan may append one platform without removing or reordering existing platforms.");
+  }
+  const added = targetPlatforms.length === currentConfig.platforms.length ? null : targetPlatforms[targetPlatforms.length - 1] ?? null;
+  const targetConfig: ProjectConfig = { ...currentConfig, platforms: targetPlatforms };
+  const canonicalAssets = projectAssets(targetConfig);
+  const canonicalById = new Map(canonicalAssets.map((asset) => [asset.assetId, asset]));
+  if (canonicalAssets.length !== assets.length) {
+    throw new OpenNoriError("platform_plan_invalid", "Platform-add assets do not match the canonical project surface.");
+  }
+  for (const asset of assets) {
+    const canonical = canonicalById.get(asset.assetId);
+    if (
+      !canonical ||
+      canonical.platform !== asset.platform ||
+      canonical.path !== asset.path ||
+      canonical.scope !== asset.scope ||
+      canonical.policy !== asset.policy ||
+      contentHash(desiredManagedContent(canonical)) !== contentHash(desiredManagedContent(asset))
+    ) {
+      throw new OpenNoriError("platform_plan_invalid", `Platform-add asset is not canonical: ${asset.assetId}.`);
+    }
+  }
+  const configAsset = canonicalById.get("core.project-config");
+  if (!configAsset) throw new OpenNoriError("platform_plan_invalid", "Platform-add assets are missing the project configuration.");
+  return { added, configAsset };
 }
 
 function treeHash(root: string, relativePath: string): string {
@@ -687,7 +772,7 @@ export function planManifestRepair(root: string, productVersion = currentProduct
       throw new OpenNoriError("platform_change_requires_migration", "Project platforms changed without removing the previously managed adapter assets.", {
         context: { configured_platforms: config.platforms, installed_platforms: readableManifest.platforms },
         recovery:
-          "Restore config.yaml platforms to the installed manifest values, uninstall the old adapter, then configure the new platform and run manifest repair followed by update."
+          "Restore config.yaml platforms to the installed manifest values. Add another adapter only through 'opennori platform add <platform> --dry-run' followed by --confirm."
       });
     }
     try {
@@ -863,7 +948,7 @@ export function planUpdate(root: string, productVersion = currentProductVersion(
       )
     );
     const blockers: string[] = [];
-    if (config.platforms.join(",") !== manifest.platforms.join(",")) {
+    if (platformSetKey(config.platforms) !== platformSetKey(manifest.platforms)) {
       blockers.push("Project config platforms do not match the install manifest.");
     }
     return {
@@ -877,6 +962,68 @@ export function planUpdate(root: string, productVersion = currentProductVersion(
     };
   } catch (error) {
     return blockedPlan("update", projectRoot, error);
+  }
+}
+
+/** Preview adding one platform adapter without refreshing existing managed assets. */
+export function planPlatformAdd(
+  root: string,
+  platform: PlatformId,
+  productVersion = currentProductVersion()
+): LifecyclePlan {
+  const projectRoot = resolvedRoot(root);
+  try {
+    requireCurrentStateSchema(projectRoot);
+    const currentConfig = readProjectConfig(projectRoot);
+    const manifest = readInstallManifest(projectRoot);
+    if (platformSetKey(currentConfig.platforms) !== platformSetKey(manifest.platforms)) {
+      throw new OpenNoriError("platform_state_mismatch", "Project config and install manifest disagree on configured platforms.", {
+        recovery: "Restore the last verified platform configuration, then preview the platform addition again."
+      });
+    }
+    const platforms = currentConfig.platforms.includes(platform) ? currentConfig.platforms : [...currentConfig.platforms, platform];
+    const targetConfig: ProjectConfig = { ...currentConfig, platforms };
+    const assets = projectAssets(targetConfig);
+    validateAssetCatalog(assets);
+    const records = ownershipByAsset(manifest, assets);
+    const { added, configAsset } = platformAddContext(projectRoot, assets);
+    const actions = [planPlatformConfigAsset(projectRoot, configAsset, records.get(configAsset.assetId))];
+    if (added) {
+      for (const asset of assets.filter((candidate) => candidate.platform === added)) {
+        actions.push(planDesiredAsset("platform-add", projectRoot, asset, records.get(asset.assetId), false));
+      }
+    }
+    const relevantActions = added
+      ? actions.filter((entry) => entry.asset_id === configAsset.assetId || entry.asset_id.startsWith(`${added}.`))
+      : actions;
+    const blockers = relevantActions
+      .filter((entry) => entry.type === "conflict" || entry.type === "preserve" || (entry.type === "skip" && !records.has(entry.asset_id)))
+      .map((entry) => `${entry.path}: ${entry.reason}`);
+    const writes = actions.some((entry) => entry.type === "create" || entry.type === "update");
+    const updateManifest = added !== null && (writes || manifest.product_version !== productVersion);
+    const manifestHash = contentHash(readText(projectPaths(projectRoot).manifest));
+    actions.push(
+      action(
+        "platform-add",
+        MANIFEST_ASSET_ID,
+        updateManifest ? "update" : "skip",
+        INSTALL_MANIFEST_PATH,
+        updateManifest
+          ? "Install manifest will record the added platform after every adapter asset is written."
+          : "The platform is already configured.",
+        { destructive: false, expected_hash: manifestHash }
+      )
+    );
+    return {
+      schema_version: "opennori/lifecycle-plan-v1",
+      operation: "platform-add",
+      root: projectRoot,
+      actions,
+      blockers,
+      warnings: blockers
+    };
+  } catch (error) {
+    return blockedPlan("platform-add", projectRoot, error);
   }
 }
 
@@ -999,100 +1146,13 @@ function runtimeUnknownAssetId(kind: string, relativePath: string): string {
   return `core.runtime-${kind}-unknown.${crypto.createHash("sha256").update(relativePath).digest("hex")}`;
 }
 
-function coordinationBindingKey(binding: { implementation_revision: number; worker_ref: string }): string {
-  return crypto
-    .createHash("sha256")
-    .update(`${binding.implementation_revision}\u0000${binding.worker_ref}`)
-    .digest("hex");
-}
-
-function runtimeCoordinationRemovalActions(root: string): LifecycleAction[] {
-  const relativeRoot = `${PROJECT_DIR}/.runtime/coordination`;
-  const directory = safeProjectPath(root, relativeRoot);
-  if (!fs.existsSync(directory)) return [];
-  const actions: LifecycleAction[] = [];
-  for (const taskEntry of fs.readdirSync(directory, { withFileTypes: true })) {
-    const relativeTask = `${relativeRoot}/${taskEntry.name}`;
-    if (!taskEntry.isDirectory() || taskEntry.isSymbolicLink()) {
-      actions.push(
-        action(
-          "uninstall",
-          runtimeUnknownAssetId("coordination", relativeTask),
-          "skip",
-          relativeTask,
-          "Unknown coordination entry will be preserved.",
-          { destructive: false }
-        )
-      );
-      continue;
-    }
-    const taskDirectory = safeProjectPath(root, relativeTask);
-    for (const bindingEntry of fs.readdirSync(taskDirectory, { withFileTypes: true })) {
-      const relativePath = `${relativeTask}/${bindingEntry.name}`;
-      if (!bindingEntry.isFile() || bindingEntry.isSymbolicLink() || !/^[a-f0-9]{64}\.json$/.test(bindingEntry.name)) {
-        actions.push(
-          action(
-            "uninstall",
-            runtimeUnknownAssetId("coordination", relativePath),
-            "skip",
-            relativePath,
-            "Unknown coordination entry will be preserved.",
-            { destructive: false }
-          )
-        );
-        continue;
-      }
-      const filePath = safeProjectPath(root, relativePath);
-      let ownedBinding = false;
-      try {
-        const payload = readJson<{
-          task_id: string;
-          implementation_revision: number;
-          worker_ref: string;
-        }>(filePath);
-        assertSchema("coordinationBinding", payload);
-        ownedBinding =
-          payload.task_id === taskEntry.name &&
-          bindingEntry.name === `${coordinationBindingKey(payload)}.json`;
-      } catch {
-        ownedBinding = false;
-      }
-      const bindingKey = bindingEntry.name.slice(0, -5);
-      if (!ownedBinding) {
-        actions.push(
-          action(
-            "uninstall",
-            `core.runtime-coordination-invalid.${taskEntry.name}.${bindingKey}`,
-            "skip",
-            relativePath,
-            "Unrecognized coordination JSON will be preserved.",
-            { destructive: false }
-          )
-        );
-        continue;
-      }
-      actions.push(
-        action(
-          "uninstall",
-          `core.runtime-coordination.${taskEntry.name}.${bindingKey}`,
-          "remove",
-          relativePath,
-          "Host-local worker observation will be removed.",
-          { destructive: true, expected_hash: contentHash(readText(filePath)) }
-        )
-      );
-    }
-  }
-  return actions;
-}
-
 function runtimeUnclassifiedRemovalActions(root: string): LifecycleAction[] {
   const relativeRoot = `${PROJECT_DIR}/.runtime`;
   const directory = safeProjectPath(root, relativeRoot);
   if (!fs.existsSync(directory)) return [];
 
   const actions: LifecycleAction[] = [];
-  const knownDirectories = new Set(["sessions", "coordination"]);
+  const knownDirectories = new Set(["sessions"]);
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     if (knownDirectories.has(entry.name)) continue;
     const relativePath = `${relativeRoot}/${entry.name}`;
@@ -1128,11 +1188,7 @@ function runtimeUnclassifiedRemovalActions(root: string): LifecycleAction[] {
 }
 
 function runtimeRemovalActions(root: string): LifecycleAction[] {
-  return [
-    ...runtimeSessionRemovalActions(root),
-    ...runtimeCoordinationRemovalActions(root),
-    ...runtimeUnclassifiedRemovalActions(root)
-  ];
+  return [...runtimeSessionRemovalActions(root), ...runtimeUnclassifiedRemovalActions(root)];
 }
 
 function uninstallActions(root: string, records: readonly OwnershipRecord[]): LifecycleAction[] {
@@ -1233,17 +1289,6 @@ function isControlledSpecialAction(plan: LifecyclePlan, entry: LifecycleAction):
     const sessionId = entry.asset_id.slice("core.runtime-session.".length);
     return /^[a-f0-9]{64}$/.test(sessionId) && entry.path === `${PROJECT_DIR}/.runtime/sessions/${sessionId}.json`;
   }
-  if (plan.operation === "uninstall" && entry.type === "remove" && entry.asset_id.startsWith("core.runtime-coordination.")) {
-    const suffix = entry.asset_id.slice("core.runtime-coordination.".length);
-    const separator = suffix.lastIndexOf(".");
-    const taskId = suffix.slice(0, separator);
-    const bindingKey = suffix.slice(separator + 1);
-    return (
-      separator > 0 &&
-      /^[a-f0-9]{64}$/.test(bindingKey) &&
-      entry.path === `${PROJECT_DIR}/.runtime/coordination/${taskId}/${bindingKey}.json`
-    );
-  }
   return false;
 }
 
@@ -1269,6 +1314,11 @@ function expectedManagedAction(
       return planDesiredAsset("init", plan.root, asset, undefined, replacesLegacy && asset.path.startsWith(`${PROJECT_DIR}/`));
     }
     if (plan.operation === "update") return planDesiredAsset("update", plan.root, asset, owned, false);
+    if (plan.operation === "platform-add") {
+      return asset.assetId === "core.project-config"
+        ? planPlatformConfigAsset(plan.root, asset, owned)
+        : planDesiredAsset("platform-add", plan.root, asset, owned, false);
+    }
     if (plan.operation === "uninstall") return owned ? planOwnershipRemoval(plan.root, owned) : null;
     if (plan.operation === "repair") {
       if (asset.policy === "seed") return null;
@@ -1308,9 +1358,10 @@ function preflight(plan: LifecyclePlan, assets: readonly ManagedAsset[]): void {
   }
   const assetMap = new Map(assets.map((asset) => [asset.assetId, asset]));
   const previousOwnership =
-    plan.operation === "update" || plan.operation === "uninstall"
+    plan.operation === "update" || plan.operation === "platform-add" || plan.operation === "uninstall"
       ? ownershipByAsset(readInstallManifest(plan.root), assets)
       : new Map<string, OwnershipRecord>();
+  const platformContext = plan.operation === "platform-add" ? platformAddContext(plan.root, assets) : null;
   const installationState = plan.operation === "init" ? inspectProjectInstallation(plan.root).state : null;
   const replacesLegacy = installationState === "legacy";
   let repairNeeded = false;
@@ -1326,7 +1377,7 @@ function preflight(plan: LifecyclePlan, assets: readonly ManagedAsset[]): void {
       throw new OpenNoriError("platform_change_requires_migration", "Project platforms changed without removing the previously managed adapter assets.", {
         context: { configured_platforms: config.platforms, installed_platforms: manifest.platforms },
         recovery:
-          "Restore config.yaml platforms to the installed manifest values, uninstall the old adapter, then configure the new platform and run manifest repair followed by update."
+          "Restore config.yaml platforms to the installed manifest values. Add another adapter only through 'opennori platform add <platform> --dry-run' followed by --confirm."
       });
     }
     try {
@@ -1360,6 +1411,13 @@ function preflight(plan: LifecyclePlan, assets: readonly ManagedAsset[]): void {
     for (const asset of assets) addExpected(expectedManagedAction(plan, asset, previousOwnership.get(asset.assetId), false));
     for (const record of previousOwnership.values()) {
       if (!assetMap.has(record.asset_id)) addExpected(expectedManagedAction(plan, undefined, record, false));
+    }
+  } else if (plan.operation === "platform-add" && platformContext) {
+    addExpected(expectedManagedAction(plan, platformContext.configAsset, previousOwnership.get(platformContext.configAsset.assetId), false));
+    if (platformContext.added) {
+      for (const asset of assets.filter((candidate) => candidate.platform === platformContext.added)) {
+        addExpected(expectedManagedAction(plan, asset, previousOwnership.get(asset.assetId), false));
+      }
     }
   } else if (plan.operation === "uninstall") {
     for (const entry of uninstallActions(plan.root, [...previousOwnership.values()])) addExpected(entry);
@@ -1489,6 +1547,7 @@ function preflight(plan: LifecyclePlan, assets: readonly ManagedAsset[]): void {
   let allowedManifestTypes: LifecycleAction["type"][];
   if (plan.operation === "init") allowedManifestTypes = [mutatesOwnership ? "create" : "skip"];
   else if (plan.operation === "update") allowedManifestTypes = mutatesOwnership ? ["update"] : ["skip", "update"];
+  else if (plan.operation === "platform-add") allowedManifestTypes = mutatesOwnership ? ["update"] : ["skip", "update"];
   else if (plan.operation === "repair") {
     allowedManifestTypes = repairNeeded ? [manifestExists ? "update" : "create"] : ["skip"];
   } else {
@@ -1567,22 +1626,8 @@ function ownershipRecord(asset: ManagedAsset, hash: string): OwnershipRecord {
 }
 
 function removeEmptyProjectDirectories(root: string): void {
-  const coordinationRoot = safeProjectPath(root, `${PROJECT_DIR}/.runtime/coordination`);
-  if (fs.existsSync(coordinationRoot) && fs.statSync(coordinationRoot).isDirectory()) {
-    for (const entry of fs.readdirSync(coordinationRoot, { withFileTypes: true })) {
-      if (
-        entry.isDirectory() &&
-        !entry.isSymbolicLink() &&
-        /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.name)
-      ) {
-        const directory = safeProjectPath(root, `${PROJECT_DIR}/.runtime/coordination/${entry.name}`);
-        if (fs.readdirSync(directory).length === 0) fs.rmdirSync(directory);
-      }
-    }
-  }
   const candidates = [
     `${PROJECT_DIR}/.runtime/sessions`,
-    `${PROJECT_DIR}/.runtime/coordination`,
     `${PROJECT_DIR}/.runtime/locks`,
     `${PROJECT_DIR}/.runtime`,
     `${PROJECT_DIR}/tasks/archive`,
@@ -1629,6 +1674,7 @@ type LifecycleFileSnapshot = {
   applied_hash: string | null;
   kind: "file" | "tree";
   expects_absent: boolean;
+  created_directories: string[];
 };
 
 function rawContentHash(content: Uint8Array): string {
@@ -1648,6 +1694,18 @@ function expectedAppliedFileHash(root: string, entry: LifecycleAction, asset?: M
     return rawContentHash(fs.readFileSync(safeProjectPath(root, INSTALL_MANIFEST_PATH)));
   }
   return null;
+}
+
+function missingParentDirectories(root: string, filePath: string): string[] {
+  const projectRoot = path.resolve(root);
+  const directories: string[] = [];
+  let current = path.dirname(filePath);
+  while (current !== projectRoot && current.startsWith(`${projectRoot}${path.sep}`)) {
+    if (fs.existsSync(current)) break;
+    directories.push(current);
+    current = path.dirname(current);
+  }
+  return directories;
 }
 
 function captureLifecycleFiles(plan: LifecyclePlan, assets: readonly ManagedAsset[]): LifecycleFileSnapshot[] {
@@ -1671,7 +1729,8 @@ function captureLifecycleFiles(plan: LifecyclePlan, assets: readonly ManagedAsse
         mode: null,
         applied_hash: expectedAppliedFileHash(plan.root, entry, assetsById.get(entry.asset_id)),
         kind: entry.asset_id === LEGACY_BACKUP_ASSET_ID ? "tree" : "file",
-        expects_absent: entry.type === "remove"
+        expects_absent: entry.type === "remove",
+        created_directories: missingParentDirectories(plan.root, filePath)
       });
       continue;
     }
@@ -1684,7 +1743,8 @@ function captureLifecycleFiles(plan: LifecyclePlan, assets: readonly ManagedAsse
       mode: fs.statSync(filePath).mode,
       applied_hash: expectedAppliedFileHash(plan.root, entry, assetsById.get(entry.asset_id)),
       kind: "file",
-      expects_absent: entry.type === "remove"
+      expects_absent: entry.type === "remove",
+      created_directories: []
     });
   }
   return snapshots;
@@ -1749,6 +1809,19 @@ function rollbackLifecycleFiles(plan: LifecyclePlan, snapshots: readonly Lifecyc
       writeBufferAtomic(snapshot.path, snapshot.content, snapshot.mode ?? undefined);
     } catch (error) {
       errors.push({ path: posixRelative(plan.root, snapshot.path), cause: error instanceof Error ? error.message : String(error) });
+    }
+  }
+  const createdDirectories = [...new Set(snapshots.flatMap((snapshot) => snapshot.created_directories))].sort(
+    (left, right) => right.length - left.length
+  );
+  for (const directory of createdDirectories) {
+    if (
+      fs.existsSync(directory) &&
+      fs.lstatSync(directory).isDirectory() &&
+      !fs.lstatSync(directory).isSymbolicLink() &&
+      fs.readdirSync(directory).length === 0
+    ) {
+      fs.rmdirSync(directory);
     }
   }
   removeEmptyProjectDirectories(plan.root);
@@ -1927,12 +2000,6 @@ function applyLifecyclePlanCore(
     if (entry.type === "remove") {
       const removalAsset = asset || (records.get(entry.asset_id)?.scope === "section" ? knownSectionAsset(records.get(entry.asset_id) as OwnershipRecord) || undefined : undefined);
       removeAsset(plan.root, entry, removalAsset);
-      if (entry.asset_id.startsWith("core.runtime-coordination.")) {
-        const directory = path.dirname(safeProjectPath(plan.root, entry.path));
-        if (fs.existsSync(directory) && fs.statSync(directory).isDirectory() && fs.readdirSync(directory).length === 0) {
-          fs.rmdirSync(directory);
-        }
-      }
       records.delete(entry.asset_id);
       continue;
     }
@@ -1996,6 +2063,34 @@ export function updateProject(root: string, options: UpdateOptions = {}): Lifecy
     plan,
     applied: true,
     manifest: applyLifecyclePlan(currentPlan, projectAssets(config), { confirm: true, productVersion })
+  };
+}
+
+/** Add one project adapter through the reviewed lifecycle plan. */
+export function addProjectPlatform(
+  root: string,
+  platform: PlatformId,
+  options: PlatformAddOptions = {}
+): LifecycleRunResult {
+  const productVersion = options.productVersion || currentProductVersion();
+  const plan = planPlatformAdd(root, platform, productVersion);
+  if (!options.confirm) return { plan, applied: false };
+  if (plan.blockers.length > 0) {
+    throw new OpenNoriError("platform_add_blocked", plan.blockers.join(" "), {
+      context: { blockers: plan.blockers },
+      recovery: "Resolve every target adapter conflict, then preview the platform addition again."
+    });
+  }
+  const currentConfig = readProjectConfig(root);
+  if (currentConfig.platforms.includes(platform)) {
+    return { plan, applied: false, manifest: readInstallManifest(root) };
+  }
+  const targetConfig: ProjectConfig = { ...currentConfig, platforms: [...currentConfig.platforms, platform] };
+  const currentPlan = planPlatformAdd(root, platform, productVersion);
+  return {
+    plan: currentPlan,
+    applied: true,
+    manifest: applyLifecyclePlan(currentPlan, projectAssets(targetConfig), { confirm: true, productVersion })
   };
 }
 

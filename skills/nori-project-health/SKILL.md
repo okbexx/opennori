@@ -1,6 +1,6 @@
 ---
 name: nori-project-health
-description: Initialize, diagnose, update, or uninstall OpenNori project assets. Use whenever OpenNori is missing, init is requested, doctor reports broken or stale state, managed files conflict, a registered agent adapter is unavailable, or the user asks to update or remove OpenNori. Keep lifecycle actions preview-first, preserve user project content, and return the user to a new agent conversation after successful initialization.
+description: Initialize, add a supported project host, diagnose, update, or uninstall OpenNori project assets. Use whenever OpenNori is missing, init or platform addition is requested, doctor reports broken or stale state, managed files conflict, a registered agent adapter is unavailable, or the user asks to update or remove OpenNori. Keep lifecycle actions preview-first, preserve existing adapters and user project content, and return the user to a new agent conversation after successful host changes.
 ---
 
 # OpenNori Project Health
@@ -32,8 +32,8 @@ Initialization must:
 
 Codex requires trust review for new or changed command hooks. Tell the user to
 inspect and approve the bundled hooks with `/hooks` when prompted. Declining
-trust leaves the CLI workflow available but disables automatic turn context and
-worker observations; do not add a parallel project-local bootstrap route.
+trust leaves the CLI workflow available but disables automatic turn context;
+do not add a parallel project-local bootstrap route.
 
 Host CLI installation, marketplace registration, and Plugin installation or
 enablement belong only to `npx opennori setup`. Project initialization must not
@@ -47,17 +47,40 @@ npx opennori setup --platform claude
 opennori init --user <name> --platform claude
 ```
 
-Claude project Skills are lifecycle-owned adapter assets; do not copy or
-synchronize them manually.
+Claude Skills and Hooks come from the user-scoped OpenNori Plugin installed by
+setup. Project lifecycle owns only `CLAUDE.md`; do not copy or synchronize
+Plugin assets into `.claude/`.
 
-After success, tell the user to open a new conversation in the configured agent
-host and say:
+## Add A Project Host
 
-```text
-Use OpenNori for this goal: <goal>
+Do not rerun `init` to add another supported host to an initialized project.
+Prepare that host at machine level, preview the project change, then confirm it:
+
+```bash
+npx opennori setup --platform claude
+opennori platform add claude --dry-run
+opennori platform add claude --confirm
+opennori doctor
 ```
 
-Do not start a task as a hidden side effect of initialization.
+Review every action and blocker before confirmation. Platform addition must
+preserve existing adapters and project settings, refuse any target adapter
+conflict before writes, and update the install manifest last. Never edit the
+configured platform list, copy Skills, or remove another adapter by hand.
+
+After success, open a new conversation in the newly added host. Commands in a
+multi-platform project must run inside one identifiable Codex or Claude Code
+session; never guess from platform order.
+
+After success, tell the user to open a new conversation in the configured agent
+host and describe the goal normally, for example:
+
+```text
+Add account deletion with a recoverable confirmation flow.
+```
+
+OpenNori is available automatically in that conversation and asks before
+creating a task. Do not start a task as a hidden side effect of initialization.
 
 ## Diagnose
 

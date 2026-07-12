@@ -12,6 +12,8 @@ introducing a team collaboration system.
 OpenNori's differentiator is Outcome-driven completion:
 
 - A human-reviewable Nori Contract defines what done means.
+- `contract.md` is the only task document the user approves; optional design and
+  execution documents remain readable agent working material.
 - Required Outcomes must be approved before implementation starts.
 - Reviewable Evidence, not task activity, determines whether an Outcome is proven.
 - A task cannot finish until every required Outcome is proven or explicitly
@@ -31,25 +33,33 @@ npx opennori setup
 opennori init --user <name>
 ```
 
-The user then stays in the agent conversation:
+The user opens a new agent conversation and describes the goal normally:
 
 ```text
-Use OpenNori for this goal: <goal>
+Add account deletion with a recoverable confirmation flow.
 ```
+
+OpenNori is present automatically. With no task selected, the agent resumes
+existing active work first. When no active task exists, it asks for
+task-creation consent before entering Plan. Small work can stay outside the
+workflow for that session; complex work does not proceed broadly after consent
+is declined.
 
 The agent follows one task workflow:
 
-1. **Plan**: inspect project specs and relevant code, ask one
-   completion-changing question at a time, create a task, and draft a Nori
-   Contract and plan commit or pull request delivery.
-2. **Implement**: after contract approval, load the curated implementation
-   context and implement the task without claiming completion.
-3. **Verify**: load the independent check context, inspect the diff, run the
+1. **Plan**: after task-creation consent, inspect project specs and relevant
+   code, ask one completion-changing question at a time, create a task, draft a
+   complete `contract.md`, add `design.md` or `plan.md` only when useful, and
+   plan commit or pull request delivery.
+2. **Implement**: after Contract approval, use the repository and any optional
+   working documents or curated context to implement without claiming completion.
+3. **Verify**: start from the approved Contract, optionally load independent
+   check context, inspect the diff, run the
    project checks, append Evidence against each Outcome, then verify the
    implementation commit or pull request.
 4. **Finish**: refuse completion while Evidence or delivery is missing, promote
-   stable learnings into project specs, archive with one developer journal
-   entry, and verify the clean final Git checkpoint.
+   stable learnings into project specs, generate `report.md`, archive with one
+   developer journal entry, and verify the clean final Git checkpoint.
 
 The user should see the current task, current stage, current Outcome gap,
 latest evidence, required decision, and next action. Internal platform files,
@@ -62,20 +72,19 @@ OpenNori capabilities are implemented and verified in dependency order.
 | Order | Capability | OpenNori mapping | Completion proof |
 | --- | --- | --- | --- |
 | 1 | Setup and project initialization | Host-level CLI/Plugin setup, safe `init`, project workflow, config, specs, workspace, and Codex adapter | A clean machine completes setup once; a clean repository initializes without host mutation; a new Codex session discovers the workflow |
-| 2 | Repo-native spec system | `.opennori/spec/` with scoped project conventions | A task context manifest can reference and load relevant specs |
-| 3 | Task artifact system | Task directory with lifecycle state, Nori Contract, context manifests, research, design, and evidence | A task survives a new session and exposes one deterministic current state |
+| 2 | Repo-native spec system | `.opennori/spec/` with scoped project conventions | An agent can reuse relevant specs directly or through optional context |
+| 3 | Task artifact system | Task directory with lifecycle state, Contract, optional design/plan/context, research, Evidence, and report | A task survives a new session while human working documents remain non-authoritative |
 | 4 | Workflow protocol | Plan -> Implement -> Verify -> Finish in `.opennori/workflow.md` | State transitions are derived from task and contract state, not a second phase store |
-| 5 | Context injection | `implement.jsonl` and `check.jsonl`, loaded by platform Skills/adapters | Implement and check receive different curated context without whole-repo injection |
+| 5 | Context injection | Optional `implement.jsonl` and `check.jsonl`, loaded by platform Skills/adapters | Curated context improves focus when present and never becomes a start gate |
 | 6 | Outcome completion | Approved Contract plus append-only Evidence | Finish is blocked until all required Outcomes are proven or waived |
 | 7 | Workspace memory | Per-developer journal and session task pointer | A new session recovers task context and previous work without chat replay |
 | 8 | Knowledge promotion | Finish-time spec update workflow | Stable lessons become reviewed project specs before archive |
 | 9 | Managed distribution | Ownership, content hashes, update preview, backup-based replacement, safe uninstall | User-modified files are preserved and managed files update deterministically |
 | 10 | Platform adapters | Registry-backed adapters over one workflow kernel | The same task/workflow semantics work through platform-native assets |
 | 11 | Session memory search | Bounded adapters for supported host session stores | A user can find and extract prior project discussions without making them truth |
-| 12 | Coordination observations | Host-native worker/message/interrupt observations with local task bindings | Multi-agent coordination is durable and does not redefine task completion |
-| 13 | Git delivery | Planned base and branch, verified implementation commit or pull request, and clean archived checkpoint | Finish cannot claim completion before project changes and repo-native task state share a verified Git history |
-| 14 | Long-term upgrades | Versioned state migrations integrated with preview, Doctor, rollback, and managed updates | A schema 1 project migrates active and archived tasks without changing Contract, Evidence, Specs, or journal content |
-| 15 | Product distribution | Stable ESM API, CI, changelog, migration policy, release process, and npm provenance | A packed artifact works through CLI and API; a matching explicit GitHub Release is the only publication trigger |
+| 12 | Git delivery | Planned base and branch, verified implementation commit or pull request, and clean archived checkpoint | Finish cannot claim completion before project changes and repo-native task state share a verified Git history |
+| 13 | Long-term upgrades | Versioned state migrations integrated with preview, Doctor, rollback, and managed updates | A schema 1 project migrates active and archived tasks without changing Contract, Evidence, Specs, or journal content |
+| 14 | Product distribution | Stable ESM API, CI, changelog, migration policy, release process, and npm provenance | A packed artifact works through CLI and API; a matching explicit GitHub Release is the only publication trigger |
 
 Capabilities are implemented and verified in this order. Later capabilities
 cannot introduce a second task state machine or bypass Outcome completion.
@@ -106,7 +115,8 @@ Agent conversation
 - Project specs.
 - Task records and Nori Contracts.
 - Git delivery plans and verified results.
-- Curated implement/check context manifests.
+- Optional curated implement/check context manifests.
+- Human-readable Contract, design, execution plan, and Finish report.
 - Typed Evidence observations and research artifacts.
 - Developer journals and per-session active-task pointers.
 
@@ -133,20 +143,24 @@ The task directory contains:
 ```text
 .opennori/tasks/<YYYY-MM-DD-slug>/
   task.json             # lifecycle and task relationships
-  contract.json         # approved Outcome definition
-  contract.md           # generated human review surface
+  contract.json         # internal approved Outcome definition
+  contract.md           # only human approval surface
   delivery.json         # planned and verified Git delivery
   design.md             # optional technical design
-  implement.jsonl       # curated specs/research for implementation
-  check.jsonl           # curated specs/research for verification
+  plan.md               # optional execution plan and progress
+  implement.jsonl       # optional implementation context
+  check.jsonl           # optional verification context
   evidence.jsonl        # append-only evidence facts
+  report.md             # Finish completion report
   research/             # durable task research
 ```
 
 Rules:
 
-- `contract.json` is the only approved Outcome authority.
-- `contract.md` is generated and never parsed as state.
+- `contract.json` is the internal approved Outcome authority.
+- `contract.md` is the only human approval surface and is never parsed as state.
+- `design.md` and `plan.md` are optional working documents, not approval or
+  completion gates.
 - `evidence.jsonl` contains facts; Outcome status, current gap, and completion are
   derived at read time.
 - There is no parallel lifecycle projection, status sidecar, or event-derived
@@ -162,8 +176,9 @@ Rules:
   the approved Contract or erasing Evidence history. It increments the
   implementation revision, and only Evidence from that revision can satisfy
   completion.
-- Replan archives the previous Contract, delivery, and both context manifests;
-  start stays blocked until their replacements are approved and curated.
+- Replan archives the previous Contract, delivery, and any context manifests;
+  start stays blocked only until the replacement Contract is approved and the
+  required delivery plan exists.
 - Any non-null blocker stops forward lifecycle transitions until explicitly
   cleared.
 - Archiving moves a completed task for organization; the task's `completed`
@@ -188,7 +203,6 @@ Rules:
       journal.md
   .runtime/
     sessions/<session-key>.json
-    coordination/<task>/<worker-binding>.json
 ```
 
 The project commits workflow, specs, tasks, contracts, delivery, evidence, and shared
@@ -199,17 +213,20 @@ workspace knowledge. `.opennori/.runtime/` is ignored.
 The current foundation includes:
 
 - A new compact core for project paths, config, task state, contract state,
-  evidence evaluation, context manifests, journals, and session pointers.
+  evidence evaluation, optional context manifests, journals, and session pointers.
 - Citty `runMain` with native nested command/help handling; no custom CLI
   resolver.
-- `setup`, `init`, `doctor`, `status`, `history`, `task`, `update`, and `uninstall` command groups.
+- `setup`, `init`, `doctor`, `status`, `history`, `platform`, `task`, `update`,
+  and `uninstall` command groups.
 - Non-destructive managed-file planning with hashes.
-- A registry-backed Codex Plugin adapter and Claude Code project adapter over
-  the same managed assets and workflow kernel.
-- Bounded Codex Plugin hooks for stage context and task-to-worker observations.
+- Registry-backed Codex and Claude Code Plugin adapters over the same managed
+  project routes and workflow kernel.
+- Preview-first, append-only platform addition that keeps existing adapters and
+  selects the active host from the current session environment.
+- Bounded Codex and Claude Code Plugin hooks for stage context when available.
 - Read-only, project-scoped host history search with no OpenNori index or copy.
-- Host-local coordination bindings over native worker tools, without a queue or
-  worker lifecycle state machine.
+- Direct use of host-native workers when useful, without OpenNori persistence or
+  a worker lifecycle state machine.
 - Git and provider CLI verification without a custom Git client.
 - Forward state migrations with preview, byte-for-byte rollback, and Doctor
   recovery.
@@ -252,12 +269,16 @@ schema validation, Markdown parsing, transport protocols, or search engines.
 - Missing initialization: commands return `project_not_initialized` and the
   exact init command.
 - User-modified managed file: update reports a conflict and preserves the file.
+- Conflicting second-host asset: platform addition blocks before changing
+  config, adapter files, or the install manifest.
+- Multi-platform command without one identifiable current host: stop instead of
+  selecting the first configured adapter.
 - Corrupt task or contract: writes stop; doctor reports the path and recovery
   action.
 - No stable host session id: starting a task fails unless the caller supplies
   an explicit session key. OpenNori never falls back to a shared global pointer.
-- Missing context file: context loading reports the missing entry and does not
-  silently omit it.
+- Missing context file: the optional context load reports the missing entry;
+  Plan, Implement, and Verify continue from the Contract and repository.
 - Unapproved contract: implementation start is blocked.
 - Missing or failed required Evidence: Finish is blocked with the current Outcome.
 - Missing, stale, or mismatched Git delivery: Finish is blocked with a concrete
@@ -282,7 +303,8 @@ Use a temporary repository to prove the real path:
 1. Run `npx opennori setup`, then `opennori init --user jarl`, and inspect created/managed files.
 2. Create a task and confirm its canonical artifact set.
 3. Draft and approve a Contract with at least two Outcomes.
-4. Add distinct implement/check context and load both.
+4. Confirm implementation can start without context manifests, then add and load
+   optional distinct implement/check context.
 5. Start the task under a stable session key and recover it in another CLI
    invocation.
 6. Show that Finish fails before required Evidence and delivery exist.

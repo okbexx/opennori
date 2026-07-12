@@ -22,16 +22,6 @@ export function hostSessionKey(value?: string): string | undefined {
   return value || process.env.OPENNORI_SESSION_ID || process.env.CODEX_THREAD_ID || process.env.CLAUDE_CODE_SESSION_ID;
 }
 
-export function requiredHostSessionKey(value?: string): string {
-  const session = hostSessionKey(value);
-  if (!session) {
-    throw new OpenNoriError("session_id_required", "A stable host session key is required for worker coordination.", {
-      recovery: "Pass --session or run from a supported host conversation."
-    });
-  }
-  return session;
-}
-
 export function readyProjectRoot(value: string): string {
   const root = projectRoot(value);
   readProjectConfig(root);
@@ -49,8 +39,27 @@ export function requireTaskLocation(root: string, taskId: string): NonNullable<R
   return location;
 }
 
-export function configuredPlatform(root: string): PlatformId {
-  const platform = readProjectConfig(root).platforms[0];
-  if (!platform) throw new OpenNoriError("platform_missing", "The project does not configure an agent platform.");
+export function configuredPlatform(root: string, env: NodeJS.ProcessEnv = process.env): PlatformId {
+  const configured = readProjectConfig(root).platforms;
+  const detected = [
+    env.CODEX_THREAD_ID?.trim() ? "codex" : null,
+    env.CLAUDE_CODE_SESSION_ID?.trim() ? "claude" : null
+  ].filter((platform): platform is PlatformId => platform !== null);
+  if (detected.length > 1) {
+    throw new OpenNoriError("platform_ambiguous", "Both Codex and Claude Code session identifiers are present.", {
+      recovery: "Run the command from one supported host session."
+    });
+  }
+  const platform = detected[0] ?? (configured.length === 1 ? configured[0] : undefined);
+  if (!platform) {
+    throw new OpenNoriError("platform_required", "The current agent platform cannot be determined for this multi-platform project.", {
+      recovery: "Run the command from a Codex or Claude Code conversation."
+    });
+  }
+  if (!configured.includes(platform)) {
+    throw new OpenNoriError("platform_not_configured", `${platform} is not configured for this project.`, {
+      recovery: `Preview 'opennori platform add ${platform} --dry-run', then apply it with --confirm.`
+    });
+  }
   return platform;
 }

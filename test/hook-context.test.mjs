@@ -5,7 +5,8 @@ import path from "node:path";
 import test from "node:test";
 import { initializeProject, repositoryRoot, runCli, runGit, temporaryProject, writeProjectJson } from "./support/fixture.mjs";
 
-const { buildCodexHookContext } = await import("../dist/src/hook-context.js");
+const { buildClaudeHookContext, buildCodexHookContext } = await import("../dist/src/hook-context.js");
+const { initProject } = await import("../dist/src/lifecycle.js");
 
 function prepareContextTask(root, session, { implementContent = "implementation entry\n", checkContent = "verification entry\n" } = {}) {
   fs.writeFileSync(path.join(root, "implement-source.txt"), implementContent);
@@ -44,8 +45,8 @@ function prepareContextTask(root, session, { implementContent = "implementation 
   return taskId;
 }
 
-function runHook(input) {
-  const result = spawnSync("node", [path.join(repositoryRoot, "hooks/opennori-context.mjs")], {
+function runHook(input, platform = "codex") {
+  const result = spawnSync("node", [path.join(repositoryRoot, "hooks/opennori-context.mjs"), platform], {
     cwd: repositoryRoot,
     input: typeof input === "string" ? input : JSON.stringify(input),
     encoding: "utf8",
@@ -56,43 +57,89 @@ function runHook(input) {
   return result.stdout.trim() ? JSON.parse(result.stdout) : null;
 }
 
-test("the package and Plugin wire context and coordination hooks", () => {
+test("the package and Plugins wire bounded context hooks", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8"));
-  const plugin = JSON.parse(fs.readFileSync(path.join(repositoryRoot, ".codex-plugin/plugin.json"), "utf8"));
-  const hooks = JSON.parse(fs.readFileSync(path.join(repositoryRoot, "hooks/hooks.json"), "utf8"));
+  const codexPlugin = JSON.parse(fs.readFileSync(path.join(repositoryRoot, ".codex-plugin/plugin.json"), "utf8"));
+  const claudePlugin = JSON.parse(fs.readFileSync(path.join(repositoryRoot, ".claude-plugin/plugin.json"), "utf8"));
+  const codexHooks = JSON.parse(fs.readFileSync(path.join(repositoryRoot, "hooks/codex-hooks.json"), "utf8"));
+  const claudeHooks = JSON.parse(fs.readFileSync(path.join(repositoryRoot, "hooks/hooks.json"), "utf8"));
 
   assert.ok(packageJson.files.includes("hooks/"));
-  assert.equal(plugin.hooks, "./hooks/hooks.json");
-  assert.deepEqual(Object.keys(hooks.hooks).sort(), ["SessionStart", "SubagentStart", "SubagentStop", "UserPromptSubmit"]);
+  assert.ok(packageJson.files.includes(".claude-plugin/"));
+  assert.equal(codexPlugin.hooks, "./hooks/codex-hooks.json");
+  assert.equal(claudePlugin.hooks, undefined);
+  assert.deepEqual(Object.keys(codexHooks.hooks).sort(), ["SessionStart", "SubagentStart", "UserPromptSubmit"]);
+  assert.deepEqual(Object.keys(claudeHooks.hooks).sort(), ["SessionStart", "SubagentStart", "UserPromptSubmit"]);
   for (const name of ["SessionStart", "SubagentStart", "UserPromptSubmit"]) {
-    const event = hooks.hooks[name];
+    const event = codexHooks.hooks[name];
     const command = event[0].hooks[0];
     assert.equal(command.type, "command");
-    assert.equal(command.command, 'node "$PLUGIN_ROOT/hooks/opennori-context.mjs"');
-    assert.equal(command.commandWindows, 'node "%PLUGIN_ROOT%\\hooks\\opennori-context.mjs"');
+    assert.equal(command.command, 'node "$PLUGIN_ROOT/hooks/opennori-context.mjs" codex');
+    assert.equal(command.commandWindows, 'node "%PLUGIN_ROOT%\\hooks\\opennori-context.mjs" codex');
     assert.equal(command.timeout, 10);
   }
-  const startObserver = hooks.hooks.SubagentStart[0].hooks[1];
-  const stopObserver = hooks.hooks.SubagentStop[0].hooks[0];
-  for (const command of [startObserver, stopObserver]) {
+  for (const name of ["SessionStart", "SubagentStart", "UserPromptSubmit"]) {
+    const command = claudeHooks.hooks[name][0].hooks[0];
     assert.equal(command.type, "command");
-    assert.equal(command.command, 'node "$PLUGIN_ROOT/hooks/opennori-observe.mjs"');
-    assert.equal(command.commandWindows, 'node "%PLUGIN_ROOT%\\hooks\\opennori-observe.mjs"');
+    assert.equal(command.command, `node "\${CLAUDE_PLUGIN_ROOT}/hooks/opennori-context.mjs" claude`);
     assert.equal(command.timeout, 10);
   }
   assert.equal(fs.existsSync(path.join(repositoryRoot, "dist/src/hook-context.js")), true);
-  assert.equal(fs.existsSync(path.join(repositoryRoot, "dist/src/coordination.js")), true);
 });
 
-test("hook context is inert without a foundation project and matching session task", (t) => {
+test("workflow assets require task-creation consent before Plan", () => {
+  for (const relativePath of ["skills/nori/SKILL.md", "skills/nori-plan/SKILL.md", "templates/workflow.md"]) {
+    const content = fs.readFileSync(path.join(repositoryRoot, relativePath), "utf8");
+    assert.match(content, /consent/i, relativePath);
+    assert.match(content, /not[\s\S]{0,100}Contract/i, relativePath);
+  }
+  for (const relativePath of ["templates/agents-section.md", "templates/claude-section.md"]) {
+    const content = fs.readFileSync(path.join(repositoryRoot, relativePath), "utf8");
+    assert.match(content, /load the installed `nori` Skill/i, relativePath);
+    assert.doesNotMatch(content, /simple conversation|task-creation consent|Contract approval/i, relativePath);
+  }
+});
+
+test("Plan shares the Contract as a host-native file link before inline fallback", () => {
+  const skill = fs.readFileSync(path.join(repositoryRoot, "skills/nori-plan/SKILL.md"), "utf8");
+  const workflow = fs.readFileSync(path.join(repositoryRoot, "templates/workflow.md"), "utf8");
+  const plugin = JSON.parse(fs.readFileSync(path.join(repositoryRoot, ".codex-plugin/plugin.json"), "utf8"));
+
+  assert.match(skill, /On Codex[\s\S]{0,180}Markdown link[\s\S]{0,180}absolute file path/);
+  assert.match(skill, /On Claude Code[\s\S]{0,180}project-relative/);
+  assert.match(skill, /Do not paste the Contract body into the conversation by default/);
+  assert.match(skill, /only when[\s\S]{0,120}user asks[\s\S]{0,120}host cannot open/);
+  assert.match(workflow, /host's native file link/);
+  assert.match(workflow, /Do not paste its body into the\s+conversation by default/);
+  assert.match(plugin.interface.longDescription, /directly openable/);
+});
+
+test("hook context is silent outside OpenNori and routes an initialized project through nori", (t) => {
   const root = temporaryProject(t, "opennori-hook-inert-");
   const input = { session_id: "hook-session", cwd: root, hook_event_name: "SessionStart" };
 
   assert.equal(buildCodexHookContext(input), null);
   initializeProject(root);
-  assert.equal(buildCodexHookContext(input), null);
+  const noTask = buildCodexHookContext(input);
+  assert.equal(noTask.task_id, null);
+  assert.match(noTask.context, /no task is selected/i);
+  assert.match(noTask.context, /Load the nori Skill/);
+  assert.doesNotMatch(noTask.context, /Simple conversation|Never create a task|Contract approval/);
+  assert.equal(buildCodexHookContext({ ...input, hook_event_name: "SubagentStart" }), null);
   assert.equal(buildCodexHookContext({ ...input, session_id: "" }), null);
   assert.equal(buildCodexHookContext({ ...input, cwd: "" }), null);
+});
+
+test("Codex hooks stay silent in a Claude-only OpenNori project", (t) => {
+  const root = temporaryProject(t, "opennori-hook-claude-only-");
+  initProject(root, { developer: "Probe", platforms: ["claude"], confirm: true });
+  assert.equal(
+    buildCodexHookContext({ session_id: "codex-session", cwd: root, hook_event_name: "SessionStart" }),
+    null
+  );
+  const claude = buildClaudeHookContext({ session_id: "claude-session", cwd: root, hook_event_name: "SessionStart" });
+  assert.match(claude.context, /no task is selected/i);
+  assert.match(runHook({ session_id: "claude-session", cwd: root, hook_event_name: "SessionStart" }, "claude").hookSpecificOutput.additionalContext, /no task is selected/i);
 });
 
 test("planning context is discovered from a nested project directory", (t) => {
@@ -111,7 +158,15 @@ test("planning context is discovered from a nested project directory", (t) => {
   assert.match(result.context, /Stage: plan/);
   assert.match(result.context, /Use the matching OpenNori Skill and CLI stage command/);
   assert.doesNotMatch(result.context, /Curated (implement|check) context/);
-  assert.equal(buildCodexHookContext({ session_id: "other-session", cwd: nested, hook_event_name: "SessionStart" }), null);
+  const otherSession = buildCodexHookContext({
+    session_id: "other-session",
+    cwd: nested,
+    hook_event_name: "SessionStart"
+  });
+  assert.equal(otherSession.task_id, null);
+  assert.match(otherSession.context, /no task is selected/i);
+  assert.match(otherSession.context, /Load the nori Skill/);
+  assert.doesNotMatch(otherSession.context, new RegExp(created.data.task.id));
 });
 
 test("Implement and Verify receive only their stage-specific curated context", (t) => {
@@ -126,7 +181,7 @@ test("Implement and Verify receive only their stage-specific curated context", (
 
   const implement = buildCodexHookContext({ session_id: session, cwd: root, hook_event_name: "SessionStart" });
   assert.match(implement.context, /Stage: implement/);
-  assert.match(implement.context, /Curated implement context:/);
+  assert.match(implement.context, /Optional implement context:/);
   assert.match(implement.context, /IMPLEMENT-CONTEXT-ONLY/);
   assert.doesNotMatch(implement.context, /CHECK-CONTEXT-ONLY/);
 
@@ -135,10 +190,54 @@ test("Implement and Verify receive only their stage-specific curated context", (
     const verify = buildCodexHookContext({ session_id: session, cwd: root, hook_event_name: hookEventName });
     assert.equal(verify.hook_event_name, hookEventName);
     assert.match(verify.context, /Stage: verify/);
-    assert.match(verify.context, /Curated check context:/);
+    assert.match(verify.context, /Optional check context:/);
     assert.match(verify.context, /CHECK-CONTEXT-ONLY/);
     assert.doesNotMatch(verify.context, /IMPLEMENT-CONTEXT-ONLY/);
   }
+});
+
+test("optional task documents and context never become an implementation gate", (t) => {
+  const root = temporaryProject(t, "opennori-hook-optional-context-");
+  const session = "hook-optional-context-session";
+  initializeProject(root);
+  const taskId = prepareContextTask(root, session);
+  const directory = path.join(root, ".opennori/tasks", taskId);
+  fs.writeFileSync(path.join(directory, "design.md"), "# Design\n\nA reviewable technical choice.\n");
+  fs.writeFileSync(path.join(directory, "plan.md"), "# Plan\n\n- [ ] Deliver the result.\n");
+  fs.rmSync(path.join(directory, "implement.jsonl"));
+  fs.rmSync(path.join(directory, "check.jsonl"));
+
+  assert.equal(runCli(root, ["task", "start", taskId], { session }).data.status, "in_progress");
+  const hook = buildCodexHookContext({ session_id: session, cwd: root, hook_event_name: "SessionStart" });
+  assert.match(hook.context, /Task documents:/);
+  assert.ok(hook.context.includes(`.opennori/tasks/${taskId}/contract.md`));
+  assert.ok(hook.context.includes(`.opennori/tasks/${taskId}/design.md`));
+  assert.ok(hook.context.includes(`.opennori/tasks/${taskId}/plan.md`));
+  assert.doesNotMatch(hook.context, /Optional implement context:/);
+
+  runCli(
+    root,
+    ["task", "context", "write", taskId, "--mode", "implement", "--input", ".opennori/.runtime/hook-implement.json"],
+    { session }
+  );
+  const refreshed = buildCodexHookContext({ session_id: session, cwd: root, hook_event_name: "SessionStart" });
+  assert.match(refreshed.context, /Optional implement context:/);
+  assert.match(refreshed.context, /implementation entry/);
+});
+
+test("stale optional context fails soft without hiding canonical task state", (t) => {
+  const root = temporaryProject(t, "opennori-hook-stale-context-");
+  const session = "hook-stale-context-session";
+  initializeProject(root);
+  const taskId = prepareContextTask(root, session);
+  runCli(root, ["task", "start", taskId], { session });
+  fs.rmSync(path.join(root, "implement-source.txt"));
+
+  const hook = buildCodexHookContext({ session_id: session, cwd: root, hook_event_name: "SessionStart" });
+  assert.match(hook.context, new RegExp(`Task: ${taskId}`));
+  assert.match(hook.context, /Stage: implement/);
+  assert.match(hook.context, /Optional implement context is unavailable:/);
+  assert.match(hook.context, /Context file does not exist/);
 });
 
 test("turn hooks omit oversized content while session hooks use the larger budget", (t) => {
@@ -164,6 +263,10 @@ test("the executable hook emits Codex additionalContext and degrades to a system
   const root = temporaryProject(t, "opennori-hook-process-");
   const session = "hook-process-session";
   initializeProject(root);
+
+  const noTask = runHook({ session_id: session, cwd: root, hook_event_name: "SessionStart" });
+  assert.match(noTask.hookSpecificOutput.additionalContext, /no task is selected/i);
+
   const created = runCli(root, ["task", "create", "--title", "Process hook", "--slug", "process-hook"], { session });
 
   const output = runHook({ session_id: session, cwd: root, hook_event_name: "SessionStart" });

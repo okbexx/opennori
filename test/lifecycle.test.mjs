@@ -14,10 +14,12 @@ import {
 const { doctorProject } = await import("../dist/src/doctor.js");
 const { contentHash } = await import("../dist/src/io.js");
 const {
+  addProjectPlatform,
   applyLifecyclePlan,
   initProject,
   planInit,
   planManifestRepair,
+  planPlatformAdd,
   planUninstall,
   planUpdate,
   repairProjectManifest,
@@ -205,6 +207,169 @@ test("lifecycle happy paths are repeatable and preserve project-owned content", 
   assert.equal(fs.readFileSync(path.join(root, ".opennori/tasks/user-task.txt"), "utf8"), "keep task data\n");
 });
 
+test("a platform adapter is previewed and added without replacing existing adapters or project config", (t) => {
+  const root = temporaryProject(t, "opennori-platform-add-");
+  const agentsPath = path.join(root, "AGENTS.md");
+  fs.writeFileSync(agentsPath, "project agent rules\n");
+  initProject(root, { developer: "Probe", confirm: true, productVersion: "one" });
+  fs.mkdirSync(path.join(root, "packages/app"), { recursive: true });
+  const configPath = path.join(root, ".opennori/config.yaml");
+  fs.writeFileSync(
+    configPath,
+    renderProjectConfig({
+      ...readProjectConfig(root),
+      packages: { app: { path: "packages/app" } },
+      default_package: "app"
+    })
+  );
+  const manifestPath = path.join(root, ".opennori/manifest.json");
+  const configBefore = fs.readFileSync(configPath);
+  const manifestBefore = fs.readFileSync(manifestPath);
+  const agentsBefore = fs.readFileSync(agentsPath);
+
+  const preview = planPlatformAdd(root, "claude", "two");
+  assert.equal(preview.operation, "platform-add");
+  assert.equal(preview.blockers.length, 0);
+  assert.equal(preview.actions.some((entry) => entry.asset_id.startsWith("codex.")), false);
+  assert.equal(preview.actions.find((entry) => entry.asset_id === "core.project-config").type, "update");
+  assert.equal(fs.existsSync(path.join(root, "CLAUDE.md")), false);
+  assert.deepEqual(fs.readFileSync(configPath), configBefore);
+  assert.deepEqual(fs.readFileSync(manifestPath), manifestBefore);
+
+  const added = addProjectPlatform(root, "claude", { confirm: true, productVersion: "two" });
+  assert.equal(added.applied, true);
+  assert.deepEqual(readProjectConfig(root), {
+    schema_version: "opennori/project-v1",
+    developer: "Probe",
+    platforms: ["codex", "claude"],
+    packages: { app: { path: "packages/app" } },
+    default_package: "app"
+  });
+  assert.deepEqual(JSON.parse(fs.readFileSync(manifestPath, "utf8")).platforms, ["codex", "claude"]);
+  assert.deepEqual(fs.readFileSync(agentsPath), agentsBefore);
+  assert.match(fs.readFileSync(path.join(root, "CLAUDE.md"), "utf8"), /OPENNORI:CLAUDE:START/);
+  assert.equal(fs.existsSync(path.join(root, ".claude")), false);
+
+  const repeated = addProjectPlatform(root, "claude", { confirm: true, productVersion: "two" });
+  assert.equal(repeated.applied, false);
+  assert.equal(repeated.plan.actions.every((entry) => entry.type === "skip"), true);
+});
+
+test("platform addition refuses target adapter conflicts without changing canonical state", (t) => {
+  const root = temporaryProject(t, "opennori-platform-add-conflict-");
+  initProject(root, { developer: "Probe", confirm: true });
+  const conflictPath = path.join(root, "CLAUDE.md");
+  fs.writeFileSync(conflictPath, "<!-- OPENNORI:CLAUDE:START -->\nbroken managed section\n");
+  const configPath = path.join(root, ".opennori/config.yaml");
+  const manifestPath = path.join(root, ".opennori/manifest.json");
+  const configBefore = fs.readFileSync(configPath);
+  const manifestBefore = fs.readFileSync(manifestPath);
+
+  const preview = planPlatformAdd(root, "claude");
+  assert.match(preview.blockers.join(" "), /managed section markers are incomplete/i);
+  const error = captureFailure(() => addProjectPlatform(root, "claude", { confirm: true }));
+  assert.equal(error.code, "platform_add_blocked");
+  assert.deepEqual(fs.readFileSync(configPath), configBefore);
+  assert.deepEqual(fs.readFileSync(manifestPath), manifestBefore);
+  assert.equal(fs.readFileSync(conflictPath, "utf8"), "<!-- OPENNORI:CLAUDE:START -->\nbroken managed section\n");
+});
+
+test("platform addition refuses an unowned project config before writing adapter assets", (t) => {
+  const root = temporaryProject(t, "opennori-platform-add-unowned-config-");
+  initProject(root, { developer: "Probe", confirm: true });
+  const configPath = path.join(root, ".opennori/config.yaml");
+  const manifestPath = path.join(root, ".opennori/manifest.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  manifest.assets = manifest.assets.filter((entry) => entry.asset_id !== "core.project-config");
+  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  const configBefore = fs.readFileSync(configPath);
+  const manifestBefore = fs.readFileSync(manifestPath);
+
+  const preview = planPlatformAdd(root, "claude");
+  assert.match(preview.blockers.join(" "), /config.yaml: Install ownership does not match/i);
+  const error = captureFailure(() => addProjectPlatform(root, "claude", { confirm: true }));
+  assert.equal(error.code, "platform_add_blocked");
+  assert.deepEqual(fs.readFileSync(configPath), configBefore);
+  assert.deepEqual(fs.readFileSync(manifestPath), manifestBefore);
+  assert.equal(fs.existsSync(path.join(root, "CLAUDE.md")), false);
+  assert.equal(fs.existsSync(path.join(root, ".claude")), false);
+});
+
+test("platform addition rolls back config, adapter files, and created directories when manifest persistence fails", (t) => {
+  const root = temporaryProject(t, "opennori-platform-add-rollback-");
+  initProject(root, { developer: "Probe", confirm: true });
+  const configPath = path.join(root, ".opennori/config.yaml");
+  const manifestPath = path.join(root, ".opennori/manifest.json");
+  const configBefore = fs.readFileSync(configPath);
+  const manifestBefore = fs.readFileSync(manifestPath);
+  const originalRename = fs.renameSync;
+  let injected = false;
+  fs.renameSync = (source, target) => {
+    if (!injected && path.resolve(String(target)) === manifestPath) {
+      injected = true;
+      throw new Error("injected platform manifest failure");
+    }
+    return originalRename(source, target);
+  };
+  try {
+    assert.throws(() => addProjectPlatform(root, "claude", { confirm: true }), /injected platform manifest failure/);
+  } finally {
+    fs.renameSync = originalRename;
+  }
+  assert.equal(injected, true);
+  assert.deepEqual(fs.readFileSync(configPath), configBefore);
+  assert.deepEqual(fs.readFileSync(manifestPath), manifestBefore);
+  assert.equal(fs.existsSync(path.join(root, "CLAUDE.md")), false);
+  assert.equal(fs.existsSync(path.join(root, ".claude")), false);
+});
+
+test("platform addition rejects a tampered or stale reviewed plan", (t) => {
+  const root = temporaryProject(t, "opennori-platform-add-stale-");
+  initProject(root, { developer: "Probe", confirm: true });
+  const currentConfig = readProjectConfig(root);
+  const targetAssets = projectAssets({ ...currentConfig, platforms: ["codex", "claude"] });
+  const tampered = structuredClone(planPlatformAdd(root, "claude"));
+  tampered.actions.find((entry) => entry.asset_id === "core.project-config").result_hash = contentHash("tampered");
+  assert.throws(
+    () => applyLifecyclePlan(tampered, targetAssets, { confirm: true }),
+    (error) => error.code === "plan_stale"
+  );
+
+  const stale = planPlatformAdd(root, "claude");
+  fs.appendFileSync(path.join(root, ".opennori/config.yaml"), "\n# concurrent project edit\n");
+  assert.throws(
+    () => applyLifecyclePlan(stale, targetAssets, { confirm: true }),
+    (error) => error.code === "plan_stale"
+  );
+  assert.equal(fs.existsSync(path.join(root, "CLAUDE.md")), false);
+});
+
+test("managed update removes legacy Claude project Skill copies", (t) => {
+  const root = temporaryProject(t, "opennori-legacy-claude-skills-");
+  initProject(root, { developer: "Probe", platforms: ["claude"], confirm: true, productVersion: "one" });
+  const skillPath = path.join(root, ".claude/skills/nori/SKILL.md");
+  fs.mkdirSync(path.dirname(skillPath), { recursive: true });
+  const skill = fs.readFileSync(path.join(process.cwd(), "skills/nori/SKILL.md"), "utf8");
+  fs.writeFileSync(skillPath, skill);
+  const manifestPath = path.join(root, ".opennori/manifest.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  manifest.assets.push({
+    asset_id: "claude.skill.nori",
+    platform: "claude",
+    path: ".claude/skills/nori/SKILL.md",
+    scope: "file",
+    policy: "managed",
+    last_written_hash: contentHash(skill)
+  });
+  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+  const preview = planUpdate(root, "two");
+  assert.equal(preview.actions.find((entry) => entry.asset_id === "claude.skill.nori").type, "remove");
+  updateProject(root, { confirm: true, productVersion: "two" });
+  assert.equal(fs.existsSync(skillPath), false);
+  assert.match(fs.readFileSync(path.join(root, "CLAUDE.md"), "utf8"), /OPENNORI:CLAUDE:START/);
+});
+
 test("manifest repair reconstructs ownership without replacing project data", (t) => {
   const root = temporaryProject(t, "opennori-manifest-repair-");
   initProject(root, { developer: "Probe", confirm: true, productVersion: "one" });
@@ -298,66 +463,6 @@ test("invalid runtime state cannot be forged into a destructive uninstall action
   const error = captureFailure(() => applyLifecyclePlan(plan, assets(root), { confirm: true }));
   assert.ok(error.code === "plan_stale" || error.code === "plan_invalid");
   assert.equal(fs.readFileSync(filePath, "utf8"), "not an OpenNori session\n");
-});
-
-test("uninstall removes owned coordination state while keeping unknown runtime ignored", (t) => {
-  const root = temporaryProject(t, "opennori-lifecycle-coordination-");
-  const session = "coordination-uninstall-session";
-  initializeProject(root);
-  const { taskId } = prepareApprovedTask(root, "coordination-uninstall", session);
-  runCli(root, ["task", "start", taskId], { session });
-  runCli(
-    root,
-    [
-      "task",
-      "coordination",
-      "assign",
-      taskId,
-      "--worker",
-      "worker-to-remove",
-      "--role",
-      "reviewer",
-      "--assignment",
-      "Inspect lifecycle cleanup"
-    ],
-    { session }
-  );
-
-  const coordinationDirectory = path.join(root, ".opennori/.runtime/coordination", taskId);
-  const ownedBinding = path.join(coordinationDirectory, fs.readdirSync(coordinationDirectory)[0]);
-  const unknownBinding = path.join(coordinationDirectory, `${"f".repeat(64)}.json`);
-  fs.writeFileSync(unknownBinding, "not an OpenNori binding\n");
-  const unknownSession = path.join(root, ".opennori/.runtime/sessions", `${"e".repeat(64)}.json`);
-  fs.writeFileSync(unknownSession, "not an OpenNori session\n");
-  const unknownInputDirectory = path.join(root, ".opennori/.runtime/task-inputs");
-  const unknownInput = path.join(unknownInputDirectory, "contract.json");
-  fs.mkdirSync(unknownInputDirectory);
-  fs.writeFileSync(unknownInput, '{"goal":"preserve this input"}\n');
-
-  const firstPlan = planUninstall(root);
-  assert.equal(firstPlan.actions.find((entry) => entry.path.endsWith(path.basename(ownedBinding))).type, "remove");
-  assert.equal(firstPlan.actions.find((entry) => entry.path.endsWith(path.basename(unknownBinding))).type, "skip");
-  assert.equal(firstPlan.actions.find((entry) => entry.path.endsWith(".opennori/.runtime/task-inputs")).type, "skip");
-  assert.equal(firstPlan.actions.find((entry) => entry.asset_id === "core.runtime-ignore").type, "conflict");
-
-  const first = uninstallProject(root, { confirm: true });
-  assert.equal(fs.existsSync(ownedBinding), false);
-  assert.equal(fs.readFileSync(unknownBinding, "utf8"), "not an OpenNori binding\n");
-  assert.equal(fs.readFileSync(unknownSession, "utf8"), "not an OpenNori session\n");
-  assert.equal(fs.readFileSync(unknownInput, "utf8"), '{"goal":"preserve this input"}\n');
-  assert.match(fs.readFileSync(path.join(root, ".gitignore"), "utf8"), /\.opennori\/\.runtime\//);
-  assert.equal(first.manifest.assets.some((entry) => entry.asset_id === "core.runtime-ignore"), true);
-
-  fs.rmSync(unknownBinding);
-  fs.rmSync(unknownSession);
-  fs.rmSync(unknownInputDirectory, { recursive: true });
-  fs.rmSync(path.join(root, ".opennori/.runtime/contract-input.json"));
-  fs.rmSync(path.join(root, ".opennori/.runtime/context-input.json"));
-  const second = uninstallProject(root, { confirm: true });
-  assert.equal(second.manifest, null);
-  assert.equal(fs.existsSync(path.join(root, ".opennori/manifest.json")), false);
-  assert.equal(fs.existsSync(path.join(root, ".gitignore")), false);
-  assert.equal(fs.existsSync(path.join(root, ".opennori/.runtime/coordination")), false);
 });
 
 test("obsolete ownership release fails closed if content appears after preview", (t) => {

@@ -15,7 +15,7 @@ function contextMaxBytes(value?: string): number | undefined {
 }
 
 const contextWriteCommand = defineCommand({
-  meta: { name: "write", description: "Write an implement or check context manifest" },
+  meta: { name: "write", description: "Write an optional implement or check context manifest" },
   args: {
     ...ROOT_ARGS,
     task: { type: "positional", description: "Task id", required: true },
@@ -76,13 +76,13 @@ const contextLoadCommand = defineCommand({
         const omitted = bundle.omitted
           .map((entry) => `Omitted ${entry.file} (${entry.bytes} bytes). Next: ${entry.recovery}`)
           .join("\n");
-        return [loaded, omitted].filter(Boolean).join("\n\n");
+        return [loaded, omitted].filter(Boolean).join("\n\n") || `No ${args.mode} context.`;
       }
     );
   }
 });
 
 export const contextCommand = defineCommand({
-  meta: { name: "context", description: "Curate separate implementation and verification context" },
+  meta: { name: "context", description: "Curate optional implementation and verification context" },
   subCommands: { write: contextWriteCommand, show: contextShowCommand, load: contextLoadCommand }
 });

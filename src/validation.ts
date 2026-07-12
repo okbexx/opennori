@@ -15,8 +15,7 @@ const SCHEMAS = {
   evidence: "evidence.schema.json",
   evidenceInput: "evidence-input.schema.json",
   context: "context.schema.json",
-  session: "session.schema.json",
-  coordinationBinding: "coordination-binding.schema.json"
+  session: "session.schema.json"
 } as const;
 
 export type SchemaName = keyof typeof SCHEMAS;

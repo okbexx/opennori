@@ -38,11 +38,6 @@ export function writeContextManifest(root: string, taskId: string, mode: Context
 
 function writeContextManifestUnlocked(root: string, taskId: string, mode: ContextMode, entries: ContextEntry[]): ContextEntry[] {
   const location = requireWritableTask(root, taskId);
-  if (location.task.status !== "planning") {
-    throw new OpenNoriError("context_locked", `Task ${taskId} is ${location.task.status}; context can only be curated in Plan.`, {
-      recovery: "Return the task to Plan before replacing implementation or verification context."
-    });
-  }
   const validated = validateEntries(root, entries);
   const content = validated.map((entry) => JSON.stringify(entry)).join("\n");
   writeTextAtomic(manifestPath(root, location.directory, mode), content ? `${content}\n` : "");
@@ -75,11 +70,6 @@ export function loadContextBundle(
   options: ContextLoadOptions = {}
 ): ContextBundle {
   const manifestFiles = loadContextFiles(root, taskId, mode);
-  if (manifestFiles.length === 0) {
-    throw new OpenNoriError("context_empty", `Task ${taskId} has no ${mode} context.`, {
-      recovery: `Write ${mode}.jsonl with the smallest relevant project files.`
-    });
-  }
   const requestedFile = options.file?.trim();
   const files = requestedFile
     ? manifestFiles.filter((entry) => entry.file === requestedFile)

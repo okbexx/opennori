@@ -20,13 +20,35 @@ public workflow or API contracts and must include a documented migration path.
   `opennori/testing` entrypoints, including a schema-checked integration test
   kit.
 - CI and provenance-bearing npm release automation.
-- A fresh Codex Verify reviewer by default, with a recursion guard and an
-  explicit sequential Claude Code path.
+- A fresh Codex Verify reviewer by default, with a recursion guard, an explicit
+  same-agent fallback when unavailable, and a sequential Claude Code path.
 - Offline release acceptance for projects created by the published
   `opennori@0.1.30` foundation.
+- Preview-first `opennori platform add <platform>` support so an initialized
+  project can use Codex and Claude Code without replacing either adapter.
+- A user-scoped Claude Code Plugin and marketplace with SessionStart,
+  UserPromptSubmit, and SubagentStart context hooks.
 
 ### Changed
 
+- `contract.md` is now the complete human approval surface and is shared as a
+  directly openable host-native file reference. Its body stays out of chat
+  unless the user requests it or the host cannot open the file; a summary never
+  substitutes for reviewing the document.
+- Contract approval and Git delivery decisions are separate. Optional
+  `design.md` and `plan.md` keep technical reasoning and execution progress
+  human-readable without becoming canonical state or approval gates.
+- Implement and Verify context manifests are optional loading hints and no
+  longer block task start. Host-native workers are used directly without an
+  additional OpenNori state layer.
+- Initialized projects now expose OpenNori automatically in new agent
+  conversations and require explicit user consent before creating a task.
+- Status and Hook routing read host session pointers without taking write locks,
+  so task-creation consent also works in read-only and Plan host modes.
+- Doctor recovery can rebuild an archived task's `contract.md` projection
+  without changing its completed canonical Contract.
+- Claude Code project initialization now keeps Skills and Hooks in the host
+  Plugin; managed update removes the previous project-local Skill copies.
 - Task archive is the only Finish-time developer journal write path.
 - Local checkout builds preserve the CLI executable bit for npm development installs.
 - Finish now requires current-revision Outcome Evidence and a verified delivery.

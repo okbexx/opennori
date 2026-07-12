@@ -10,13 +10,15 @@ import {
   journalLockTarget,
   prepareApprovedTask,
   runCli,
+  runCliHuman,
   sessionLockTarget,
   taskLockTarget,
   temporaryProject
 } from "./support/fixture.mjs";
 
 const { retryStateBusy } = await import("../dist/src/cli-output.js");
-const { approveContract, writeContractDraft } = await import("../dist/src/contract.js");
+const { approveContract, regenerateContractMarkdown, writeContractDraft } = await import("../dist/src/contract.js");
+const { doctorProject } = await import("../dist/src/doctor.js");
 const { OpenNoriError } = await import("../dist/src/errors.js");
 const { initProject } = await import("../dist/src/lifecycle.js");
 const { appendJsonLine } = await import("../dist/src/io.js");
@@ -84,6 +86,61 @@ test("Contract JSON and Markdown writes roll back as one transaction", (t) => {
   assert.match(fs.readFileSync(markdownPath, "utf8"), /Status: approved/);
 });
 
+test("Contract human output is complete and Doctor detects review drift", (t) => {
+  const root = temporaryProject(t, "opennori-contract-review-");
+  const session = "contract-review-session";
+  initializeProject(root);
+  const created = runCli(root, ["task", "create", "--title", "Review Contract", "--slug", "review-contract"], { session });
+  const taskId = created.data.task.id;
+  const input = path.join(root, ".opennori/.runtime/contract-review-input.json");
+  fs.writeFileSync(
+    input,
+    `${JSON.stringify({
+      goal: "Review the complete user agreement",
+      outcomes: [
+        {
+          id: "outcome-complete-review",
+          statement: "The user can inspect every completion condition",
+          verification: "Read the complete Contract before approval",
+          required: true
+        }
+      ],
+      assumptions: ["The user reviews the Contract in the host conversation"]
+    })}\n`
+  );
+  runCli(root, ["task", "contract", "write", taskId, "--input", ".opennori/.runtime/contract-review-input.json"], { session });
+
+  const human = runCliHuman(root, ["task", "contract", "show", taskId], { session });
+  assert.match(human, /^# Review the complete user agreement/m);
+  assert.match(human, /## Outcomes/);
+  assert.match(human, /Verification: Read the complete Contract before approval/);
+  assert.match(human, /## Assumptions/);
+  assert.match(human, /The user reviews the Contract in the host conversation/);
+  assert.doesNotMatch(human, /generated from contract\.json|lifecycle state/i);
+
+  const reviewCheckId = `task.${taskId}.contract-review`;
+  assert.equal(doctorProject(root).checks.find((check) => check.id === reviewCheckId)?.ok, true);
+  fs.appendFileSync(path.join(root, ".opennori/tasks", taskId, "contract.md"), "manual drift\n");
+  const drift = doctorProject(root).checks.find((check) => check.id === reviewCheckId);
+  assert.equal(drift?.ok, false);
+  assert.match(drift?.recovery ?? "", new RegExp(`contract show ${taskId}`));
+});
+
+test("completed tasks can restore their human Contract projection", (t) => {
+  const root = temporaryProject(t, "opennori-completed-contract-review-");
+  initializeProject(root);
+  const { taskId } = completeTask(root, "completed-contract-review");
+  const directory = path.join(root, ".opennori/tasks", taskId);
+  const markdown = path.join(directory, "contract.md");
+  const canonical = fs.readFileSync(path.join(directory, "contract.json"), "utf8");
+
+  fs.appendFileSync(markdown, "manual drift\n");
+  regenerateContractMarkdown(directory);
+
+  assert.equal(fs.readFileSync(path.join(directory, "contract.json"), "utf8"), canonical);
+  assert.equal(doctorProject(root).checks.find((check) => check.id === `task.${taskId}.contract-review`)?.ok, true);
+});
+
 test("Contract rollback preserves a concurrent replacement", (t) => {
   const root = temporaryProject(t, "opennori-contract-concurrent-rollback-");
   initProject(root, { developer: "Probe", confirm: true });
@@ -127,7 +184,9 @@ test("replan restores the Contract and contexts when task persistence fails", (t
   const { taskId } = prepareApprovedTask(root, "replan-rollback", session);
   runCli(root, ["task", "start", taskId], { session });
   const taskDirectory = path.join(root, ".opennori/tasks", taskId);
-  const names = ["contract.json", "contract.md", "implement.jsonl", "check.jsonl"];
+  fs.writeFileSync(path.join(taskDirectory, "design.md"), "# Design\n");
+  fs.writeFileSync(path.join(taskDirectory, "plan.md"), "# Plan\n");
+  const names = ["contract.json", "contract.md", "design.md", "plan.md", "implement.jsonl", "check.jsonl", "delivery.json"];
   const before = new Map(names.map((name) => [name, fs.readFileSync(path.join(taskDirectory, name))]));
   const originalRename = fs.renameSync;
   let injected = false;
@@ -171,7 +230,7 @@ test("CLI retry only repeats state_busy failures", async () => {
   assert.equal(domainCalls, 1);
 });
 
-test("corrupt host session pointers self-heal without changing task state", (t) => {
+test("read-only session lookup ignores corrupt pointers without changing task state", (t) => {
   const root = temporaryProject(t, "opennori-session-heal-");
   const session = "corrupt-session";
   initializeProject(root);
@@ -179,9 +238,11 @@ test("corrupt host session pointers self-heal without changing task state", (t) 
   const sessionId = crypto.createHash("sha256").update(session).digest("hex");
   const pointer = path.join(root, ".opennori/.runtime/sessions", `${sessionId}.json`);
   fs.writeFileSync(pointer, `${JSON.stringify({ task_id: created.data.task.id, unexpected: true })}\n`);
+  fs.writeFileSync(path.join(root, ".opennori-runtime.lock"), "read lookup must not acquire this lock\n");
 
   assert.equal(loadCurrentTask(root, { sessionKey: session }), null);
-  assert.equal(fs.existsSync(pointer), false);
+  assert.equal(fs.existsSync(pointer), true);
+  assert.equal(runCli(root, ["status", "--summary"], { session }).data.current, null);
   assert.equal(runCli(root, ["task", "show", created.data.task.id], { session }).data.task.status, "planning");
 });
 

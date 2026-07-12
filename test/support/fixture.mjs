@@ -94,12 +94,20 @@ export function materializePublished0130Project(root) {
   };
 }
 
-export function runCli(root, args, { ok = true, session = "integration-session", timeout = 15_000 } = {}) {
+function hostEnvironment(session, platform = "codex") {
+  const environment = { ...process.env };
+  delete environment.CODEX_THREAD_ID;
+  delete environment.CLAUDE_CODE_SESSION_ID;
+  environment[platform === "claude" ? "CLAUDE_CODE_SESSION_ID" : "CODEX_THREAD_ID"] = session;
+  return environment;
+}
+
+export function runCli(root, args, { ok = true, session = "integration-session", platform = "codex", timeout = 15_000 } = {}) {
   const result = spawnSync("node", [cliPath, ...args, "--root", root, "--json"], {
     encoding: "utf8",
     timeout,
     maxBuffer: 4 * 1024 * 1024,
-    env: { ...process.env, CODEX_THREAD_ID: session }
+    env: hostEnvironment(session, platform)
   });
   assert.equal(
     result.status === 0,
@@ -111,12 +119,12 @@ export function runCli(root, args, { ok = true, session = "integration-session",
   return JSON.parse(output);
 }
 
-export function runCliHuman(root, args, { ok = true, session = "integration-session", timeout = 15_000 } = {}) {
+export function runCliHuman(root, args, { ok = true, session = "integration-session", platform = "codex", timeout = 15_000 } = {}) {
   const result = spawnSync("node", [cliPath, ...args, "--root", root], {
     encoding: "utf8",
     timeout,
     maxBuffer: 4 * 1024 * 1024,
-    env: { ...process.env, CODEX_THREAD_ID: session }
+    env: hostEnvironment(session, platform)
   });
   assert.equal(
     result.status === 0,
@@ -130,13 +138,13 @@ export function runCliPassthrough(
   root,
   args,
   commandArgs,
-  { ok = true, session = "integration-session", timeout = 15_000 } = {}
+  { ok = true, session = "integration-session", platform = "codex", timeout = 15_000 } = {}
 ) {
   const result = spawnSync("node", [cliPath, ...args, "--root", root, "--json", "--", ...commandArgs], {
     encoding: "utf8",
     timeout,
     maxBuffer: 4 * 1024 * 1024,
-    env: { ...process.env, CODEX_THREAD_ID: session }
+    env: hostEnvironment(session, platform)
   });
   assert.equal(
     result.status === 0,

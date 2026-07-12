@@ -5,6 +5,8 @@ import path from "node:path";
 import test from "node:test";
 import { initializeProject, runCli, runCliHuman, temporaryProject } from "./support/fixture.mjs";
 
+const { addProjectPlatform } = await import("../dist/src/lifecycle.js");
+
 function writeJsonLines(filePath, records) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${records.map((record) => JSON.stringify(record)).join("\n")}\n`);
@@ -224,8 +226,10 @@ test("history reads tolerate malformed tails and never mutate host or project st
 test("unsupported platform memory fails explicitly without falling back", (t) => {
   const root = temporaryProject(t, "opennori-history-unsupported-");
   initializeProject(root);
-  const configPath = path.join(root, ".opennori", "config.yaml");
-  fs.writeFileSync(configPath, fs.readFileSync(configPath, "utf8").replace("- codex", "- claude"));
-  const result = runCli(root, ["history", "search", "--query", "anything"], { ok: false });
+  addProjectPlatform(root, "claude", { confirm: true });
+  const result = runCli(root, ["history", "search", "--query", "anything"], {
+    ok: false,
+    platform: "claude"
+  });
   assert.equal(result.error.code, "session_memory_unsupported");
 });

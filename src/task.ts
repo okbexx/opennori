@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { loadContextManifest } from "./context.ts";
 import { loadContract } from "./contract.ts";
 import { deliveryReady, loadDelivery } from "./delivery-state.ts";
 import { OpenNoriError } from "./errors.ts";
@@ -165,7 +164,7 @@ function startTaskUnlocked(root: string, taskId: string, options: SessionOptions
   const contract = loadContract(location.directory, taskId);
   if (contract.status !== "approved") {
     throw new OpenNoriError("contract_not_approved", `Task ${taskId} cannot start until its contract is approved.`, {
-      recovery: "Review and approve contract.json, then start the task again."
+      recovery: "Review and approve contract.md, then start the task again."
     });
   }
   if (location.task.delivery_required) {
@@ -177,13 +176,6 @@ function startTaskUnlocked(root: string, taskId: string, options: SessionOptions
     }
     if (delivery.mode === "waived" && !deliveryReady(location.task, delivery)) {
       throw new OpenNoriError("delivery_waiver_stale", `Task ${taskId} needs a current delivery waiver confirmation.`);
-    }
-  }
-  for (const mode of ["implement", "check"] as const) {
-    if (loadContextManifest(root, taskId, mode).length === 0) {
-      throw new OpenNoriError("context_required", `Task ${taskId} needs non-empty ${mode} context before implementation starts.`, {
-        recovery: `Write and verify ${mode}.jsonl, then start the task again.`
-      });
     }
   }
   if (location.task.status !== "planning" && location.task.status !== "in_progress" && location.task.status !== "review") {
@@ -288,7 +280,7 @@ function replanTaskUnlocked(root: string, taskId: string, reason: string): TaskR
     blocker,
     updated_at: timestamp
   };
-  const plannedMoves = ["contract.md", "implement.jsonl", "check.jsonl", "contract.json", "delivery.json"]
+  const plannedMoves = ["contract.md", "design.md", "plan.md", "implement.jsonl", "check.jsonl", "contract.json", "delivery.json"]
     .map((name) => ({
       source: path.join(location.directory, name),
       target: path.join(researchDirectory, `replanned-${stamp}-${name}`)
@@ -427,25 +419,16 @@ export function rollbackTaskArchive(root: string, taskId: string): TaskLocation 
 export function loadCurrentTask(root: string, options: SessionOptions = {}): TaskRecord | null {
   const sessionKey = requireSessionKey(options.sessionKey);
   const filePath = sessionPath(root, sessionKey);
-  return withProjectRuntimeLock(root, "read current task session", () =>
-    withSessionFileLock(root, filePath, () => {
-      if (!fs.existsSync(filePath)) return null;
-      let session: { schema_version: "opennori/session-v1"; task_id: string; updated_at: string };
-      try {
-        session = readJson(filePath);
-        assertSchema("session", session);
-      } catch {
-        fs.rmSync(filePath, { force: true });
-        return null;
-      }
-      const location = findTask(root, session.task_id);
-      if (!location || location.archived) {
-        fs.rmSync(filePath, { force: true });
-        return null;
-      }
-      return location.task;
-    })
-  );
+  if (!fs.existsSync(filePath)) return null;
+  let session: { schema_version: "opennori/session-v1"; task_id: string; updated_at: string };
+  try {
+    session = readJson(filePath);
+    assertSchema("session", session);
+  } catch {
+    return null;
+  }
+  const location = findTask(root, session.task_id);
+  return !location || location.archived ? null : location.task;
 }
 
 export function clearCurrentTask(root: string, options: SessionOptions = {}): void {
@@ -513,8 +496,9 @@ export function taskNextAction(view: TaskView): string {
   if (view.task.blocker) return `Resolve blocker: ${view.task.blocker}`;
   if (view.phase === "plan") {
     if (!view.contract) return "Draft the Nori Contract.";
+    if (view.contract.status !== "approved") return "Review and approve contract.md.";
     if (!view.delivery) return "Plan commit, pull request, or explicitly waived delivery.";
-    return "Approve the Contract and start implementation.";
+    return "Start implementation of the approved Contract.";
   }
   if (view.phase === "implement") return "Implement the approved Contract, then move the task to review.";
   if (view.phase === "verify") {

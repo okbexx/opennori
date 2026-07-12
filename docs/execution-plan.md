@@ -14,17 +14,26 @@ npx opennori setup
 opennori init --user <name>
 ```
 
-Then, in a new Codex conversation:
+Then open a new Codex conversation and describe the goal naturally:
 
 ```text
-Use OpenNori for this goal: <goal>
+Add account deletion with a recoverable confirmation flow.
 ```
+
+OpenNori participates automatically and asks for task-creation consent before
+Plan. Small work may stay outside the workflow for that session. Consent to
+create a task never substitutes for Contract approval.
 
 User-facing language centers on the agreed result, current stage, current gap,
 required decision, and verified Git delivery. Task, Contract, Outcome, Evidence,
-context manifests, implementation revisions, session pointers, ownership, and
+implementation revisions, session pointers, ownership, optional context, and
 hashes remain deeper review or agent/operator concepts unless recovery requires
 them.
+
+The user reviews and approves one complete `contract.md`. Complex tasks may also
+carry `design.md` and `plan.md` as readable agent working documents; neither is a
+state authority or approval gate. Finish produces `report.md`. Code enforces only
+Task, Contract, Evidence, Delivery, Git, and filesystem safety boundaries.
 
 ## Execution Rules
 
@@ -40,7 +49,9 @@ them.
 
 Status: complete
 
-User entry: the agent drafts and reviews one Nori Contract.
+User entry: the agent provides a host-native file link to the complete
+`contract.md` for one explicit approval decision. The document body stays out
+of chat unless the user requests it or the host cannot open the file.
 
 User sees:
 
@@ -63,8 +74,8 @@ Completion proof:
 3. Contract and Evidence state outside the current schemas fails validation.
 4. The full temporary-project workflow passes with Outcome-shaped state.
 
-Non-goals: Contract revisions and UI presentation beyond current CLI/report
-surfaces.
+Non-goals: making optional `design.md`, `plan.md`, or Context lists into state,
+approval, or completion gates.
 
 ## P0-B: Human Approval Provenance
 
@@ -130,12 +141,13 @@ The foundation is complete only after:
 
 - the complete temporary-project workflow passes, including return from Verify
   to Implement with fresh Evidence for the new implementation revision
-- replan invalidates the old Contract and both context manifests
+- replan invalidates the old Contract and archives any optional context manifests
 - lifecycle writes, journal updates, and archives survive injected failures and
   concurrent commands without silent state loss
 - doctor identifies corrupt canonical task, Contract, Evidence, and ownership
   state with a concrete recovery action
-- setup, init, update, uninstall, and reactivation use one documented path each
+- setup, init, platform addition, update, uninstall, and reactivation use one
+  documented path each
 
 The repository regression suite and packed-artifact path exercise every item in
 this gate. Foundation completion does not imply release readiness or complete
@@ -177,24 +189,36 @@ behind one registry over the same Task/Contract/Evidence kernel. Keep Codex as
 the default path and add one independently verified second adapter before
 claiming the registry is extensible.
 
-Codex owns its Plugin route. Claude Code uses its official project instruction
-and Skill locations. Both adapters are produced by the same managed lifecycle,
-diagnosed through platform-specific host checks, and exercised from the packed
-artifact without changing the default Codex commands.
+Codex and Claude Code use their official Plugin and marketplace commands.
+Packaged Skills and bounded context Hooks stay in the host Plugins; the project
+lifecycle writes only each native project route. Both adapters are diagnosed
+through platform-specific host checks and exercised from the packed artifact
+without changing the default Codex commands.
 
-### P1-C: Codex Turn Context
+An initialized project adds the bounded second adapter through
+`platform add <platform> --dry-run` followed by `--confirm`. The operation is
+append-only: it preserves existing adapters and user project settings, refuses
+all target-path conflicts before writes, updates the manifest last, and rolls
+back config, files, and newly created directories on failure. Multi-platform
+runtime commands select the current host from its stable session environment
+and stop when that host is absent or ambiguous.
+
+### P1-C: Host Turn Context
 
 Status: complete
 
-Use official Plugin hooks to inject a bounded stage breadcrumb and selected
-curated context at supported Codex lifecycle events. Hooks remain guidance and
-context delivery; the CLI remains the only deterministic transition layer.
+Use official Codex and Claude Code Plugin hooks to inject a bounded stage
+breadcrumb and available curated context. Hooks remain optional guidance and
+context delivery; the CLI remains the deterministic transition layer.
 
-`SessionStart`, `UserPromptSubmit`, and `SubagentStart` load the current
-session's task, stage, Contract state, current gap, next action, package, and
-stage-specific curated context. Session/subagent context is capped at 48 KiB;
-per-turn context is capped at 8 KiB and degrades to an explicit context-load
-command. Missing projects or session tasks remain silent.
+`SessionStart` and `UserPromptSubmit` expose no-selection routing in an
+initialized project: existing active work is resumed first, otherwise the
+task-creation consent gate applies. Once a task is selected, `SessionStart`,
+`UserPromptSubmit`, and `SubagentStart` load its stage, Contract state, current
+gap, next action, package, and available stage-specific curated context. Session/subagent
+context is capped at 48 KiB; per-turn context is capped at 8 KiB and degrades
+to an explicit context-load command. Missing projects remain silent, and
+SubagentStart remains silent until a task is selected.
 
 ### P1-D: Persisted Session Memory
 
@@ -214,21 +238,15 @@ When a host does not write separate index or prompt-history files, the adapter
 falls back to at most 50 recent transcripts and 512 KiB per transcript after
 the same project check.
 
-### P1-E: Durable Coordination
+### P1-E: Host-Native Workers
 
 Status: complete
 
-Expose worker, message, interruption, and completion observations without
-creating a second task lifecycle. Prefer host-native coordination and a mature
-event/store implementation over a custom runtime.
-
-Codex remains responsible for worker creation, messaging, waiting, interruption,
-and live status. OpenNori stores only schema-validated task-to-worker bindings
-and observation timestamps under ignored host-local runtime state.
-`SubagentStart` and `SubagentStop` are captured automatically; agent Skills
-record successful message and interruption observations without persisting
-message bodies. Bindings retain their implementation revision, so stale work is
-visible, and no worker observation can change Task or Outcome completion.
+Use host-native workers for bounded implementation or review without creating a
+second runtime. The host owns creation, messaging, waiting, interruption, and
+live status. Host execution state stays outside OpenNori; Skills treat worker
+reports as untrusted leads and the CLI accepts only independently validated
+Evidence.
 
 ### P1-F: Real Product Acceptance
 
@@ -344,8 +362,7 @@ Closeout passed:
 - no competing lifecycle, Contract, Evidence, completion, or stage authority
 - failure-atomic canonical writes and recoverable archive, journal, and Spec
   promotion boundaries
-- implementation-revision invalidation across Evidence and coordination
-  observations
+- implementation-revision invalidation across Evidence and delivery
 - one current user path with no removed compatibility route reintroduced
 - full repository checks plus the packed-artifact path in a temporary project
 
@@ -364,10 +381,9 @@ control planes, and provider execution remain outside the current program.
 Need: make Verify independent by default on the primary host without creating a
 second lifecycle, Evidence authority, or worker runtime.
 
-Current project: the Plugin already injects curated check context on
-`SubagentStart`, observes `SubagentStart` and `SubagentStop`, binds workers to an
-implementation revision, and keeps all coordination state outside Task and
-Outcome authority.
+Current project: the Plugin injects available task state and optional check
+context on `SubagentStart`. The host owns the worker lifecycle; OpenNori stores
+no worker state.
 
 User references: Codex is the primary host; Claude Code remains the bounded
 second adapter with a sequential core workflow.
@@ -381,11 +397,10 @@ Skill requests subagents, surface the child thread, and let the host own spawn,
 wait, messaging, interruption, sandbox, and lifecycle behavior.
 
 Mature OSS: no external orchestration package is needed because orchestration
-is already supplied by the host and OpenNori already owns the narrower
-coordination observation boundary.
+is already supplied by the host.
 
-Decision: reuse Codex host-native subagents and adapt the existing Skill, hook,
-check-context, and coordination surfaces.
+Decision: reuse Codex host-native subagents through the existing Skill, Hook,
+and optional check-context surfaces.
 
 Reason: this produces a fresh review context while preserving `task.json`,
 `contract.json`, and `evidence.jsonl` as the only lifecycle, Outcome, and fact
@@ -393,8 +408,9 @@ authorities. The reviewer cannot append Evidence or deliver Git; the primary
 agent reproduces its observations through the deterministic CLI path.
 
 Risk: skill instructions cannot manufacture host concurrency. If Codex cannot
-start a reviewer, Verify must expose that limitation rather than silently claim
-independence. Claude Code stays explicitly sequential.
+start a reviewer, Verify continues sequentially and exposes that limitation
+rather than silently claiming independence. Claude Code stays explicitly
+sequential.
 
 Verification: package-contract tests assert delegation, recursion, Evidence,
 and platform-fallback rules; real product acceptance must inspect the spawned
@@ -409,9 +425,9 @@ review thread and confirm that only CLI-validated observations affect Finish.
 - Session memory: use read-only host adapters and bounded standard-library file
   reads first; add a search dependency only when measured corpus size requires
   it.
-- Coordination: reuse host-native collaboration, official hooks, Ajv, atomic
-  writes, and existing locks for narrow local bindings. A hand-written queue,
-  event bus, process supervisor, or worker state machine is not allowed.
+- Host execution: use host-native collaboration when it helps, but keep worker
+  execution outside OpenNori state. A hand-written queue, event bus, process
+  supervisor, or worker state machine is not allowed.
 - Acceptance: use packed artifacts, isolated host configuration, and real
   supported-agent conversations; do not make publication a prerequisite for
   local product proof.

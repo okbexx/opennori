@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
-import { buildCodexHookContext } from "../dist/src/hook-context.js";
+import { buildHostHookContext } from "../dist/src/hook-context.js";
 
 const chunks = [];
 for await (const chunk of process.stdin) chunks.push(chunk);
 
 try {
   const input = JSON.parse(Buffer.concat(chunks).toString("utf8"));
-  const result = buildCodexHookContext(input);
+  const platform = process.argv[2] === "claude" ? "claude" : "codex";
+  const result = buildHostHookContext(input, platform);
   if (result) {
     process.stdout.write(
       `${JSON.stringify({

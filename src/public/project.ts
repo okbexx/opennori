@@ -4,10 +4,12 @@ export { OpenNoriError, asOpenNoriError } from "../errors.ts";
 export { doctorProject } from "../doctor.ts";
 export { applyStateMigration, inferProjectStateSchema, planStateMigration } from "../migration.ts";
 export {
+  addProjectPlatform,
   applyLifecyclePlan,
   initProject,
   planInit,
   planManifestRepair,
+  planPlatformAdd,
   planUninstall,
   planUpdate,
   repairProjectManifest,
@@ -27,6 +29,7 @@ export type {
   AssetInspectionStatus,
   InitOptions,
   LifecycleRunResult,
+  PlatformAddOptions,
   RepairOptions,
   UninstallOptions,
   UpdateOptions

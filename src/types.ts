@@ -161,28 +161,6 @@ export type ContextEntry = {
   reason: string;
 };
 
-export type CoordinationBinding = {
-  schema_version: "opennori/coordination-binding-v1";
-  task_id: string;
-  implementation_revision: number;
-  platform: "codex";
-  parent_session_ref: string;
-  worker_ref: string;
-  role: string;
-  assignment: string | null;
-  outcome_ids: string[];
-  paths: string[];
-  started_at: string | null;
-  last_contact_at: string | null;
-  interrupted_at: string | null;
-  stopped_at: string | null;
-  updated_at: string;
-};
-
-export type CoordinationBindingView = CoordinationBinding & {
-  current_revision: boolean;
-};
-
 export type OutcomeStatus = {
   id: string;
   statement: string;
@@ -227,7 +205,7 @@ export type LifecycleAction = {
 
 export type LifecyclePlan = {
   schema_version: "opennori/lifecycle-plan-v1";
-  operation: "init" | "repair" | "update" | "uninstall";
+  operation: "init" | "repair" | "update" | "platform-add" | "uninstall";
   root: string;
   actions: LifecycleAction[];
   blockers: string[];

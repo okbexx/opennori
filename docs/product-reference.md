@@ -13,23 +13,31 @@ cd <project>
 opennori init --user <name>
 ```
 
-Setup installs the matching npm CLI and configures the Plugin through the
-official Codex CLI. Initialization only creates the managed workflow and
-project adapter after host readiness and project safety checks pass. OpenNori
-does not write personal Codex configuration or Plugin cache files directly.
-Initialization does not start a task. Open a new Codex conversation and say:
+Setup installs the matching npm CLI and configures the selected Plugin through
+the official Codex or Claude Code CLI. Initialization only creates the managed
+workflow and project route after host readiness and project safety checks pass.
+OpenNori does not write personal host configuration or Plugin cache files
+directly.
+Initialization does not start a task. Open a new Codex conversation and
+describe the goal naturally:
 
 ```text
-Use OpenNori for this goal: <goal>
+Add account deletion with a recoverable confirmation flow.
 ```
 
-The user remains in the conversation. Packaged Skills run the workflow and the
-CLI reads or writes deterministic state.
+OpenNori is available automatically in the initialized project. With no task
+selected, the agent first resumes existing active work or asks the user to
+choose between active tasks. Only when none exists does it classify the request
+and ask for explicit task-creation consent. A declined small change is handled
+directly for the rest of that session. Declined complex work is clarified or
+reduced rather than implemented broadly without a task. Consent enters Plan; it
+does not approve a Contract or authorize implementation. Packaged Skills run
+the workflow and the CLI reads or writes deterministic state.
 
 Codex asks the user to review new or changed command hooks before they run. The
 bundled hooks can be inspected with `/hooks`. Declining trust does not block the
-CLI workflow, but automatic turn context and worker observations remain
-inactive until the hooks are trusted.
+CLI workflow, but automatic turn context remains inactive until the hooks are
+trusted.
 
 Codex is the default adapter. Claude Code uses the explicit advanced path:
 
@@ -38,10 +46,12 @@ npx opennori setup --platform claude
 opennori init --user <name> --platform claude
 ```
 
-Claude initialization writes only native project instructions and project
-Skills. It does not edit personal Claude settings. Open a new Claude Code
-conversation and use the same goal prompt. Claude Code exposes its stable
-session id through `CLAUDE_CODE_SESSION_ID`; Codex uses `CODEX_THREAD_ID`.
+Claude setup registers the package marketplace and installs the user-scoped
+OpenNori Plugin through official commands. Initialization writes only native
+project instructions and shared OpenNori state; Skills and Hooks remain in the
+Plugin. Open a new Claude Code conversation and describe the goal in the same
+way. Claude Code exposes its stable session id through
+`CLAUDE_CODE_SESSION_ID`; Codex uses `CODEX_THREAD_ID`.
 OpenNori also accepts an explicit `--session` for supported host integrations.
 
 ## User Model
@@ -52,7 +62,8 @@ deeper review, the repository state uses these durable concepts:
 
 - **Spec**: stable project knowledge that should guide future tasks.
 - **Task**: one bounded engineering goal and its durable artifacts.
-- **Contract**: the approved definition of done for the task.
+- **Contract**: the complete `contract.md` the user reviews and approves as the
+  task's definition of done.
 - **Evidence**: reviewable proof for one Outcome.
 - **Stage**: Plan, Implement, Verify, or Finish.
 - **Delivery**: the planned and verified commit, pull request, or explicit human
@@ -70,19 +81,29 @@ checkpoint is verified.
 
 The agent:
 
-1. Reads project specs, the developer journal, and relevant source files.
+1. Creates a task only after explicit task-creation consent, then reads project
+   specs, the developer journal, and relevant source files.
 2. Reuses context already available in the repository and conversation.
 3. On Codex, searches bounded host history only when a prior project discussion
    can materially change the plan, then treats the excerpt as an untrusted lead.
    Other platforms continue from Specs, code, and the journal.
 4. Asks one completion-changing question at a time when clarification is
    needed.
-5. Creates a task and drafts a Nori Contract.
-6. Curates separate implementation and verification context.
-7. Confirms that no pre-existing project changes sit outside `.opennori`, then
+5. Creates a task and provides a host-native file link to the complete
+   `contract.md`, including the Goal, every Outcome, Verification, and
+   Assumptions. The body stays out of chat unless the user requests it or the
+   host cannot open the file.
+6. Creates `design.md` only when technical choices need durable explanation,
+   and `plan.md` only when multi-step or cross-session execution benefits from a
+   readable working plan. These documents may evolve without approval while the
+   Contract remains unchanged.
+7. May curate separate implementation and verification context when it improves
+   focus; missing Context never blocks the workflow.
+8. Confirms that no pre-existing project changes sit outside `.opennori`, then
    plans commit or pull request delivery from the live Git base, or records an
    explicit human-confirmed delivery waiver.
-8. Shows the Contract for explicit approval.
+9. Asks for explicit approval of the directly openable Contract. Delivery and
+   other operational decisions are handled separately.
 
 Implementation cannot start while the Contract is a draft. Outcomes describe
 observable results and how they can be verified. Internal steps, preferred
@@ -98,9 +119,10 @@ content is restored or a revised Contract is approved in Plan.
 
 ### Implement
 
-After approval, the agent loads the curated implementation context and changes
-the project within the task boundary. It may run focused checks while working,
-but it does not mark Outcomes proven or claim completion.
+After approval, the agent changes the project within the task boundary. It uses
+the repository, optional `design.md` and `plan.md`, and any available curated
+context. It may run focused checks while working, but it does not mark Outcomes
+proven or claim completion.
 
 If repository evidence invalidates the Contract, the agent blocks the task and
 returns to Plan for a user-reviewed revision. It does not silently broaden the
@@ -108,21 +130,21 @@ goal.
 
 ### Verify
 
-Verification starts from the approved Contract and independent check context,
-not from the implementation summary. The agent inspects the actual diff, runs
-the project's checks, exercises user-visible behavior when relevant, and
-records append-only Evidence for each Outcome.
+Verification starts from the approved Contract, not from the implementation
+summary. The agent may use an independent check-context list when one is useful,
+then inspects the actual diff, runs the project's checks, exercises user-visible
+behavior when relevant, and records append-only Evidence for each Outcome.
 
 On Codex, the primary agent delegates the first review pass to one fresh
 host-native check subagent by default. The reviewer receives the task id,
-required Outcomes, package boundary, and curated check context. It may inspect
+required Outcomes, package boundary, and any available check context. It may inspect
 and run non-destructive checks, but it cannot write Evidence, transition the
 Task, perform Git delivery, or delegate another reviewer. The primary agent
 waits for the report, treats it as an untrusted lead, reproduces the claimed
 observations, and records only CLI-validated typed Evidence. If Codex cannot
-start the reviewer, verification stops with an explicit host limitation instead
-of claiming same-agent independence. Claude Code uses the same check context in
-a sequential verification pass and does not call coordination commands.
+start the reviewer, the primary agent continues sequentially and reports that
+reviewer independence was unavailable. Claude Code performs a sequential
+verification pass without implying that a separate reviewer ran.
 
 Proven Evidence names what was observed and where the user can review it.
 `task evidence run` executes command observations without a shell and preserves
@@ -153,12 +175,14 @@ or while current-revision delivery is missing. Once the task is ready, the agent
 
 1. Promotes stable, reusable learnings into the project specs.
 2. Prepares the durable outcome summary and knowledge decision.
-3. Marks the task completed and archives it for organization; archive writes
+3. Generates `report.md` with the Goal, Outcome Evidence, Git delivery, and any
+   remaining limitations.
+4. Marks the task completed and archives it for organization; archive writes
    exactly one current-developer journal entry.
-4. Commits the archived task, delivery record, report, Specs, and journal as one
+5. Commits the archived task, delivery record, report, Specs, and journal as one
    final Git checkpoint and pushes it to the existing pull request when needed.
-5. Runs read-only finalization to prove the clean checkpoint and remote head.
-6. Gives the user a concise completion report with Evidence, delivery, and
+6. Runs read-only finalization to prove the clean checkpoint and remote head.
+7. Gives the user a concise completion report with Evidence, delivery, and
    limitations.
 
 Archive requires an explicit `promoted` or `none` knowledge decision and stores
@@ -198,9 +222,11 @@ there is no separate phase store.
 
 Within a task:
 
-- `contract.json` is the approved Outcome authority.
-- `contract.md` is generated for human review and is never parsed as state.
-- `implement.jsonl` and `check.jsonl` are curated context manifests.
+- `contract.json` is the internal approved Outcome authority.
+- `contract.md` is the only human approval surface and is never parsed as state.
+- `design.md` and `plan.md` are optional, human-readable working documents. They
+  can evolve without changing lifecycle state or requiring approval.
+- `implement.jsonl` and `check.jsonl` are optional curated context manifests.
 - `delivery.json` records the delivery plan and current-revision verification.
 - `evidence.jsonl` is an append-only record of typed verification observations.
 - Each Evidence record is bound to the current implementation revision.
@@ -230,13 +256,15 @@ into tracked state because a commit cannot contain its own hash.
   tasks/
     <YYYY-MM-DD-slug>/
       task.json               # lifecycle authority
-      contract.json           # approved Outcome authority
-      contract.md             # generated review surface
+      contract.json           # internal approved Outcome authority
+      contract.md             # only human approval surface
       delivery.json           # planned and verified Git delivery
       design.md               # optional technical design
-      implement.jsonl         # curated implementation context
-      check.jsonl             # curated verification context
+      plan.md                 # optional execution plan and progress
+      implement.jsonl         # optional implementation context
+      check.jsonl             # optional verification context
       evidence.jsonl          # append-only evidence
+      report.md               # Finish completion report
       research/               # durable task-specific research
     archive/<YYYY-MM>/        # completed task organization
   workspace/
@@ -246,27 +274,27 @@ into tracked state because a commit cannot contain its own hash.
       journal.md
   .runtime/
     sessions/<session-key>.json
-    coordination/<task>/<worker-binding>.json
 ```
 
 Commit workflow, specs, task artifacts, contracts, delivery, evidence, and shared
 workspace knowledge. Ignore `.opennori/.runtime/`;
-session pointers and worker bindings are host-local and never project truth.
+session pointers are host-local and never project truth.
 
 ## Context Rules
 
-Context manifests contain project-relative file paths and a reason for each
-entry. Implementation and verification use separate manifests so the checker
-does not merely replay the implementer's framing.
+Context manifests are optional internal aids. When present, they contain
+project-relative file paths and a reason for each entry. Implementation and
+verification may use separate manifests so the checker does not merely replay
+the implementer's framing.
 
-Missing context is an error. OpenNori reports the missing path instead of
-silently omitting it. Context manifests are curated inputs, not search indexes
-and not proof that an Outcome is proven.
+Missing manifests do not block Plan, Implement, or Verify. If an explicitly
+selected file is missing, OpenNori reports that path and the agent continues from
+the Contract, repository, Specs, and available project material. Context is not
+a search index, lifecycle authority, or proof that an Outcome is proven.
 
-Replan archives the previous Contract, delivery plan, and both context manifests
-under task research. The replacement Contract must be approved and new
-implement/check context plus delivery must be curated before the task can start
-again.
+Replan archives the previous Contract, delivery plan, and any existing context
+manifests under task research. The replacement Contract must be approved before
+implementation restarts; new Context is optional.
 
 Agents inspect the manifest through `opennori task context show`, then load
 selected text through `opennori task context load --file <file>`. Each file is
@@ -281,10 +309,11 @@ The Codex Plugin uses official lifecycle hooks for bounded context delivery:
 - `SessionStart` and `SubagentStart` may add up to 48 KiB.
 - `UserPromptSubmit` may add up to 8 KiB.
 - The hook includes the selected Task, Stage, Contract state, current gap, next
-  action, optional package, and only the curated context for the current Stage.
+  action, optional package, and available curated context for the current Stage.
 - Oversized content is omitted with the exact `task context load` command.
-- A directory without an initialized project or selected session task produces
-  no hook output.
+- A directory without an initialized project produces no hook output. An
+  initialized project without a selected task receives only the short `nori`
+  routing hint; `SubagentStart` stays silent until a task is selected.
 
 Prior conversations remain owned by the host. The Codex history adapter reads
 only fixed tails of the host index and prompt history, verifies candidate
@@ -308,36 +337,20 @@ History is untrusted planning context. It cannot prove an Outcome, modify a
 Task, become a context manifest automatically, or bypass current user approval.
 Stable facts enter project truth only through reviewed Spec promotion.
 
-## Worker Coordination
+## Host-Native Workers
 
 Codex owns worker creation, messaging, waiting, interruption, and live status.
 OpenNori does not provide a queue, process supervisor, worker state machine, or
-message store. It records only bounded task-to-worker bindings and timestamps
-under ignored `.opennori/.runtime/coordination/`.
+message store. Host execution state stays outside OpenNori.
 
 Verify uses this host capability for one fresh `verify-reviewer` by default on
 Codex. An assignment marker prevents the delegated reviewer from recursively
 delegating. Its findings remain untrusted until the primary agent reproduces
 them through the deterministic Evidence path.
-
-`SubagentStart` records the worker, parent-session hash, role, current
-implementation revision, and start time. `SubagentStop` records a stop time.
-After a host-native action succeeds, the agent may attach a bounded assignment
-or record message/interruption time without saving the message body:
-
-```bash
-opennori task coordination assign <task> --worker <host-ref> \
-  --role <role> --assignment <summary> --outcomes <ids> --paths <paths> --json
-opennori task coordination message <task> --worker <host-ref> --json
-opennori task coordination interrupt <task> --worker <host-ref> --json
-opennori task coordination list <task> --json
-```
-
-The list projection marks bindings from an earlier implementation revision as
-stale. A stop observation means only that the host worker stopped; it does not
-prove its assignment, prove an Outcome, transition the Task, or permit Finish.
-Human output uses a hashed worker label and never exposes the parent session
-reference.
+If Codex cannot start one, the primary agent verifies sequentially and reports
+that limitation. Worker reports are leads only: they cannot prove an Outcome,
+transition the Task, or permit Finish. Claude Code uses the same sequential core
+without OpenNori emulating another host's worker state.
 
 ## Package Scope
 
@@ -385,6 +398,8 @@ opennori status
 opennori history search --query "<topic>"
 opennori history show <session-id>
 npx opennori setup --dry-run
+opennori platform add claude --dry-run
+opennori platform add claude --confirm
 opennori update --dry-run
 opennori update --confirm
 opennori update --repair-manifest --dry-run
@@ -410,8 +425,9 @@ contract with:
 opennori task --help
 ```
 
-Do not patch canonical JSON or JSONL state by hand. Markdown task and Contract
-views are review surfaces, not state import APIs.
+Do not patch canonical JSON or JSONL state by hand. `contract.md` is the user
+approval surface; optional `design.md` and `plan.md` are working documents; the
+Finish `report.md` is the durable result. They are not state import APIs.
 
 ## Public API And Releases
 
@@ -432,6 +448,9 @@ Initialization and update record only files OpenNori actually writes. Content
 hashes distinguish unchanged generated assets from user-modified files.
 
 - Update is preview-first and preserves conflicting files.
+- Platform addition is preview-first, append-only, and preserves every existing
+  adapter and project setting. It writes the new adapter assets and updates the
+  install manifest only after the complete plan succeeds.
 - Update previews state schema migrations, validates all affected state before
   writes, updates the manifest last, and restores original bytes and modes on a
   migration failure.
@@ -451,13 +470,25 @@ opennori update --confirm
 
 The platform registry supports Codex and Claude Code over the same workflow and
 state model. Further platform expansion is not part of the current product.
+An existing project adds the other supported host without rerunning
+initialization:
+
+```bash
+npx opennori setup --platform claude
+opennori platform add claude --dry-run
+opennori platform add claude --confirm
+opennori doctor
+```
+
+At runtime, OpenNori selects the configured adapter from `CODEX_THREAD_ID` or
+`CLAUDE_CODE_SESSION_ID`. A multi-platform command outside either host, or an
+environment that exposes both identifiers, stops instead of guessing.
 
 | Capability | Codex | Claude Code |
 | --- | --- | --- |
 | Managed workflow, Skills, Task, Contract, and Evidence | supported | supported |
-| Automatic turn context | supported | unsupported |
+| Automatic turn context | supported | supported |
 | Read-only host history | supported | unsupported |
-| Host-native worker observations | supported | unsupported |
 | Fresh host-native Verify reviewer | default | sequential fallback |
 
 An unsupported optional capability fails explicitly and never reads another
@@ -481,6 +512,10 @@ platform's host state. The core sequential workflow remains available.
 - **Manifest missing or unreadable**: preview `update --repair-manifest`, then
   confirm only after reviewing reconstructed ownership.
 - **Managed file modified**: update reports a conflict and preserves the file.
+- **New adapter path conflicts**: platform addition blocks before any write and
+  preserves the existing project and adapter routes.
+- **Current host ambiguous or absent**: a multi-platform project stops and asks
+  the caller to run from one Codex or Claude Code conversation.
 - **Corrupt state**: writes stop; `opennori doctor` reports the path and
   recovery action.
 - **No stable session key**: task activation stops instead of using a shared
@@ -497,15 +532,14 @@ platform's host state. The core sequential workflow remains available.
   lists the existing project paths to commit, stash, or remove first.
 - **Approved Contract changed**: Implement is blocked and reports the recorded
   and actual content hashes.
-- **Context missing**: loading stops and identifies the missing entry.
+- **Context missing**: the optional context load identifies the missing entry;
+  the workflow continues from the Contract and repository material.
 - **History unavailable or format unsupported**: continue from Specs and the
   developer journal; no project state is changed.
 - **History outside the project**: the session is rejected without returning
   its text.
-- **Coordination unsupported**: continue sequentially on the configured
-  platform.
-- **Coordination observation busy or malformed**: the hook fails soft and does
-  not change the Task, Contract, or Evidence.
+- **Fresh reviewer unavailable**: continue sequentially and report the missing
+  reviewer independence without weakening Evidence requirements.
 - **Evidence incomplete**: Finish reports the current Outcome gap.
 - **Delivery incomplete or stale**: Finish reports the required current-revision
   commit, pull request, or waiver.
@@ -522,7 +556,8 @@ platform's host state. The core sequential workflow remains available.
 The Plugin contains seven focused agent protocols:
 
 - `nori`: root router for the current project and task state.
-- `nori-plan`: task discovery, context curation, delivery planning, and Contract approval.
+- `nori-plan`: task discovery, optional design/plan/context authoring, delivery
+  planning, and complete Contract review and approval.
 - `nori-implement`: implementation within an approved task.
 - `nori-check`: independent verification, Evidence, and implementation delivery.
 - `nori-finish`: completion gate, journal, archive, and final Git checkpoint.
@@ -534,14 +569,12 @@ CLI state validation or human approval. Stage Skills include the canonical CLI
 input shapes and command order so an ordinary task does not need to inspect the
 OpenNori package source or schemas.
 
-The npm package itself is the Codex Plugin root:
-`.codex-plugin/plugin.json` declares the product and `skills/` contains the
-seven protocols. The tracked marketplace catalog points to the exact npm
-version and uses the official default-install policy. New Codex Skills become
-available only in a new conversation. The Claude adapter writes those same
-canonical Skill sources to `.claude/skills/` as lifecycle-owned project assets.
-The Plugin also declares bounded context and coordination hooks; Codex requires
-the user to review and trust command hooks before they run.
+The npm package is both Plugin roots: `.codex-plugin/plugin.json` and
+`.claude-plugin/plugin.json` declare the host packages while `skills/` contains
+the seven canonical protocols. Each marketplace points to the matching package
+version. New Skills and Hooks become available only in a new host conversation.
+Both Plugins inject bounded task context. Codex requires the user to review and
+trust command hooks.
 
 ## Product Boundary
 
@@ -549,10 +582,9 @@ OpenNori owns workflow artifacts, delivery verification, and Outcome completion.
 Codex or Claude Code owns agent execution, tools, and Git commands; repository
 conventions continue to own engineering and merge policy.
 
-Read-only Codex history and host-local worker observations extend the same
-project/task state without becoming another completion authority. Additional
-platform capabilities must remain explicit adapter features over the same
-kernel.
+Read-only Codex history can inform Plan without becoming project truth. Host
+workers remain entirely host-owned. Additional platform capabilities must
+remain explicit adapter features over the same kernel.
 
 ## Source Checkout Maintenance
 

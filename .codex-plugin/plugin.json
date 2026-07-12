@@ -19,11 +19,11 @@
     "codex"
   ],
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json",
+  "hooks": "./hooks/codex-hooks.json",
   "interface": {
     "displayName": "OpenNori",
     "shortDescription": "Repo-native agent workflow with outcome-driven completion.",
-    "longDescription": "OpenNori carries a coding goal from confirmed results to verified Git delivery. It plans before implementation, uses a fresh Codex reviewer by default, records what actually passed or failed, verifies the delivered commit or pull request, preserves reusable project knowledge, and refuses completion while a required result is still missing. Compact status, bounded context, safe upgrades, and project-scoped history keep later conversations useful without turning chat history into project truth.",
+    "longDescription": "OpenNori carries a coding goal from a directly openable, human-readable Contract to verified Git delivery. Agents can add design and execution-plan Markdown when the work needs it, while deterministic state tracks approval, Evidence, and delivery without constraining the implementation process. OpenNori uses a fresh Codex reviewer by default and falls back transparently when unavailable; Claude Code verifies sequentially, and both paths refuse completion while a required result is still missing. Shared repository state, safe upgrades, and project-scoped history keep later conversations useful without turning chat history into project truth.",
     "developerName": "okbexx",
     "category": "Productivity",
     "capabilities": [
@@ -32,7 +32,7 @@
     ],
     "websiteURL": "https://opennori.dev/",
     "defaultPrompt": [
-      "Use OpenNori for a new goal. Ask me for the goal before creating a Task.",
+      "Help with my goal. Ask before creating an OpenNori task.",
       "Continue the current OpenNori task."
     ],
     "brandColor": "#19A974"

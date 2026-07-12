@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { inspectClaudeHost } from "./claude-host.ts";
+import { inspectClaudePlugin } from "./claude-plugin.ts";
 import { inspectCodexPlugin } from "./codex-plugin.ts";
+import { renderContractMarkdown } from "./contract.ts";
 import { asOpenNoriError, OpenNoriError } from "./errors.ts";
 import { contentHash, posixRelative, readText, safeProjectPath } from "./io.ts";
 import { inspectManagedAsset, type AssetInspection, validateManifestOwnership } from "./lifecycle.ts";
@@ -120,16 +121,33 @@ function diagnoseCodexPlugin(root: string, diagnosis: MutableDiagnosis): void {
 }
 
 function diagnoseClaudeHost(root: string, diagnosis: MutableDiagnosis): void {
-  const inspection = inspectClaudeHost(root);
+  const inspection = inspectClaudePlugin(root, currentProductVersion());
   addCheck(diagnosis, {
     id: "claude.cli",
-    ok: inspection.ready,
-    message: inspection.ready
+    ok: inspection.cli_available,
+    message: inspection.cli_available
       ? `Claude Code is available (${inspection.version}).`
       : "Claude Code is not available on PATH.",
-    recovery: inspection.ready
+    recovery: inspection.cli_available
       ? undefined
       : "Install or update Claude Code, then rerun npx opennori setup --platform claude."
+  });
+  addCheck(diagnosis, {
+    id: "claude.marketplace",
+    ok: inspection.marketplace_present && inspection.marketplace_source_valid,
+    message: inspection.marketplace_source_valid
+      ? "The OpenNori Claude Code marketplace is configured."
+      : "The OpenNori Claude Code marketplace is missing or incompatible.",
+    recovery: inspection.marketplace_source_valid ? undefined : "Run npx opennori setup --platform claude."
+  });
+  addCheck(diagnosis, {
+    id: "claude.plugin",
+    ok: inspection.installed && inspection.enabled && inspection.installed_version === inspection.expected_version,
+    message:
+      inspection.installed && inspection.enabled
+        ? `The OpenNori Claude Code Plugin version is ${inspection.installed_version}.`
+        : "The OpenNori Claude Code Plugin is not installed and enabled.",
+    recovery: inspection.ready ? undefined : "Run npx opennori setup --platform claude, then open a new Claude Code conversation."
   });
 }
 
@@ -284,7 +302,7 @@ function diagnoseManifest(root: string, config: ProjectConfig | null, diagnosis:
           recovery:
             configPlatforms === manifestPlatforms
               ? undefined
-              : "Restore config.yaml platforms to the installed manifest values before any repair. Remove the old adapter through uninstall before configuring a different platform."
+              : "Restore config.yaml platforms to the installed manifest values. Add another adapter only through 'opennori platform add <platform> --dry-run' followed by --confirm."
         },
         { broken: configPlatforms !== manifestPlatforms }
       );
@@ -348,6 +366,24 @@ function diagnoseTaskDirectory(
       ok: true,
       message: `${relativePath}: task, Contract, and Evidence are valid.`
     });
+    if (view.contract) {
+      const reviewPath = path.join(directory, "contract.md");
+      const reviewStat = fs.existsSync(reviewPath) ? fs.lstatSync(reviewPath) : null;
+      const reviewMatches =
+        reviewStat?.isFile() === true &&
+        !reviewStat.isSymbolicLink() &&
+        readText(reviewPath) === renderContractMarkdown(view.contract);
+      addCheck(diagnosis, {
+        id: `task.${view.task.id}.contract-review`,
+        ok: reviewMatches,
+        message: reviewMatches
+          ? `${relativePath}/contract.md matches the canonical Contract.`
+          : `${relativePath}/contract.md is missing or differs from the canonical Contract.`,
+        recovery: reviewMatches
+          ? undefined
+          : `Run 'opennori task contract show ${view.task.id} > ${relativePath}/contract.md', review the complete document, then rerun opennori doctor.`
+      });
+    }
     if (!archived && view.task.package && config) {
       try {
         const packageDirectory = projectPackageDirectory(root, config, view.task.package);

@@ -38,6 +38,7 @@
   },
   "files": [
     ".agents/plugins/",
+    ".claude-plugin/",
     ".codex-plugin/",
     "dist/",
     "hooks/",

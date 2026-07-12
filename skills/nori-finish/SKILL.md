@@ -19,10 +19,8 @@ work needs.
 5. Refuse completion if required Git delivery is missing or belongs to an older
    implementation revision.
 
-Worker bindings and stop observations do not participate in this gate. On
-Codex, list them only to surface stale or interrupted work as a limitation; on
-platforms without coordination support, do not call coordination commands.
-Never use worker state to prove an Outcome or infer task completion.
+Host worker activity does not participate in this gate. Never use a worker
+report to prove an Outcome or infer task completion.
 
 When blocked, name the current Outcome, latest Evidence, required decision or
 action, and route to `nori-check`, `nori-implement`, or the user. Do not mark the

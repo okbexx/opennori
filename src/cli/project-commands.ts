@@ -133,7 +133,7 @@ export const initCommand = defineCommand({
           `Initialized OpenNori in ${result.plan.root}.`,
           backup ? `Previous OpenNori state was backed up at ${backup.path}.` : null,
           platformStatus,
-          `Next: Open a new ${platformConversationName(result.platform.platform)} conversation and say: Use OpenNori for this goal: <goal>`
+          `Next: Open a new ${platformConversationName(result.platform.platform)} conversation and describe your goal. OpenNori will ask before creating a task.`
         ]
           .filter(Boolean)
           .join("\n");

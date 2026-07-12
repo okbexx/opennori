@@ -6,16 +6,6 @@ import type { ManagedAsset, OwnershipRecord, PlatformId, ProjectConfig } from ".
 
 export const PLATFORM_IDS = ["codex", "claude"] as const satisfies readonly PlatformId[];
 
-const PACKAGED_SKILLS = [
-  "nori",
-  "nori-plan",
-  "nori-implement",
-  "nori-check",
-  "nori-finish",
-  "nori-update-spec",
-  "nori-project-health"
-] as const;
-
 export const CODEX_ROUTE_MARKERS = {
   start: "<!-- OPENNORI:START -->",
   end: "<!-- OPENNORI:END -->"
@@ -30,7 +20,6 @@ type PlatformAdapter = {
   id: PlatformId;
   displayName: string;
   sessionMemory: SessionMemoryAdapter | null;
-  coordination: "codex-hooks" | null;
   assets: (config: ProjectConfig) => ManagedAsset[];
   sections: Array<{
     assetId: string;
@@ -43,23 +32,11 @@ function template(relativePath: string): string {
   return readText(packagePath("templates", relativePath));
 }
 
-function packagedSkillAssets(platform: PlatformId, directory: string): ManagedAsset[] {
-  return PACKAGED_SKILLS.map((skill) => ({
-    assetId: `${platform}.skill.${skill}`,
-    platform,
-    path: `${directory}/${skill}/SKILL.md`,
-    scope: "file",
-    policy: "managed",
-    content: readText(packagePath("skills", skill, "SKILL.md"))
-  }));
-}
-
 const PLATFORM_ADAPTERS: Record<PlatformId, PlatformAdapter> = {
   codex: {
     id: "codex",
     displayName: "Codex",
     sessionMemory: codexSessionMemoryAdapter,
-    coordination: "codex-hooks",
     assets: () => [
       {
         assetId: "codex.project-route",
@@ -77,7 +54,6 @@ const PLATFORM_ADAPTERS: Record<PlatformId, PlatformAdapter> = {
     id: "claude",
     displayName: "Claude Code",
     sessionMemory: null,
-    coordination: null,
     assets: () => [
       {
         assetId: "claude.project-route",
@@ -87,8 +63,7 @@ const PLATFORM_ADAPTERS: Record<PlatformId, PlatformAdapter> = {
         policy: "managed",
         content: template("claude-section.md"),
         markers: CLAUDE_ROUTE_MARKERS
-      },
-      ...packagedSkillAssets("claude", ".claude/skills")
+      }
     ],
     sections: [{ assetId: "claude.project-route", path: "CLAUDE.md", markers: CLAUDE_ROUTE_MARKERS }]
   }
@@ -112,13 +87,6 @@ export function platformSessionMemory(platform: PlatformId): SessionMemoryAdapte
     });
   }
   return adapter;
-}
-
-export function requirePlatformCoordination(platform: PlatformId): void {
-  if (platformAdapter(platform).coordination) return;
-  throw new OpenNoriError("coordination_unsupported", `${platformDisplayName(platform)} does not expose supported worker coordination.`, {
-    recovery: "Continue sequentially on this platform; Task, Contract, and Evidence remain available."
-  });
 }
 
 export function projectPlatformAssets(config: ProjectConfig): ManagedAsset[] {

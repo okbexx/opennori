@@ -1,6 +1,6 @@
 ---
 name: nori-implement
-description: Implement an approved OpenNori task. Use when the current task is in Implement/in_progress or the user asks to build the approved Contract. Load curated implementation context, make the smallest coherent change within scope, keep canonical state in the CLI, and hand the actual diff to nori-check without claiming Outcomes are proven or the task is complete.
+description: Implement an approved OpenNori task. Use when the current task is in Implement/in_progress or the user asks to build the approved Contract. Read the Contract and available human-readable task documents, make the smallest coherent change within scope, keep an existing execution plan current, and hand the actual diff to nori-check without claiming Outcomes are proven or the task is complete.
 ---
 
 # OpenNori Implement
@@ -10,12 +10,14 @@ Implement the approved task without redefining its Outcome boundary.
 ## Preconditions
 
 1. Run `opennori status --summary --json`.
-2. Confirm the task is in Implement and the Contract is approved.
-3. Inspect the curated implementation manifest with
-   `opennori task context show <task> --mode implement --json`, then load each
-   needed entry with `opennori task context load <task> --mode implement
-   --file <file> --json`.
-4. Stop if a required context file is missing or canonical state is corrupt.
+2. Confirm the task is in Implement and the Contract is approved, then read the
+   complete `contract.md`.
+3. Read available `design.md`, `plan.md`, and relevant task research. If an
+   implement context manifest exists, load the useful entries through
+   `opennori task context show` and `opennori task context load`.
+4. Treat a missing, empty, or stale context manifest as a loading hint failure:
+   inspect the Contract, Specs, working Markdown, and repository source instead.
+   Stop only when canonical task or Contract state is corrupt.
 5. Read `opennori task delivery show <task> --json` and keep work on the planned
    branch and base history.
 
@@ -39,46 +41,27 @@ opennori status --summary --json
 - Prefer existing libraries and project infrastructure over new machinery.
 - Add or update focused checks when the repository's verification model calls
   for them.
+- Keep an existing `plan.md` current as steps, discoveries, checks, and remaining
+  work change. Create one only when the work becomes multi-step, cross-session,
+  or high-risk.
+- Update `design.md` when a meaningful implementation decision changes. Neither
+  document may redefine the approved Contract.
 - Keep durable research and design in the task directory; promote stable
   project knowledge only through `nori-update-spec`.
 - Leave the task's project changes reviewable for `nori-check`. Intermediate
-  commits are allowed, but do not record final delivery before independent
+  commits are allowed, but do not record final delivery before Outcome
   verification succeeds.
 
-Use the CLI for task state and context changes. Do not patch `task.json`,
+Use the CLI for canonical task state changes. Do not patch `task.json`,
 `contract.json`, or JSONL state directly.
 
 ## Host-Native Workers
 
-Read `.opennori/config.yaml` first. Only when the first configured platform is
-`codex`, use Codex's native worker tools for independent, bounded work that can
-proceed without multiple agents editing the same files. Keep one controlled
-writer; use a host worktree when parallel edits require isolation. OpenNori does
-not provide a queue or worker runtime.
-
-After a worker starts, bind its host reference to the current task revision and
-record only a bounded assignment, Outcome ids, and project paths:
-
-```bash
-opennori task coordination assign <task> --worker <host-ref> \
-  --role <role> --assignment <summary> --outcomes <ids> --paths <paths> --json
-```
-
-`SubagentStart` and `SubagentStop` hooks record start/stop observations when
-trusted. After a native message or interruption succeeds, record only its time:
-
-```bash
-opennori task coordination message <task> --worker <host-ref> --json
-opennori task coordination interrupt <task> --worker <host-ref> --json
-```
-
-Do not persist message bodies or transcript paths. A stopped worker, completed
-assignment, or worker summary is not Outcome Evidence and never transitions the
-Task. Use `coordination list` to spot stale-revision work before integrating it.
-
-On platforms without coordination support, work sequentially and do not call
-the `task coordination` commands. Unsupported coordination must not fall back
-to Codex state.
+Use the current host's native workers for bounded, independent work when they
+help. Keep one controlled writer or use host-native worktree isolation, then
+inspect results before integration. OpenNori does not provide a worker runtime
+or record worker activity. Work sequentially when the host has no parallel
+worker capability.
 
 ## Scope Conflict
 
@@ -94,9 +77,9 @@ different user outcome:
 
 3. load `nori-plan` for a user-reviewed Contract revision
 
-Replan preserves the previous Contract and both context manifests under task
-research and records the reason as a blocker. Plan must approve the replacement
-Contract and curate new implement/check context before start. If existing
+Replan preserves the previous Contract under task research and records the
+reason as a blocker. Plan must approve the replacement Contract before start
+and may update working Markdown or optional context manifests. If existing
 Outcome Evidence prevents Contract replacement, keep the approved task boundary
 and create a follow-up task for the changed scope.
 
@@ -116,7 +99,7 @@ Report:
 - what changed
 - what remains intentionally out of scope
 - any known implementation limitation
-- that independent verification is next
+- that Outcome verification is next
 
 Do not record proven Evidence merely because the code was written
 or a local check succeeded during implementation. `nori-check` owns that

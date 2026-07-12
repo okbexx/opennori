@@ -171,13 +171,7 @@ export function renderContractMarkdown(contract: NoriContract): string {
   if (contract.assumptions.length > 0) {
     lines.push("## Assumptions", "", ...contract.assumptions.map((assumption) => `- ${assumption}`), "");
   }
-  lines.push(
-    "---",
-    "",
-    "This file is generated from contract.json for review. OpenNori never parses it as lifecycle state.",
-    ""
-  );
-  return lines.join("\n");
+  return `${lines.join("\n").trimEnd()}\n`;
 }
 
 /** Hash only the semantic definition that the user reviews and approves. */
@@ -204,9 +198,6 @@ export function regenerateContractMarkdown(taskDirectory: string): string {
 
 function regenerateContractMarkdownUnlocked(taskDirectory: string): string {
   const task = loadCanonicalTask(taskDirectory);
-  if (task.status === "completed") {
-    throw new OpenNoriError("task_completed", `Task ${task.id} is completed and its Contract is read-only.`);
-  }
   const contract = loadContract(taskDirectory, task.id);
   const markdown = renderContractMarkdown(contract);
   writeTextAtomic(contractReviewPath(taskDirectory), markdown);

@@ -8,9 +8,11 @@ as their API.
 ```js
 import {
   OPENNORI_API_VERSION,
+  addProjectPlatform,
   doctorProject,
   loadTaskView,
   planTaskDelivery,
+  planPlatformAdd,
   planUpdate,
   updateProject
 } from "opennori";
@@ -21,7 +23,7 @@ import {
 | Import | Responsibility |
 | --- | --- |
 | `opennori` | Backward-compatible aggregate API plus host setup |
-| `opennori/task` | Task, Contract, Context, Evidence, delivery, reports, and completion projections |
+| `opennori/task` | Task, Contract, optional Context, Evidence, delivery, reports, and completion projections |
 | `opennori/project` | Project initialization, managed lifecycle, state migration, and Doctor |
 | `opennori/memory` | Bounded, project-scoped, read-only Codex session memory |
 | `opennori/testing` | Schema-checked records, recording host runners, and temporary Git projects |
@@ -30,12 +32,12 @@ Prefer a domain subpath for new integrations:
 
 ```js
 import { createTask, loadTaskView, planTaskDelivery } from "opennori/task";
-import { doctorProject, planUpdate } from "opennori/project";
+import { addProjectPlatform, doctorProject, planPlatformAdd, planUpdate } from "opennori/project";
 import { codexSessionMemoryAdapter } from "opennori/memory";
 ```
 
-Verify integrations can execute command Evidence without a shell and load only
-selected curated context files:
+Verify integrations can execute command Evidence without a shell and optionally
+load selected curated context files:
 
 ```js
 import { loadContextBundle, runCommandEvidence } from "opennori/task";
@@ -105,8 +107,15 @@ Lifecycle planning functions are read-only. Apply functions require explicit
 confirmation. Git delivery functions call the official `git` and `gh` CLIs and
 validate their results; they do not expose a custom Git transport.
 
-Do not write canonical JSON or JSONL directly. Markdown reports and Contract
-views are output surfaces and are never accepted as state input.
+`planPlatformAdd(root, platform)` previews an append-only adapter addition.
+`addProjectPlatform(root, platform, { confirm: true })` preserves configured
+adapters and user project settings, writes only the new adapter assets, and
+records the updated platform set in the install manifest last.
+
+Do not write canonical JSON or JSONL directly. `contract.md` is the human
+approval surface; `design.md` and `plan.md` are optional agent-authored working
+documents; `report.md` is the Finish result. None is accepted as canonical state
+input.
 
 ## Package Boundary
 

@@ -1,6 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import { inspectClaudeHost, type ClaudeHostInspection } from "./claude-host.ts";
+import {
+  inspectClaudePlugin,
+  installClaudePlugin,
+  type ClaudePluginInspection,
+  type ClaudePluginInstallResult
+} from "./claude-plugin.ts";
 import { installCodexPlugin, inspectCodexPlugin, type CodexPluginInstallResult, type CodexPluginInspection } from "./codex-plugin.ts";
 import { asOpenNoriError, OpenNoriError } from "./errors.ts";
 import { defaultHostCommandRunner, type HostCommandResult, type HostCommandRunner } from "./host-command.ts";
@@ -21,7 +26,10 @@ export type GlobalCliInspection = {
 
 export type HostSetupResult = {
   cli: GlobalCliInspection;
-  platform: ({ platform: "codex"; display_name: "Codex" } & (CodexPluginInspection | CodexPluginInstallResult)) | ClaudeHostInspection;
+  platform:
+    | ({ platform: "codex"; display_name: "Codex" } & (CodexPluginInspection | CodexPluginInstallResult))
+    | ClaudePluginInspection
+    | ClaudePluginInstallResult;
   applied: boolean;
   cli_installed: boolean;
 };
@@ -34,7 +42,7 @@ export function inspectPlatformHost(
 ): HostSetupResult["platform"] {
   return platform === "codex"
     ? { platform: "codex", display_name: "Codex", ...inspectCodexPlugin(cwd, expectedVersion) }
-    : inspectClaudeHost(cwd, runner);
+    : inspectClaudePlugin(cwd, expectedVersion, runner);
 }
 
 function commandFailure(command: string, args: readonly string[], result: HostCommandResult): OpenNoriError {
@@ -127,7 +135,8 @@ export function setupHost(
     binaryExists = fs.existsSync,
     pluginInspector = inspectCodexPlugin,
     pluginInstaller = installCodexPlugin,
-    claudeInspector = inspectClaudeHost
+    claudeInspector = inspectClaudePlugin,
+    claudeInstaller = installClaudePlugin
   }: {
     dryRun?: boolean;
     platform?: PlatformId;
@@ -136,14 +145,15 @@ export function setupHost(
     binaryExists?: (filePath: string) => boolean;
     pluginInspector?: typeof inspectCodexPlugin;
     pluginInstaller?: typeof installCodexPlugin;
-    claudeInspector?: typeof inspectClaudeHost;
+    claudeInspector?: typeof inspectClaudePlugin;
+    claudeInstaller?: typeof installClaudePlugin;
   } = {}
 ): HostSetupResult {
   let cli = inspectGlobalCli(cwd, expectedVersion, runner, binaryExists);
   const inspectPlatform = (): HostSetupResult["platform"] =>
     platform === "codex"
       ? { platform: "codex", display_name: "Codex", ...pluginInspector(cwd, expectedVersion) }
-      : claudeInspector(cwd, runner);
+      : claudeInspector(cwd, expectedVersion, runner);
   if (dryRun) return { cli, platform: inspectPlatform(), applied: false, cli_installed: false };
 
   let cliInstalled = false;
@@ -168,7 +178,7 @@ export function setupHost(
     platformResult =
       platform === "codex"
         ? { platform: "codex", display_name: "Codex", ...pluginInstaller(cwd, expectedVersion) }
-        : requireClaudeReady(claudeInspector(cwd, runner));
+        : claudeInstaller(cwd, expectedVersion, runner);
   } catch (error) {
     if (!cliInstalled) throw error;
     const failure = asOpenNoriError(error);
@@ -186,12 +196,4 @@ export function setupHost(
   }
 
   return { cli, platform: platformResult, applied: true, cli_installed: cliInstalled };
-}
-
-function requireClaudeReady(inspection: ClaudeHostInspection): ClaudeHostInspection {
-  if (inspection.ready) return inspection;
-  throw new OpenNoriError("claude_cli_not_ready", "Claude Code is not available on PATH.", {
-    context: inspection,
-    recovery: "Install or update Claude Code, then rerun npx opennori setup --platform claude."
-  });
 }

@@ -17,6 +17,7 @@ const { inspectCodexPlugin, installCodexPlugin } = await import("../dist/src/cod
 const { initProject, uninstallProject, updateProject } = await import("../dist/src/lifecycle.js");
 const { currentProductVersion, readProjectConfig, renderProjectConfig } = await import("../dist/src/project.js");
 const { setupHost } = await import("../dist/src/setup.js");
+const { configuredPlatform } = await import("../dist/src/cli/common.js");
 const publicApi = await import("../dist/src/index.js");
 
 function runHost(command, args, options = {}) {
@@ -35,10 +36,15 @@ function runHost(command, args, options = {}) {
 
 test("package, Plugin, marketplace, and public API expose one release contract", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8"));
-  const plugin = JSON.parse(fs.readFileSync(path.join(repositoryRoot, ".codex-plugin/plugin.json"), "utf8"));
-  const marketplace = JSON.parse(fs.readFileSync(path.join(repositoryRoot, ".agents/plugins/marketplace.json"), "utf8"));
-  assert.equal(plugin.version, packageJson.version);
-  assert.equal(marketplace.plugins[0].source.version, packageJson.version);
+  const codexPlugin = JSON.parse(fs.readFileSync(path.join(repositoryRoot, ".codex-plugin/plugin.json"), "utf8"));
+  const codexMarketplace = JSON.parse(fs.readFileSync(path.join(repositoryRoot, ".agents/plugins/marketplace.json"), "utf8"));
+  const claudePlugin = JSON.parse(fs.readFileSync(path.join(repositoryRoot, ".claude-plugin/plugin.json"), "utf8"));
+  const claudeMarketplace = JSON.parse(fs.readFileSync(path.join(repositoryRoot, ".claude-plugin/marketplace.json"), "utf8"));
+  assert.equal(codexPlugin.version, packageJson.version);
+  assert.equal(codexMarketplace.plugins[0].source.version, packageJson.version);
+  assert.equal(claudePlugin.version, packageJson.version);
+  assert.equal(claudeMarketplace.version, packageJson.version);
+  assert.equal(claudeMarketplace.plugins[0].version, packageJson.version);
   assert.equal(packageJson.exports["."].import, "./dist/src/index.js");
   if (process.platform !== "win32") {
     assert.notEqual(fs.statSync(path.join(repositoryRoot, packageJson.bin.opennori)).mode & 0o111, 0);
@@ -54,9 +60,34 @@ test("package, Plugin, marketplace, and public API expose one release contract",
   assert.match(publishWorkflow, /\*-alpha\.\*\) tag=alpha/);
   assert.equal(publicApi.OPENNORI_API_VERSION, 1);
   assert.equal(publicApi.CURRENT_STATE_SCHEMA_VERSION, 2);
-  for (const name of ["initProject", "updateProject", "doctorProject", "loadTaskView", "planTaskDelivery", "recordTaskDelivery"]) {
+  for (const name of [
+    "initProject",
+    "addProjectPlatform",
+    "planPlatformAdd",
+    "updateProject",
+    "doctorProject",
+    "loadTaskView",
+    "planTaskDelivery",
+    "recordTaskDelivery"
+  ]) {
     assert.equal(typeof publicApi[name], "function", name);
   }
+});
+
+test("multi-platform projects resolve the current host instead of the first configured platform", (t) => {
+  const root = temporaryProject(t, "opennori-current-platform-");
+  initProject(root, { developer: "Probe", platforms: ["codex", "claude"], confirm: true });
+
+  assert.equal(configuredPlatform(root, { CODEX_THREAD_ID: "codex-session" }), "codex");
+  assert.equal(configuredPlatform(root, { CLAUDE_CODE_SESSION_ID: "claude-session" }), "claude");
+  assert.throws(
+    () => configuredPlatform(root, {}),
+    (error) => error.code === "platform_required"
+  );
+  assert.throws(
+    () => configuredPlatform(root, { CODEX_THREAD_ID: "codex", CLAUDE_CODE_SESSION_ID: "claude" }),
+    (error) => error.code === "platform_ambiguous"
+  );
 });
 
 test("Codex Plugin refresh never removes the installed version before add succeeds", (t) => {
@@ -372,6 +403,8 @@ test("the packed artifact installs a ready CLI and completes Git delivery in a r
   const executable = path.join(executableDirectory, "opennori");
   const fakeCodex = path.join(executableDirectory, "codex");
   const fakeClaude = path.join(executableDirectory, "claude");
+  const claudeState = path.join(root, "claude-plugin-state.json");
+  fs.writeFileSync(claudeState, JSON.stringify({ marketplace: null, installed: false, enabled: false }));
   fs.writeFileSync(
     fakeCodex,
     [
@@ -394,13 +427,28 @@ test("the packed artifact installs a ready CLI and completes Git delivery in a r
     fakeClaude,
     [
       "#!/usr/bin/env node",
-      "if (process.argv[2] === '--version') console.log('2.1.89');",
-      "else { console.error('Unexpected fake Claude command'); process.exitCode = 1; }",
+      "const fs = require('node:fs');",
+      "const argv = process.argv.slice(2);",
+      "const command = argv.join(' ');",
+      "const statePath = process.env.OPENNORI_FAKE_CLAUDE_STATE;",
+      "const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));",
+      "const version = process.env.OPENNORI_TEST_VERSION;",
+      "if (command === '--version') console.log('2.1.89');",
+      "else if (command === 'plugin marketplace list --json') console.log(JSON.stringify(state.marketplace ? [{ name: 'opennori', source: 'directory', path: state.marketplace }] : []));",
+      "else if (argv[0] === 'plugin' && argv[1] === 'marketplace' && argv[2] === 'add') { state.marketplace = argv[3]; console.log('added'); }",
+      "else if (command === 'plugin marketplace update opennori') console.log('updated');",
+      "else if (command === 'plugin list --json') console.log(JSON.stringify(state.installed ? [{ id: 'opennori@opennori', version, scope: 'user', enabled: state.enabled }] : []));",
+      "else if (command === 'plugin install opennori@opennori --scope user') { state.installed = true; state.enabled = true; console.log('installed'); }",
+      "else if (command === 'plugin update opennori@opennori --scope user') { state.installed = true; console.log('updated'); }",
+      "else if (command === 'plugin enable opennori@opennori --scope user') { state.enabled = true; console.log('enabled'); }",
+      "else { console.error('Unexpected fake Claude command: ' + command); process.exitCode = 1; }",
+      "fs.writeFileSync(statePath, JSON.stringify(state));",
       ""
     ].join("\n")
   );
   fs.chmodSync(fakeClaude, 0o755);
   environment.PATH = `${executableDirectory}${path.delimiter}${process.env.PATH ?? ""}`;
+  environment.OPENNORI_FAKE_CLAUDE_STATE = claudeState;
 
   const sessionEnvironment = { ...environment, CODEX_THREAD_ID: "packed-product-session" };
   const packedCli = (args) =>
@@ -423,6 +471,27 @@ test("the packed artifact installs a ready CLI and completes Git delivery in a r
   assert.equal(JSON.parse(initialized.stdout).data.applied, true);
   assert.equal(fs.existsSync(path.join(project, ".opennori/workflow.md")), true);
   assert.equal(fs.existsSync(path.join(project, "AGENTS.md")), true);
+  const claudeSetupApplied = runHost(executable, ["setup", "--platform", "claude", "--json"], {
+    cwd: project,
+    env: environment
+  });
+  assert.equal(JSON.parse(claudeSetupApplied.stdout).data.platform.ready, true);
+  const claudePreview = runHost(
+    executable,
+    ["platform", "add", "claude", "--dry-run", "--root", project, "--json"],
+    { cwd: project, env: environment }
+  );
+  assert.equal(JSON.parse(claudePreview.stdout).data.applied, false);
+  assert.equal(fs.existsSync(path.join(project, "CLAUDE.md")), false);
+  const claudeAdded = runHost(
+    executable,
+    ["platform", "add", "claude", "--confirm", "--root", project, "--json"],
+    { cwd: project, env: environment }
+  );
+  assert.equal(JSON.parse(claudeAdded.stdout).data.applied, true);
+  assert.deepEqual(readProjectConfig(project).platforms, ["codex", "claude"]);
+  assert.equal(fs.existsSync(path.join(project, "CLAUDE.md")), true);
+  assert.equal(fs.existsSync(path.join(project, ".claude")), false);
   fs.writeFileSync(path.join(project, "app.txt"), "baseline\n");
   projectGit(["add", "--all"]);
   projectGit(["commit", "-m", "Initialize packed product project"]);
@@ -537,7 +606,7 @@ test("the packed artifact installs a ready CLI and completes Git delivery in a r
   );
   assert.equal(JSON.parse(claudeInit.stdout).data.applied, true);
   assert.equal(fs.existsSync(path.join(claudeProject, "CLAUDE.md")), true);
-  assert.equal(fs.existsSync(path.join(claudeProject, ".claude/skills/nori/SKILL.md")), true);
+  assert.equal(fs.existsSync(path.join(claudeProject, ".claude")), false);
   const claudeSessionEnvironment = {
     ...environment,
     CODEX_THREAD_ID: "",
@@ -587,7 +656,7 @@ test("the packed artifact installs a ready CLI and completes Git delivery in a r
   assert.equal(JSON.parse(claudeDiagnosis.stdout).data.status, "ready");
 });
 
-test("the Claude adapter manages native project instructions and Skills safely", (t) => {
+test("the Claude adapter keeps Plugin Skills out of project state", (t) => {
   const root = temporaryProject(t, "opennori-claude-adapter-");
   const instructions = path.join(root, "CLAUDE.md");
   fs.writeFileSync(instructions, "user instructions\n");
@@ -598,28 +667,12 @@ test("the Claude adapter manages native project instructions and Skills safely",
   const content = fs.readFileSync(instructions, "utf8");
   assert.match(content, /^user instructions\n/);
   assert.equal(content.split("<!-- OPENNORI:CLAUDE:START -->").length - 1, 1);
-  for (const skill of [
-    "nori",
-    "nori-plan",
-    "nori-implement",
-    "nori-check",
-    "nori-finish",
-    "nori-update-spec",
-    "nori-project-health"
-  ]) {
-    assert.equal(fs.existsSync(path.join(root, ".claude/skills", skill, "SKILL.md")), true);
-  }
-  assert.match(fs.readFileSync(path.join(root, ".claude/skills/nori-plan/SKILL.md"), "utf8"), /first configured platform is `codex`/);
-  assert.match(fs.readFileSync(path.join(root, ".claude/skills/nori-implement/SKILL.md"), "utf8"), /platforms without coordination support/);
-  assert.match(fs.readFileSync(path.join(root, ".claude/skills/nori-check/SKILL.md"), "utf8"), /task evidence run/);
-  assert.match(fs.readFileSync(path.join(root, ".claude/skills/nori-finish/SKILL.md"), "utf8"), /archive command writes exactly one/);
+  assert.equal(fs.existsSync(path.join(root, ".claude")), false);
   const manifest = JSON.parse(fs.readFileSync(path.join(root, ".opennori/manifest.json"), "utf8"));
   assert.deepEqual(manifest.platforms, ["claude"]);
 
   uninstallProject(root, { confirm: true });
   assert.equal(fs.readFileSync(instructions, "utf8"), "user instructions\n");
-  assert.equal(fs.existsSync(path.join(root, ".claude/skills/nori/SKILL.md")), false);
-  assert.equal(fs.existsSync(path.join(root, ".claude/skills/nori")), false);
 });
 
 test("default and explicit package scopes are recorded at task creation", (t) => {

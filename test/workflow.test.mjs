@@ -144,19 +144,21 @@ test("the public CLI enforces Plan, Implement, Verify, and Finish", (t) => {
   assert.doesNotMatch(human, /sha256|implementation_revision|\.opennori\/\.runtime/);
 });
 
-test("replanning invalidates the Contract and both curated contexts", (t) => {
+test("replanning archives the Contract, optional documents, contexts, and delivery", (t) => {
   const root = temporaryProject(t, "opennori-replan-");
   const session = "replan-session";
   initializeProject(root);
   const { taskId, inputs } = prepareApprovedTask(root, "replan", session);
   runCli(root, ["task", "start", taskId], { session });
+  const directory = path.join(root, ".opennori/tasks", taskId);
+  fs.writeFileSync(path.join(directory, "design.md"), "# Design\n\nCurrent technical design.\n");
+  fs.writeFileSync(path.join(directory, "plan.md"), "# Plan\n\n- [ ] Implement the approved result.\n");
 
   runCli(root, ["task", "replan", taskId, "--reason", "The approved scope changed"], { session });
-  const directory = path.join(root, ".opennori/tasks", taskId);
-  for (const name of ["contract.json", "contract.md", "implement.jsonl", "check.jsonl"]) {
+  for (const name of ["contract.json", "contract.md", "design.md", "plan.md", "implement.jsonl", "check.jsonl", "delivery.json"]) {
     assert.equal(fs.existsSync(path.join(directory, name)), false, `${name} should be invalidated`);
   }
-  assert.equal(fs.readdirSync(path.join(directory, "research")).filter((name) => name.includes("replanned-")).length, 5);
+  assert.equal(fs.readdirSync(path.join(directory, "research")).filter((name) => name.includes("replanned-")).length, 7);
 
   runCli(root, ["task", "unblock", taskId], { session });
   assert.equal(runCli(root, ["task", "start", taskId], { ok: false, session }).error.code, "contract_not_found");
@@ -167,5 +169,5 @@ test("replanning invalidates the Contract and both curated contexts", (t) => {
     { session }
   );
   runCli(root, ["task", "delivery", "plan", taskId, "--mode", "commit"], { session });
-  assert.equal(runCli(root, ["task", "start", taskId], { ok: false, session }).error.code, "context_required");
+  assert.equal(runCli(root, ["task", "start", taskId], { session }).data.status, "in_progress");
 });
