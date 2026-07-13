@@ -3,21 +3,7 @@
 OpenNori follows Semantic Versioning. Until `1.0.0`, minor releases may change
 public workflow or API contracts and must include a documented migration path.
 
-## 0.2.0-alpha.3 - 2026-07-13
-
-### Fixed
-
-- Public package and Plugin metadata now links to the deployed OpenNori site.
-
-## 0.2.0-alpha.2 - 2026-07-13
-
-### Fixed
-
-- Codex setup now reads the exact npm Plugin version from marketplace source
-  metadata and honors an explicit `min-release-age-exclude=opennori` exception
-  without relaxing the release-age policy for other packages.
-
-## 0.2.0-alpha.1 - 2026-07-13
+## 0.2.0 - 2026-07-13
 
 ### Added
 
@@ -71,6 +57,13 @@ public workflow or API contracts and must include a documented migration path.
   with the agreed result, current gap, Git delivery, and next action.
 - The Citty CLI composition root is split into domain command modules without
   changing command paths or JSON contracts.
+
+### Fixed
+
+- Public package and Plugin metadata links to the deployed OpenNori site.
+- Codex setup reads the exact npm Plugin version from marketplace source
+  metadata and honors an explicit `min-release-age-exclude=opennori` exception
+  without relaxing the release-age policy for other packages.
 
 ### Migration
 

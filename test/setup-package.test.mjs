@@ -57,8 +57,8 @@ test("package, Plugin, marketplace, and public API expose one release contract",
   const publishWorkflow = fs.readFileSync(path.join(repositoryRoot, ".github/workflows/publish.yml"), "utf8");
   assert.match(publishWorkflow, /id-token: write/);
   assert.match(publishWorkflow, /npm run release:check/);
-  assert.match(publishWorkflow, /npm publish --ignore-scripts --access public --provenance --tag/);
-  assert.match(publishWorkflow, /\*-alpha\.\*\) tag=alpha/);
+  assert.match(publishWorkflow, /Refuse prerelease versions/);
+  assert.match(publishWorkflow, /npm publish --ignore-scripts --access public --provenance --tag latest/);
   assert.equal(publicApi.OPENNORI_API_VERSION, 1);
   assert.equal(publicApi.CURRENT_STATE_SCHEMA_VERSION, 2);
   for (const name of [
@@ -239,7 +239,7 @@ test("Codex accepts only a readable version-matched local OpenNori Plugin and ne
 
 test("host setup upgrades the CLI, reports partial progress, and converges on retry", (t) => {
   const root = temporaryProject(t, "opennori-setup-");
-  const expectedVersion = "0.2.0-alpha.3";
+  const expectedVersion = "0.2.0";
   const prefix = path.join(root, "global");
   const executable = path.join(prefix, "bin", "opennori");
   const originalPath = process.env.PATH;

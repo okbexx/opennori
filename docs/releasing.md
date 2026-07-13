@@ -21,8 +21,8 @@ git status --short
 Update `CHANGELOG.md`, commit the release version, then publish a GitHub Release
 whose tag is exactly `v<package-version>`. The release workflow reruns the full
 check and publishes with npm provenance. A tag/version mismatch fails before
-publication. SemVer prereleases publish to `alpha`, `beta`, or `next`; only a
-stable version can update npm's `latest` tag.
+publication. OpenNori publishes stable versions only, always through npm's
+`latest` tag.
 
 After publication, verify the public package metadata, install the exact version
 into an isolated npm prefix, run setup, initialize a temporary Git repository,
