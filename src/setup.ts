@@ -34,6 +34,15 @@ export type HostSetupResult = {
   cli_installed: boolean;
 };
 
+function npmReleaseAgeExemptsOpenNori(cwd: string, runner: HostCommandRunner): boolean {
+  const result = runner("npm", ["config", "get", "min-release-age-exclude"], cwd);
+  if (result.error || result.status !== 0) return false;
+  return result.stdout
+    .split(/\r?\n/)
+    .map((value) => value.trim())
+    .includes("opennori");
+}
+
 export function inspectPlatformHost(
   cwd: string,
   platform: PlatformId,
@@ -177,7 +186,13 @@ export function setupHost(
   try {
     platformResult =
       platform === "codex"
-        ? { platform: "codex", display_name: "Codex", ...pluginInstaller(cwd, expectedVersion) }
+        ? {
+            platform: "codex",
+            display_name: "Codex",
+            ...pluginInstaller(cwd, expectedVersion, {
+              allowRecentPackage: npmReleaseAgeExemptsOpenNori(cwd, runner)
+            })
+          }
         : claudeInstaller(cwd, expectedVersion, runner);
   } catch (error) {
     if (!cliInstalled) throw error;

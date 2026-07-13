@@ -52,12 +52,13 @@ export type CodexPluginInstallResult = CodexPluginInspection & {
   plugin_reinstalled: boolean;
 };
 
-function runCodexJson<T>(cwd: string, args: string[]): T {
+function runCodexJson<T>(cwd: string, args: string[], { allowRecentPackage = false }: { allowRecentPackage?: boolean } = {}): T {
   const result = spawnSync("codex", args, {
     cwd,
     encoding: "utf8",
     maxBuffer: COMMAND_OUTPUT_LIMIT,
-    stdio: ["ignore", "pipe", "pipe"]
+    stdio: ["ignore", "pipe", "pipe"],
+    ...(allowRecentPackage ? { env: { ...process.env, NPM_CONFIG_MIN_RELEASE_AGE: "0" } } : {})
   });
   if (result.error) {
     const missing = "code" in result.error && result.error.code === "ENOENT";
@@ -160,6 +161,8 @@ export function inspectCodexPlugin(cwd: string, expectedVersion: string): CodexP
   const discoveredAvailableVersion =
     typeof availablePlugin?.version === "string"
       ? availablePlugin.version
+      : availablePlugin?.source?.source === "npm" && typeof availablePlugin.source.version === "string"
+        ? availablePlugin.source.version
       : installedPlugin?.source?.source === "npm" && typeof installedPlugin.source.version === "string"
         ? installedPlugin.source.version
         : null;
@@ -186,7 +189,11 @@ export function inspectCodexPlugin(cwd: string, expectedVersion: string): CodexP
 }
 
 /** Install through public Codex commands, never by writing host config or cache files. */
-export function installCodexPlugin(cwd: string, expectedVersion: string): CodexPluginInstallResult {
+export function installCodexPlugin(
+  cwd: string,
+  expectedVersion: string,
+  { allowRecentPackage = false }: { allowRecentPackage?: boolean } = {}
+): CodexPluginInstallResult {
   let inspection = inspectCodexPlugin(cwd, expectedVersion);
   let marketplaceAdded = false;
   let marketplaceUpgraded = false;
@@ -248,7 +255,7 @@ export function installCodexPlugin(cwd: string, expectedVersion: string): CodexP
 
   // Codex add is idempotent for an installed Plugin and refreshes it without a
   // destructive remove-first window. The host command owns its install commit.
-  runCodexJson<unknown>(cwd, ["plugin", "add", CODEX_PLUGIN_ID, "--json"]);
+  runCodexJson<unknown>(cwd, ["plugin", "add", CODEX_PLUGIN_ID, "--json"], { allowRecentPackage });
   pluginReinstalled = true;
 
   inspection = inspectCodexPlugin(cwd, expectedVersion);

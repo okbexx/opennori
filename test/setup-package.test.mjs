@@ -111,10 +111,10 @@ test("Codex Plugin refresh never removes the installed version before add succee
       "} else if (command === 'plugin marketplace upgrade opennori --json') {",
       "  console.log('{}');",
       "} else if (command === 'plugin list --available --json') {",
-      "  console.log(JSON.stringify({ installed: state.installed ? [{ pluginId: 'opennori@opennori', version: state.version, installed: true, enabled: true, source: { source: 'npm', version: 'new' } }] : [], available: [] }));",
+      "  console.log(JSON.stringify({ installed: state.installed ? [{ pluginId: 'opennori@opennori', version: state.version, installed: true, enabled: true, source: { source: 'npm', version: 'new' } }] : [], available: state.installed ? [] : [{ pluginId: 'opennori@opennori', version: null, source: { source: 'npm', version: 'new' } }] }));",
       "} else if (command === 'plugin add opennori@opennori --json') {",
       "  if (process.env.OPENNORI_FAKE_CODEX_ADD_FAIL === '1') { fs.writeFileSync(statePath, JSON.stringify(state)); console.error('injected add failure'); process.exit(1); }",
-      "  state.installed = true; state.version = 'new'; console.log('{}');",
+      "  state.installed = true; state.version = 'new'; state.releaseAge = process.env.NPM_CONFIG_MIN_RELEASE_AGE ?? null; console.log('{}');",
       "} else if (command.startsWith('plugin remove ')) {",
       "  state.installed = false; console.log('{}');",
       "} else {",
@@ -131,10 +131,16 @@ test("Codex Plugin refresh never removes the installed version before add succee
   process.env.PATH = `${bin}${path.delimiter}${previousPath ?? ""}`;
   process.env.OPENNORI_FAKE_CODEX_STATE = statePath;
   try {
+    fs.writeFileSync(statePath, JSON.stringify({ installed: false, version: null, calls: [] }));
+    const fresh = installCodexPlugin(root, "new", { allowRecentPackage: true });
+    assert.equal(fresh.ready, true);
+    let state = JSON.parse(fs.readFileSync(statePath, "utf8"));
+    assert.equal(state.releaseAge, "0");
+
     fs.writeFileSync(statePath, JSON.stringify({ installed: true, version: "old", calls: [] }));
     const installed = installCodexPlugin(root, "new");
     assert.equal(installed.ready, true);
-    let state = JSON.parse(fs.readFileSync(statePath, "utf8"));
+    state = JSON.parse(fs.readFileSync(statePath, "utf8"));
     assert.equal(state.version, "new");
     assert.equal(state.calls.some((command) => command.startsWith("plugin remove ")), false);
 
@@ -233,7 +239,7 @@ test("Codex accepts only a readable version-matched local OpenNori Plugin and ne
 
 test("host setup upgrades the CLI, reports partial progress, and converges on retry", (t) => {
   const root = temporaryProject(t, "opennori-setup-");
-  const expectedVersion = "0.2.0-alpha.1";
+  const expectedVersion = "0.2.0-alpha.2";
   const prefix = path.join(root, "global");
   const executable = path.join(prefix, "bin", "opennori");
   const originalPath = process.env.PATH;
@@ -254,6 +260,7 @@ test("host setup upgrades the CLI, reports partial progress, and converges on re
       };
     }
     if (command === "npm" && args[0] === "prefix") return { status: 0, stdout: `${prefix}\n`, stderr: "" };
+    if (command === "npm" && args[0] === "config") return { status: 0, stdout: "opennori\n", stderr: "" };
     if (command === "npm" && args[0] === "install") {
       assert.deepEqual(args, ["install", "--global", `opennori@${expectedVersion}`]);
       installedVersion = expectedVersion;
@@ -307,7 +314,10 @@ test("host setup upgrades the CLI, reports partial progress, and converges on re
     expectedVersion,
     runner,
     binaryExists: (filePath) => filePath === executable,
-    pluginInstaller: () => pluginReady
+    pluginInstaller: (_cwd, _version, options) => {
+      assert.deepEqual(options, { allowRecentPackage: true });
+      return pluginReady;
+    }
   });
   assert.equal(result.cli_installed, false);
   assert.equal(result.cli.command_ready, true);

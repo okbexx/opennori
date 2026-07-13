@@ -3,7 +3,15 @@
 OpenNori follows Semantic Versioning. Until `1.0.0`, minor releases may change
 public workflow or API contracts and must include a documented migration path.
 
-## Unreleased
+## 0.2.0-alpha.2 - 2026-07-13
+
+### Fixed
+
+- Codex setup now reads the exact npm Plugin version from marketplace source
+  metadata and honors an explicit `min-release-age-exclude=opennori` exception
+  without relaxing the release-age policy for other packages.
+
+## 0.2.0-alpha.1 - 2026-07-13
 
 ### Added
 
