@@ -240,7 +240,7 @@ test("Codex accepts only a readable version-matched local OpenNori Plugin and ne
 
 test("host setup upgrades the CLI, reports partial progress, and converges on retry", (t) => {
   const root = temporaryProject(t, "opennori-setup-");
-  const expectedVersion = "0.2.1";
+  const expectedVersion = "0.2.2";
   const prefix = path.join(root, "global");
   const executable = path.join(prefix, "bin", "opennori");
   const originalPath = process.env.PATH;
@@ -261,7 +261,7 @@ test("host setup upgrades the CLI, reports partial progress, and converges on re
       };
     }
     if (command === "npm" && args[0] === "prefix") return { status: 0, stdout: `${prefix}\n`, stderr: "" };
-    if (command === "npm" && args[0] === "config") return { status: 0, stdout: "opennori\n", stderr: "" };
+    if (command === "npm" && args[0] === "config") return { status: 0, stdout: "opennori,@openai/codex\n", stderr: "" };
     if (command === "npm" && args[0] === "install") {
       assert.deepEqual(args, ["install", "--global", `opennori@${expectedVersion}`]);
       installedVersion = expectedVersion;

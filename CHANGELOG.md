@@ -3,6 +3,12 @@
 OpenNori follows Semantic Versioning. Until `1.0.0`, minor releases may change
 public workflow or API contracts and must include a documented migration path.
 
+## 0.2.2 - 2026-07-13
+
+### Fixed
+
+- Setup recognizes npm's comma-separated multi-value release-age exclusions.
+
 ## 0.2.1 - 2026-07-13
 
 ### Fixed

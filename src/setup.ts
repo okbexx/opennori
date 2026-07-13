@@ -38,7 +38,7 @@ function npmReleaseAgeExemptsOpenNori(cwd: string, runner: HostCommandRunner): b
   const result = runner("npm", ["config", "get", "min-release-age-exclude"], cwd);
   if (result.error || result.status !== 0) return false;
   return result.stdout
-    .split(/\r?\n/)
+    .split(/[,\r\n]+/)
     .map((value) => value.trim())
     .includes("opennori");
 }
