@@ -43,4 +43,4 @@ jobs:
             *) tag=latest ;;
           esac
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
-      - run: npm publish --access public --provenance --tag "${{ steps.distribution.outputs.tag }}"
+      - run: npm publish --ignore-scripts --access public --provenance --tag "${{ steps.distribution.outputs.tag }}"

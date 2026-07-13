@@ -56,7 +56,8 @@ test("package, Plugin, marketplace, and public API expose one release contract",
   }
   const publishWorkflow = fs.readFileSync(path.join(repositoryRoot, ".github/workflows/publish.yml"), "utf8");
   assert.match(publishWorkflow, /id-token: write/);
-  assert.match(publishWorkflow, /--provenance --tag/);
+  assert.match(publishWorkflow, /npm run release:check/);
+  assert.match(publishWorkflow, /npm publish --ignore-scripts --access public --provenance --tag/);
   assert.match(publishWorkflow, /\*-alpha\.\*\) tag=alpha/);
   assert.equal(publicApi.OPENNORI_API_VERSION, 1);
   assert.equal(publicApi.CURRENT_STATE_SCHEMA_VERSION, 2);
