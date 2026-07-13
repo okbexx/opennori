@@ -1,13 +1,13 @@
 {
   "name": "opennori",
-  "version": "0.2.0-alpha.2",
+  "version": "0.2.0-alpha.3",
   "description": "Repo-native Plan, Implement, Verify, and Finish workflow with outcome-driven completion.",
   "author": {
     "name": "okbexx",
     "email": "okbexx@gmail.com",
     "url": "https://github.com/okbexx"
   },
-  "homepage": "https://opennori.dev",
+  "homepage": "https://opennori.okbexx.com",
   "repository": "https://github.com/okbexx/opennori",
   "license": "GPL-3.0-only",
   "keywords": [
@@ -30,7 +30,7 @@
       "Interactive",
       "Write"
     ],
-    "websiteURL": "https://opennori.dev/",
+    "websiteURL": "https://opennori.okbexx.com/",
     "defaultPrompt": [
       "Help with my goal. Ask before creating an OpenNori task.",
       "Continue the current OpenNori task."

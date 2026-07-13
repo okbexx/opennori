@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "opennori",
-  "version": "0.2.0-alpha.2",
+  "version": "0.2.0-alpha.3",
   "description": "OpenNori Plugin marketplace.",
   "owner": {
     "name": "okbexx",
@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "opennori",
-      "version": "0.2.0-alpha.2",
+      "version": "0.2.0-alpha.3",
       "description": "Repo-native Plan, Implement, Verify, and Finish workflow with outcome-driven completion.",
       "author": {
         "name": "okbexx",

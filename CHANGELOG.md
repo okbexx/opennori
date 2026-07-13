@@ -3,6 +3,12 @@
 OpenNori follows Semantic Versioning. Until `1.0.0`, minor releases may change
 public workflow or API contracts and must include a documented migration path.
 
+## 0.2.0-alpha.3 - 2026-07-13
+
+### Fixed
+
+- Public package and Plugin metadata now links to the deployed OpenNori site.
+
 ## 0.2.0-alpha.2 - 2026-07-13
 
 ### Fixed

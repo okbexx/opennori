@@ -239,7 +239,7 @@ test("Codex accepts only a readable version-matched local OpenNori Plugin and ne
 
 test("host setup upgrades the CLI, reports partial progress, and converges on retry", (t) => {
   const root = temporaryProject(t, "opennori-setup-");
-  const expectedVersion = "0.2.0-alpha.2";
+  const expectedVersion = "0.2.0-alpha.3";
   const prefix = path.join(root, "global");
   const executable = path.join(prefix, "bin", "opennori");
   const originalPath = process.env.PATH;
