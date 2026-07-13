@@ -109,7 +109,7 @@ test("Codex Plugin refresh never removes the installed version before add succee
       "if (command === 'plugin marketplace list --json') {",
       "  console.log(JSON.stringify({ marketplaces: [{ name: 'opennori', marketplaceSource: { sourceType: 'git', source: 'https://github.com/okbexx/opennori.git' } }] }));",
       "} else if (command === 'plugin marketplace upgrade opennori --json') {",
-      "  console.log('{}');",
+      "  state.marketplaceReleaseAge = process.env.NPM_CONFIG_MIN_RELEASE_AGE ?? null; console.log('{}');",
       "} else if (command === 'plugin list --available --json') {",
       "  console.log(JSON.stringify({ installed: state.installed ? [{ pluginId: 'opennori@opennori', version: state.version, installed: true, enabled: true, source: { source: 'npm', version: 'new' } }] : [], available: state.installed ? [] : [{ pluginId: 'opennori@opennori', version: null, source: { source: 'npm', version: 'new' } }] }));",
       "} else if (command === 'plugin add opennori@opennori --json') {",
@@ -135,6 +135,7 @@ test("Codex Plugin refresh never removes the installed version before add succee
     const fresh = installCodexPlugin(root, "new", { allowRecentPackage: true });
     assert.equal(fresh.ready, true);
     let state = JSON.parse(fs.readFileSync(statePath, "utf8"));
+    assert.equal(state.marketplaceReleaseAge, "0");
     assert.equal(state.releaseAge, "0");
 
     fs.writeFileSync(statePath, JSON.stringify({ installed: true, version: "old", calls: [] }));
@@ -239,7 +240,7 @@ test("Codex accepts only a readable version-matched local OpenNori Plugin and ne
 
 test("host setup upgrades the CLI, reports partial progress, and converges on retry", (t) => {
   const root = temporaryProject(t, "opennori-setup-");
-  const expectedVersion = "0.2.0";
+  const expectedVersion = "0.2.1";
   const prefix = path.join(root, "global");
   const executable = path.join(prefix, "bin", "opennori");
   const originalPath = process.env.PATH;

@@ -1,6 +1,6 @@
 {
   "name": "opennori",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Repo-native Plan, Implement, Verify, and Finish workflow with outcome-driven completion.",
   "author": {
     "name": "okbexx",

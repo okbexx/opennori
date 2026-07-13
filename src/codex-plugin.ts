@@ -222,18 +222,16 @@ export function installCodexPlugin(
   }
 
   if (!inspection.marketplace_present) {
-    runCodexJson<unknown>(cwd, [
-      "plugin",
-      "marketplace",
-      "add",
-      CODEX_MARKETPLACE_SOURCE,
-      "--ref",
-      CODEX_MARKETPLACE_REF,
-      "--json"
-    ]);
+    runCodexJson<unknown>(
+      cwd,
+      ["plugin", "marketplace", "add", CODEX_MARKETPLACE_SOURCE, "--ref", CODEX_MARKETPLACE_REF, "--json"],
+      { allowRecentPackage }
+    );
     marketplaceAdded = true;
   } else if (inspection.marketplace_source_type === "official") {
-    runCodexJson<unknown>(cwd, ["plugin", "marketplace", "upgrade", CODEX_MARKETPLACE_NAME, "--json"]);
+    runCodexJson<unknown>(cwd, ["plugin", "marketplace", "upgrade", CODEX_MARKETPLACE_NAME, "--json"], {
+      allowRecentPackage
+    });
     marketplaceUpgraded = true;
   }
 

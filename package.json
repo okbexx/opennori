@@ -1,6 +1,6 @@
 {
   "name": "opennori",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Repo-native engineering workflow for coding agents with outcome-driven completion.",
   "type": "module",
   "main": "./dist/src/index.js",
